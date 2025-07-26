@@ -20,7 +20,7 @@ const Auth = () => {
     // Check if user is already logged in
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
-        navigate("/");
+        navigate("/dashboard");
       }
     });
 
@@ -29,7 +29,7 @@ const Auth = () => {
       (event, session) => {
         if (session?.user) {
           setUser(session.user);
-          navigate("/");
+          navigate("/dashboard");
         } else {
           setUser(null);
         }
