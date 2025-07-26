@@ -14,7 +14,138 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      books: {
+        Row: {
+          chapters: string | null
+          created_at: string
+          id: string
+          status: string | null
+          title: string | null
+          user_id: string | null
+        }
+        Insert: {
+          chapters?: string | null
+          created_at?: string
+          id?: string
+          status?: string | null
+          title?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          chapters?: string | null
+          created_at?: string
+          id?: string
+          status?: string | null
+          title?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "books_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_histories: {
+        Row: {
+          created_at: string
+          id: string
+          messages: Json | null
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          messages?: Json | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          messages?: Json | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_histories_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          book_id: string | null
+          created_at: string
+          id: string
+          pod_provider: string | null
+          quantity: number | null
+          status: string | null
+          total_price: number | null
+          user_id: string | null
+        }
+        Insert: {
+          book_id?: string | null
+          created_at?: string
+          id?: string
+          pod_provider?: string | null
+          quantity?: number | null
+          status?: string | null
+          total_price?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          book_id?: string | null
+          created_at?: string
+          id?: string
+          pod_provider?: string | null
+          quantity?: number | null
+          status?: string | null
+          total_price?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          age: number | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+        }
+        Insert: {
+          age?: number | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+        }
+        Update: {
+          age?: number | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
