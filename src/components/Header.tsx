@@ -33,7 +33,7 @@ const Header = () => {
               <BookOpen className="w-5 h-5 text-accent-foreground" />
             </div>
             <span className="text-xl font-bold text-foreground">
-              AI Autobiography
+              Narrated
             </span>
           </a>
           

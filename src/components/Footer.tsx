@@ -12,7 +12,7 @@ const Footer = () => {
                 <BookOpen className="w-5 h-5 text-accent-foreground" />
               </div>
               <span className="text-xl font-bold">
-                AI Autobiography
+                Narrated
               </span>
             </div>
             <p className="text-primary-foreground/80 text-sm leading-relaxed">
@@ -26,7 +26,7 @@ const Footer = () => {
             <ul className="space-y-2 text-sm text-primary-foreground/80">
               <li>
                 <a href="#" className="hover:text-accent transition-colors">
-                  AI Autobiography Writing
+                  Story Writing
                 </a>
               </li>
               <li>
@@ -96,7 +96,7 @@ const Footer = () => {
         
         <div className="border-t border-primary-foreground/20 mt-12 pt-8 text-center">
           <p className="text-primary-foreground/60 text-sm">
-            © 2024 AI Autobiography. All rights reserved. Bringing your life story to life.
+            © 2024 Narrated. All rights reserved. Bringing your life story to life.
           </p>
         </div>
       </div>

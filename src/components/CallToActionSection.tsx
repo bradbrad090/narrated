@@ -14,7 +14,7 @@ const CallToActionSection = () => {
           </h2>
           
           <p className="text-xl md:text-2xl text-primary-foreground/90 mb-12 leading-relaxed">
-            Join hundreds of people who have already preserved their legacy with our AI autobiography service.
+            Join hundreds of people who have already preserved their legacy with Narrated.
           </p>
           
           <div className="grid md:grid-cols-3 gap-8 mb-12">
