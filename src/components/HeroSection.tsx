@@ -17,31 +17,31 @@ const HeroSection = () => {
       {/* Content */}
       <div className="relative z-10 container mx-auto px-6 text-center">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-7xl font-bold text-primary-foreground mb-6 leading-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-primary-foreground mb-4 sm:mb-6 leading-tight">
             Your Life Story,
             <span className="block text-transparent bg-gradient-accent bg-clip-text">
               Beautifully Written
             </span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-primary-foreground/90 mb-8 leading-relaxed max-w-3xl mx-auto">
-            Share your memories through conversation with our AI, and watch as your unique life story 
+          <p className="text-lg sm:text-xl md:text-2xl text-primary-foreground/90 mb-6 sm:mb-8 leading-relaxed max-w-3xl mx-auto px-4 sm:px-0">
+            Share your memories through conversation with our intelligent assistant, and watch as your unique life story 
             transforms into a beautifully crafted autobiography, professionally printed and delivered to your door.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button variant="accent" size="lg" className="text-lg px-8 py-6 font-semibold">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4 sm:px-0">
+            <Button variant="accent" size="lg" className="text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 font-semibold w-full sm:w-auto">
               Start Your Story Today
             </Button>
-            <Button variant="outline" size="lg" className="text-lg px-8 py-6 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
+            <Button variant="outline" size="lg" className="text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 w-full sm:w-auto">
               See How It Works
             </Button>
           </div>
           
-          <div className="mt-12 flex flex-col sm:flex-row gap-8 justify-center items-center text-primary-foreground/80">
+          <div className="mt-8 sm:mt-12 flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center items-center text-primary-foreground/80 text-sm sm:text-base">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-accent rounded-full"></div>
-              <span>AI-Powered Writing</span>
+              <span>Intelligent Writing</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-accent rounded-full"></div>

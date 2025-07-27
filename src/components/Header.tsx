@@ -1,11 +1,20 @@
 import { Button } from "@/components/ui/button";
-import { BookOpen, Menu, User } from "lucide-react";
+import { BookOpen, Menu, User, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 const Header = () => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     // Check current user
@@ -90,10 +99,83 @@ const Header = () => {
               </>
             )}
             
-            {/* Mobile menu button */}
-            <button className="md:hidden p-2 text-muted-foreground hover:text-foreground">
-              <Menu className="w-5 h-5" />
-            </button>
+            {/* Mobile menu */}
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <SheetTrigger asChild>
+                <button className="md:hidden p-2 text-muted-foreground hover:text-foreground">
+                  <Menu className="w-5 h-5" />
+                </button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-72">
+                <SheetHeader>
+                  <SheetTitle className="text-left">Menu</SheetTitle>
+                  <SheetDescription className="text-left">
+                    Navigate through our services
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="flex flex-col gap-4 mt-8">
+                  <a 
+                    href="/what-we-do" 
+                    className="text-lg font-medium text-foreground hover:text-primary transition-colors py-2"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    What We Do
+                  </a>
+                  <a 
+                    href="/pricing" 
+                    className="text-lg font-medium text-foreground hover:text-primary transition-colors py-2"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Pricing
+                  </a>
+                  <a 
+                    href="/faq" 
+                    className="text-lg font-medium text-foreground hover:text-primary transition-colors py-2"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    FAQ
+                  </a>
+                  <div className="border-t pt-4 mt-4">
+                    {user ? (
+                      <Button 
+                        variant="hero" 
+                        className="w-full"
+                        onClick={() => {
+                          window.location.href = '/dashboard';
+                          setIsOpen(false);
+                        }}
+                      >
+                        <User className="w-4 h-4 mr-2" />
+                        My Profile
+                      </Button>
+                    ) : (
+                      <div className="flex flex-col gap-3">
+                        <Button 
+                          variant="outline" 
+                          className="w-full"
+                          onClick={() => {
+                            window.location.href = '/auth';
+                            setIsOpen(false);
+                          }}
+                        >
+                          Login
+                        </Button>
+                        <Button 
+                          variant="hero" 
+                          className="w-full"
+                          onClick={() => {
+                            window.location.href = '/auth';
+                            setIsOpen(false);
+                          }}
+                        >
+                          Get Started
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>
