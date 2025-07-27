@@ -197,7 +197,11 @@ const Dashboard = () => {
                     <p className="text-sm text-muted-foreground mb-4">
                       Created {new Date(book.created_at).toLocaleDateString()}
                     </p>
-                    <Button variant="outline" className="w-full">
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => navigate(`/write/${book.id}`)}
+                    >
                       Continue Writing
                     </Button>
                   </CardContent>
