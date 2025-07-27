@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { BookOpen, Menu, User, X } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import {
@@ -15,6 +16,7 @@ import {
 const Header = () => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Check current user
@@ -74,7 +76,7 @@ const Header = () => {
               <Button 
                 variant="hero" 
                 className="hidden sm:inline-flex"
-                onClick={() => window.location.href = '/dashboard'}
+                onClick={() => navigate('/dashboard')}
               >
                 <User className="w-4 h-4 mr-2" />
                 My Profile
@@ -85,14 +87,14 @@ const Header = () => {
                   variant="ghost" 
                   size="sm" 
                   className="text-foreground/80 hover:text-foreground hidden sm:inline-flex"
-                  onClick={() => window.location.href = '/auth'}
+                  onClick={() => navigate('/auth')}
                 >
                   Login
                 </Button>
                 <Button 
                   variant="hero" 
                   className="hidden sm:inline-flex"
-                  onClick={() => window.location.href = '/auth'}
+                  onClick={() => navigate('/auth')}
                 >
                   Get Started
                 </Button>
@@ -141,7 +143,7 @@ const Header = () => {
                         variant="hero" 
                         className="w-full"
                         onClick={() => {
-                          window.location.href = '/dashboard';
+                          navigate('/dashboard');
                           setIsOpen(false);
                         }}
                       >
@@ -154,7 +156,7 @@ const Header = () => {
                           variant="outline" 
                           className="w-full"
                           onClick={() => {
-                            window.location.href = '/auth';
+                            navigate('/auth');
                             setIsOpen(false);
                           }}
                         >
@@ -164,7 +166,7 @@ const Header = () => {
                           variant="hero" 
                           className="w-full"
                           onClick={() => {
-                            window.location.href = '/auth';
+                            navigate('/auth');
                             setIsOpen(false);
                           }}
                         >
