@@ -22,14 +22,14 @@ const HeroSection = () => {
     }
 
     try {
-      // Save email to signup table - skip if it fails since signup table isn't in types
-      // This will work when the table is properly configured
-      try {
-        await supabase
-          .from('signup' as any)
-          .insert({ email: email.trim() });
-      } catch (signupError) {
-        console.log('Signup table not accessible, continuing to auth...');
+      // Save email to signup table
+      const { error } = await supabase
+        .from('signup' as any)
+        .insert({ email: email.trim() });
+
+      if (error) {
+        console.error('Error saving email:', error);
+        // Continue to auth page even if saving fails
       }
 
       // Navigate to auth page with email as query parameter
