@@ -40,25 +40,19 @@ const Header = () => {
           {/* Navigation - Hidden on mobile */}
           <nav className="hidden md:flex items-center gap-8">
             <a 
-              href="#how-it-works" 
+              href="/what-we-do" 
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
-              How It Works
+              What We Do
             </a>
             <a 
-              href="#benefits" 
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Benefits
-            </a>
-            <a 
-              href="#pricing" 
+              href="/pricing" 
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
               Pricing
             </a>
             <a 
-              href="#faq" 
+              href="/faq" 
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
               FAQ
