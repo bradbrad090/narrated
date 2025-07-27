@@ -1,9 +1,15 @@
+import { Helmet } from "react-helmet-async";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 const TermsOfService = () => {
   return (
-    <div className="min-h-screen">
+    <>
+      <Helmet>
+        <title>Terms of Service - Legal Agreement | Narrated</title>
+        <meta name="description" content="Read our terms of service for AI autobiography writing services. Understand user responsibilities, intellectual property rights, and service agreements." />
+      </Helmet>
+      <div className="min-h-screen">
       <Header />
       <div className="pt-20 pb-16">
         <div className="container mx-auto px-6 max-w-4xl">
@@ -56,7 +62,8 @@ const TermsOfService = () => {
         </div>
       </div>
       <Footer />
-    </div>
+      </div>
+    </>
   );
 };
 

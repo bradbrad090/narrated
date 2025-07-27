@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import HowItWorksSection from "@/components/HowItWorksSection";
@@ -7,14 +8,20 @@ import Footer from "@/components/Footer";
 
 const Index = () => {
   return (
-    <div className="min-h-screen">
+    <>
+      <Helmet>
+        <title>Narrated - AI-Powered Autobiography Writing Service</title>
+        <meta name="description" content="Transform your life story into a beautifully written autobiography with AI. Professional ghostwriting, premium printing, and custom cover design. Preserve your legacy for future generations." />
+      </Helmet>
+      <div className="min-h-screen">
       <Header />
       <HeroSection />
       <HowItWorksSection />
       <BenefitsSection />
       <CallToActionSection />
       <Footer />
-    </div>
+      </div>
+    </>
   );
 };
 

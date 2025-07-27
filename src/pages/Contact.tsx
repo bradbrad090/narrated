@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +9,12 @@ import { Mail, MapPin } from "lucide-react";
 
 const Contact = () => {
   return (
-    <div className="min-h-screen">
+    <>
+      <Helmet>
+        <title>Contact Us - Get In Touch | Narrated</title>
+        <meta name="description" content="Contact Narrated for questions about our AI autobiography writing service. We're here to help preserve your life story. Located in Perth, Western Australia." />
+      </Helmet>
+      <div className="min-h-screen">
       <Header />
       <div className="pt-20 pb-16">
         <div className="container mx-auto px-6 max-w-4xl">
@@ -66,7 +72,8 @@ const Contact = () => {
         </div>
       </div>
       <Footer />
-    </div>
+      </div>
+    </>
   );
 };
 

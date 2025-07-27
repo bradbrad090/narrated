@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -126,7 +127,12 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-subtle">
+    <>
+      <Helmet>
+        <title>Sign In - Access Your Account | Narrated</title>
+        <meta name="description" content="Sign in to your Narrated account to continue writing your autobiography or create a new account to start preserving your life story today." />
+      </Helmet>
+      <div className="min-h-screen bg-gradient-subtle">
       <Header />
       <div className="flex items-center justify-center min-h-screen p-4 pt-20">
       <Card className="w-full max-w-md">
@@ -242,7 +248,8 @@ const Auth = () => {
         </CardContent>
       </Card>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

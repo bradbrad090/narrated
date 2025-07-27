@@ -1,9 +1,15 @@
+import { Helmet } from "react-helmet-async";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 const PrivacyPolicy = () => {
   return (
-    <div className="min-h-screen">
+    <>
+      <Helmet>
+        <title>Privacy Policy - Data Protection & Security | Narrated</title>
+        <meta name="description" content="Learn how Narrated protects your personal information and life stories. Our comprehensive privacy policy outlines data collection, usage, and security measures." />
+      </Helmet>
+      <div className="min-h-screen">
       <Header />
       <div className="pt-20 pb-16">
         <div className="container mx-auto px-6 max-w-4xl">
@@ -49,7 +55,8 @@ const PrivacyPolicy = () => {
         </div>
       </div>
       <Footer />
-    </div>
+      </div>
+    </>
   );
 };
 

@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Mic, Users, Gift } from "lucide-react";
 import Header from "@/components/Header";
@@ -5,7 +6,12 @@ import Footer from "@/components/Footer";
 
 const WhatWeDo = () => {
   return (
-    <div className="min-h-screen bg-gradient-subtle">
+    <>
+      <Helmet>
+        <title>What We Do - AI Autobiography Writing Services | Narrated</title>
+        <meta name="description" content="Discover how Narrated transforms your life stories into professional autobiographies using AI technology. From conversational interviews to published books." />
+      </Helmet>
+      <div className="min-h-screen bg-gradient-subtle">
       <Header />
       
       <main className="pt-24 pb-16">
@@ -102,7 +108,8 @@ const WhatWeDo = () => {
       </main>
 
       <Footer />
-    </div>
+      </div>
+    </>
   );
 };
 
