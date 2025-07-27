@@ -40,11 +40,11 @@ const CallToActionSection = () => {
                 </h3>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-primary-foreground/80">
-                    <span className="line-through">$499</span>
-                    <span className="text-accent font-bold text-2xl">$299</span>
+                    <span className="line-through">$399</span>
+                    <span className="text-accent font-bold text-2xl">$199</span>
                   </div>
                   <p className="text-primary-foreground/70 text-sm">
-                    Limited time offer - Save $200
+                     Limited time offer - Save $200
                   </p>
                 </div>
               </div>

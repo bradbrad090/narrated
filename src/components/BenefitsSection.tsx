@@ -10,7 +10,7 @@ const BenefitsSection = () => {
     {
       icon: Clock,
       title: "Save Time & Effort",
-      description: "No more struggling with blank pages. Our AI guides you through the entire storytelling process."
+      description: "No more struggling with blank pages. Our intelligent assistant guides you through the entire storytelling process."
     },
     {
       icon: Users,
@@ -20,7 +20,7 @@ const BenefitsSection = () => {
     {
       icon: Award,
       title: "Your Unique Voice",
-      description: "Our AI learns your speaking style to ensure the final book truly sounds like you."
+      description: "Our intelligent system learns your speaking style to ensure the final book truly sounds like you."
     },
     {
       icon: Shield,
@@ -42,7 +42,7 @@ const BenefitsSection = () => {
             Why Choose Narrated?
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Combining cutting-edge AI technology with the timeless art of storytelling 
+            Combining cutting-edge intelligent technology with the timeless art of storytelling 
             to create something truly meaningful
           </p>
         </div>
@@ -61,9 +61,9 @@ const BenefitsSection = () => {
                   </div>
                 </div>
                 
-                <h3 className="text-xl font-semibold text-foreground mb-4">
-                  {benefit.title}
-                </h3>
+                 <h3 className="text-xl font-semibold text-foreground mb-4 text-center">
+                   {benefit.title}
+                 </h3>
                 
                 <p className="text-muted-foreground leading-relaxed">
                   {benefit.description}

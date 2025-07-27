@@ -9,7 +9,7 @@ const Pricing = () => {
   const plans = [
     {
       name: "Essential Story",
-      price: "$299",
+      price: "$49",
       description: "Perfect for capturing your key life moments",
       features: [
         "3-4 conversation sessions",
@@ -21,7 +21,7 @@ const Pricing = () => {
     },
     {
       name: "Complete Legacy",
-      price: "$599",
+      price: "$199",
       description: "Comprehensive life story documentation",
       features: [
         "6-8 conversation sessions",
@@ -36,7 +36,7 @@ const Pricing = () => {
     },
     {
       name: "Premium Heritage",
-      price: "$999",
+      price: "$399",
       description: "The ultimate legacy preservation experience",
       features: [
         "10-12 conversation sessions",
@@ -55,7 +55,7 @@ const Pricing = () => {
     <>
       <Helmet>
         <title>Pricing - Affordable Autobiography Writing Plans | Narrated</title>
-        <meta name="description" content="Choose from our flexible pricing plans for AI-powered autobiography writing. Professional quality books starting at competitive rates with premium printing included." />
+        <meta name="description" content="Choose from our flexible pricing plans for intelligent autobiography writing. Professional quality books starting at competitive rates with premium printing included." />
       </Helmet>
       <div className="min-h-screen bg-gradient-subtle">
         <Header />
@@ -68,7 +68,7 @@ const Pricing = () => {
                 Simple, Transparent Pricing
               </h1>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                Choose the plan that best fits your story. All plans include AI-powered conversations, 
+                Choose the plan that best fits your story. All plans include intelligent conversations, 
                 professional writing, and editing. No hidden fees.
               </p>
             </div>
