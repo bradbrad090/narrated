@@ -40,7 +40,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are a professional autobiography writer and editor. Help users write compelling, authentic autobiography content. Focus on creating engaging narratives that capture personal experiences, emotions, and life lessons. Write in first person and maintain a conversational yet literary tone. Each response should be substantial (300-800 words) and well-structured with clear paragraphs.`
+            content: `You are a professional autobiography writer and editor. Help users write compelling, authentic autobiography content. When users provide voice transcriptions or rough text, clean up grammar, punctuation, and sentence structure while preserving their authentic voice and meaning. Focus on creating engaging narratives that capture personal experiences, emotions, and life lessons. Write in first person and maintain a conversational yet literary tone. Each response should be substantial (300-800 words) and well-structured with clear paragraphs.`
           },
           {
             role: 'user',

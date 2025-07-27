@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Plus, Book, LogOut } from "lucide-react";
+import { Plus, Book, LogOut, Trash2 } from "lucide-react";
 
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -109,6 +109,34 @@ const Dashboard = () => {
     }
   };
 
+  const handleDeleteBook = async (bookId: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('books')
+        .delete()
+        .eq('id', bookId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Book deleted",
+        description: "Your book has been deleted.",
+      });
+
+      // Refresh books list
+      fetchBooks(user.id);
+    } catch (error: any) {
+      toast({
+        title: "Error deleting book",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
@@ -193,18 +221,28 @@ const Dashboard = () => {
                       Status: <span className="capitalize">{book.status}</span>
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Created {new Date(book.created_at).toLocaleDateString()}
-                    </p>
-                    <Button 
-                      variant="outline" 
-                      className="w-full"
-                      onClick={() => navigate(`/write/${book.id}`)}
-                    >
-                      Continue Writing
-                    </Button>
-                  </CardContent>
+                   <CardContent>
+                     <p className="text-sm text-muted-foreground mb-4">
+                       Created {new Date(book.created_at).toLocaleDateString()}
+                     </p>
+                     <div className="flex gap-2">
+                       <Button 
+                         variant="outline" 
+                         className="flex-1"
+                         onClick={() => navigate(`/write/${book.id}`)}
+                       >
+                         Continue Writing
+                       </Button>
+                       <Button 
+                         variant="outline" 
+                         size="icon"
+                         onClick={() => handleDeleteBook(book.id)}
+                         className="text-destructive hover:text-destructive"
+                       >
+                         <Trash2 className="h-4 w-4" />
+                       </Button>
+                     </div>
+                   </CardContent>
                 </Card>
               ))}
             </div>
