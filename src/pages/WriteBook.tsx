@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { Book, LogOut, Save, Sparkles, ArrowLeft } from "lucide-react";
+import { VoiceRecorder } from "@/components/VoiceRecorder";
 
 const WriteBook = () => {
   const { bookId } = useParams();
@@ -152,6 +153,14 @@ const WriteBook = () => {
     }
   };
 
+  const handlePromptTranscription = (transcribedText: string) => {
+    setPrompt(prev => prev ? prev + " " + transcribedText : transcribedText);
+  };
+
+  const handleContentTranscription = (transcribedText: string) => {
+    setContent(prev => prev ? prev + " " + transcribedText : transcribedText);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
@@ -223,15 +232,21 @@ const WriteBook = () => {
                 onChange={(e) => setPrompt(e.target.value)}
                 className="min-h-[100px]"
               />
-              <Button 
-                onClick={generateContent}
-                disabled={!prompt.trim() || generating}
-                className="w-full"
-                variant="hero"
-              >
-                <Sparkles className="h-4 w-4 mr-2" />
-                {generating ? "Generating..." : "Generate Content"}
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button 
+                  onClick={generateContent}
+                  disabled={!prompt.trim() || generating}
+                  className="flex-1"
+                  variant="hero"
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  {generating ? "Generating..." : "Generate Content"}
+                </Button>
+                <VoiceRecorder 
+                  onTranscription={handlePromptTranscription}
+                  disabled={generating}
+                />
+              </div>
             </CardContent>
           </Card>
 
@@ -250,9 +265,17 @@ const WriteBook = () => {
                 onChange={(e) => setContent(e.target.value)}
                 className="min-h-[400px] text-base leading-relaxed"
               />
-              <div className="mt-4 flex justify-between items-center text-sm text-muted-foreground">
-                <span>{content.length} characters</span>
-                <span>{Math.ceil(content.split(' ').length)} words</span>
+              <div className="mt-4 flex justify-between items-center">
+                <div className="flex items-center space-x-4">
+                  <VoiceRecorder 
+                    onTranscription={handleContentTranscription}
+                    disabled={saving}
+                  />
+                  <div className="text-sm text-muted-foreground">
+                    <span>{content.length} characters</span>
+                    <span className="ml-4">{Math.ceil(content.split(' ').length)} words</span>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
