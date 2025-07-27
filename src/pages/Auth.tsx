@@ -11,6 +11,7 @@ import { User } from "@supabase/supabase-js";
 const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
@@ -44,6 +45,16 @@ const Auth = () => {
     
     try {
       if (isSignUp) {
+        // Check if passwords match
+        if (password !== confirmPassword) {
+          toast({
+            title: "Password Mismatch",
+            description: "Passwords do not match. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -191,6 +202,20 @@ const Auth = () => {
               />
             </div>
 
+            {isSignUp && (
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="Confirm your password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+              </div>
+            )}
+
             <Button type="submit" className="w-full" variant="hero">
               {isSignUp ? "Create Account" : "Sign In"}
             </Button>
@@ -203,9 +228,12 @@ const Auth = () => {
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
             >
               {isSignUp 
-                ? "Already have an account? Sign in" 
-                : "Don't have an account? Sign up"
+                ? "Already have an account? " 
+                : "Don't have an account? "
               }
+              <span className="text-blue-600 font-medium hover:text-blue-700">
+                {isSignUp ? "Sign in" : "Sign up"}
+              </span>
             </button>
           </div>
         </CardContent>
