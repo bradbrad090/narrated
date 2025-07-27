@@ -89,6 +89,7 @@ const WriteBook = () => {
   const generateContent = async () => {
     if (!prompt.trim() || !user || !book) return;
 
+    console.log('Starting content generation...', { userId: user.id, bookId: book.id, prompt: prompt.substring(0, 50) + '...' });
     setGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke('generate-autobiography', {
@@ -99,9 +100,19 @@ const WriteBook = () => {
         }
       });
 
-      if (error) throw error;
+      console.log('Function response:', { data, error });
 
-      if (data.content) {
+      if (error) {
+        console.error('Edge function error:', error);
+        throw error;
+      }
+
+      if (data?.error) {
+        console.error('Error in function response:', data.error);
+        throw new Error(data.error);
+      }
+
+      if (data?.content) {
         const newContent = content ? content + "\n\n" + data.content : data.content;
         setContent(newContent);
         setPrompt("");
@@ -110,11 +121,19 @@ const WriteBook = () => {
           title: "Content generated!",
           description: "AI has added new content to your autobiography.",
         });
+      } else {
+        console.warn('No content in response:', data);
+        toast({
+          title: "No content generated",
+          description: "The AI didn't generate any content. Please try again.",
+          variant: "destructive",
+        });
       }
     } catch (error: any) {
+      console.error('Full error object:', error);
       toast({
         title: "Error generating content",
-        description: error.message,
+        description: error.message || "An unknown error occurred",
         variant: "destructive",
       });
     } finally {
