@@ -9,6 +9,7 @@ import { User } from "@supabase/supabase-js";
 import { Book, LogOut, Save, Sparkles, ArrowLeft, Plus, FileText, Trash2 } from "lucide-react";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import ConversationalInterface from "@/components/ConversationalInterface";
 
 interface Chapter {
   id: string;
@@ -439,15 +440,36 @@ const WriteBook = () => {
                     </CardHeader>
                   </Card>
 
-                  {/* AI Prompt Section */}
+                  {/* Conversational AI Section */}
+                  <ConversationalInterface
+                    onContentUpdate={(content, action) => {
+                      if (!currentChapter) return;
+                      
+                      let newContent;
+                      if (action === 'append') {
+                        newContent = currentChapter.content 
+                          ? currentChapter.content + "\n\n" + content 
+                          : content;
+                      } else {
+                        newContent = content;
+                      }
+                      
+                      const updatedChapter = { ...currentChapter, content: newContent };
+                      setCurrentChapter(updatedChapter);
+                      setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
+                    }}
+                    disabled={saving || !currentChapter}
+                  />
+
+                  {/* Traditional AI Prompt Section */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center space-x-2">
                         <Sparkles className="h-5 w-5 text-primary" />
-                        <span>AI Writing Assistant</span>
+                        <span>Traditional AI Assistant</span>
                       </CardTitle>
                       <CardDescription>
-                        Describe what you'd like to write about for this chapter and AI will help craft the content.
+                        Or use the traditional prompt-based approach to generate content.
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -462,7 +484,7 @@ const WriteBook = () => {
                           onClick={generateContent}
                           disabled={!prompt.trim() || generating}
                           className="flex-1"
-                          variant="hero"
+                          variant="outline"
                         >
                           <Sparkles className="h-4 w-4 mr-2" />
                           {generating ? "Generating..." : "Generate Content"}
