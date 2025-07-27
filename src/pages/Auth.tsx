@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,7 +18,23 @@ const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Check for email and signup parameters in URL
+    const urlParams = new URLSearchParams(location.search);
+    const emailParam = urlParams.get('email');
+    const signupParam = urlParams.get('signup');
+    
+    if (emailParam) {
+      setEmail(emailParam);
+    }
+    
+    if (signupParam === 'true') {
+      setIsSignUp(true);
+    }
+  }, [location]);
 
   useEffect(() => {
     // Check if user is already logged in

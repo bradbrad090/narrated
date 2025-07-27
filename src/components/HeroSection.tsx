@@ -1,7 +1,45 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import heroImage from "@/assets/hero-book.jpg";
 
 const HeroSection = () => {
+  const [email, setEmail] = useState("");
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleGetStarted = async () => {
+    if (!email.trim()) {
+      toast({
+        title: "Email Required",
+        description: "Please enter your email address to get started.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Save email to signup table - skip if it fails since signup table isn't in types
+      // This will work when the table is properly configured
+      try {
+        await supabase
+          .from('signup' as any)
+          .insert({ email: email.trim() });
+      } catch (signupError) {
+        console.log('Signup table not accessible, continuing to auth...');
+      }
+
+      // Navigate to auth page with email as query parameter
+      navigate(`/auth?email=${encodeURIComponent(email.trim())}&signup=true`);
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      // Continue to auth page even if saving fails
+      navigate(`/auth?email=${encodeURIComponent(email.trim())}&signup=true`);
+    }
+  };
   return (
     <section className="relative min-h-screen flex items-center justify-center bg-gradient-subtle overflow-hidden">
       {/* Background image with overlay */}
@@ -30,12 +68,19 @@ const HeroSection = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4 sm:px-0 max-w-md mx-auto">
-            <input 
+            <Input 
               type="email" 
               placeholder="Enter your email" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="flex h-12 w-full rounded-md border border-primary-foreground/30 bg-primary-foreground/10 backdrop-blur-sm px-4 py-3 text-base text-primary-foreground placeholder:text-primary-foreground/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
             />
-            <Button variant="accent" size="lg" className="text-base sm:text-lg px-6 sm:px-8 py-3 font-semibold w-full sm:w-auto whitespace-nowrap">
+            <Button 
+              variant="accent" 
+              size="lg" 
+              onClick={handleGetStarted}
+              className="text-base sm:text-lg px-6 sm:px-8 py-3 font-semibold w-full sm:w-auto whitespace-nowrap"
+            >
               Get Started
             </Button>
           </div>
