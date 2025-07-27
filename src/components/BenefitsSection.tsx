@@ -55,8 +55,8 @@ const BenefitsSection = () => {
                 key={index}
                 className="bg-card rounded-xl p-8 shadow-card hover:shadow-elegant transition-elegant group"
               >
-                <div className="mb-6">
-                  <div className="w-16 h-16 bg-gradient-accent rounded-lg flex items-center justify-center group-hover:shadow-glow transition-elegant">
+                <div className="mb-6 text-center">
+                  <div className="w-16 h-16 bg-gradient-accent rounded-lg flex items-center justify-center group-hover:shadow-glow transition-elegant mx-auto">
                     <Icon className="w-8 h-8 text-accent-foreground" />
                   </div>
                 </div>
@@ -73,24 +73,6 @@ const BenefitsSection = () => {
           })}
         </div>
         
-        <div className="mt-16 text-center">
-          <div className="bg-card rounded-2xl p-8 shadow-elegant max-w-3xl mx-auto">
-            <h3 className="text-2xl font-semibold text-foreground mb-4">
-              Still have questions?
-            </h3>
-            <p className="text-muted-foreground mb-6">
-              Our team is here to help you understand how we can bring your life story to life.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-gradient-accent text-accent-foreground px-6 py-3 rounded-lg font-semibold shadow-card hover:shadow-glow transition-elegant">
-                Schedule a Call
-              </button>
-              <button className="border border-border text-foreground px-6 py-3 rounded-lg font-semibold hover:bg-muted transition-elegant">
-                View FAQ
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );

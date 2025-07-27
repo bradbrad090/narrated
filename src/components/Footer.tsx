@@ -31,16 +31,6 @@ const Footer = () => {
               </li>
               <li>
                 <a href="#" className="hover:text-accent transition-colors">
-                  Professional Editing
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-accent transition-colors">
-                  Premium Printing
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-accent transition-colors">
                   Custom Cover Design
                 </a>
               </li>
@@ -52,22 +42,17 @@ const Footer = () => {
             <h4 className="font-semibold mb-4">Support</h4>
             <ul className="space-y-2 text-sm text-primary-foreground/80">
               <li>
-                <a href="#" className="hover:text-accent transition-colors">
+                <a href="/faq" className="hover:text-accent transition-colors">
                   FAQ
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-accent transition-colors">
-                  Contact Us
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-accent transition-colors">
+                <a href="/privacy-policy" className="hover:text-accent transition-colors">
                   Privacy Policy
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-accent transition-colors">
+                <a href="/terms-of-service" className="hover:text-accent transition-colors">
                   Terms of Service
                 </a>
               </li>
@@ -78,17 +63,18 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Contact</h4>
             <ul className="space-y-3 text-sm text-primary-foreground/80">
+              <li>
+                <a href="/contact" className="hover:text-accent transition-colors">
+                  Contact Us
+                </a>
+              </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4" />
                 <span>hello@aiautobiography.com</span>
               </li>
               <li className="flex items-center gap-2">
-                <Phone className="w-4 h-4" />
-                <span>1-800-MEMOIR-1</span>
-              </li>
-              <li className="flex items-center gap-2">
                 <MapPin className="w-4 h-4" />
-                <span>New York, NY</span>
+                <span>Perth, Western Australia</span>
               </li>
             </ul>
           </div>
