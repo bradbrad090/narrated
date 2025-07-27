@@ -6,14 +6,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Book, LogOut, Save, Sparkles, ArrowLeft } from "lucide-react";
+import { Book, LogOut, Save, Sparkles, ArrowLeft, Plus, FileText, Trash2 } from "lucide-react";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+
+interface Chapter {
+  id: string;
+  book_id: string;
+  user_id: string;
+  chapter_number: number;
+  title: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+}
 
 const WriteBook = () => {
   const { bookId } = useParams();
   const [user, setUser] = useState<User | null>(null);
   const [book, setBook] = useState<any>(null);
-  const [content, setContent] = useState("");
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [currentChapter, setCurrentChapter] = useState<Chapter | null>(null);
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -29,7 +42,7 @@ const WriteBook = () => {
         return;
       }
       setUser(user);
-      fetchBook(user.id);
+      fetchBookAndChapters(user.id);
     });
 
     // Listen for auth changes
@@ -39,7 +52,7 @@ const WriteBook = () => {
           navigate("/auth");
         } else {
           setUser(session.user);
-          fetchBook(session.user.id);
+          fetchBookAndChapters(session.user.id);
         }
       }
     );
@@ -47,19 +60,36 @@ const WriteBook = () => {
     return () => subscription.unsubscribe();
   }, [navigate, bookId]);
 
-  const fetchBook = async (userId: string) => {
+  const fetchBookAndChapters = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      // Fetch book
+      const { data: bookData, error: bookError } = await supabase
         .from('books')
         .select('*')
         .eq('id', bookId)
         .eq('user_id', userId)
         .single();
 
-      if (error) throw error;
-      
-      setBook(data);
-      setContent(data.chapters || "");
+      if (bookError) throw bookError;
+      setBook(bookData);
+
+      // Fetch chapters
+      const { data: chaptersData, error: chaptersError } = await supabase
+        .from('chapters')
+        .select('*')
+        .eq('book_id', bookId)
+        .eq('user_id', userId)
+        .order('chapter_number', { ascending: true });
+
+      if (chaptersError) throw chaptersError;
+
+      if (chaptersData && chaptersData.length > 0) {
+        setChapters(chaptersData);
+        setCurrentChapter(chaptersData[0]);
+      } else {
+        // Create first chapter if none exist
+        await createNewChapter(userId, 1, "Chapter 1");
+      }
     } catch (error: any) {
       toast({
         title: "Error fetching book",
@@ -69,6 +99,84 @@ const WriteBook = () => {
       navigate("/dashboard");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const createNewChapter = async (userId: string, chapterNumber: number, title: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('chapters')
+        .insert({
+          book_id: bookId!,
+          user_id: userId,
+          chapter_number: chapterNumber,
+          title: title,
+          content: ""
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const newChapter = data as Chapter;
+      setChapters(prev => [...prev, newChapter].sort((a, b) => a.chapter_number - b.chapter_number));
+      setCurrentChapter(newChapter);
+
+      toast({
+        title: "Chapter created!",
+        description: `${title} has been added to your book.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error creating chapter",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleAddChapter = () => {
+    if (!user) return;
+    const nextChapterNumber = chapters.length + 1;
+    createNewChapter(user.id, nextChapterNumber, `Chapter ${nextChapterNumber}`);
+  };
+
+  const handleDeleteChapter = async (chapterId: string) => {
+    if (chapters.length <= 1) {
+      toast({
+        title: "Cannot delete",
+        description: "You must have at least one chapter.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('chapters')
+        .delete()
+        .eq('id', chapterId);
+
+      if (error) throw error;
+
+      const updatedChapters = chapters.filter(c => c.id !== chapterId);
+      setChapters(updatedChapters);
+      
+      // Select a different chapter if current was deleted
+      if (currentChapter?.id === chapterId) {
+        setCurrentChapter(updatedChapters[0] || null);
+      }
+
+      toast({
+        title: "Chapter deleted",
+        description: "The chapter has been removed from your book.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error deleting chapter",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
@@ -87,14 +195,14 @@ const WriteBook = () => {
   };
 
   const generateContent = async () => {
-    if (!prompt.trim() || !user || !book) return;
+    if (!prompt.trim() || !user || !book || !currentChapter) return;
 
     console.log('Starting content generation...', { userId: user.id, bookId: book.id, prompt: prompt.substring(0, 50) + '...' });
     setGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke('generate-autobiography', {
         body: {
-          prompt: `Write autobiography content based on this prompt: ${prompt}. ${content ? 'Continue from the existing content.' : 'This is the beginning of the autobiography.'}`,
+          prompt: `Write autobiography content for ${currentChapter.title} based on this prompt: ${prompt}. ${currentChapter.content ? 'Continue from the existing content.' : 'This is the beginning of this chapter.'}`,
           userId: user.id,
           bookId: book.id
         }
@@ -113,13 +221,20 @@ const WriteBook = () => {
       }
 
       if (data?.content) {
-        const newContent = content ? content + "\n\n" + data.content : data.content;
-        setContent(newContent);
+        const newContent = currentChapter.content ? currentChapter.content + "\n\n" + data.content : data.content;
+        
+        // Update current chapter state
+        const updatedChapter = { ...currentChapter, content: newContent };
+        setCurrentChapter(updatedChapter);
+        
+        // Update chapters array
+        setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
+        
         setPrompt("");
         
         toast({
           title: "Content generated!",
-          description: "AI has added new content to your autobiography.",
+          description: "AI has added new content to your chapter.",
         });
       } else {
         console.warn('No content in response:', data);
@@ -141,29 +256,29 @@ const WriteBook = () => {
     }
   };
 
-  const saveContent = async () => {
-    if (!user || !book) return;
+  const saveCurrentChapter = async () => {
+    if (!user || !currentChapter) return;
 
     setSaving(true);
     try {
       const { error } = await supabase
-        .from('books')
+        .from('chapters')
         .update({
-          chapters: content,
-          status: content.trim() ? 'in_progress' : 'draft'
+          content: currentChapter.content,
+          title: currentChapter.title
         })
-        .eq('id', book.id)
+        .eq('id', currentChapter.id)
         .eq('user_id', user.id);
 
       if (error) throw error;
 
       toast({
-        title: "Saved!",
-        description: "Your autobiography has been saved.",
+        title: "Chapter saved!",
+        description: `${currentChapter.title} has been saved.`,
       });
     } catch (error: any) {
       toast({
-        title: "Error saving",
+        title: "Error saving chapter",
         description: error.message,
         variant: "destructive",
       });
@@ -177,7 +292,25 @@ const WriteBook = () => {
   };
 
   const handleContentTranscription = (transcribedText: string) => {
-    setContent(prev => prev ? prev + " " + transcribedText : transcribedText);
+    if (!currentChapter) return;
+    const updatedContent = currentChapter.content ? currentChapter.content + " " + transcribedText : transcribedText;
+    const updatedChapter = { ...currentChapter, content: updatedContent };
+    setCurrentChapter(updatedChapter);
+    setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
+  };
+
+  const handleChapterContentChange = (newContent: string) => {
+    if (!currentChapter) return;
+    const updatedChapter = { ...currentChapter, content: newContent };
+    setCurrentChapter(updatedChapter);
+    setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
+  };
+
+  const handleChapterTitleChange = (newTitle: string) => {
+    if (!currentChapter) return;
+    const updatedChapter = { ...currentChapter, title: newTitle };
+    setCurrentChapter(updatedChapter);
+    setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
   };
 
   if (loading) {
@@ -213,11 +346,11 @@ const WriteBook = () => {
           <div className="flex items-center space-x-4">
             <Button 
               variant="outline" 
-              onClick={saveContent}
-              disabled={saving}
+              onClick={saveCurrentChapter}
+              disabled={saving || !currentChapter}
             >
               <Save className="h-4 w-4 mr-2" />
-              {saving ? "Saving..." : "Save"}
+              {saving ? "Saving..." : "Save Chapter"}
             </Button>
             <span className="text-sm text-muted-foreground">
               Welcome, {user?.email}
@@ -231,74 +364,158 @@ const WriteBook = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="grid gap-6">
-          {/* AI Prompt Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Sparkles className="h-5 w-5 text-primary" />
-                <span>AI Writing Assistant</span>
-              </CardTitle>
-              <CardDescription>
-                Describe what you'd like to write about and AI will help craft your autobiography content.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Textarea
-                placeholder="Example: Write about my childhood growing up in a small town, focusing on summer adventures and family traditions..."
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                className="min-h-[100px]"
-              />
-              <div className="flex flex-col sm:flex-row gap-2">
-                <Button 
-                  onClick={generateContent}
-                  disabled={!prompt.trim() || generating}
-                  className="flex-1"
-                  variant="hero"
+      <main className="h-[calc(100vh-80px)]">
+        <ResizablePanelGroup direction="horizontal" className="w-full">
+          {/* Left Sidebar - Chapter List */}
+          <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
+            <div className="h-full bg-background border-r p-4">
+              <div className="space-y-2">
+                <h2 className="text-lg font-semibold mb-4">Chapters</h2>
+                
+                {chapters.map((chapter) => (
+                  <div
+                    key={chapter.id}
+                    className={`p-3 rounded-lg border cursor-pointer transition-colors group ${
+                      currentChapter?.id === chapter.id 
+                        ? 'bg-primary/10 border-primary' 
+                        : 'hover:bg-muted'
+                    }`}
+                    onClick={() => setCurrentChapter(chapter)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <FileText className="h-4 w-4" />
+                        <span className="font-medium">{chapter.title}</span>
+                      </div>
+                      {chapters.length > 1 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteChapter(chapter.id);
+                          }}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {chapter.content.length} characters
+                    </p>
+                  </div>
+                ))}
+                
+                <Button
+                  variant="outline"
+                  className="w-full mt-4"
+                  onClick={handleAddChapter}
                 >
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  {generating ? "Generating..." : "Generate Content"}
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Chapter
                 </Button>
-                <VoiceRecorder 
-                  onTranscription={handlePromptTranscription}
-                  disabled={generating}
-                />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </ResizablePanel>
 
-          {/* Writing Area */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Your Autobiography</CardTitle>
-              <CardDescription>
-                Edit and refine your autobiography content. You can manually edit the AI-generated text or write your own.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                placeholder="Your autobiography content will appear here. You can edit it directly or use the AI assistant above to generate new content..."
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                className="min-h-[400px] text-base leading-relaxed"
-              />
-              <div className="mt-4 flex justify-between items-center">
-                <div className="flex items-center space-x-4">
-                  <VoiceRecorder 
-                    onTranscription={handleContentTranscription}
-                    disabled={saving}
-                  />
-                  <div className="text-sm text-muted-foreground">
-                    <span>{content.length} characters</span>
-                    <span className="ml-4">{Math.ceil(content.split(' ').length)} words</span>
+          <ResizableHandle withHandle />
+
+          {/* Right Side - Content Editor */}
+          <ResizablePanel defaultSize={75}>
+            <div className="h-full p-6 overflow-auto">
+              {currentChapter ? (
+                <div className="max-w-4xl mx-auto space-y-6">
+                  {/* Chapter Title Editor */}
+                  <Card>
+                    <CardHeader>
+                      <input
+                        type="text"
+                        value={currentChapter.title}
+                        onChange={(e) => handleChapterTitleChange(e.target.value)}
+                        className="text-2xl font-bold bg-transparent border-none outline-none w-full"
+                        placeholder="Chapter Title"
+                      />
+                    </CardHeader>
+                  </Card>
+
+                  {/* AI Prompt Section */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <Sparkles className="h-5 w-5 text-primary" />
+                        <span>AI Writing Assistant</span>
+                      </CardTitle>
+                      <CardDescription>
+                        Describe what you'd like to write about for this chapter and AI will help craft the content.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <Textarea
+                        placeholder="Example: Write about my childhood growing up in a small town, focusing on summer adventures and family traditions..."
+                        value={prompt}
+                        onChange={(e) => setPrompt(e.target.value)}
+                        className="min-h-[100px]"
+                      />
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <Button 
+                          onClick={generateContent}
+                          disabled={!prompt.trim() || generating}
+                          className="flex-1"
+                          variant="hero"
+                        >
+                          <Sparkles className="h-4 w-4 mr-2" />
+                          {generating ? "Generating..." : "Generate Content"}
+                        </Button>
+                        <VoiceRecorder 
+                          onTranscription={handlePromptTranscription}
+                          disabled={generating}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Chapter Content Editor */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>{currentChapter.title}</CardTitle>
+                      <CardDescription>
+                        Edit and refine your chapter content. You can manually edit the AI-generated text or write your own.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Textarea
+                        placeholder="Your chapter content will appear here. You can edit it directly or use the AI assistant above to generate new content..."
+                        value={currentChapter.content}
+                        onChange={(e) => handleChapterContentChange(e.target.value)}
+                        className="min-h-[500px] text-base leading-relaxed"
+                      />
+                      <div className="mt-4 flex justify-between items-center">
+                        <div className="flex items-center space-x-4">
+                          <VoiceRecorder 
+                            onTranscription={handleContentTranscription}
+                            disabled={saving}
+                          />
+                          <div className="text-sm text-muted-foreground">
+                            <span>{currentChapter.content.length} characters</span>
+                            <span className="ml-4">{Math.ceil(currentChapter.content.split(' ').length)} words</span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center">
+                    <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">Select a chapter to start writing</p>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              )}
+            </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </main>
     </div>
   );
