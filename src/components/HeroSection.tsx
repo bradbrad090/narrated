@@ -29,12 +29,14 @@ const HeroSection = () => {
             transforms into a beautifully crafted autobiography, professionally printed and delivered to your door.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4 sm:px-0">
-            <Button variant="accent" size="lg" className="text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 font-semibold w-full sm:w-auto">
-              Start Your Story Today
-            </Button>
-            <Button variant="outline" size="lg" className="text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 w-full sm:w-auto">
-              See How It Works
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4 sm:px-0 max-w-md mx-auto">
+            <input 
+              type="email" 
+              placeholder="Enter your email" 
+              className="flex h-12 w-full rounded-md border border-primary-foreground/30 bg-primary-foreground/10 backdrop-blur-sm px-4 py-3 text-base text-primary-foreground placeholder:text-primary-foreground/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+            />
+            <Button variant="accent" size="lg" className="text-base sm:text-lg px-6 sm:px-8 py-3 font-semibold w-full sm:w-auto whitespace-nowrap">
+              Get Started
             </Button>
           </div>
           
