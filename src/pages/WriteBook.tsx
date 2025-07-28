@@ -138,7 +138,9 @@ const WriteBook = () => {
 
   const handleAddChapter = () => {
     if (!user) return;
-    const nextChapterNumber = chapters.length + 1;
+    // Find the highest chapter number and add 1 to avoid duplicates
+    const maxChapterNumber = Math.max(...chapters.map(c => c.chapter_number), 0);
+    const nextChapterNumber = maxChapterNumber + 1;
     createNewChapter(user.id, nextChapterNumber, `Chapter ${nextChapterNumber}`);
   };
 
