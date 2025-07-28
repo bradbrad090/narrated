@@ -153,7 +153,7 @@ const Header = () => {
                     ) : (
                       <div className="flex flex-col gap-3">
                         <Button 
-                          variant="outline" 
+                          variant="mobile-login" 
                           className="w-full"
                           onClick={() => {
                             navigate('/auth');

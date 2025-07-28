@@ -20,6 +20,7 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         hero: "bg-gradient-hero text-primary-foreground hover:shadow-glow shadow-elegant transition-elegant",
         accent: "bg-gradient-accent text-accent-foreground hover:shadow-glow shadow-card transition-elegant",
+        "mobile-login": "bg-[hsl(var(--yellow-pale))] text-[hsl(var(--yellow-foreground))] hover:bg-[hsl(var(--yellow-solid))] transition-colors",
       },
       size: {
         default: "h-10 px-4 py-2",

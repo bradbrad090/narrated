@@ -34,6 +34,11 @@
     /* Accent - rich gold */
     --accent: 42 85% 65%;
     --accent-foreground: 220 50% 25%;
+    
+    /* Yellow variants for mobile login */
+    --yellow-pale: 50 85% 85%;
+    --yellow-solid: 50 90% 60%;
+    --yellow-foreground: 220 50% 25%;
 
     /* Destructive */
     --destructive: 0 75% 55%;
@@ -99,6 +104,11 @@
 
     --accent: 42 85% 65%;
     --accent-foreground: 220 35% 8%;
+    
+    /* Yellow variants for mobile login - dark mode */
+    --yellow-pale: 50 75% 70%;
+    --yellow-solid: 50 85% 55%;
+    --yellow-foreground: 220 35% 8%;
 
     --destructive: 0 75% 55%;
     --destructive-foreground: 35 25% 95%;
