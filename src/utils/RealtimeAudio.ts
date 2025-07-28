@@ -185,28 +185,43 @@ export class ConversationalChat {
 
   async init() {
     try {
+      console.log('🎤 Starting ConversationalChat initialization...');
+      
       // Initialize audio context
       this.audioContext = new AudioContext();
+      console.log('✅ AudioContext created:', this.audioContext.state);
       
       // Connect to WebSocket
       const wsUrl = `wss://keadkwromhlyvoyxvcmi.supabase.co/functions/v1/realtime-conversation`;
+      console.log('🔌 Connecting to WebSocket:', wsUrl);
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = async () => {
-        console.log('Connected to conversational AI');
+        console.log('✅ WebSocket connected successfully!');
         
         // Start recording
+        console.log('🎤 Starting audio recording...');
         this.recorder = new AudioRecorder((audioData) => {
+          console.log('🎵 Audio data captured, length:', audioData.length);
           if (this.ws?.readyState === WebSocket.OPEN) {
+            console.log('📤 Sending audio to WebSocket...');
             this.ws.send(JSON.stringify({
               type: 'input_audio_buffer.append',
               audio: encodeAudioForAPI(audioData)
             }));
+          } else {
+            console.warn('⚠️ WebSocket not ready, audio data lost');
           }
         });
         
-        await this.recorder.start();
-        this.onMessageCallback({ type: 'connected' });
+        try {
+          await this.recorder.start();
+          console.log('✅ Audio recording started successfully');
+          this.onMessageCallback({ type: 'connected' });
+        } catch (error) {
+          console.error('❌ Failed to start audio recording:', error);
+          throw error;
+        }
       };
 
       this.ws.onmessage = async (event) => {
