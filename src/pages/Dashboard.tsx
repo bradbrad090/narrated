@@ -254,8 +254,8 @@ const Dashboard = () => {
         </div>
 
         {/* Create New Book Section */}
-        <div className="mb-8">
-          <Card className="border-dashed border-2 hover:border-primary/50 transition-colors">
+        <div className="mb-8 flex justify-center">
+          <Card className="border-dashed border-2 hover:border-primary/50 transition-colors max-w-md w-full">
             <CardHeader className="text-center">
               <CardTitle className="flex items-center justify-center space-x-2">
                 <Plus className="h-5 w-5" />
