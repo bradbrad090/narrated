@@ -3,14 +3,17 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Plus, Book, LogOut, Trash2 } from "lucide-react";
+import { Plus, Book, LogOut, Trash2, Edit2, Check, X } from "lucide-react";
 
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [books, setBooks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingBookId, setEditingBookId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -44,7 +47,7 @@ const Dashboard = () => {
     try {
       const { data, error } = await supabase
         .from('books')
-        .select('*')
+        .select('*, chapters(content)')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
@@ -137,6 +140,54 @@ const Dashboard = () => {
     }
   };
 
+  const handleRenameBook = async (bookId: string, newTitle: string) => {
+    if (!user || !newTitle.trim()) return;
+
+    try {
+      const { error } = await supabase
+        .from('books')
+        .update({ title: newTitle.trim() })
+        .eq('id', bookId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Book renamed",
+        description: "Your book title has been updated.",
+      });
+
+      // Refresh books list
+      fetchBooks(user.id);
+      setEditingBookId(null);
+      setEditingTitle("");
+    } catch (error: any) {
+      toast({
+        title: "Error renaming book",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const startEditing = (bookId: string, currentTitle: string) => {
+    setEditingBookId(bookId);
+    setEditingTitle(currentTitle);
+  };
+
+  const cancelEditing = () => {
+    setEditingBookId(null);
+    setEditingTitle("");
+  };
+
+  const getWordCount = (book: any) => {
+    if (!book.chapters || book.chapters.length === 0) return 0;
+    return book.chapters.reduce((total: number, chapter: any) => {
+      const content = chapter.content || '';
+      return total + content.split(/\s+/).filter((word: string) => word.length > 0).length;
+    }, 0);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
@@ -213,38 +264,89 @@ const Dashboard = () => {
             </Card>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {books.map((book) => (
-                <Card key={book.id} className="hover:shadow-md transition-shadow cursor-pointer">
-                  <CardHeader>
-                    <CardTitle className="text-lg">{book.title}</CardTitle>
-                    <CardDescription>
-                      Status: <span className="capitalize">{book.status}</span>
-                    </CardDescription>
-                  </CardHeader>
-                   <CardContent>
-                     <p className="text-sm text-muted-foreground mb-4">
-                       Created {new Date(book.created_at).toLocaleDateString()}
-                     </p>
-                     <div className="flex gap-2">
-                       <Button 
-                         variant="outline" 
-                         className="flex-1"
-                         onClick={() => navigate(`/write/${book.id}`)}
-                       >
-                         Continue Writing
-                       </Button>
-                       <Button 
-                         variant="outline" 
-                         size="icon"
-                         onClick={() => handleDeleteBook(book.id)}
-                         className="text-destructive hover:text-destructive"
-                       >
-                         <Trash2 className="h-4 w-4" />
-                       </Button>
-                     </div>
-                   </CardContent>
-                </Card>
-              ))}
+              {books.map((book) => {
+                const wordCount = getWordCount(book);
+                
+                return (
+                  <Card key={book.id} className="hover:shadow-md transition-shadow">
+                    <CardHeader>
+                      {editingBookId === book.id ? (
+                        <div className="flex items-center gap-2">
+                          <Input
+                            value={editingTitle}
+                            onChange={(e) => setEditingTitle(e.target.value)}
+                            className="flex-1"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                handleRenameBook(book.id, editingTitle);
+                              } else if (e.key === 'Escape') {
+                                cancelEditing();
+                              }
+                            }}
+                            autoFocus
+                          />
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() => handleRenameBook(book.id, editingTitle)}
+                          >
+                            <Check className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={cancelEditing}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-lg">{book.title}</CardTitle>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => startEditing(book.id, book.title)}
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                      <CardDescription>
+                        Status: <span className="capitalize">{book.status}</span>
+                        {wordCount > 0 && (
+                          <span className="ml-2">• {wordCount.toLocaleString()} words</span>
+                        )}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex justify-between items-center mb-4">
+                        <div></div>
+                        <p className="text-sm text-muted-foreground">
+                          Created {new Date(book.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          className="flex-1"
+                          onClick={() => navigate(`/write/${book.id}`)}
+                        >
+                          Continue Writing
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="icon"
+                          onClick={() => handleDeleteBook(book.id)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </div>
