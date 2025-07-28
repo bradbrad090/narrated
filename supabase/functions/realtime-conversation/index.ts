@@ -33,16 +33,13 @@ serve(async (req) => {
 
   socket.onopen = () => {
     console.log('Client WebSocket opened');
-    // Connect to OpenAI Realtime API with proper headers
-    const openAIUrl = new URL('wss://api.openai.com/v1/realtime');
-    openAIUrl.searchParams.set('model', 'gpt-4o-realtime-preview-2024-10-01');
+    // Connect to OpenAI Realtime API
+    const openAIUrl = 'wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01';
     
-    openAISocket = new WebSocket(openAIUrl.toString(), {
-      headers: {
-        "Authorization": `Bearer ${OPENAI_API_KEY}`,
-        "OpenAI-Beta": "realtime=v1"
-      }
-    });
+    openAISocket = new WebSocket(openAIUrl, [
+      `Bearer.${OPENAI_API_KEY}`,
+      'realtime-v1'
+    ]);
 
     openAISocket.onopen = () => {
       console.log('Connected to OpenAI Realtime API');
