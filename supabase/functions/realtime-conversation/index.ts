@@ -78,17 +78,7 @@ serve(async (req) => {
           type: "session.update",
           session: {
             modalities: ["text", "audio"],
-            instructions: `You are an expert autobiography writing assistant. Your role is to help users tell their life story through conversational dialogue. 
-
-When a user shares a story or memory:
-1. Listen carefully and acknowledge what they've shared
-2. Ask thoughtful follow-up questions to help them elaborate (like "What emotions did you feel?", "Who else was there?", "What did that teach you?", "How did that change you?")
-3. Help them uncover rich details, emotions, and meaning in their experiences
-4. Guide them to explore the significance of events in their life journey
-
-Keep your questions conversational and empathetic. Help them paint vivid pictures with their words. Focus on drawing out sensory details, emotions, relationships, and personal growth.
-
-Remember: You're helping them craft their autobiography chapter by chapter, so encourage depth and reflection.`,
+            instructions: `You are a helpful AI assistant. When the user speaks, respond naturally and ask them questions about their day or interests. Keep responses short and conversational.`,
             voice: "sage",
             input_audio_format: "pcm16",
             output_audio_format: "pcm16",
@@ -99,37 +89,35 @@ Remember: You're helping them craft their autobiography chapter by chapter, so e
               type: "server_vad",
               threshold: 0.5,
               prefix_padding_ms: 300,
-              silence_duration_ms: 1000
+              silence_duration_ms: 800
             },
-            tools: [
-              {
-                type: "function",
-                name: "save_chapter_content",
-                description: "Save or update the current chapter content based on the conversation",
-                parameters: {
-                  type: "object",
-                  properties: {
-                    content: { 
-                      type: "string",
-                      description: "The narrative content to add or update in the chapter"
-                    },
-                    action: {
-                      type: "string",
-                      enum: ["append", "replace"],
-                      description: "Whether to append to existing content or replace it"
-                    }
-                  },
-                  required: ["content", "action"]
-                }
-              }
-            ],
-            tool_choice: "auto",
             temperature: 0.8,
-            max_response_output_tokens: "inf"
+            max_response_output_tokens: 500
           }
         };
         
+        console.log('Sending session update:', JSON.stringify(sessionUpdate, null, 2));
         openAISocket?.send(JSON.stringify(sessionUpdate));
+        
+        // Send an initial greeting to test the connection
+        setTimeout(() => {
+          console.log('Sending initial greeting');
+          const greeting = {
+            type: "conversation.item.create",
+            item: {
+              type: "message",
+              role: "assistant",
+              content: [
+                {
+                  type: "text",
+                  text: "Hello! I can hear you now. Please say something and I'll respond."
+                }
+              ]
+            }
+          };
+          openAISocket?.send(JSON.stringify(greeting));
+          openAISocket?.send(JSON.stringify({ type: "response.create" }));
+        }, 1000);
       }
 
       // Handle function calls
