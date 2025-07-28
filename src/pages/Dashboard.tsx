@@ -333,6 +333,7 @@ const Dashboard = () => {
                             size="icon"
                             variant="ghost"
                             onClick={() => startEditing(book.id, book.title)}
+                            className="bg-yellow-400/20 hover:bg-yellow-400/30"
                           >
                             <Edit2 className="h-4 w-4" />
                           </Button>

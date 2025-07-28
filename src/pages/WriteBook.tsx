@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Book, LogOut, Save, Sparkles, ArrowLeft, Plus, FileText, Trash2 } from "lucide-react";
+import { Book, LogOut, Save, Sparkles, ArrowLeft, Plus, FileText, Trash2, Edit2 } from "lucide-react";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import ConversationalInterface from "@/components/ConversationalInterface";
@@ -432,13 +432,29 @@ const WriteBook = () => {
                   {/* Chapter Title Editor */}
                   <Card>
                     <CardHeader>
-                      <input
-                        type="text"
-                        value={currentChapter.title}
-                        onChange={(e) => handleChapterTitleChange(e.target.value)}
-                        className="text-2xl font-bold bg-transparent border-none outline-none w-full"
-                        placeholder="Chapter Title"
-                      />
+                      <div className="flex items-center justify-between">
+                        <input
+                          type="text"
+                          value={currentChapter.title}
+                          onChange={(e) => handleChapterTitleChange(e.target.value)}
+                          className="text-2xl font-bold bg-transparent border-none outline-none flex-1"
+                          placeholder="Chapter Title"
+                        />
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="bg-yellow-400/20 hover:bg-yellow-400/30 ml-2"
+                          onClick={() => {
+                            const inputElement = document.querySelector('.text-2xl.font-bold') as HTMLInputElement;
+                            if (inputElement) {
+                              inputElement.focus();
+                              inputElement.select();
+                            }
+                          }}
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </CardHeader>
                   </Card>
 
