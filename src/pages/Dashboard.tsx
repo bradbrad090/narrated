@@ -203,6 +203,15 @@ const Dashboard = () => {
     }, 0);
   };
 
+  const getChapterCount = (book: any) => {
+    return book.chapters ? book.chapters.length : 0;
+  };
+
+  const getEstimatedPages = (wordCount: number) => {
+    // Assuming approximately 250 words per page
+    return Math.ceil(wordCount / 250);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
@@ -281,6 +290,8 @@ const Dashboard = () => {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {books.map((book) => {
                 const wordCount = getWordCount(book);
+                const chapterCount = getChapterCount(book);
+                const estimatedPages = getEstimatedPages(wordCount);
                 
                 return (
                   <Card key={book.id} className="hover:shadow-md transition-shadow">
@@ -327,12 +338,20 @@ const Dashboard = () => {
                           </Button>
                         </div>
                       )}
-                      <CardDescription>
-                        Status: <span className="capitalize">{book.status}</span>
-                        {wordCount > 0 && (
-                          <span className="ml-2">• {wordCount.toLocaleString()} words</span>
-                        )}
-                      </CardDescription>
+                      <div className="grid grid-cols-3 gap-4 mt-3">
+                        <div className="text-center">
+                          <p className="text-2xl font-semibold text-primary">{chapterCount}</p>
+                          <p className="text-xs text-muted-foreground">Chapters</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-2xl font-semibold text-primary">{wordCount.toLocaleString()}</p>
+                          <p className="text-xs text-muted-foreground">Words</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-2xl font-semibold text-primary">{estimatedPages}</p>
+                          <p className="text-xs text-muted-foreground">Est. Pages</p>
+                        </div>
+                      </div>
                     </CardHeader>
                     <CardContent>
                       <div className="flex justify-between items-center mb-4">
