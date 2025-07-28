@@ -325,22 +325,55 @@ const WriteBook = () => {
     setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
   };
 
-  const generateStoryIdea = () => {
-    const storyPrompts = [
-      "Your first memories of school",
-      "A childhood summer that changed everything",
-      "The day you learned something important about yourself",
-      "Your most embarrassing moment and what you learned from it",
-      "A person who influenced your life in an unexpected way",
-      "The moment you felt most proud of yourself",
-      "A time when you had to be brave",
-      "Your favorite family tradition and why it matters",
-      "A mistake that led to something wonderful",
-      "The day you realized you were growing up"
-    ];
-    
-    const randomPrompt = storyPrompts[Math.floor(Math.random() * storyPrompts.length)];
-    setStoryIdea(randomPrompt);
+  const generateStoryIdea = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('openai-conversation', {
+        body: { 
+          prompt: `You are a creative prompt generator specializing in autobiography and memoir writing. Your task is to generate random questions that prompt users to reflect on specific times, periods, or milestones in their life story. These questions must be time-specific—tied to particular life stages (e.g., childhood, teenage years, early adulthood), first experiences, specific ages, events, or timelines—rather than generic open-ended queries like "Tell me about a happy memory." Avoid broad questions; make them focused on a defined moment or era to encourage vivid, personal narratives.
+
+To ensure variety and quality:
+
+Draw inspiration from real memoir prompts, but randomize and vary them each time.
+Cover diverse themes like family, relationships, challenges, achievements, daily life, or personal growth.
+Make questions engaging and introspective, often starting with "Describe," "Reflect on," "What was," "When did," or "Tell about."
+Generate 1-5 new questions per response, ensuring each is unique and not repeated from examples.
+Keep questions concise, 1-2 sentences max.
+
+Examples of good time-specific autobiography prompts (use these as style guides, but create originals):
+
+What is your earliest childhood memory, and how does it reflect the environment you grew up in? (Inspired by early memory prompts)
+Describe your first day of high school and how it shaped your teenage friendships.
+When did you get your first job, and what unexpected lesson did you learn from it during that time?
+Reflect on a specific moment in your early twenties when you faced a major decision about your career.
+What was your family's daily routine like during your elementary school years, and how has it influenced your habits today?
+Tell about the first time you traveled alone as a young adult and what independence it taught you.
+During your teenage years, what was a pivotal argument with a parent, and how did it change your relationship?
+Describe a holiday tradition from your childhood that you still remember vividly from age 10 or so.
+When did you first fall in love in your late teens, and what emotions dominated that period?
+Reflect on moving to a new home or city in your mid-thirties and the challenges it brought to your family life.
+
+Now, generate 1 random time-specific autobiography prompt question based on the guidelines above.` 
+        }
+      });
+
+      if (error) throw error;
+      
+      if (data?.generatedText) {
+        setStoryIdea(data.generatedText);
+      }
+    } catch (error) {
+      console.error('Error generating story idea:', error);
+      // Fallback to a random prompt if API fails
+      const fallbackPrompts = [
+        "Describe your first day at a new school and how it shaped your understanding of change.",
+        "What was your earliest memory of feeling truly proud of an accomplishment in elementary school?",
+        "Reflect on a specific summer during your childhood that taught you something important about family.",
+        "When did you first realize you were becoming an adult, and what triggered that moment?",
+        "Tell about a tradition from your teenage years that you now understand differently as an adult."
+      ];
+      const randomPrompt = fallbackPrompts[Math.floor(Math.random() * fallbackPrompts.length)];
+      setStoryIdea(randomPrompt);
+    }
   };
 
   if (loading) {
