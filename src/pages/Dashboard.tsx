@@ -82,11 +82,26 @@ const Dashboard = () => {
     if (!user) return;
 
     try {
+      // Get existing book titles to determine next number
+      const existingTitles = books.map(book => book.title);
+      const baseTitle = "My New Autobiography";
+      
+      let newTitle = baseTitle;
+      let counter = 2;
+      
+      // If base title exists, find the next available number
+      if (existingTitles.includes(baseTitle)) {
+        while (existingTitles.includes(`${baseTitle} ${counter}`)) {
+          counter++;
+        }
+        newTitle = `${baseTitle} ${counter}`;
+      }
+
       const { data, error } = await supabase
         .from('books')
         .insert([
           {
-            title: "My New Autobiography",
+            title: newTitle,
             status: "draft",
             user_id: user.id,
           }
