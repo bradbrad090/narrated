@@ -120,13 +120,13 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
   };
 
   return (
-    <div className="flex items-center space-x-2">
+    <>
       {!isRecording ? (
         <Button
           variant="outline"
           onClick={startRecording}
           disabled={disabled || isProcessing}
-          className="flex items-center space-x-2"
+          className="w-full h-10 flex items-center space-x-2"
         >
           <Mic className="h-4 w-4" />
           <span>{isProcessing ? "Processing..." : "Voice Input"}</span>
@@ -135,19 +135,12 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
         <Button
           variant="destructive"
           onClick={stopRecording}
-          className="flex items-center space-x-2 animate-pulse"
+          className="w-full h-10 flex items-center space-x-2 animate-pulse"
         >
           <Square className="h-4 w-4" />
           <span>Stop Recording</span>
         </Button>
       )}
-      
-      {isRecording && (
-        <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-          <span>Recording...</span>
-        </div>
-      )}
-    </div>
+    </>
   );
 };

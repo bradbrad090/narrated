@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Book, LogOut, Save, Sparkles, ArrowLeft, Plus, FileText, Trash2, Edit2 } from "lucide-react";
+import { Book, LogOut, Save, Sparkles, ArrowLeft, Plus, FileText, Trash2, Edit2, Type } from "lucide-react";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
@@ -62,6 +62,13 @@ const WriteBook = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate, bookId]);
+
+  // Auto-generate story idea when page loads
+  useEffect(() => {
+    if (!storyIdea && !loading) {
+      generateStoryIdea();
+    }
+  }, [loading, storyIdea]);
 
   const fetchBookAndChapters = async (userId: string) => {
     try {
@@ -519,7 +526,7 @@ const WriteBook = () => {
                           Give me an idea
                         </Button>
                         
-                        <div className="w-full">
+                        <div className="w-full h-10">
                           <VoiceRecorder 
                             onTranscription={handleContentTranscription}
                             disabled={generating}
@@ -531,6 +538,7 @@ const WriteBook = () => {
                           variant="outline"
                           className="w-full h-10"
                         >
+                          <Type className="h-4 w-4 mr-2" />
                           I'd prefer to type
                         </Button>
                       </div>
@@ -576,14 +584,16 @@ const WriteBook = () => {
                         onChange={(e) => handleChapterContentChange(e.target.value)}
                         className="min-h-[500px] text-base leading-relaxed"
                       />
-                      <div className="mt-4 flex justify-between items-center">
-                        <div className="text-sm text-muted-foreground">
-                          {(() => {
-                            const words = currentChapter.content.trim() ? currentChapter.content.split(/\s+/).length : 0;
-                            const pages = Math.ceil(words / 300);
-                            return `${words} words • ${pages} page${pages !== 1 ? 's' : ''} • ${currentChapter.content.length} characters`;
-                          })()}
-                        </div>
+                      <div className="mt-4 flex justify-center">
+                        <Button 
+                          onClick={saveCurrentChapter}
+                          disabled={saving || !currentChapter}
+                          size="lg"
+                          className="shadow-lg"
+                        >
+                          <Save className="h-4 w-4 mr-2" />
+                          {saving ? "Saving..." : "Save"}
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -600,19 +610,6 @@ const WriteBook = () => {
           </ResizablePanel>
         </ResizablePanelGroup>
       </main>
-      
-      {/* Fixed Save Button */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <Button 
-          onClick={saveCurrentChapter}
-          disabled={saving || !currentChapter}
-          size="lg"
-          className="shadow-lg"
-        >
-          <Save className="h-4 w-4 mr-2" />
-          {saving ? "Saving..." : "Save"}
-        </Button>
-      </div>
     </div>
   );
 };
