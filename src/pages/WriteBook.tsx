@@ -536,7 +536,7 @@ const WriteBook = () => {
                         </Button>
                         
                         <VoiceRecorder 
-                          onTranscription={handlePromptTranscription}
+                          onTranscription={handleContentTranscription}
                           disabled={generating}
                         />
                         
