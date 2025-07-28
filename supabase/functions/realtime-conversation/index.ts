@@ -28,7 +28,8 @@ serve(async (req) => {
     return response;
   }
 
-  console.log('WebSocket connection established');
+  console.log('WebSocket connection established, API key found');
+  console.log('API key format check:', OPENAI_API_KEY.startsWith('sk-') ? 'Valid format' : 'Invalid format');
 
   socket.onopen = () => {
     console.log('Client WebSocket opened');
