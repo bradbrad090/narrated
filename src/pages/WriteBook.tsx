@@ -425,7 +425,11 @@ const WriteBook = () => {
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {chapter.content.length} characters
+                      {(() => {
+                        const words = chapter.content.trim() ? chapter.content.split(/\s+/).length : 0;
+                        const pages = Math.ceil(words / 300);
+                        return `${words} words • ${pages} page${pages !== 1 ? 's' : ''}`;
+                      })()}
                     </p>
                   </div>
                 ))}
@@ -509,21 +513,23 @@ const WriteBook = () => {
                           onClick={generateStoryIdea}
                           disabled={generating}
                           variant="outline"
-                          className="w-full"
+                          className="w-full h-10"
                         >
                           <Sparkles className="h-4 w-4 mr-2" />
                           Give me an idea
                         </Button>
                         
-                        <VoiceRecorder 
-                          onTranscription={handleContentTranscription}
-                          disabled={generating}
-                        />
+                        <div className="w-full">
+                          <VoiceRecorder 
+                            onTranscription={handleContentTranscription}
+                            disabled={generating}
+                          />
+                        </div>
                         
                         <Button 
                           onClick={() => setShowTextarea(!showTextarea)}
                           variant="outline"
-                          className="w-full"
+                          className="w-full h-10"
                         >
                           I'd prefer to type
                         </Button>
@@ -571,15 +577,12 @@ const WriteBook = () => {
                         className="min-h-[500px] text-base leading-relaxed"
                       />
                       <div className="mt-4 flex justify-between items-center">
-                        <div className="flex items-center space-x-4">
-                          <VoiceRecorder 
-                            onTranscription={handleContentTranscription}
-                            disabled={saving}
-                          />
-                          <div className="text-sm text-muted-foreground">
-                            <span>{currentChapter.content.length} characters</span>
-                            <span className="ml-4">{Math.ceil(currentChapter.content.split(' ').length)} words</span>
-                          </div>
+                        <div className="text-sm text-muted-foreground">
+                          {(() => {
+                            const words = currentChapter.content.trim() ? currentChapter.content.split(/\s+/).length : 0;
+                            const pages = Math.ceil(words / 300);
+                            return `${words} words • ${pages} page${pages !== 1 ? 's' : ''} • ${currentChapter.content.length} characters`;
+                          })()}
                         </div>
                       </div>
                     </CardContent>
@@ -597,6 +600,19 @@ const WriteBook = () => {
           </ResizablePanel>
         </ResizablePanelGroup>
       </main>
+      
+      {/* Fixed Save Button */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <Button 
+          onClick={saveCurrentChapter}
+          disabled={saving || !currentChapter}
+          size="lg"
+          className="shadow-lg"
+        >
+          <Save className="h-4 w-4 mr-2" />
+          {saving ? "Saving..." : "Save"}
+        </Button>
+      </div>
     </div>
   );
 };
