@@ -32,6 +32,8 @@ const WriteBook = () => {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showTextarea, setShowTextarea] = useState(false);
+  const [storyIdea, setStoryIdea] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -316,6 +318,24 @@ const WriteBook = () => {
     setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
   };
 
+  const generateStoryIdea = () => {
+    const storyPrompts = [
+      "Your first memories of school",
+      "A childhood summer that changed everything",
+      "The day you learned something important about yourself",
+      "Your most embarrassing moment and what you learned from it",
+      "A person who influenced your life in an unexpected way",
+      "The moment you felt most proud of yourself",
+      "A time when you had to be brave",
+      "Your favorite family tradition and why it matters",
+      "A mistake that led to something wonderful",
+      "The day you realized you were growing up"
+    ];
+    
+    const randomPrompt = storyPrompts[Math.floor(Math.random() * storyPrompts.length)];
+    setStoryIdea(randomPrompt);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
@@ -479,39 +499,79 @@ const WriteBook = () => {
                     disabled={saving || !currentChapter}
                   />
 
-                  {/* Traditional AI Prompt Section */}
+                  {/* Conversational Assistant Section */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center space-x-2">
                         <Sparkles className="h-5 w-5 text-primary" />
-                        <span>Traditional AI Assistant</span>
+                        <span>Conversational Assistant</span>
                       </CardTitle>
-                      <CardDescription>
-                        Or use the traditional prompt-based approach to generate content.
-                      </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <Textarea
-                        placeholder="Example: Write about my childhood growing up in a small town, focusing on summer adventures and family traditions..."
-                        value={prompt}
-                        onChange={(e) => setPrompt(e.target.value)}
-                        className="min-h-[100px]"
-                      />
-                      <div className="flex flex-col sm:flex-row gap-2">
+                      {showTextarea && (
+                        <Textarea
+                          placeholder="Example: Write about my childhood growing up in a small town, focusing on summer adventures and family traditions..."
+                          value={prompt}
+                          onChange={(e) => setPrompt(e.target.value)}
+                          className="min-h-[100px]"
+                        />
+                      )}
+                      
+                      {storyIdea && (
+                        <div className="p-4 bg-muted rounded-lg">
+                          <p className="text-sm text-muted-foreground font-medium">Story Idea:</p>
+                          <p className="mt-1">{storyIdea}</p>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-3 gap-2">
                         <Button 
-                          onClick={generateContent}
-                          disabled={!prompt.trim() || generating}
-                          className="flex-1"
+                          onClick={generateStoryIdea}
+                          disabled={generating}
                           variant="outline"
+                          className="w-full"
                         >
                           <Sparkles className="h-4 w-4 mr-2" />
-                          {generating ? "Generating..." : "Generate Content"}
+                          Give me an idea
                         </Button>
+                        
                         <VoiceRecorder 
                           onTranscription={handlePromptTranscription}
                           disabled={generating}
                         />
+                        
+                        <Button 
+                          onClick={() => setShowTextarea(!showTextarea)}
+                          variant="outline"
+                          className="w-full"
+                        >
+                          I'd prefer to type
+                        </Button>
                       </div>
+
+                      {(showTextarea && prompt.trim()) && (
+                        <div className="flex gap-2">
+                          <Button 
+                            onClick={generateContent}
+                            disabled={!prompt.trim() || generating}
+                            className="flex-1"
+                            variant="outline"
+                          >
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            {generating ? "Generating..." : "Generate Content"}
+                          </Button>
+                          <Button 
+                            onClick={() => {
+                              setPrompt("");
+                              setShowTextarea(false);
+                            }}
+                            variant="outline"
+                          >
+                            <Save className="h-4 w-4 mr-2" />
+                            Save
+                          </Button>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
 
