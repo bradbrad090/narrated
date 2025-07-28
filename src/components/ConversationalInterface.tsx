@@ -117,14 +117,26 @@ const ConversationalInterface: React.FC<ConversationalInterfaceProps> = ({
   };
 
   const startConversation = async () => {
-    if (disabled) return;
+    console.log('🚀 START CONVERSATION CLICKED');
+    
+    if (disabled) {
+      console.log('❌ Conversation disabled');
+      return;
+    }
     
     setIsConnecting(true);
+    console.log('🔄 Setting connecting state to true');
+    
     try {
+      console.log('🎯 Creating ConversationalChat instance...');
       chatRef.current = new ConversationalChat(handleMessage, handleFunctionCall);
+      
+      console.log('⚡ Calling init...');
       await chatRef.current.init();
+      console.log('✅ Init completed successfully');
+      
     } catch (error) {
-      console.error('Error starting conversation:', error);
+      console.error('💥 Error starting conversation:', error);
       setIsConnecting(false);
       toast({
         title: "Failed to Start",
