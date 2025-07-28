@@ -50,7 +50,17 @@ serve(async (req) => {
 
     openAISocket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      console.log('Received from OpenAI:', data.type);
+      console.log('Received from OpenAI:', data.type, data);
+
+      // Handle errors from OpenAI
+      if (data.type === 'error') {
+        console.error('OpenAI Error:', data);
+        socket.send(JSON.stringify({ 
+          type: 'error', 
+          message: `OpenAI API Error: ${data.error?.message || 'Unknown error'}` 
+        }));
+        return;
+      }
 
       // Send session update after receiving session.created
       if (data.type === 'session.created') {
