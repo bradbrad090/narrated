@@ -9,7 +9,7 @@ import { User } from "@supabase/supabase-js";
 import { Book, LogOut, Save, Sparkles, ArrowLeft, Plus, FileText, Trash2, Edit2 } from "lucide-react";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-import ConversationalInterface from "@/components/ConversationalInterface";
+
 
 interface Chapter {
   id: string;
@@ -478,26 +478,6 @@ const WriteBook = () => {
                     </CardHeader>
                   </Card>
 
-                  {/* Conversational AI Section */}
-                  <ConversationalInterface
-                    onContentUpdate={(content, action) => {
-                      if (!currentChapter) return;
-                      
-                      let newContent;
-                      if (action === 'append') {
-                        newContent = currentChapter.content 
-                          ? currentChapter.content + "\n\n" + content 
-                          : content;
-                      } else {
-                        newContent = content;
-                      }
-                      
-                      const updatedChapter = { ...currentChapter, content: newContent };
-                      setCurrentChapter(updatedChapter);
-                      setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
-                    }}
-                    disabled={saving || !currentChapter}
-                  />
 
                   {/* Conversational Assistant Section */}
                   <Card>

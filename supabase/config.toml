@@ -1,7 +1,4 @@
 project_id = "keadkwromhlyvoyxvcmi"
 
-[functions.realtime-conversation]
-verify_jwt = false
-
 [functions.openai-conversation]
 verify_jwt = false
