@@ -97,8 +97,8 @@ const WriteBook = () => {
         setChapters(chaptersData);
         setCurrentChapter(chaptersData[0]);
       } else {
-        // Create first chapter if none exist
-        await createNewChapter(userId, 1, "Chapter 1");
+        // Create 15 default chapters if none exist
+        await createDefaultChapters(userId);
       }
     } catch (error: any) {
       toast({
@@ -109,6 +109,58 @@ const WriteBook = () => {
       navigate("/dashboard");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const createDefaultChapters = async (userId: string) => {
+    const defaultChapters = [
+      { title: "Roots and Ancestry: Before My Birth", description: "Exploring family history, parents' lives, and the world events shaping my origins." },
+      { title: "Arrival: Birth and Infancy", description: "Recounting the moment of arrival, early family bonds, and initial discoveries in a new world." },
+      { title: "First Steps: Toddler Years", description: "Memories of play, first words, and the simple joys and mishaps of preschool years." },
+      { title: "New Beginnings: Starting School", description: "The excitement and nerves of the first day of school, new friends, and adapting to structure." },
+      { title: "Classroom Days: Elementary School", description: "Lessons learned in classrooms and on recess, early achievements, and childhood friendships." },
+      { title: "Changing Times: Junior High", description: "Navigating puberty, shifting social dynamics, and the challenges of middle school life." },
+      { title: "Teenage Years: High School", description: "Academic pressures, extracurriculars, first romances, and defining teenage rebellions." },
+      { title: "Milestone Achieved: High School Graduation", description: "The bittersweet farewell to youth, final high school moments, and stepping into independence." },
+      { title: "Higher Learning: College Years", description: "Intellectual growth, new freedoms, lifelong friendships, and exploring passions in higher education." },
+      { title: "Career Start: Entering the Workforce", description: "Landing the initial job, career beginnings, workplace lessons, and building professional identity." },
+      { title: "Building a Life: Marriage and Family", description: "Meeting a partner, wedding milestones, starting a home, and the joys of parenthood." },
+      { title: "Professional Growth: Mid-Career Years", description: "Professional peaks, promotions, work-life balance struggles, and overcoming mid-career hurdles." },
+      { title: "Transitions: Empty Nest Phase", description: "Watching kids leave home, reevaluating relationships, and personal reinventions in later adulthood." },
+      { title: "Later Chapters: Approaching Retirement", description: "Winding down work, new hobbies, health reflections, and embracing post-career freedom amid global changes." },
+      { title: "Today and Beyond: The Present Moment", description: "Current thoughts on life's journey, ongoing pursuits, wisdom gained, and hopes for what's next." }
+    ];
+
+    try {
+      const chaptersToInsert = defaultChapters.map((chapter, index) => ({
+        book_id: bookId!,
+        user_id: userId,
+        chapter_number: index + 1,
+        title: chapter.title,
+        content: chapter.description
+      }));
+
+      const { data, error } = await supabase
+        .from('chapters')
+        .insert(chaptersToInsert)
+        .select();
+
+      if (error) throw error;
+
+      const newChapters = data as Chapter[];
+      setChapters(newChapters);
+      setCurrentChapter(newChapters[0]);
+
+      toast({
+        title: "Template chapters created!",
+        description: "15 default chapters have been added to help you get started.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error creating chapters",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
