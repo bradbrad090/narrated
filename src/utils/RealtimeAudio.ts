@@ -218,7 +218,14 @@ export class ConversationalChat {
 
       this.ws.onmessage = async (event) => {
         const data = JSON.parse(event.data);
-        console.log('Received message:', data.type);
+        console.log('Received message:', data.type, data);
+        
+        // Add specific logging for audio and transcript messages
+        if (data.type === 'response.audio.delta') {
+          console.log('Processing audio delta, size:', data.delta?.length);
+        } else if (data.type?.includes('transcript')) {
+          console.log('Transcript message:', data);
+        }
 
         if (data.type === 'response.audio.delta') {
           // Convert base64 to Uint8Array and play

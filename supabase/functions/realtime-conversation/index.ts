@@ -50,7 +50,16 @@ serve(async (req) => {
 
     openAISocket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      console.log('Received from OpenAI:', data.type, data);
+      console.log('Received from OpenAI:', data.type);
+      
+      // Log specific message types for debugging
+      if (data.type === 'response.audio.delta') {
+        console.log('Audio delta received, length:', data.delta?.length || 0);
+      } else if (data.type === 'response.audio_transcript.delta') {
+        console.log('Audio transcript delta:', data.delta);
+      } else if (data.type === 'conversation.item.input_audio_transcription.completed') {
+        console.log('User transcript completed:', data.transcript);
+      }
 
       // Handle errors from OpenAI
       if (data.type === 'error') {
