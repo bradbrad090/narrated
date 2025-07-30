@@ -55,16 +55,17 @@ const HeroSection = () => {
       {/* Content */}
       <div className="relative z-10 container mx-auto px-6 text-center">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-primary-foreground mb-4 sm:mb-6 leading-tight">
-            Your Life Story,
+          <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold text-primary-foreground mb-4 sm:mb-6 leading-tight">
+            <span className="block sm:inline">Your Life Story,</span>
             <span className="block text-transparent bg-gradient-accent bg-clip-text">
               Beautifully Written
             </span>
           </h1>
           
-          <p className="text-lg sm:text-xl md:text-2xl text-primary-foreground/90 mb-6 sm:mb-8 leading-relaxed max-w-3xl mx-auto px-4 sm:px-0">
-            Share your memories through conversation with our intelligent assistant, and watch as your unique life story 
-            transforms into a beautifully crafted autobiography, professionally printed and delivered to your door.
+          <p className="text-base sm:text-xl md:text-2xl text-primary-foreground/90 mb-6 sm:mb-8 leading-relaxed max-w-3xl mx-auto px-4 sm:px-0">
+            <span className="hidden sm:inline">Share your memories through conversation with our intelligent assistant, and watch as your unique life story 
+            transforms into a beautifully crafted autobiography, professionally printed and delivered to your door.</span>
+            <span className="sm:hidden">Transform your memories into a beautiful autobiography with AI assistance.</span>
           </p>
           
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4 sm:px-0 max-w-md mx-auto">
@@ -85,7 +86,7 @@ const HeroSection = () => {
             </Button>
           </div>
           
-          <div className="mt-8 sm:mt-12 flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center items-center text-primary-foreground/80 text-sm sm:text-base">
+          <div className="mt-6 sm:mt-12 hidden sm:flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center items-center text-primary-foreground/80 text-sm sm:text-base">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-accent rounded-full"></div>
               <span>Intelligent Writing</span>

@@ -4,35 +4,36 @@ import deliveryImage from "@/assets/book-delivery.jpg";
 
 const HowItWorksSection = () => {
   return (
-    <section className="py-24 bg-background">
+    <section className="py-12 sm:py-24 bg-background">
       <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+        <div className="text-center mb-8 sm:mb-16">
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3 sm:mb-6">
             How It Works
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto hidden sm:block">
             From conversation to published autobiography in three simple steps
           </p>
         </div>
         
-        <div className="grid md:grid-cols-3 gap-12 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-12 max-w-6xl mx-auto">
           {/* Step 1 */}
           <div className="text-center group">
-            <div className="relative mb-8">
-              <div className="w-24 h-24 bg-gradient-accent rounded-full flex items-center justify-center mx-auto shadow-glow group-hover:shadow-elegant transition-elegant">
-                <MessageCircle className="w-12 h-12 text-accent-foreground" />
+            <div className="relative mb-4 sm:mb-8">
+              <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gradient-accent rounded-full flex items-center justify-center mx-auto shadow-glow group-hover:shadow-elegant transition-elegant">
+                <MessageCircle className="w-8 h-8 sm:w-12 sm:h-12 text-accent-foreground" />
               </div>
-              <div className="absolute -top-2 -right-2 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold">
+              <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 w-6 h-6 sm:w-8 sm:h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-sm sm:text-base">
                 1
               </div>
             </div>
-            <h3 className="text-2xl font-semibold text-foreground mb-4">
+            <h3 className="text-lg sm:text-2xl font-semibold text-foreground mb-2 sm:mb-4">
               Share Your Story
             </h3>
-            <p className="text-muted-foreground leading-relaxed mb-6">
-              Have natural conversations with our AI about your life experiences, memories, and the moments that matter most to you.
+            <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-4 sm:mb-6">
+              <span className="hidden sm:inline">Have natural conversations with our AI about your life experiences, memories, and the moments that matter most to you.</span>
+              <span className="sm:hidden">Talk with our AI about your memories and experiences.</span>
             </p>
-            <div className="rounded-lg overflow-hidden shadow-card">
+            <div className="rounded-lg overflow-hidden shadow-card hidden sm:block">
               <img 
                 src={conversationImage} 
                 alt="AI conversation visualization" 
@@ -43,21 +44,22 @@ const HowItWorksSection = () => {
           
           {/* Step 2 */}
           <div className="text-center group">
-            <div className="relative mb-8">
-              <div className="w-24 h-24 bg-gradient-accent rounded-full flex items-center justify-center mx-auto shadow-glow group-hover:shadow-elegant transition-elegant">
-                <PenTool className="w-12 h-12 text-accent-foreground" />
+            <div className="relative mb-4 sm:mb-8">
+              <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gradient-accent rounded-full flex items-center justify-center mx-auto shadow-glow group-hover:shadow-elegant transition-elegant">
+                <PenTool className="w-8 h-8 sm:w-12 sm:h-12 text-accent-foreground" />
               </div>
-              <div className="absolute -top-2 -right-2 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold">
+              <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 w-6 h-6 sm:w-8 sm:h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-sm sm:text-base">
                 2
               </div>
             </div>
-            <h3 className="text-2xl font-semibold text-foreground mb-4">
+            <h3 className="text-lg sm:text-2xl font-semibold text-foreground mb-2 sm:mb-4">
               AI Crafts Your Book
             </h3>
-            <p className="text-muted-foreground leading-relaxed mb-6">
-              Our advanced AI transforms your conversations into a beautifully written, coherent autobiography that captures your unique voice.
+            <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-4 sm:mb-6">
+              <span className="hidden sm:inline">Our advanced AI transforms your conversations into a beautifully written, coherent autobiography that captures your unique voice.</span>
+              <span className="sm:hidden">AI transforms your stories into a beautiful autobiography.</span>
             </p>
-            <div className="bg-card rounded-lg p-6 shadow-card border">
+            <div className="bg-card rounded-lg p-4 sm:p-6 shadow-card border hidden sm:block">
               <div className="space-y-3">
                 <div className="h-2 bg-muted rounded w-full"></div>
                 <div className="h-2 bg-muted rounded w-4/5"></div>
@@ -72,21 +74,22 @@ const HowItWorksSection = () => {
           
           {/* Step 3 */}
           <div className="text-center group">
-            <div className="relative mb-8">
-              <div className="w-24 h-24 bg-gradient-accent rounded-full flex items-center justify-center mx-auto shadow-glow group-hover:shadow-elegant transition-elegant">
-                <Truck className="w-12 h-12 text-accent-foreground" />
+            <div className="relative mb-4 sm:mb-8">
+              <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gradient-accent rounded-full flex items-center justify-center mx-auto shadow-glow group-hover:shadow-elegant transition-elegant">
+                <Truck className="w-8 h-8 sm:w-12 sm:h-12 text-accent-foreground" />
               </div>
-              <div className="absolute -top-2 -right-2 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold">
+              <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 w-6 h-6 sm:w-8 sm:h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-sm sm:text-base">
                 3
               </div>
             </div>
-            <h3 className="text-2xl font-semibold text-foreground mb-4">
+            <h3 className="text-lg sm:text-2xl font-semibold text-foreground mb-2 sm:mb-4">
               Receive Your Book
             </h3>
-            <p className="text-muted-foreground leading-relaxed mb-6">
-              Your autobiography is professionally printed on premium paper and delivered to your door as a beautiful hardcover book.
+            <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-4 sm:mb-6">
+              <span className="hidden sm:inline">Your autobiography is professionally printed on premium paper and delivered to your door as a beautiful hardcover book.</span>
+              <span className="sm:hidden">Get your professionally printed hardcover book delivered.</span>
             </p>
-            <div className="rounded-lg overflow-hidden shadow-card">
+            <div className="rounded-lg overflow-hidden shadow-card hidden sm:block">
               <img 
                 src={deliveryImage} 
                 alt="Premium book delivery" 
@@ -96,10 +99,10 @@ const HowItWorksSection = () => {
           </div>
         </div>
         
-        <div className="text-center mt-16">
-          <div className="inline-flex items-center gap-4 bg-card rounded-full px-8 py-4 shadow-card">
-            <span className="text-sm text-muted-foreground">Typical timeline:</span>
-            <span className="font-semibold text-foreground">2-3 weeks from start to delivery</span>
+        <div className="text-center mt-8 sm:mt-16">
+          <div className="inline-flex items-center gap-2 sm:gap-4 bg-card rounded-full px-4 sm:px-8 py-3 sm:py-4 shadow-card">
+            <span className="text-xs sm:text-sm text-muted-foreground">Timeline:</span>
+            <span className="text-sm sm:text-base font-semibold text-foreground">2-3 weeks</span>
           </div>
         </div>
       </div>
