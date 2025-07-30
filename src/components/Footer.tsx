@@ -1,24 +1,10 @@
 import { BookOpen, Mail, Phone, MapPin } from "lucide-react";
-
 const Footer = () => {
-  return (
-    <footer className="bg-primary text-primary-foreground py-8">
+  return <footer className="bg-primary text-primary-foreground py-8">
       <div className="container mx-auto px-6">
         <div className="grid md:grid-cols-4 gap-4">
           {/* Brand */}
-          <div className="col-span-1">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
-                <BookOpen className="w-5 h-5 text-accent-foreground" />
-              </div>
-              <span className="text-xl font-bold">
-                Narrated
-              </span>
-            </div>
-            <p className="text-primary-foreground/80 text-sm leading-relaxed">
-              Preserving life stories through the power of AI and the art of storytelling.
-            </p>
-          </div>
+          
           
           {/* Services */}
           <div>
@@ -81,8 +67,6 @@ const Footer = () => {
           </p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
