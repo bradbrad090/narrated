@@ -78,15 +78,12 @@ const CallToActionSection = () => {
           <Button 
             variant="accent" 
             size="lg" 
-            className="text-xl px-12 py-6 font-bold group"
+            className="text-base sm:text-xl px-6 sm:px-12 py-4 sm:py-6 font-bold group w-full sm:w-auto max-w-xs sm:max-w-none mx-auto"
           >
-            Start Your Autobiography Now
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            <span className="sm:hidden">Start Now</span>
+            <span className="hidden sm:inline">Start Your Autobiography Now</span>
+            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform ml-2" />
           </Button>
-          
-          <p className="mt-6 text-primary-foreground/60 text-sm">
-            No commitment required • Start with a free consultation
-          </p>
         </div>
       </div>
       
