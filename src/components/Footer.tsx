@@ -22,7 +22,7 @@ const Footer = () => {
           
           {/* Services */}
           <div>
-            <h4 className="font-semibold mb-4">Services</h4>
+            <h4 className="font-bold text-base mb-4 text-primary-foreground">Services</h4>
             <ul className="space-y-2 text-sm text-primary-foreground/80">
               <li>
                 <a href="#" className="hover:text-accent transition-colors">
@@ -39,7 +39,7 @@ const Footer = () => {
           
           {/* Support */}
           <div>
-            <h4 className="font-semibold mb-4">Support</h4>
+            <h4 className="font-bold text-base mb-4 text-primary-foreground">Support</h4>
             <ul className="space-y-2 text-sm text-primary-foreground/80">
               <li>
                 <a href="/faq" className="hover:text-accent transition-colors">
@@ -61,13 +61,8 @@ const Footer = () => {
           
           {/* Contact */}
           <div>
-            <h4 className="font-semibold mb-4">Contact</h4>
+            <h4 className="font-bold text-base mb-4 text-primary-foreground">Contact</h4>
             <ul className="space-y-3 text-sm text-primary-foreground/80">
-              <li>
-                <a href="/contact" className="hover:text-accent transition-colors">
-                  Contact Us
-                </a>
-              </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4" />
                 <span>hello@aiautobiography.com</span>
