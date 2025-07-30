@@ -18,11 +18,6 @@ const BenefitsSection = () => {
       description: "Get the expertise of professional ghostwriters at a fraction of the cost and time."
     },
     {
-      icon: Award,
-      title: "Your Unique Voice",
-      description: "Our intelligent system learns your speaking style to ensure the final book truly sounds like you."
-    },
-    {
       icon: Shield,
       title: "Complete Privacy",
       description: "Your stories are handled with the utmost confidentiality and security throughout the process."

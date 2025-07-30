@@ -2,9 +2,9 @@ import { BookOpen, Mail, Phone, MapPin } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="bg-primary text-primary-foreground py-16">
+    <footer className="bg-primary text-primary-foreground py-8">
       <div className="container mx-auto px-6">
-        <div className="grid md:grid-cols-4 gap-8">
+        <div className="grid md:grid-cols-4 gap-4">
           {/* Brand */}
           <div className="col-span-1">
             <div className="flex items-center gap-2 mb-4">
@@ -80,7 +80,7 @@ const Footer = () => {
           </div>
         </div>
         
-        <div className="border-t border-primary-foreground/20 mt-12 pt-8 text-center">
+        <div className="border-t border-primary-foreground/20 mt-6 pt-4 text-center">
           <p className="text-primary-foreground/60 text-sm">
             © 2024 Narrated. All rights reserved. Bringing your life story to life.
           </p>
