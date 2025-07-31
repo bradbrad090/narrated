@@ -597,19 +597,17 @@ Now, generate 1 random time-specific autobiography prompt question based on the 
               <h1 className="text-xl font-semibold">{book?.title || "My Autobiography"}</h1>
             </div>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center justify-end space-x-3">
             <Button 
               variant="outline" 
               onClick={saveCurrentChapter}
               disabled={saving || !currentChapter}
+              size="sm"
             >
               <Save className="h-4 w-4 mr-2" />
-              {saving ? "Saving..." : "Save Chapter"}
+              {saving ? "Saving..." : "Save"}
             </Button>
-            <span className="text-sm text-muted-foreground">
-              Welcome, {user?.email}
-            </span>
-            <Button variant="outline" onClick={handleSignOut}>
+            <Button variant="outline" onClick={handleSignOut} size="sm">
               <LogOut className="h-4 w-4 mr-2" />
               Sign Out
             </Button>
