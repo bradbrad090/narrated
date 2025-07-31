@@ -524,7 +524,7 @@ Now, generate 1 random time-specific autobiography prompt question based on the 
               <ArrowLeft className="h-4 w-4" />
               <span className={isMobile ? "sr-only" : ""}>Back to Dashboard</span>
             </Button>
-            <div className="flex items-center space-x-2">
+            <div className={`flex items-center space-x-2 ${isMobile ? "hidden" : ""}`}>
               <Book className="h-6 w-6 text-primary" />
               <h1 className="text-xl font-semibold">{book?.title || "My Autobiography"}</h1>
             </div>
