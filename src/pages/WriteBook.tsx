@@ -89,9 +89,20 @@ const WriteBook = () => {
         .select('*')
         .eq('id', bookId)
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (bookError) throw bookError;
+      
+      if (!bookData) {
+        toast({
+          title: "Book not found",
+          description: "The requested book could not be found.",
+          variant: "destructive",
+        });
+        navigate("/dashboard");
+        return;
+      }
+      
       setBook(bookData);
 
       // Fetch chapters
@@ -211,6 +222,18 @@ const WriteBook = () => {
     ];
 
     try {
+      // Double-check that chapters don't already exist to prevent duplicates
+      const { data: existingChapters } = await supabase
+        .from('chapters')
+        .select('id')
+        .eq('book_id', bookId!)
+        .eq('user_id', userId);
+
+      if (existingChapters && existingChapters.length > 0) {
+        console.log('Chapters already exist, skipping creation');
+        return;
+      }
+
       const chaptersToInsert = defaultChapters.map((chapter, index) => ({
         book_id: bookId!,
         user_id: userId,
@@ -224,7 +247,25 @@ const WriteBook = () => {
         .insert(chaptersToInsert)
         .select();
 
-      if (error) throw error;
+      if (error) {
+        // If it's a duplicate key error, try to fetch existing chapters instead
+        if (error.message.includes('duplicate key')) {
+          console.log('Duplicate chapters detected, fetching existing chapters');
+          const { data: existingData } = await supabase
+            .from('chapters')
+            .select('*')
+            .eq('book_id', bookId!)
+            .eq('user_id', userId)
+            .order('chapter_number', { ascending: true });
+          
+          if (existingData && existingData.length > 0) {
+            setChapters(existingData as Chapter[]);
+            setCurrentChapter(existingData[0] as Chapter);
+            return;
+          }
+        }
+        throw error;
+      }
 
       const newChapters = data as Chapter[];
       setChapters(newChapters);
@@ -235,6 +276,7 @@ const WriteBook = () => {
         description: "14 default chapters have been added to help you get started.",
       });
     } catch (error: any) {
+      console.error('Error in createDefaultChapters:', error);
       toast({
         title: "Error creating chapters",
         description: error.message,
