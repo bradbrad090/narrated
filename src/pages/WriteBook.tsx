@@ -118,21 +118,21 @@ const WriteBook = () => {
 
   const createDefaultChapters = async (userId: string) => {
     const defaultChapters = [
-      { title: "Chapter 1", description: "Exploring family history, parents' lives, and the world events shaping my origins." },
-      { title: "Chapter 2", description: "Recounting the moment of arrival, early family bonds, and initial discoveries in a new world." },
-      { title: "Chapter 3", description: "Memories of play, first words, and the simple joys and mishaps of preschool years." },
-      { title: "Chapter 4", description: "The excitement and nerves of the first day of school, new friends, and adapting to structure." },
-      { title: "Chapter 5", description: "Lessons learned in classrooms and on recess, early achievements, and childhood friendships." },
-      { title: "Chapter 6", description: "Navigating puberty, shifting social dynamics, and the challenges of middle school life." },
-      { title: "Chapter 7", description: "Academic pressures, extracurriculars, first romances, and defining teenage rebellions." },
-      { title: "Chapter 8", description: "The bittersweet farewell to youth, final high school moments, and stepping into independence." },
-      { title: "Chapter 9", description: "Intellectual growth, new freedoms, lifelong friendships, and exploring passions in higher education." },
-      { title: "Chapter 10", description: "Landing the initial job, career beginnings, workplace lessons, and building professional identity." },
-      { title: "Chapter 11", description: "Meeting a partner, wedding milestones, starting a home, and the joys of parenthood." },
-      { title: "Chapter 12", description: "Professional peaks, promotions, work-life balance struggles, and overcoming mid-career hurdles." },
-      { title: "Chapter 13", description: "Watching kids leave home, reevaluating relationships, and personal reinventions in later adulthood." },
-      { title: "Chapter 14", description: "Winding down work, new hobbies, health reflections, and embracing post-career freedom amid global changes." },
-      { title: "Chapter 15", description: "Current thoughts on life's journey, ongoing pursuits, wisdom gained, and hopes for what's next." }
+      { title: "Chapter 1: Roots and Ancestry", description: "Exploring family history, parents' lives, and the world events shaping my origins." },
+      { title: "Chapter 2: Arrival", description: "Recounting the moment of arrival, early family bonds, and initial discoveries in a new world." },
+      { title: "Chapter 3: First Steps", description: "Memories of play, first words, and the simple joys and mishaps of preschool years." },
+      { title: "Chapter 4: New Beginnings", description: "The excitement and nerves of the first day of school, new friends, and adapting to structure." },
+      { title: "Chapter 5: Classroom Days", description: "Lessons learned in classrooms and on recess, early achievements, and childhood friendships." },
+      { title: "Chapter 6: Changing Times", description: "Navigating puberty, shifting social dynamics, and the challenges of middle school life." },
+      { title: "Chapter 7: Teenage Years", description: "Academic pressures, extracurriculars, first romances, and defining teenage rebellions." },
+      { title: "Chapter 8: Milestone Achieved", description: "The bittersweet farewell to youth, final high school moments, and stepping into independence." },
+      { title: "Chapter 9: Higher Learning", description: "Intellectual growth, new freedoms, lifelong friendships, and exploring passions in higher education." },
+      { title: "Chapter 10: Career Start", description: "Landing the initial job, career beginnings, workplace lessons, and building professional identity." },
+      { title: "Chapter 11: Building a Life", description: "Meeting a partner, wedding milestones, starting a home, and the joys of parenthood." },
+      { title: "Chapter 12: Professional Growth", description: "Professional peaks, promotions, work-life balance struggles, and overcoming mid-career hurdles." },
+      { title: "Chapter 13: Transitions", description: "Watching kids leave home, reevaluating relationships, and personal reinventions in later adulthood." },
+      { title: "Chapter 14: Later Chapters", description: "Winding down work, new hobbies, health reflections, and embracing post-career freedom amid global changes." },
+      { title: "Chapter 15: Today and Beyond", description: "Current thoughts on life's journey, ongoing pursuits, wisdom gained, and hopes for what's next." }
     ];
 
     try {
@@ -445,8 +445,8 @@ Now, generate 1 random time-specific autobiography prompt question based on the 
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
-      {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      {/* Header - Fixed position on mobile for better accessibility */}
+      <header className={`border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ${isMobile ? 'sticky top-0 z-50' : ''}`}>
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-4">
             {isMobile && (
@@ -550,7 +550,7 @@ Now, generate 1 random time-specific autobiography prompt question based on the 
       </header>
 
       {/* Main Content */}
-      <main className="h-[calc(100vh-80px)]">
+      <main className={isMobile ? "min-h-screen" : "h-[calc(100vh-80px)]"}>
         {isMobile ? (
           <div className="h-full p-4 overflow-auto">
             {currentChapter ? (
