@@ -544,9 +544,9 @@ Now, generate 1 random time-specific autobiography prompt question based on the 
                           }}
                         >
                           <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                              <FileText className="h-4 w-4" />
-                              <span className="font-medium">{chapter.title}</span>
+                            <div className="flex items-center space-x-2 flex-1 min-w-0">
+                              <FileText className="h-4 w-4 flex-shrink-0" />
+                              <span className="font-medium text-sm truncate">{chapter.title}</span>
                             </div>
                             {chapters.length > 1 && (
                               <Button
