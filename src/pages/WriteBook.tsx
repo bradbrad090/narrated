@@ -98,8 +98,18 @@ const WriteBook = () => {
       if (chaptersError) throw chaptersError;
 
       if (chaptersData && chaptersData.length > 0) {
-        setChapters(chaptersData);
-        setCurrentChapter(chaptersData[0]);
+        // Check if chapters need title updates (for existing books)
+        const needsUpdate = chaptersData.some(chapter => 
+          chapter.title.match(/^Chapter \d+$/) || 
+          !chapter.title.includes(':')
+        );
+        
+        if (needsUpdate) {
+          await updateChapterTitles(userId, chaptersData);
+        } else {
+          setChapters(chaptersData);
+          setCurrentChapter(chaptersData[0]);
+        }
       } else {
         // Create 15 default chapters if none exist
         await createDefaultChapters(userId);
@@ -113,6 +123,65 @@ const WriteBook = () => {
       navigate("/dashboard");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updateChapterTitles = async (userId: string, existingChapters: Chapter[]) => {
+    const defaultTitles = [
+      "Chapter 1: Birth and Infancy",
+      "Chapter 2: Toddler Years", 
+      "Chapter 3: Starting School",
+      "Chapter 4: Elementary School",
+      "Chapter 5: Junior High",
+      "Chapter 6: High School",
+      "Chapter 7: High School Graduation",
+      "Chapter 8: College Years",
+      "Chapter 9: Entering the Workforce",
+      "Chapter 10: Marriage and Family",
+      "Chapter 11: Mid-Career Years",
+      "Chapter 12: Empty Nest Phase",
+      "Chapter 13: Approaching Retirement",
+      "Chapter 14: The Present Moment"
+    ];
+
+    try {
+      const updates = existingChapters.map((chapter, index) => {
+        const newTitle = defaultTitles[index] || `Chapter ${chapter.chapter_number}`;
+        return {
+          id: chapter.id,
+          title: newTitle
+        };
+      });
+
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('chapters')
+          .update({ title: update.title })
+          .eq('id', update.id)
+          .eq('user_id', userId);
+
+        if (error) throw error;
+      }
+
+      // Update local state with new titles
+      const updatedChapters = existingChapters.map((chapter, index) => ({
+        ...chapter,
+        title: defaultTitles[index] || `Chapter ${chapter.chapter_number}`
+      }));
+
+      setChapters(updatedChapters);
+      setCurrentChapter(updatedChapters[0]);
+
+      toast({
+        title: "Chapter titles updated!",
+        description: "Your chapters now have the new life phase titles.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error updating chapter titles",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
