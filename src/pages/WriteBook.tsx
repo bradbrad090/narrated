@@ -620,7 +620,7 @@ Now, generate 1 random time-specific autobiography prompt question based on the 
       {/* Main Content */}
       <main className={isMobile ? "min-h-screen" : "h-[calc(100vh-80px)]"}>
         {isMobile ? (
-          <div className="h-full p-4 overflow-auto">
+          <div className="h-full pt-20 p-4 overflow-auto">
             {currentChapter ? (
                 <div className="max-w-4xl mx-auto space-y-6">
                    {/* Conversational Assistant Section */}
