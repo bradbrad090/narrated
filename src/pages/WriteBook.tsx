@@ -67,12 +67,19 @@ const WriteBook = () => {
     return () => subscription.unsubscribe();
   }, [navigate, bookId]);
 
-  // Auto-generate story idea when page loads
+  // Auto-generate story idea when page loads or chapter changes
   useEffect(() => {
-    if (!storyIdea && !loading) {
+    if (currentChapter && (!storyIdea || !loading)) {
       generateStoryIdea();
     }
-  }, [loading, storyIdea]);
+  }, [currentChapter, loading]);
+
+  // Clear story idea when chapter changes to trigger new generation
+  useEffect(() => {
+    if (currentChapter) {
+      setStoryIdea("");
+    }
+  }, [currentChapter?.id]);
 
   const fetchBookAndChapters = async (userId: string) => {
     try {
@@ -450,33 +457,30 @@ const WriteBook = () => {
   };
 
   const generateStoryIdea = async () => {
+    if (!currentChapter) return;
+    
     try {
+      const chapterContext = `The user is currently writing "${currentChapter.title}". `;
       const { data, error } = await supabase.functions.invoke('openai-conversation', {
         body: { 
-          prompt: `You are a creative prompt generator specializing in autobiography and memoir writing. Your task is to generate random questions that prompt users to reflect on specific times, periods, or milestones in their life story. These questions must be time-specific—tied to particular life stages (e.g., childhood, teenage years, early adulthood), first experiences, specific ages, events, or timelines—rather than generic open-ended queries like "Tell me about a happy memory." Avoid broad questions; make them focused on a defined moment or era to encourage vivid, personal narratives.
+          prompt: `${chapterContext}You are a creative prompt generator specializing in autobiography and memoir writing. Your task is to generate random questions that prompt users to reflect on specific times, periods, or milestones in their life story that are RELEVANT to the chapter they're currently writing.
 
-To ensure variety and quality:
+Based on the chapter title "${currentChapter.title}", generate a time-specific autobiography prompt that would be appropriate for this life phase or period. The question should be:
 
-Draw inspiration from real memoir prompts, but randomize and vary them each time.
-Cover diverse themes like family, relationships, challenges, achievements, daily life, or personal growth.
-Make questions engaging and introspective, often starting with "Describe," "Reflect on," "What was," "When did," or "Tell about."
-Generate 1-5 new questions per response, ensuring each is unique and not repeated from examples.
-Keep questions concise, 1-2 sentences max.
+1. Time-specific—tied to the particular life stage mentioned in the chapter title
+2. Focused on a defined moment or era to encourage vivid, personal narratives  
+3. Engaging and introspective, often starting with "Describe," "Reflect on," "What was," "When did," or "Tell about"
+4. Concise, 1-2 sentences max
+5. Relevant to the themes and life period of the current chapter
 
-Examples of good time-specific autobiography prompts (use these as style guides, but create originals):
+Examples based on different chapter types:
+- For "Before My Birth": Ask about family history, parents' early relationship, or world events during parents' youth
+- For "Birth and Infancy": Ask about early family dynamics, first home, or family traditions around that time
+- For "Elementary School": Ask about specific school memories, childhood friendships, or family routines during those years
+- For "High School": Ask about teenage experiences, first jobs, or pivotal moments during adolescence
+- For "Marriage and Family": Ask about meeting spouse, wedding details, or early parenting experiences
 
-What is your earliest childhood memory, and how does it reflect the environment you grew up in? (Inspired by early memory prompts)
-Describe your first day of high school and how it shaped your teenage friendships.
-When did you get your first job, and what unexpected lesson did you learn from it during that time?
-Reflect on a specific moment in your early twenties when you faced a major decision about your career.
-What was your family's daily routine like during your elementary school years, and how has it influenced your habits today?
-Tell about the first time you traveled alone as a young adult and what independence it taught you.
-During your teenage years, what was a pivotal argument with a parent, and how did it change your relationship?
-Describe a holiday tradition from your childhood that you still remember vividly from age 10 or so.
-When did you first fall in love in your late teens, and what emotions dominated that period?
-Reflect on moving to a new home or city in your mid-thirties and the challenges it brought to your family life.
-
-Now, generate 1 random time-specific autobiography prompt question based on the guidelines above.` 
+Generate 1 contextually appropriate autobiography prompt question for "${currentChapter.title}".` 
         }
       });
 
