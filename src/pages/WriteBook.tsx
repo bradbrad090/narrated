@@ -6,9 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Book, LogOut, Save, Sparkles, ArrowLeft, Plus, FileText, Trash2, Edit2, Type } from "lucide-react";
+import { Book, LogOut, Save, Sparkles, ArrowLeft, Plus, FileText, Trash2, Edit2, Type, Menu } from "lucide-react";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 
 interface Chapter {
@@ -34,8 +36,10 @@ const WriteBook = () => {
   const [saving, setSaving] = useState(false);
   const [showTextarea, setShowTextarea] = useState(false);
   const [storyIdea, setStoryIdea] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     // Check if user is logged in
@@ -445,13 +449,80 @@ Now, generate 1 random time-specific autobiography prompt question based on the 
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-4">
+            {isMobile && (
+              <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="h-4 w-4" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-80 p-0">
+                  <div className="h-full bg-background p-4">
+                    <div className="space-y-2">
+                      <h2 className="text-lg font-semibold mb-4">Chapters</h2>
+                      
+                      {chapters.map((chapter) => (
+                        <div
+                          key={chapter.id}
+                          className={`p-3 rounded-lg border cursor-pointer transition-colors group ${
+                            currentChapter?.id === chapter.id 
+                              ? 'bg-primary/10 border-primary' 
+                              : 'hover:bg-muted'
+                          }`}
+                          onClick={() => {
+                            setCurrentChapter(chapter);
+                            setSidebarOpen(false);
+                          }}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <FileText className="h-4 w-4" />
+                              <span className="font-medium">{chapter.title}</span>
+                            </div>
+                            {chapters.length > 1 && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteChapter(chapter.id);
+                                }}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {(() => {
+                              const words = chapter.content.trim() ? chapter.content.split(/\s+/).length : 0;
+                              const pages = Math.ceil(words / 300);
+                              return `${words} words • ${pages} page${pages !== 1 ? 's' : ''}`;
+                            })()}
+                          </p>
+                        </div>
+                      ))}
+                      
+                      <Button
+                        variant="outline"
+                        className="w-full mt-4"
+                        onClick={handleAddChapter}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Chapter
+                      </Button>
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            )}
             <Button 
               variant="ghost" 
               onClick={() => navigate("/dashboard")}
               className="flex items-center space-x-2"
             >
               <ArrowLeft className="h-4 w-4" />
-              <span>Back to Dashboard</span>
+              <span className={isMobile ? "sr-only" : ""}>Back to Dashboard</span>
             </Button>
             <div className="flex items-center space-x-2">
               <Book className="h-6 w-6 text-primary" />
@@ -480,70 +551,9 @@ Now, generate 1 random time-specific autobiography prompt question based on the 
 
       {/* Main Content */}
       <main className="h-[calc(100vh-80px)]">
-        <ResizablePanelGroup direction="horizontal" className="w-full">
-          {/* Left Sidebar - Chapter List */}
-          <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
-            <div className="h-full bg-background border-r p-4">
-              <div className="space-y-2">
-                <h2 className="text-lg font-semibold mb-4">Chapters</h2>
-                
-                {chapters.map((chapter) => (
-                  <div
-                    key={chapter.id}
-                    className={`p-3 rounded-lg border cursor-pointer transition-colors group ${
-                      currentChapter?.id === chapter.id 
-                        ? 'bg-primary/10 border-primary' 
-                        : 'hover:bg-muted'
-                    }`}
-                    onClick={() => setCurrentChapter(chapter)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <FileText className="h-4 w-4" />
-                        <span className="font-medium">{chapter.title}</span>
-                      </div>
-                      {chapters.length > 1 && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteChapter(chapter.id);
-                          }}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {(() => {
-                        const words = chapter.content.trim() ? chapter.content.split(/\s+/).length : 0;
-                        const pages = Math.ceil(words / 300);
-                        return `${words} words • ${pages} page${pages !== 1 ? 's' : ''}`;
-                      })()}
-                    </p>
-                  </div>
-                ))}
-                
-                <Button
-                  variant="outline"
-                  className="w-full mt-4"
-                  onClick={handleAddChapter}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Chapter
-                </Button>
-              </div>
-            </div>
-          </ResizablePanel>
-
-          <ResizableHandle withHandle />
-
-          {/* Right Side - Content Editor */}
-          <ResizablePanel defaultSize={75}>
-            <div className="h-full p-6 overflow-auto">
-              {currentChapter ? (
+        {isMobile ? (
+          <div className="h-full p-4 overflow-auto">
+            {currentChapter ? (
                 <div className="max-w-4xl mx-auto space-y-6">
                   {/* Chapter Title Editor */}
                   <Card>
@@ -600,7 +610,7 @@ Now, generate 1 random time-specific autobiography prompt question based on the 
                         </div>
                       )}
 
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className={`grid gap-2 ${isMobile ? 'grid-cols-1' : 'grid-cols-3'}`}>
                         <Button 
                           onClick={generateStoryIdea}
                           disabled={generating}
@@ -683,17 +693,231 @@ Now, generate 1 random time-specific autobiography prompt question based on the 
                     </CardContent>
                   </Card>
                 </div>
-              ) : (
-                <div className="flex items-center justify-center h-full">
-                  <div className="text-center">
-                    <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">Select a chapter to start writing</p>
-                  </div>
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">Select a chapter to start writing</p>
                 </div>
-              )}
-            </div>
-          </ResizablePanel>
-        </ResizablePanelGroup>
+              </div>
+            )}
+          </div>
+        ) : (
+          <ResizablePanelGroup direction="horizontal" className="w-full">
+            {/* Left Sidebar - Chapter List */}
+            <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
+              <div className="h-full bg-background border-r p-4">
+                <div className="space-y-2">
+                  <h2 className="text-lg font-semibold mb-4">Chapters</h2>
+                  
+                  {chapters.map((chapter) => (
+                    <div
+                      key={chapter.id}
+                      className={`p-3 rounded-lg border cursor-pointer transition-colors group ${
+                        currentChapter?.id === chapter.id 
+                          ? 'bg-primary/10 border-primary' 
+                          : 'hover:bg-muted'
+                      }`}
+                      onClick={() => setCurrentChapter(chapter)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <FileText className="h-4 w-4" />
+                          <span className="font-medium">{chapter.title}</span>
+                        </div>
+                        {chapters.length > 1 && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteChapter(chapter.id);
+                            }}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {(() => {
+                          const words = chapter.content.trim() ? chapter.content.split(/\s+/).length : 0;
+                          const pages = Math.ceil(words / 300);
+                          return `${words} words • ${pages} page${pages !== 1 ? 's' : ''}`;
+                        })()}
+                      </p>
+                    </div>
+                  ))}
+                  
+                  <Button
+                    variant="outline"
+                    className="w-full mt-4"
+                    onClick={handleAddChapter}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Chapter
+                  </Button>
+                </div>
+              </div>
+            </ResizablePanel>
+
+            <ResizableHandle withHandle />
+
+            {/* Right Side - Content Editor */}
+            <ResizablePanel defaultSize={75}>
+              <div className="h-full p-6 overflow-auto">
+                {currentChapter ? (
+                  <div className="max-w-4xl mx-auto space-y-6">
+                    {/* Chapter Title Editor */}
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <input
+                            type="text"
+                            value={currentChapter.title}
+                            onChange={(e) => handleChapterTitleChange(e.target.value)}
+                            className="text-2xl font-bold bg-transparent border-none outline-none flex-1"
+                            placeholder="Chapter Title"
+                          />
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="bg-yellow-400/20 hover:bg-yellow-400/30 ml-2"
+                            onClick={() => {
+                              const inputElement = document.querySelector('.text-2xl.font-bold') as HTMLInputElement;
+                              if (inputElement) {
+                                inputElement.focus();
+                                inputElement.select();
+                              }
+                            }}
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardHeader>
+                    </Card>
+
+
+                    {/* Conversational Assistant Section */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center space-x-2">
+                          <Sparkles className="h-5 w-5 text-primary" />
+                          <span>Conversational Assistant</span>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {showTextarea && (
+                          <Textarea
+                            placeholder="Example: Write about my childhood growing up in a small town, focusing on summer adventures and family traditions..."
+                            value={prompt}
+                            onChange={(e) => setPrompt(e.target.value)}
+                            className="min-h-[100px]"
+                          />
+                        )}
+                        
+                        {storyIdea && (
+                          <div className="p-4 bg-muted rounded-lg">
+                            <p className="text-sm text-muted-foreground font-medium">Story Idea:</p>
+                            <p className="mt-1">{storyIdea}</p>
+                          </div>
+                        )}
+
+                        <div className="grid grid-cols-3 gap-2">
+                          <Button 
+                            onClick={generateStoryIdea}
+                            disabled={generating}
+                            variant="outline"
+                            className="w-full h-10"
+                          >
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            Give me an idea
+                          </Button>
+                          
+                          <div className="w-full h-10">
+                            <VoiceRecorder 
+                              onTranscription={handleContentTranscription}
+                              disabled={generating}
+                            />
+                          </div>
+                          
+                          <Button 
+                            onClick={() => setShowTextarea(!showTextarea)}
+                            variant="outline"
+                            className="w-full h-10"
+                          >
+                            <Type className="h-4 w-4 mr-2" />
+                            I'd prefer to type
+                          </Button>
+                        </div>
+
+                        {(showTextarea && prompt.trim()) && (
+                          <div className="flex gap-2">
+                            <Button 
+                              onClick={generateContent}
+                              disabled={!prompt.trim() || generating}
+                              className="flex-1"
+                              variant="outline"
+                            >
+                              <Sparkles className="h-4 w-4 mr-2" />
+                              {generating ? "Generating..." : "Generate Content"}
+                            </Button>
+                            <Button 
+                              onClick={() => {
+                                setPrompt("");
+                                setShowTextarea(false);
+                              }}
+                              variant="outline"
+                            >
+                              <Save className="h-4 w-4 mr-2" />
+                              Save
+                            </Button>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    {/* Chapter Content Editor */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>{currentChapter.title}</CardTitle>
+                        <CardDescription>
+                          Edit and refine your chapter content. You can manually edit the AI-generated text or write your own.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <Textarea
+                          placeholder="Your chapter content will appear here. You can edit it directly or use the AI assistant above to generate new content..."
+                          value={currentChapter.content}
+                          onChange={(e) => handleChapterContentChange(e.target.value)}
+                          className="min-h-[500px] text-base leading-relaxed"
+                        />
+                        <div className="mt-4 flex justify-center">
+                          <Button 
+                            onClick={saveCurrentChapter}
+                            disabled={saving || !currentChapter}
+                            size="lg"
+                            className="shadow-lg"
+                          >
+                            <Save className="h-4 w-4 mr-2" />
+                            {saving ? "Saving..." : "Save"}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center">
+                      <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">Select a chapter to start writing</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        )}
       </main>
     </div>
   );
