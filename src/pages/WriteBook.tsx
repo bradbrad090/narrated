@@ -528,8 +528,10 @@ Generate 1 contextually appropriate autobiography prompt question for "${current
 
       if (error) throw error;
       
-      if (data?.generatedText) {
-        setStoryIdea(data.generatedText);
+      if (data?.choices?.[0]?.message?.content) {
+        setStoryIdea(data.choices[0].message.content);
+      } else {
+        throw new Error("No content received from AI");
       }
     } catch (error) {
       console.error('Error generating story idea:', error);
