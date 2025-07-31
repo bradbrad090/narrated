@@ -111,7 +111,7 @@ const WriteBook = () => {
           setCurrentChapter(chaptersData[0]);
         }
       } else {
-        // Create 15 default chapters if none exist
+        // Create 14 default chapters if none exist
         await createDefaultChapters(userId);
       }
     } catch (error: any) {
@@ -128,20 +128,20 @@ const WriteBook = () => {
 
   const updateChapterTitles = async (userId: string, existingChapters: Chapter[]) => {
     const defaultTitles = [
-      "Chapter 1: Birth and Infancy",
-      "Chapter 2: Toddler Years", 
-      "Chapter 3: Starting School",
-      "Chapter 4: Elementary School",
-      "Chapter 5: Junior High",
-      "Chapter 6: High School",
-      "Chapter 7: High School Graduation",
-      "Chapter 8: College Years",
-      "Chapter 9: Entering the Workforce",
-      "Chapter 10: Marriage and Family",
-      "Chapter 11: Mid-Career Years",
-      "Chapter 12: Empty Nest Phase",
-      "Chapter 13: Approaching Retirement",
-      "Chapter 14: The Present Moment"
+      "Chapter 1: Before My Birth",
+      "Chapter 2: Birth and Infancy",
+      "Chapter 3: Toddler Years", 
+      "Chapter 4: Starting School",
+      "Chapter 5: Elementary School",
+      "Chapter 6: Junior High",
+      "Chapter 7: High School",
+      "Chapter 8: High School Graduation",
+      "Chapter 9: College Years",
+      "Chapter 10: Entering the Workforce",
+      "Chapter 11: Marriage and Family",
+      "Chapter 12: Mid-Career Years",
+      "Chapter 13: Empty Nest Phase",
+      "Chapter 14: Approaching Retirement"
     ];
 
     try {
@@ -187,21 +187,20 @@ const WriteBook = () => {
 
   const createDefaultChapters = async (userId: string) => {
     const defaultChapters = [
-      { title: "Chapter 1: Birth and Infancy", description: "Exploring family history, parents' lives, and the world events shaping my origins." },
-      { title: "Chapter 2: Toddler Years", description: "Recounting the moment of arrival, early family bonds, and initial discoveries in a new world." },
-      { title: "Chapter 3: Starting School", description: "Memories of play, first words, and the simple joys and mishaps of preschool years." },
-      { title: "Chapter 4: Elementary School", description: "The excitement and nerves of the first day of school, new friends, and adapting to structure." },
-      { title: "Chapter 5: Junior High", description: "Lessons learned in classrooms and on recess, early achievements, and childhood friendships." },
-      { title: "Chapter 6: High School", description: "Navigating puberty, shifting social dynamics, and the challenges of middle school life." },
-      { title: "Chapter 7: High School Graduation", description: "Academic pressures, extracurriculars, first romances, and defining teenage rebellions." },
-      { title: "Chapter 8: College Years", description: "The bittersweet farewell to youth, final high school moments, and stepping into independence." },
-      { title: "Chapter 9: Entering the Workforce", description: "Intellectual growth, new freedoms, lifelong friendships, and exploring passions in higher education." },
-      { title: "Chapter 10: Marriage and Family", description: "Landing the initial job, career beginnings, workplace lessons, and building professional identity." },
-      { title: "Chapter 11: Mid-Career Years", description: "Meeting a partner, wedding milestones, starting a home, and the joys of parenthood." },
-      { title: "Chapter 12: Empty Nest Phase", description: "Professional peaks, promotions, work-life balance struggles, and overcoming mid-career hurdles." },
-      { title: "Chapter 13: Approaching Retirement", description: "Watching kids leave home, reevaluating relationships, and personal reinventions in later adulthood." },
-      { title: "Chapter 14: The Present Moment", description: "Winding down work, new hobbies, health reflections, and embracing post-career freedom amid global changes." },
-      { title: "Chapter 15: Looking Forward", description: "Current thoughts on life's journey, ongoing pursuits, wisdom gained, and hopes for what's next." }
+      { title: "Chapter 1: Before My Birth", description: "Exploring family history, parents' lives, and the world events shaping my origins." },
+      { title: "Chapter 2: Birth and Infancy", description: "Recounting the moment of arrival, early family bonds, and initial discoveries in a new world." },
+      { title: "Chapter 3: Toddler Years", description: "Memories of play, first words, and the simple joys and mishaps of preschool years." },
+      { title: "Chapter 4: Starting School", description: "The excitement and nerves of the first day of school, new friends, and adapting to structure." },
+      { title: "Chapter 5: Elementary School", description: "Lessons learned in classrooms and on recess, early achievements, and childhood friendships." },
+      { title: "Chapter 6: Junior High", description: "Navigating puberty, shifting social dynamics, and the challenges of middle school life." },
+      { title: "Chapter 7: High School", description: "Academic pressures, extracurriculars, first romances, and defining teenage rebellions." },
+      { title: "Chapter 8: High School Graduation", description: "The bittersweet farewell to youth, final high school moments, and stepping into independence." },
+      { title: "Chapter 9: College Years", description: "Intellectual growth, new freedoms, lifelong friendships, and exploring passions in higher education." },
+      { title: "Chapter 10: Entering the Workforce", description: "Landing the initial job, career beginnings, workplace lessons, and building professional identity." },
+      { title: "Chapter 11: Marriage and Family", description: "Meeting a partner, wedding milestones, starting a home, and the joys of parenthood." },
+      { title: "Chapter 12: Mid-Career Years", description: "Professional peaks, promotions, work-life balance struggles, and overcoming mid-career hurdles." },
+      { title: "Chapter 13: Empty Nest Phase", description: "Watching kids leave home, reevaluating relationships, and personal reinventions in later adulthood." },
+      { title: "Chapter 14: Approaching Retirement", description: "Winding down work, new hobbies, health reflections, and embracing post-career freedom amid global changes." }
     ];
 
     try {
@@ -226,7 +225,7 @@ const WriteBook = () => {
 
       toast({
         title: "Template chapters created!",
-        description: "15 default chapters have been added to help you get started.",
+        description: "14 default chapters have been added to help you get started.",
       });
     } catch (error: any) {
       toast({
@@ -624,37 +623,7 @@ Now, generate 1 random time-specific autobiography prompt question based on the 
           <div className="h-full p-4 overflow-auto">
             {currentChapter ? (
                 <div className="max-w-4xl mx-auto space-y-6">
-                  {/* Chapter Title Editor */}
-                  <Card>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <input
-                          type="text"
-                          value={currentChapter.title}
-                          onChange={(e) => handleChapterTitleChange(e.target.value)}
-                          className="text-2xl font-bold bg-transparent border-none outline-none flex-1"
-                          placeholder="Chapter Title"
-                        />
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="bg-yellow-400/20 hover:bg-yellow-400/30 ml-2"
-                          onClick={() => {
-                            const inputElement = document.querySelector('.text-2xl.font-bold') as HTMLInputElement;
-                            if (inputElement) {
-                              inputElement.focus();
-                              inputElement.select();
-                            }
-                          }}
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </CardHeader>
-                  </Card>
-
-
-                  {/* Conversational Assistant Section */}
+                   {/* Conversational Assistant Section */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center space-x-2">
