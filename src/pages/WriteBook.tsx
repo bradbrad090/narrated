@@ -131,7 +131,8 @@ const WriteBook = () => {
       { title: "Chapter 11: Mid-Career Years", description: "Meeting a partner, wedding milestones, starting a home, and the joys of parenthood." },
       { title: "Chapter 12: Empty Nest Phase", description: "Professional peaks, promotions, work-life balance struggles, and overcoming mid-career hurdles." },
       { title: "Chapter 13: Approaching Retirement", description: "Watching kids leave home, reevaluating relationships, and personal reinventions in later adulthood." },
-      { title: "Chapter 14: The Present Moment", description: "Winding down work, new hobbies, health reflections, and embracing post-career freedom amid global changes." }
+      { title: "Chapter 14: The Present Moment", description: "Winding down work, new hobbies, health reflections, and embracing post-career freedom amid global changes." },
+      { title: "Chapter 15: Looking Forward", description: "Current thoughts on life's journey, ongoing pursuits, wisdom gained, and hopes for what's next." }
     ];
 
     try {
