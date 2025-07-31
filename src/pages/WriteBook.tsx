@@ -118,21 +118,21 @@ const WriteBook = () => {
 
   const createDefaultChapters = async (userId: string) => {
     const defaultChapters = [
-      { title: "Roots and Ancestry: Before My Birth", description: "Exploring family history, parents' lives, and the world events shaping my origins." },
-      { title: "Arrival: Birth and Infancy", description: "Recounting the moment of arrival, early family bonds, and initial discoveries in a new world." },
-      { title: "First Steps: Toddler Years", description: "Memories of play, first words, and the simple joys and mishaps of preschool years." },
-      { title: "New Beginnings: Starting School", description: "The excitement and nerves of the first day of school, new friends, and adapting to structure." },
-      { title: "Classroom Days: Elementary School", description: "Lessons learned in classrooms and on recess, early achievements, and childhood friendships." },
-      { title: "Changing Times: Junior High", description: "Navigating puberty, shifting social dynamics, and the challenges of middle school life." },
-      { title: "Teenage Years: High School", description: "Academic pressures, extracurriculars, first romances, and defining teenage rebellions." },
-      { title: "Milestone Achieved: High School Graduation", description: "The bittersweet farewell to youth, final high school moments, and stepping into independence." },
-      { title: "Higher Learning: College Years", description: "Intellectual growth, new freedoms, lifelong friendships, and exploring passions in higher education." },
-      { title: "Career Start: Entering the Workforce", description: "Landing the initial job, career beginnings, workplace lessons, and building professional identity." },
-      { title: "Building a Life: Marriage and Family", description: "Meeting a partner, wedding milestones, starting a home, and the joys of parenthood." },
-      { title: "Professional Growth: Mid-Career Years", description: "Professional peaks, promotions, work-life balance struggles, and overcoming mid-career hurdles." },
-      { title: "Transitions: Empty Nest Phase", description: "Watching kids leave home, reevaluating relationships, and personal reinventions in later adulthood." },
-      { title: "Later Chapters: Approaching Retirement", description: "Winding down work, new hobbies, health reflections, and embracing post-career freedom amid global changes." },
-      { title: "Today and Beyond: The Present Moment", description: "Current thoughts on life's journey, ongoing pursuits, wisdom gained, and hopes for what's next." }
+      { title: "Chapter 1", description: "Exploring family history, parents' lives, and the world events shaping my origins." },
+      { title: "Chapter 2", description: "Recounting the moment of arrival, early family bonds, and initial discoveries in a new world." },
+      { title: "Chapter 3", description: "Memories of play, first words, and the simple joys and mishaps of preschool years." },
+      { title: "Chapter 4", description: "The excitement and nerves of the first day of school, new friends, and adapting to structure." },
+      { title: "Chapter 5", description: "Lessons learned in classrooms and on recess, early achievements, and childhood friendships." },
+      { title: "Chapter 6", description: "Navigating puberty, shifting social dynamics, and the challenges of middle school life." },
+      { title: "Chapter 7", description: "Academic pressures, extracurriculars, first romances, and defining teenage rebellions." },
+      { title: "Chapter 8", description: "The bittersweet farewell to youth, final high school moments, and stepping into independence." },
+      { title: "Chapter 9", description: "Intellectual growth, new freedoms, lifelong friendships, and exploring passions in higher education." },
+      { title: "Chapter 10", description: "Landing the initial job, career beginnings, workplace lessons, and building professional identity." },
+      { title: "Chapter 11", description: "Meeting a partner, wedding milestones, starting a home, and the joys of parenthood." },
+      { title: "Chapter 12", description: "Professional peaks, promotions, work-life balance struggles, and overcoming mid-career hurdles." },
+      { title: "Chapter 13", description: "Watching kids leave home, reevaluating relationships, and personal reinventions in later adulthood." },
+      { title: "Chapter 14", description: "Winding down work, new hobbies, health reflections, and embracing post-career freedom amid global changes." },
+      { title: "Chapter 15", description: "Current thoughts on life's journey, ongoing pursuits, wisdom gained, and hopes for what's next." }
     ];
 
     try {
