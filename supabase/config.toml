@@ -2,3 +2,6 @@ project_id = "keadkwromhlyvoyxvcmi"
 
 [functions.openai-conversation]
 verify_jwt = false
+
+[functions.voice-to-autobiography]
+verify_jwt = false
