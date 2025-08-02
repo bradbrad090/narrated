@@ -62,7 +62,7 @@ const HeroSection = () => {
             </span>
           </h1>
           
-          <p className="text-base sm:text-xl md:text-2xl text-primary-foreground/90 mb-6 sm:mb-8 leading-relaxed max-w-3xl mx-auto px-4 sm:px-0">
+          <p className="text-base sm:text-xl md:text-2xl text-primary-foreground/90 mb-6 sm:mb-8 mt-4 leading-relaxed max-w-3xl mx-auto px-4 sm:px-0">
             <span className="hidden sm:inline">Share your memories through conversation with our intelligent assistant, and watch as your unique life story 
             transforms into a beautifully crafted autobiography, professionally printed and delivered to your door.</span>
             <span className="sm:hidden">Transform your memories into a beautiful autobiography with AI assistance.</span>
