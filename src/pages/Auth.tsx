@@ -146,8 +146,10 @@ const Auth = () => {
   return (
     <>
       <Helmet>
-        <title>Sign In - Access Your Account | Narrated</title>
-        <meta name="description" content="Sign in to your Narrated account to continue writing your autobiography or create a new account to start preserving your life story today." />
+        <title>Sign In to Your Autobiography Project | Narrated</title>
+        <meta name="description" content="Access your Narrated account to continue your autobiography project. Create your account in seconds and start preserving your life story with AI assistance." />
+        <meta name="robots" content="noindex, nofollow" />
+        <link rel="canonical" href="https://narrated.com/auth" />
       </Helmet>
       <div className="min-h-screen bg-gradient-subtle">
       <Header />

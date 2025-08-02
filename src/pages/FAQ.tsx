@@ -52,8 +52,10 @@ const FAQ = () => {
   return (
     <>
       <Helmet>
-        <title>FAQ - Frequently Asked Questions | Narrated</title>
-        <meta name="description" content="Get answers to common questions about our AI autobiography writing service. Learn about our process, pricing, timeline, and how we preserve your life stories." />
+        <title>Autobiography Writing FAQ - Common Questions | Narrated</title>
+        <meta name="description" content="Answers to frequently asked questions about AI-assisted autobiography writing. Learn about our process, pricing, timelines, and what makes Narrated different." />
+        <meta name="keywords" content="autobiography FAQ, AI writing questions, memoir writing help, life story FAQ, Narrated questions" />
+        <link rel="canonical" href="https://narrated.com/faq" />
       </Helmet>
       <div className="min-h-screen bg-gradient-subtle">
         <Header />

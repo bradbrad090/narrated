@@ -8,8 +8,10 @@ const WhatWeDo = () => {
   return (
     <>
       <Helmet>
-        <title>What We Do - AI Autobiography Writing Services | Narrated</title>
-        <meta name="description" content="Discover how Narrated transforms your life stories into professional autobiographies using AI technology. From conversational interviews to published books." />
+        <title>How AI Autobiography Writing Works | What We Do | Narrated</title>
+        <meta name="description" content="Discover how Narrated uses conversational AI to help you write your life story. From guided conversations to professional printing - see our complete process." />
+        <meta name="keywords" content="AI autobiography process, how to write life story, memoir writing process, autobiography creation, AI assisted writing" />
+        <link rel="canonical" href="https://narrated.com/what-we-do" />
       </Helmet>
       <div className="min-h-screen bg-gradient-subtle">
       <Header />

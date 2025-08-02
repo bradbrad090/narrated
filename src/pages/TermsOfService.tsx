@@ -6,8 +6,10 @@ const TermsOfService = () => {
   return (
     <>
       <Helmet>
-        <title>Terms of Service - Legal Agreement | Narrated</title>
-        <meta name="description" content="Read our terms of service for AI autobiography writing services. Understand user responsibilities, intellectual property rights, and service agreements." />
+        <title>Terms of Service - Legal Terms | Narrated</title>
+        <meta name="description" content="Terms and conditions for using Narrated's AI autobiography writing service. Legal framework for our autobiography creation and publishing services." />
+        <meta name="robots" content="noindex, follow" />
+        <link rel="canonical" href="https://narrated.com/terms-of-service" />
       </Helmet>
       <div className="min-h-screen">
       <Header />

@@ -11,8 +11,10 @@ const Contact = () => {
   return (
     <>
       <Helmet>
-        <title>Contact Us - Get In Touch | Narrated</title>
-        <meta name="description" content="Contact Narrated for questions about our AI autobiography writing service. We're here to help preserve your life story. Located in Perth, Western Australia." />
+        <title>Contact Narrated - AI Autobiography Writing Support</title>
+        <meta name="description" content="Get help with your autobiography project. Contact our Perth-based team for questions about AI-assisted life story writing, pricing, or technical support." />
+        <meta name="keywords" content="autobiography support, AI writing help, contact narrated, Perth autobiography service, life story assistance" />
+        <link rel="canonical" href="https://narrated.com/contact" />
       </Helmet>
       <div className="min-h-screen">
       <Header />

@@ -54,8 +54,10 @@ const Pricing = () => {
   return (
     <>
       <Helmet>
-        <title>Pricing - Affordable Autobiography Writing Plans | Narrated</title>
-        <meta name="description" content="Choose from our flexible pricing plans for intelligent autobiography writing. Professional quality books starting at competitive rates with premium printing included." />
+        <title>Autobiography Writing Pricing - Plans from $49 | Narrated</title>
+        <meta name="description" content="Clear pricing for AI-assisted autobiography writing. Essential Story $49, Complete Legacy $199, Premium Heritage $399. Professional editing and printing included." />
+        <meta name="keywords" content="autobiography pricing, life story cost, memoir writing price, AI writing service cost, book printing price" />
+        <link rel="canonical" href="https://narrated.com/pricing" />
       </Helmet>
       <div className="min-h-screen bg-gradient-subtle">
         <Header />

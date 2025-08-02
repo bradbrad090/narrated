@@ -58,7 +58,7 @@ const HeroSection = () => {
           <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold text-primary-foreground mb-4 sm:mb-6 leading-tight">
             <span className="block sm:inline">Your Life Story,</span>
             <span className="block text-transparent bg-gradient-accent bg-clip-text">
-              Beautifully Written
+              Written by you
             </span>
           </h1>
           

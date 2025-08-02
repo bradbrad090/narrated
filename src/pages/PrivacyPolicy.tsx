@@ -6,8 +6,10 @@ const PrivacyPolicy = () => {
   return (
     <>
       <Helmet>
-        <title>Privacy Policy - Data Protection & Security | Narrated</title>
-        <meta name="description" content="Learn how Narrated protects your personal information and life stories. Our comprehensive privacy policy outlines data collection, usage, and security measures." />
+        <title>Privacy Policy - Data Protection | Narrated</title>
+        <meta name="description" content="Learn how Narrated protects your personal stories and data during autobiography creation. Our commitment to privacy and security for your life story." />
+        <meta name="robots" content="noindex, follow" />
+        <link rel="canonical" href="https://narrated.com/privacy-policy" />
       </Helmet>
       <div className="min-h-screen">
       <Header />
