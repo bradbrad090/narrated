@@ -476,12 +476,37 @@ const WriteBook = () => {
     setPrompt(prev => prev ? prev + " " + transcribedText : transcribedText);
   };
 
-  const handleContentTranscription = (transcribedText: string) => {
+  const handleContentTranscription = async (transcribedText: string) => {
     if (!currentChapter) return;
     const updatedContent = currentChapter.content ? currentChapter.content + " " + transcribedText : transcribedText;
     const updatedChapter = { ...currentChapter, content: updatedContent };
     setCurrentChapter(updatedChapter);
     setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
+    
+    // Auto-save after voice transcription
+    try {
+      const { error } = await supabase
+        .from('chapters')
+        .update({
+          content: updatedContent,
+          title: updatedChapter.title
+        })
+        .eq('id', updatedChapter.id)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Voice transcription saved!",
+        description: "Your spoken content has been automatically saved.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error auto-saving transcription",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const handleChapterContentChange = (newContent: string) => {
