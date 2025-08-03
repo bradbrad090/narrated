@@ -42,7 +42,7 @@ serve(async (req) => {
   }
 
   try {
-    const { audio } = await req.json();
+    const { audio, systemPrompt } = await req.json();
     
     if (!audio) {
       throw new Error('No audio data provided');
@@ -93,7 +93,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are an AI specialized in transforming raw, transcribed spoken narratives into clean, readable autobiographical transcripts. Your sole task is to process voice-to-text input, which consists of unstructured, conversational speech about personal experiences or events. This input may be rambling, incomplete, repetitive, or non-linear, as it comes directly from spoken storytelling without clear structure.
+            content: systemPrompt || `You are an AI specialized in transforming raw, transcribed spoken narratives into clean, readable autobiographical transcripts. Your sole task is to process voice-to-text input, which consists of unstructured, conversational speech about personal experiences or events. This input may be rambling, incomplete, repetitive, or non-linear, as it comes directly from spoken storytelling without clear structure.
 
 To create the output:
 
