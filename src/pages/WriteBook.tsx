@@ -694,7 +694,7 @@ Generate 1 contextually appropriate autobiography prompt question for "${current
                         </div>
                       )}
 
-                      <div className={`grid gap-2 ${isMobile ? 'grid-cols-1' : 'grid-cols-3'}`}>
+                      <div className={`grid gap-2 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
                         <Button 
                           onClick={generateStoryIdea}
                           disabled={generating}
@@ -711,15 +711,6 @@ Generate 1 contextually appropriate autobiography prompt question for "${current
                             disabled={generating}
                           />
                         </div>
-                        
-                        <Button 
-                          onClick={() => setShowTextarea(!showTextarea)}
-                          variant="outline"
-                          className="w-full h-10"
-                        >
-                          <Type className="h-4 w-4 mr-2" />
-                          I'd prefer to type
-                        </Button>
                       </div>
 
                       {(showTextarea && prompt.trim()) && (
@@ -907,7 +898,7 @@ Generate 1 contextually appropriate autobiography prompt question for "${current
                           </div>
                         )}
 
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-2 gap-2">
                           <Button 
                             onClick={generateStoryIdea}
                             disabled={generating}
@@ -924,15 +915,6 @@ Generate 1 contextually appropriate autobiography prompt question for "${current
                               disabled={generating}
                             />
                           </div>
-                          
-                          <Button 
-                            onClick={() => setShowTextarea(!showTextarea)}
-                            variant="outline"
-                            className="w-full h-10"
-                          >
-                            <Type className="h-4 w-4 mr-2" />
-                            I'd prefer to type
-                          </Button>
                         </div>
 
                         {(showTextarea && prompt.trim()) && (
