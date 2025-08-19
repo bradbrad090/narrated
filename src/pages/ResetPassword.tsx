@@ -18,35 +18,22 @@ const ResetPassword = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if we have the required parameters for password reset
-    const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
-    const type = searchParams.get('type');
+    // Check if this is a valid recovery flow
+    const isRecoveryFlow = searchParams.get('recovery') === 'true' || searchParams.get('type') === 'recovery';
     
-    if (type !== 'recovery' || !accessToken || !refreshToken) {
-      toast({
-        title: "Invalid Reset Link",
-        description: "This password reset link is invalid or has expired.",
-        variant: "destructive",
+    if (!isRecoveryFlow) {
+      // Check if user has an active session (they should if coming from recovery email)
+      supabase.auth.getUser().then(({ data: { user }, error }) => {
+        if (error || !user) {
+          toast({
+            title: "Invalid Reset Link", 
+            description: "This password reset link is invalid or has expired.",
+            variant: "destructive",
+          });
+          navigate('/auth');
+        }
       });
-      navigate('/auth');
-      return;
     }
-
-    // Set the session from URL parameters for password recovery
-    supabase.auth.setSession({
-      access_token: accessToken,
-      refresh_token: refreshToken,
-    }).then(({ error }) => {
-      if (error) {
-        toast({
-          title: "Invalid Reset Link",
-          description: "This password reset link is invalid or has expired.",
-          variant: "destructive",
-        });
-        navigate('/auth');
-      }
-    });
   }, [searchParams, navigate, toast]);
 
   const handlePasswordReset = async (e: React.FormEvent) => {

@@ -38,12 +38,14 @@ const Auth = () => {
   }, [location]);
 
   useEffect(() => {
-    // Don't redirect if user is on password reset page
+    // Don't redirect if user is on password reset page or if it's a recovery flow
     const isOnResetPage = location.pathname === '/reset-password';
+    const urlParams = new URLSearchParams(location.search);
+    const isRecoveryFlow = urlParams.get('type') === 'recovery' || urlParams.get('recovery') === 'true';
     
     // Check if user is already logged in
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user && !isOnResetPage) {
+      if (user && !isOnResetPage && !isRecoveryFlow) {
         navigate("/dashboard");
       }
     });
@@ -51,17 +53,18 @@ const Auth = () => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        if (session?.user && !isOnResetPage) {
+        // Don't auto-redirect during password recovery
+        if (session?.user && !isOnResetPage && !isRecoveryFlow) {
           setUser(session.user);
           navigate("/dashboard");
-        } else if (!session?.user) {
+        } else if (!session?.user && !isRecoveryFlow) {
           setUser(null);
         }
       }
     );
 
     return () => subscription.unsubscribe();
-  }, [navigate, location.pathname]);
+  }, [navigate, location.pathname, location.search]);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -161,7 +164,7 @@ const Auth = () => {
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${window.location.origin}/reset-password?recovery=true`,
       });
       
       if (error) throw error;
