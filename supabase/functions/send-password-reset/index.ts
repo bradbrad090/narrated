@@ -58,15 +58,52 @@ serve(async (req) => {
 
       console.log('Sending test email to:', testEmail);
 
-      // Send simple test email
+      // Send branded test email
       const { data, error } = await resend.emails.send({
         from: 'Narrated <noreply@narrated.com.au>',
         to: [testEmail],
-        subject: 'Password Reset Test - Narrated',
+        subject: 'Test Email - Narrated',
         html: `
-          <h2>Password Reset Test</h2>
-          <p>This is a test email from your Narrated password reset system.</p>
-          <p>If you received this, your email configuration is working correctly!</p>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Test Email - Narrated</title>
+          </head>
+          <body style="margin: 0; padding: 0; background: linear-gradient(180deg, hsl(35, 25%, 98%), hsl(35, 20%, 96%)); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: white; box-shadow: 0 8px 32px hsla(220, 25%, 15%, 0.08);">
+              <!-- Header -->
+              <div style="background: linear-gradient(135deg, hsl(220, 50%, 25%), hsl(220, 60%, 35%)); padding: 40px 30px; text-align: center;">
+                <h1 style="color: hsl(35, 25%, 98%); margin: 0; font-size: 32px; font-weight: 600; letter-spacing: -0.5px;">Narrated</h1>
+                <p style="color: hsl(42, 85%, 65%); margin: 8px 0 0; font-size: 16px; opacity: 0.9;">Preserve Your Story</p>
+              </div>
+              
+              <!-- Content -->
+              <div style="padding: 40px 30px;">
+                <h2 style="color: hsl(220, 25%, 15%); font-size: 24px; font-weight: 600; margin: 0 0 20px; line-height: 1.3;">Test Email Successful</h2>
+                
+                <p style="color: hsl(220, 15%, 45%); font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
+                  This is a test email from your Narrated system. If you're receiving this, your email configuration is working perfectly!
+                </p>
+                
+                <p style="color: hsl(220, 15%, 45%); font-size: 16px; line-height: 1.6; margin: 0;">
+                  Your autobiography platform is ready to send password reset emails and other important notifications.
+                </p>
+              </div>
+              
+              <!-- Footer -->
+              <div style="background-color: hsl(35, 15%, 92%); padding: 30px; text-align: center;">
+                <p style="color: hsl(220, 15%, 45%); font-size: 14px; margin: 0 0 10px;">
+                  © 2024 Narrated. Preserving life stories with AI assistance.
+                </p>
+                <p style="color: hsl(220, 15%, 45%); font-size: 12px; margin: 0;">
+                  This email was sent to test the system configuration.
+                </p>
+              </div>
+            </div>
+          </body>
+          </html>
         `,
       });
 
@@ -113,17 +150,75 @@ serve(async (req) => {
 
       console.log('Sending password reset email to:', userEmail);
 
-      // Send password reset email
+      // Send branded password reset email
       const { data, error } = await resend.emails.send({
         from: 'Narrated <noreply@narrated.com.au>',
         to: [userEmail],
         subject: 'Reset Your Password - Narrated',
         html: `
-          <h2>Reset Your Password</h2>
-          <p>We received a request to reset your password for your Narrated account.</p>
-          ${resetToken ? `<p><strong>Reset Code:</strong> ${resetToken}</p>` : ''}
-          ${redirectTo ? `<p><a href="${redirectTo}" style="background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Reset Password</a></p>` : ''}
-          <p>If you didn't request this, you can safely ignore this email.</p>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Reset Your Password - Narrated</title>
+          </head>
+          <body style="margin: 0; padding: 0; background: linear-gradient(180deg, hsl(35, 25%, 98%), hsl(35, 20%, 96%)); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: white; box-shadow: 0 8px 32px hsla(220, 25%, 15%, 0.08);">
+              <!-- Header -->
+              <div style="background: linear-gradient(135deg, hsl(220, 50%, 25%), hsl(220, 60%, 35%)); padding: 40px 30px; text-align: center;">
+                <h1 style="color: hsl(35, 25%, 98%); margin: 0; font-size: 32px; font-weight: 600; letter-spacing: -0.5px;">Narrated</h1>
+                <p style="color: hsl(42, 85%, 65%); margin: 8px 0 0; font-size: 16px; opacity: 0.9;">Preserve Your Story</p>
+              </div>
+              
+              <!-- Content -->
+              <div style="padding: 40px 30px;">
+                <h2 style="color: hsl(220, 25%, 15%); font-size: 24px; font-weight: 600; margin: 0 0 20px; line-height: 1.3;">Reset Your Password</h2>
+                
+                <p style="color: hsl(220, 15%, 45%); font-size: 16px; line-height: 1.6; margin: 0 0 25px;">
+                  We received a request to reset your password for your Narrated account. Click the button below to securely reset your password.
+                </p>
+                
+                ${resetToken ? `
+                  <div style="background-color: hsl(35, 15%, 92%); padding: 20px; border-radius: 8px; margin: 25px 0; text-align: center;">
+                    <p style="color: hsl(220, 25%, 15%); font-size: 14px; margin: 0 0 10px; font-weight: 500;">Or use this reset code:</p>
+                    <div style="background-color: white; padding: 15px; border-radius: 6px; font-family: 'Courier New', monospace; font-size: 24px; font-weight: bold; color: hsl(220, 50%, 25%); letter-spacing: 2px;">
+                      ${resetToken}
+                    </div>
+                  </div>
+                ` : ''}
+                
+                ${redirectTo ? `
+                  <div style="text-align: center; margin: 30px 0;">
+                    <a href="${redirectTo}" style="background: linear-gradient(135deg, hsl(220, 50%, 25%), hsl(220, 60%, 35%)); color: hsl(35, 25%, 98%); padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px hsla(220, 50%, 25%, 0.3); transition: all 0.3s ease;">
+                      Reset My Password
+                    </a>
+                  </div>
+                ` : ''}
+                
+                <div style="background-color: hsl(42, 85%, 95%); border-left: 4px solid hsl(42, 85%, 65%); padding: 15px 20px; margin: 30px 0; border-radius: 4px;">
+                  <p style="color: hsl(220, 25%, 15%); font-size: 14px; margin: 0; font-weight: 500;">
+                    🔒 For your security, this link will expire in 24 hours.
+                  </p>
+                </div>
+                
+                <p style="color: hsl(220, 15%, 45%); font-size: 14px; line-height: 1.6; margin: 20px 0 0;">
+                  If you didn't request this password reset, you can safely ignore this email. Your password will remain unchanged.
+                </p>
+              </div>
+              
+              <!-- Footer -->
+              <div style="background-color: hsl(35, 15%, 92%); padding: 30px; text-align: center; border-top: 1px solid hsl(35, 20%, 88%);">
+                <p style="color: hsl(220, 15%, 45%); font-size: 14px; margin: 0 0 10px;">
+                  © 2024 Narrated. Preserving life stories with AI assistance.
+                </p>
+                <p style="color: hsl(220, 15%, 45%); font-size: 12px; margin: 0;">
+                  If you're having trouble with the button above, copy and paste the URL into your web browser.
+                </p>
+              </div>
+            </div>
+          </body>
+          </html>
         `,
       });
 
