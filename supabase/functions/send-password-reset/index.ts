@@ -6,6 +6,7 @@ import { PasswordResetEmail } from './_templates/password-reset.tsx'
 
 const resendApiKey = Deno.env.get('RESEND_API_KEY')
 console.log('Resend API key exists:', !!resendApiKey)
+console.log('Resend API key length:', resendApiKey?.length || 0)
 if (!resendApiKey) {
   console.error('RESEND_API_KEY environment variable is missing')
 }
