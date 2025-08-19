@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
 
       console.log('Sending email via Resend...')
       const { data, error } = await resend.emails.send({
-        from: 'Narrated <noreply@narrated.com.au>',
+        from: 'Narrated <onboarding@resend.dev>',
         to: [testEmail],
         subject: '[TEST] Reset Your Narrated Password',
         html,
@@ -162,7 +162,7 @@ Deno.serve(async (req) => {
         )
 
         const { data, error } = await resend.emails.send({
-          from: 'Narrated <noreply@narrated.com.au>',
+          from: 'Narrated <onboarding@resend.dev>',
           to: [user.email],
           subject: 'Reset Your Narrated Password',
           html,
@@ -237,7 +237,7 @@ Deno.serve(async (req) => {
       )
 
       const { data, error } = await resend.emails.send({
-        from: 'Narrated <noreply@narrated.com.au>',
+        from: 'Narrated <onboarding@resend.dev>',
         to: [email],
         subject: 'Reset Your Narrated Password',
         html,
