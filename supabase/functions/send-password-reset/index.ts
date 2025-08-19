@@ -224,32 +224,45 @@ Deno.serve(async (req) => {
         )
       }
 
-      const html = await renderAsync(
-        React.createElement(PasswordResetEmail, {
-          supabase_url: Deno.env.get('SUPABASE_URL') ?? '',
-          token: email_data.token,
-          token_hash: email_data.token_hash,
-          redirect_to: email_data.redirect_to,
-          email_action_type: email_data.email_action_type,
-          user_email: user.email,
-        })
-      )
+      // Send email in background to prevent timeout
+      const sendEmailTask = async () => {
+        try {
+          console.log('Starting background email task for:', user.email)
+          
+          const html = await renderAsync(
+            React.createElement(PasswordResetEmail, {
+              supabase_url: Deno.env.get('SUPABASE_URL') ?? '',
+              token: email_data.token,
+              token_hash: email_data.token_hash,
+              redirect_to: email_data.redirect_to,
+              email_action_type: email_data.email_action_type,
+              user_email: user.email,
+            })
+          )
 
-      const { data, error } = await resend.emails.send({
-        from: 'Narrated <noreply@narrated.com.au>',
-        to: [user.email],
-        subject: 'Reset Your Narrated Password',
-        html,
-      })
+          const { data, error } = await resend.emails.send({
+            from: 'Narrated <noreply@narrated.com.au>',
+            to: [user.email],
+            subject: 'Reset Your Narrated Password',
+            html,
+          })
 
-      if (error) {
-        console.error('Resend error:', error)
-        throw error
+          if (error) {
+            console.error('Resend error in background task:', error)
+            throw error
+          }
+
+          console.log('Password reset email sent successfully in background:', data)
+        } catch (error) {
+          console.error('Error in background email task:', error)
+        }
       }
 
-      console.log('Password reset email sent successfully:', data)
+      // Start background task
+      EdgeRuntime.waitUntil(sendEmailTask())
 
-      return new Response(JSON.stringify({ success: true, data }), {
+      // Return immediate response to prevent webhook timeout
+      return new Response(JSON.stringify({ success: true, message: 'Email queued for sending' }), {
         status: 200,
         headers: {
           'Content-Type': 'application/json',
