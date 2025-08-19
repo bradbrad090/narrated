@@ -4,7 +4,11 @@ import { Resend } from 'npm:resend@4.0.0'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { PasswordResetEmail } from './_templates/password-reset.tsx'
 
-const resend = new Resend(Deno.env.get('RESEND_API_KEY') as string)
+const resendApiKey = Deno.env.get('RESEND_API_KEY')
+if (!resendApiKey) {
+  console.error('RESEND_API_KEY environment variable is missing')
+}
+const resend = resendApiKey ? new Resend(resendApiKey) : null
 const hookSecret = Deno.env.get('SEND_PASSWORD_RESET_HOOK_SECRET') as string
 
 const corsHeaders = {
@@ -41,6 +45,25 @@ Deno.serve(async (req) => {
             'Content-Type': 'application/json',
             ...corsHeaders
           }
+        }
+      )
+    }
+
+    // Check if Resend is configured
+    if (!resend) {
+      console.error('Resend is not configured - missing RESEND_API_KEY')
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Email service is not configured. Missing RESEND_API_KEY.',
+          resend_configured: false
+        }),
+        {
+          status: 500,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
         }
       )
     }
@@ -216,6 +239,24 @@ Deno.serve(async (req) => {
           JSON.stringify({ error: 'Invalid webhook payload format' }),
           {
             status: 400,
+            headers: {
+              'Content-Type': 'application/json',
+              ...corsHeaders,
+            },
+          }
+        )
+      }
+
+      // Check if Resend is configured
+      if (!resend) {
+        console.error('Resend is not configured - missing RESEND_API_KEY')
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: 'Email service is not configured. Missing RESEND_API_KEY.' 
+          }),
+          {
+            status: 500,
             headers: {
               'Content-Type': 'application/json',
               ...corsHeaders,
