@@ -5,6 +5,7 @@ import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { PasswordResetEmail } from './_templates/password-reset.tsx'
 
 const resendApiKey = Deno.env.get('RESEND_API_KEY')
+console.log('Resend API key exists:', !!resendApiKey)
 if (!resendApiKey) {
   console.error('RESEND_API_KEY environment variable is missing')
 }
