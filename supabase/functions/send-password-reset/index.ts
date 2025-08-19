@@ -15,9 +15,17 @@ serve(async (req) => {
   try {
     console.log('Password reset function called');
     
+    // Debug all environment variables
+    console.log('=== ENVIRONMENT DEBUG ===');
+    const allEnvVars = Deno.env.toObject();
+    console.log('All env vars:', Object.keys(allEnvVars));
+    console.log('RESEND_API_KEY exists in env:', 'RESEND_API_KEY' in allEnvVars);
+    console.log('========================');
+    
     // Get the RESEND_API_KEY
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
     console.log('API Key available:', !!resendApiKey);
+    console.log('API Key length:', resendApiKey?.length || 0);
     
     if (!resendApiKey) {
       console.error('RESEND_API_KEY is missing');
