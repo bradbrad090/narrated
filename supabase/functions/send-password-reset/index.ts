@@ -20,14 +20,20 @@ Deno.serve(async (req) => {
 
   // Handle GET requests for testing
   if (req.method === 'GET') {
+    console.log('GET request received for testing')
     const url = new URL(req.url)
     const testEmail = url.searchParams.get('test_email')
     
+    console.log('Test email parameter:', testEmail)
+    console.log('Resend API key exists:', !!Deno.env.get('RESEND_API_KEY'))
+    
     if (!testEmail) {
+      console.log('No test email provided, returning usage info')
       return new Response(
         JSON.stringify({ 
           message: 'Password Reset Email Test Endpoint',
-          usage: 'Add ?test_email=your-email@example.com to test the email template'
+          usage: 'Add ?test_email=your-email@example.com to test the email template',
+          resend_configured: !!Deno.env.get('RESEND_API_KEY')
         }), 
         { 
           status: 200,
@@ -41,6 +47,7 @@ Deno.serve(async (req) => {
 
     // Send test email
     try {
+      console.log('Generating email template for:', testEmail)
       const html = await renderAsync(
         React.createElement(PasswordResetEmail, {
           supabase_url: 'https://keadkwromhlyvoyxvcmi.supabase.co',
@@ -51,7 +58,9 @@ Deno.serve(async (req) => {
           user_email: testEmail,
         })
       )
+      console.log('Email template generated successfully')
 
+      console.log('Sending email via Resend...')
       const { data, error } = await resend.emails.send({
         from: 'Narrated <noreply@narrated.com.au>',
         to: [testEmail],
@@ -60,9 +69,9 @@ Deno.serve(async (req) => {
       })
 
       if (error) {
-        console.error('Test email error:', error)
+        console.error('Resend API error:', error)
         return new Response(
-          JSON.stringify({ success: false, error: error.message }),
+          JSON.stringify({ success: false, error: error.message, details: error }),
           {
             status: 500,
             headers: {
@@ -73,7 +82,8 @@ Deno.serve(async (req) => {
         )
       }
 
-      console.log('Test email sent successfully:', data)
+      console.log('Test email sent successfully to:', testEmail)
+      console.log('Resend response:', data)
       return new Response(
         JSON.stringify({ 
           success: true, 
@@ -89,9 +99,13 @@ Deno.serve(async (req) => {
         }
       )
     } catch (error) {
-      console.error('Test email error:', error)
+      console.error('Unexpected error in test function:', error)
       return new Response(
-        JSON.stringify({ success: false, error: error.message }),
+        JSON.stringify({ 
+          success: false, 
+          error: error.message,
+          stack: error.stack 
+        }),
         {
           status: 500,
           headers: {
