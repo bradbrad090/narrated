@@ -22,6 +22,12 @@ const Auth = () => {
   const location = useLocation();
   const { toast } = useToast();
 
+  const getPageTitle = () => {
+    if (isForgotPassword) return "Reset Password - Narrated";
+    if (isSignUp) return "Sign Up - Narrated";
+    return "Sign In - Narrated";
+  };
+
   useEffect(() => {
     // Check for email and signup parameters in URL
     const urlParams = new URLSearchParams(location.search);
@@ -187,7 +193,7 @@ const Auth = () => {
   return (
     <>
       <Helmet>
-        <title>Sign In to Your Autobiography Project | Narrated</title>
+        <title>{getPageTitle()}</title>
         <meta name="description" content="Access your Narrated account to continue your autobiography project. Create your account in seconds and start preserving your life story with AI assistance." />
         <meta name="robots" content="noindex, nofollow" />
         <link rel="canonical" href="https://narrated.com/auth" />

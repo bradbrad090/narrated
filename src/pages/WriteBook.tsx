@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -585,7 +586,13 @@ Generate 1 contextually appropriate autobiography prompt question for "${current
   }
 
   return (
-    <div className="min-h-screen bg-gradient-subtle">
+    <>
+      <Helmet>
+        <title>{book?.title ? `${book.title} - Write Your Book` : 'Write Your Autobiography'} | Narrated</title>
+        <meta name="description" content="Write and edit your autobiography with AI assistance. Voice recording, chapter management, and intelligent content generation." />
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
+      <div className="min-h-screen bg-gradient-subtle">
       {/* Header - Fixed position on mobile for better accessibility */}
       <header className={`border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ${isMobile ? 'sticky top-0 z-50' : ''}`}>
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -1011,6 +1018,7 @@ Generate 1 contextually appropriate autobiography prompt question for "${current
         )}
       </main>
     </div>
+    </>
   );
 };
 
