@@ -16,6 +16,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -143,6 +144,40 @@ const Auth = () => {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email) {
+      toast({
+        title: "Email Required",
+        description: "Please enter your email address to reset your password.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth`,
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Password Reset Email Sent",
+        description: "Check your email for a link to reset your password.",
+      });
+      
+      setIsForgotPassword(false);
+    } catch (error: any) {
+      toast({
+        title: "Password Reset Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <>
       <Helmet>
@@ -157,16 +192,39 @@ const Auth = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-semibold">
-            {isSignUp ? "Create Account" : "Welcome Back"}
+            {isForgotPassword ? "Reset Password" : isSignUp ? "Create Account" : "Welcome Back"}
           </CardTitle>
           <CardDescription>
-            {isSignUp 
-              ? "Start your autobiography journey today" 
-              : "Sign in to your account"
+            {isForgotPassword 
+              ? "Enter your email to receive a password reset link"
+              : isSignUp 
+                ? "Start your autobiography journey today" 
+                : "Sign in to your account"
             }
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {isForgotPassword ? (
+            // Forgot Password Form
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              
+              <Button type="submit" className="w-full" variant="hero">
+                Send Reset Link
+              </Button>
+            </form>
+          ) : (
+            <>
           {/* Social Auth Buttons */}
           <div className="space-y-3">
             <Button 
@@ -219,7 +277,18 @@ const Auth = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <div className="flex justify-between items-center">
+                <Label htmlFor="password">Password</Label>
+                {!isSignUp && (
+                  <button
+                    type="button"
+                    onClick={() => setIsForgotPassword(true)}
+                    className="text-xs text-primary hover:text-primary/80 transition-colors"
+                  >
+                    Forgot Password?
+                  </button>
+                )}
+              </div>
               <Input
                 id="password"
                 type="password"
@@ -248,21 +317,33 @@ const Auth = () => {
               {isSignUp ? "Create Account" : "Sign In"}
             </Button>
           </form>
+          </>
+          )}
 
           <div className="text-center">
-            <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-sm text-muted-foreground hover:text-primary transition-colors"
-            >
-              {isSignUp 
-                ? "Already have an account? " 
-                : "Don't have an account? "
-              }
-              <span className="text-blue-600 font-medium hover:text-blue-700">
-                {isSignUp ? "Sign in" : "Sign up"}
-              </span>
-            </button>
+            {isForgotPassword ? (
+              <button
+                type="button"
+                onClick={() => setIsForgotPassword(false)}
+                className="text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
+                Back to sign in
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
+                {isSignUp 
+                  ? "Already have an account? " 
+                  : "Don't have an account? "
+                }
+                <span className="text-blue-600 font-medium hover:text-blue-700">
+                  {isSignUp ? "Sign in" : "Sign up"}
+                </span>
+              </button>
+            )}
           </div>
         </CardContent>
       </Card>
