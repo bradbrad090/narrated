@@ -130,6 +130,7 @@ Deno.serve(async (req) => {
     
     // If webhook secret is configured, verify the webhook
     if (hookSecret) {
+      console.log('Webhook secret found, verifying webhook...')
       const wh = new Webhook(hookSecret)
       try {
         const {
@@ -200,15 +201,19 @@ Deno.serve(async (req) => {
         )
       }
     } else {
-      // Fallback: handle direct API calls (not recommended for production)
-      console.log('No webhook secret configured, handling direct call')
+      // Handle Supabase auth webhook without secret verification
+      console.log('No webhook secret configured, handling Supabase auth webhook directly')
       
       const body = JSON.parse(payload)
-      const { email, reset_url } = body
-
-      if (!email || !reset_url) {
+      console.log('Webhook payload received:', JSON.stringify(body, null, 2))
+      
+      // Supabase auth webhook format
+      const { user, email_data } = body
+      
+      if (!user?.email || !email_data) {
+        console.error('Invalid webhook payload format')
         return new Response(
-          JSON.stringify({ error: 'Missing required fields: email, reset_url' }),
+          JSON.stringify({ error: 'Invalid webhook payload format' }),
           {
             status: 400,
             headers: {
@@ -219,26 +224,20 @@ Deno.serve(async (req) => {
         )
       }
 
-      // Extract parameters from reset_url for the template
-      const url = new URL(reset_url)
-      const token_hash = url.searchParams.get('token') || ''
-      const email_action_type = url.searchParams.get('type') || 'recovery'
-      const redirect_to = url.searchParams.get('redirect_to') || ''
-
       const html = await renderAsync(
         React.createElement(PasswordResetEmail, {
           supabase_url: Deno.env.get('SUPABASE_URL') ?? '',
-          token: token_hash,
-          token_hash,
-          redirect_to,
-          email_action_type,
-          user_email: email,
+          token: email_data.token,
+          token_hash: email_data.token_hash,
+          redirect_to: email_data.redirect_to,
+          email_action_type: email_data.email_action_type,
+          user_email: user.email,
         })
       )
 
       const { data, error } = await resend.emails.send({
         from: 'Narrated <noreply@narrated.com.au>',
-        to: [email],
+        to: [user.email],
         subject: 'Reset Your Narrated Password',
         html,
       })
