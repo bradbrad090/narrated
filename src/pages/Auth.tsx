@@ -38,9 +38,12 @@ const Auth = () => {
   }, [location]);
 
   useEffect(() => {
+    // Don't redirect if user is on password reset page
+    const isOnResetPage = location.pathname === '/reset-password';
+    
     // Check if user is already logged in
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
+      if (user && !isOnResetPage) {
         navigate("/dashboard");
       }
     });
@@ -48,17 +51,17 @@ const Auth = () => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        if (session?.user) {
+        if (session?.user && !isOnResetPage) {
           setUser(session.user);
           navigate("/dashboard");
-        } else {
+        } else if (!session?.user) {
           setUser(null);
         }
       }
     );
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, location.pathname]);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();

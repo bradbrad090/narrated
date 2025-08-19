@@ -21,15 +21,32 @@ const ResetPassword = () => {
     // Check if we have the required parameters for password reset
     const accessToken = searchParams.get('access_token');
     const refreshToken = searchParams.get('refresh_token');
+    const type = searchParams.get('type');
     
-    if (!accessToken || !refreshToken) {
+    if (type !== 'recovery' || !accessToken || !refreshToken) {
       toast({
         title: "Invalid Reset Link",
         description: "This password reset link is invalid or has expired.",
         variant: "destructive",
       });
       navigate('/auth');
+      return;
     }
+
+    // Set the session from URL parameters for password recovery
+    supabase.auth.setSession({
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    }).then(({ error }) => {
+      if (error) {
+        toast({
+          title: "Invalid Reset Link",
+          description: "This password reset link is invalid or has expired.",
+          variant: "destructive",
+        });
+        navigate('/auth');
+      }
+    });
   }, [searchParams, navigate, toast]);
 
   const handlePasswordReset = async (e: React.FormEvent) => {
