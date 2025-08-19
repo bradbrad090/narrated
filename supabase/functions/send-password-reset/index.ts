@@ -150,8 +150,8 @@ serve(async (req) => {
 
       console.log('Sending password reset email to:', userEmail);
 
-      // Send branded password reset email
-      const { data, error } = await resend.emails.send({
+      // Send email in background to avoid timeout - don't await this
+      const emailPromise = resend.emails.send({
         from: 'Narrated <noreply@narrated.com.au>',
         to: [userEmail],
         subject: 'Reset Your Password - Narrated',
@@ -222,25 +222,27 @@ serve(async (req) => {
         `,
       });
 
-      if (error) {
-        console.error('Resend error:', error);
-        return new Response(
-          JSON.stringify({ error: 'Failed to send password reset email', details: error }),
-          { 
-            status: 500, 
-            headers: { 'Content-Type': 'application/json', ...corsHeaders } 
-          }
-        );
-      }
-
-      console.log('Password reset email sent successfully:', data);
-      return new Response(
-        JSON.stringify({ success: true, message: 'Password reset email sent' }),
+      // Return immediate response to avoid timeout
+      const response = new Response(
+        JSON.stringify({ success: true, message: 'Password reset email initiated' }),
         { 
           status: 200, 
           headers: { 'Content-Type': 'application/json', ...corsHeaders } 
         }
       );
+
+      // Handle email result in background
+      emailPromise.then(({ data, error }) => {
+        if (error) {
+          console.error('Resend error:', error);
+        } else {
+          console.log('Password reset email sent successfully:', data);
+        }
+      }).catch((error) => {
+        console.error('Email promise error:', error);
+      });
+
+      return response;
     }
 
     return new Response(
