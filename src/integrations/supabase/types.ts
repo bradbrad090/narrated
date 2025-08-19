@@ -166,52 +166,26 @@ export type Database = {
       profiles: {
         Row: {
           age: number | null
+          completed_signup: boolean | null
           created_at: string
           email: string | null
           full_name: string | null
           id: string
-          signup_id: string | null
         }
         Insert: {
           age?: number | null
+          completed_signup?: boolean | null
           created_at?: string
           email?: string | null
           full_name?: string | null
           id?: string
-          signup_id?: string | null
         }
         Update: {
           age?: number | null
+          completed_signup?: boolean | null
           created_at?: string
           email?: string | null
           full_name?: string | null
-          id?: string
-          signup_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_signup_id_fkey"
-            columns: ["signup_id"]
-            isOneToOne: false
-            referencedRelation: "signup"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      signup: {
-        Row: {
-          created_at: string
-          email: string | null
-          id: string
-        }
-        Insert: {
-          created_at?: string
-          email?: string | null
-          id?: string
-        }
-        Update: {
-          created_at?: string
-          email?: string | null
           id?: string
         }
         Relationships: []

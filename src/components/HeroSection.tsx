@@ -21,24 +21,8 @@ const HeroSection = () => {
       return;
     }
 
-    try {
-      // Save email to signup table
-      const { error } = await supabase
-        .from('signup' as any)
-        .insert({ email: email.trim() });
-
-      if (error) {
-        console.error('Error saving email:', error);
-        // Continue to auth page even if saving fails
-      }
-
-      // Navigate to auth page with email as query parameter
-      navigate(`/auth?email=${encodeURIComponent(email.trim())}&signup=true`);
-    } catch (error) {
-      console.error('Unexpected error:', error);
-      // Continue to auth page even if saving fails
-      navigate(`/auth?email=${encodeURIComponent(email.trim())}&signup=true`);
-    }
+    // Navigate directly to auth page with email as query parameter
+    navigate(`/auth?email=${encodeURIComponent(email.trim())}&signup=true`);
   };
   return (
     <section className="relative min-h-screen flex items-center justify-center bg-gradient-subtle overflow-hidden">
