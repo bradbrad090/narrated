@@ -57,6 +57,7 @@ A working autobiography creation service where users can:
 ## 📋 MEDIUM PRIORITY - Enhanced Experience
 
 #### User Experience Improvements
+- [ ] **Custom Email Branding** - Set up Resend integration for branded password reset emails from narrated.com.au
 - [ ] **Email Notifications** - Confirmation emails, progress updates, completion notifications
 - [ ] **Auto-save Functionality** - Prevent loss of conversation progress
 - [ ] **Mobile Optimization** - Ensure conversations work well on mobile devices
