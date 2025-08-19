@@ -18,6 +18,91 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders })
   }
 
+  // Handle GET requests for testing
+  if (req.method === 'GET') {
+    const url = new URL(req.url)
+    const testEmail = url.searchParams.get('test_email')
+    
+    if (!testEmail) {
+      return new Response(
+        JSON.stringify({ 
+          message: 'Password Reset Email Test Endpoint',
+          usage: 'Add ?test_email=your-email@example.com to test the email template'
+        }), 
+        { 
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders
+          }
+        }
+      )
+    }
+
+    // Send test email
+    try {
+      const html = await renderAsync(
+        React.createElement(PasswordResetEmail, {
+          supabase_url: 'https://keadkwromhlyvoyxvcmi.supabase.co',
+          token: 'test-token-123',
+          token_hash: 'test-hash-456',
+          redirect_to: 'https://narrated.com.au/auth',
+          email_action_type: 'recovery',
+          user_email: testEmail,
+        })
+      )
+
+      const { data, error } = await resend.emails.send({
+        from: 'Narrated <noreply@narrated.com.au>',
+        to: [testEmail],
+        subject: '[TEST] Reset Your Narrated Password',
+        html,
+      })
+
+      if (error) {
+        console.error('Test email error:', error)
+        return new Response(
+          JSON.stringify({ success: false, error: error.message }),
+          {
+            status: 500,
+            headers: {
+              'Content-Type': 'application/json',
+              ...corsHeaders,
+            },
+          }
+        )
+      }
+
+      console.log('Test email sent successfully:', data)
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: `Test password reset email sent to ${testEmail}`,
+          data 
+        }),
+        {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        }
+      )
+    } catch (error) {
+      console.error('Test email error:', error)
+      return new Response(
+        JSON.stringify({ success: false, error: error.message }),
+        {
+          status: 500,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        }
+      )
+    }
+  }
+
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { 
       status: 405,
