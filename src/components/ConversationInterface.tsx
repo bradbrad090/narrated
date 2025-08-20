@@ -28,7 +28,6 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   onContentGenerated
 }) => {
   const [currentMessage, setCurrentMessage] = useState('');
-  const [isVoiceMode, setIsVoiceMode] = useState(false);
   const [isAISpeaking, setIsAISpeaking] = useState(false);
   const [directPrompt, setDirectPrompt] = useState('');
   const [generating, setGenerating] = useState(false);
@@ -94,7 +93,6 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
 
   const handleVoiceTranscription = (text: string) => {
     setCurrentMessage(prev => prev + (prev ? ' ' : '') + text);
-    setIsVoiceMode(false);
   };
 
   const handleSaveSelfConversation = async () => {
@@ -110,8 +108,8 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
         timestamp: new Date().toISOString()
       };
 
-      // Determine if voice was used (if voice mode was recently active)
-      const conversationMedium = isVoiceMode ? 'voice' : 'text';
+      // Default to text medium for self conversations
+      const conversationMedium = 'text';
 
       // Save to chat_histories table
       const { error } = await supabase
@@ -145,7 +143,6 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       });
       
       setCurrentMessage('');
-      setIsVoiceMode(false); // Reset voice mode after saving
     } catch (error: any) {
       console.error('Error saving self conversation:', error);
       toast({
@@ -259,29 +256,13 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                   >
                     <Send className="h-4 w-4" />
                   </Button>
-                  <Button
-                    onClick={() => setIsVoiceMode(!isVoiceMode)}
-                    variant="outline"
-                    size="icon"
-                    aria-label={isVoiceMode ? "Stop voice input" : "Start voice input"}
-                  >
-                    {isVoiceMode ? (
-                      <MicOff className="h-4 w-4" />
-                    ) : (
-                      <Mic className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              {isVoiceMode && (
-                <div className="mt-2">
                   <VoiceRecorder
                     onTranscription={handleVoiceTranscription}
                     disabled={false}
                   />
                 </div>
-              )}
+              </div>
+
 
               {/* Display recent self conversation entries */}
               {conversationHistory.filter(session => session.isSelfConversation).length > 0 && (
