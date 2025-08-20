@@ -29,8 +29,6 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
 }) => {
   const [currentMessage, setCurrentMessage] = useState('');
   const [isAISpeaking, setIsAISpeaking] = useState(false);
-  const [directPrompt, setDirectPrompt] = useState('');
-  const [generating, setGenerating] = useState(false);
   const [selectedMode, setSelectedMode] = useState('self');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -153,44 +151,6 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     }
   };
 
-  const generateDirectContent = async () => {
-    if (!directPrompt.trim() || !userId || !bookId) return;
-
-    setGenerating(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-autobiography', {
-        body: {
-          prompt: `Write autobiography content based on this prompt: ${directPrompt}. Make it personal and engaging.`,
-          userId: userId,
-          bookId: bookId
-        }
-      });
-
-      if (error) throw error;
-
-      if (data?.error) {
-        throw new Error(data.error);
-      }
-
-      if (data?.content && onContentGenerated) {
-        onContentGenerated(data.content);
-        setDirectPrompt("");
-        
-        toast({
-          title: "Content generated!",
-          description: "AI has generated new content for your chapter.",
-        });
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error generating content",
-        description: error.message || "An unknown error occurred",
-        variant: "destructive",
-      });
-    } finally {
-      setGenerating(false);
-    }
-  };
 
   const formatMessage = (content: string) => {
     // Simple formatting for better readability
@@ -304,91 +264,99 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5" />
-                Text-Assisted Writing
+                Text-Assisted Conversation
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Get AI-powered suggestions and assistance for your writing
+                Have a text conversation with AI to develop your story
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-4">
-                <Textarea
-                  placeholder="Describe what you'd like to write about, and AI will provide suggestions and help..."
-                  value={directPrompt}
-                  onChange={(e) => setDirectPrompt(e.target.value)}
-                  className="min-h-[100px]"
-                />
-                <Button 
-                  onClick={generateDirectContent}
-                  disabled={!directPrompt.trim() || generating}
-                  className="w-full"
-                >
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  {generating ? "Generating..." : "Get AI Suggestions"}
-                </Button>
-              </div>
-
-              <div className="border-t pt-4">
-                <h4 className="font-medium mb-3">Start Text Conversation</h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {!currentSession ? (
+                <div className="text-center py-8">
                   <Button
                     onClick={() => startConversation('interview')}
                     disabled={isLoading}
-                    className="h-auto p-4 flex flex-col items-center gap-2"
-                    variant="outline"
+                    size="lg"
                   >
                     {isLoading ? (
-                      <Loader2 className="h-6 w-6 animate-spin" />
+                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                     ) : (
-                      <MessageCircle className="h-6 w-6" />
+                      <MessageCircle className="h-5 w-5 mr-2" />
                     )}
-                    <div className="text-center">
-                      <div className="font-medium">Interview</div>
-                      <div className="text-xs text-muted-foreground">
-                        Q&A about your life
-                      </div>
-                    </div>
-                  </Button>
-
-                  <Button
-                    onClick={() => startConversation('reflection')}
-                    disabled={isLoading}
-                    className="h-auto p-4 flex flex-col items-center gap-2"
-                    variant="outline"
-                  >
-                    {isLoading ? (
-                      <Loader2 className="h-6 w-6 animate-spin" />
-                    ) : (
-                      <MessageCircle className="h-6 w-6" />
-                    )}
-                    <div className="text-center">
-                      <div className="font-medium">Reflection</div>
-                      <div className="text-xs text-muted-foreground">
-                        Deep exploration
-                      </div>
-                    </div>
-                  </Button>
-
-                  <Button
-                    onClick={() => startConversation('brainstorming')}
-                    disabled={isLoading}
-                    className="h-auto p-4 flex flex-col items-center gap-2"
-                    variant="outline"
-                  >
-                    {isLoading ? (
-                      <Loader2 className="h-6 w-6 animate-spin" />
-                    ) : (
-                      <MessageCircle className="h-6 w-6" />
-                    )}
-                    <div className="text-center">
-                      <div className="font-medium">Brainstorming</div>
-                      <div className="text-xs text-muted-foreground">
-                        Creative ideas
-                      </div>
-                    </div>
+                    Start Conversation
                   </Button>
                 </div>
-              </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Messages Display */}
+                  <ScrollArea className="h-[400px] p-4 border rounded-lg">
+                    <div className="space-y-4">
+                      {currentSession.messages.map((message, index) => (
+                        <div
+                          key={index}
+                          className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                        >
+                          <div
+                            className={`max-w-[80%] p-3 rounded-lg ${
+                              message.role === 'user'
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted'
+                            }`}
+                          >
+                            <div className="text-sm">
+                              {formatMessage(message.content)}
+                            </div>
+                            <div className="text-xs opacity-70 mt-1">
+                              {new Date(message.timestamp).toLocaleTimeString()}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      {isTyping && (
+                        <div className="flex justify-start">
+                          <div className="bg-muted p-3 rounded-lg">
+                            <div className="flex items-center gap-1">
+                              <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
+                              <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                              <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      <div ref={messagesEndRef} />
+                    </div>
+                  </ScrollArea>
+
+                  {/* Message Input */}
+                  <div className="flex gap-2">
+                    <Textarea
+                      ref={textareaRef}
+                      value={currentMessage}
+                      onChange={(e) => setCurrentMessage(e.target.value)}
+                      onKeyDown={handleKeyPress}
+                      placeholder="Type your message..."
+                      className="flex-1 min-h-[80px] resize-none"
+                      disabled={isTyping}
+                    />
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        onClick={handleSendMessage}
+                        disabled={!currentMessage.trim() || isTyping}
+                        size="icon"
+                      >
+                        <Send className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        onClick={endConversation}
+                        variant="outline"
+                        size="icon"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
