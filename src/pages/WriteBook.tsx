@@ -9,6 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { Book, LogOut, Save, Sparkles, ArrowLeft, Plus, FileText, Trash2, Edit2, Type, Menu } from "lucide-react";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
+import { ConversationInterface } from "@/components/ConversationInterface";
+import { ConversationContext } from "@/components/ConversationContext";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -38,6 +40,7 @@ const WriteBook = () => {
   const [showTextarea, setShowTextarea] = useState(false);
   const [storyIdea, setStoryIdea] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showConversation, setShowConversation] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -972,6 +975,17 @@ Generate 1 contextually appropriate autobiography prompt question for "${current
                             </Button>
                           </div>
                         )}
+                        
+                        {/* AI Conversation Button */}
+                        <div className="pt-4 border-t">
+                          <Button 
+                            onClick={() => setShowConversation(!showConversation)}
+                            variant="outline"
+                            className="w-full"
+                          >
+                            💬 {showConversation ? 'Hide' : 'Start'} AI Conversation
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
 
@@ -1003,6 +1017,35 @@ Generate 1 contextually appropriate autobiography prompt question for "${current
                         </div>
                       </CardContent>
                     </Card>
+                    
+                    {/* AI Conversation Section */}
+                    {showConversation && user && book && (
+                      <Card className="mt-6">
+                        <CardHeader>
+                          <CardTitle>AI Conversation Assistant</CardTitle>
+                          <CardDescription>
+                            Have a natural conversation to explore your memories and generate content for your autobiography.
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                            <div className="lg:col-span-3">
+                              <ConversationInterface
+                                userId={user.id}
+                                bookId={book.id}
+                                chapterId={currentChapter?.id}
+                              />
+                            </div>
+                            <div className="lg:col-span-1">
+                              <ConversationContext
+                                context={null}
+                                isLoading={false}
+                              />
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
                   </div>
                 ) : (
                   <div className="flex items-center justify-center h-full">
