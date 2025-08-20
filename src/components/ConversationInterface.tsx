@@ -216,7 +216,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                     className="min-w-[120px]"
                     aria-label="Save entry"
                   >
-                    Submit
+                    Save Story
                   </Button>
                   <VoiceRecorder
                     onTranscription={handleVoiceTranscription}
