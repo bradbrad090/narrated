@@ -110,6 +110,9 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
         timestamp: new Date().toISOString()
       };
 
+      // Determine if voice was used (if voice mode was recently active)
+      const conversationMedium = isVoiceMode ? 'voice' : 'text';
+
       // Save to chat_histories table
       const { error } = await supabase
         .from('chat_histories')
@@ -118,7 +121,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           chapter_id: chapterId,
           session_id: sessionId,
           conversation_type: 'reflection',
-          conversation_medium: 'text',
+          conversation_medium: conversationMedium,
           is_self_conversation: true,
           messages: [selfConversationEntry],
           context_snapshot: context || {},
@@ -142,6 +145,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       });
       
       setCurrentMessage('');
+      setIsVoiceMode(false); // Reset voice mode after saving
     } catch (error: any) {
       console.error('Error saving self conversation:', error);
       toast({
@@ -279,10 +283,36 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                 </div>
               )}
 
-              {/* Self conversation entries would be displayed here */}
-              <div className="text-sm text-muted-foreground">
-                Your self conversation entries will appear here once implemented.
-              </div>
+              {/* Display recent self conversation entries */}
+              {conversationHistory.filter(session => session.isSelfConversation).length > 0 && (
+                <div className="mt-4">
+                  <h4 className="font-medium text-sm mb-2">Recent Self Entries</h4>
+                  <ScrollArea className="h-[200px]">
+                    <div className="space-y-2">
+                      {conversationHistory
+                        .filter(session => session.isSelfConversation)
+                        .slice(0, 3)
+                        .map((session) => (
+                          <div key={session.sessionId} className="p-3 border rounded-lg text-sm">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Badge variant="outline">
+                                {new Date(session.messages[0]?.timestamp).toLocaleDateString()}
+                              </Badge>
+                              <Badge 
+                                variant={session.conversationMedium === 'voice' ? 'default' : 'secondary'}
+                              >
+                                {session.conversationMedium === 'voice' ? '🎤' : '💬'}
+                              </Badge>
+                            </div>
+                            <p className="text-muted-foreground line-clamp-2">
+                              {session.messages[0]?.content || 'Empty entry'}
+                            </p>
+                          </div>
+                        ))}
+                    </div>
+                  </ScrollArea>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -431,35 +461,85 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
             <CardTitle className="text-lg">Recent Conversations</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              {conversationHistory.slice(0, 3).map((session) => (
-                <div key={session.sessionId} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline">
-                        {session.conversationType}
-                      </Badge>
-                      <Badge 
-                        variant={session.conversationMedium === 'voice' ? 'default' : 'secondary'}
-                        className={session.conversationMedium === 'voice' ? 'bg-green-100 text-green-800' : ''}
-                      >
-                        {session.conversationMedium === 'voice' ? '🎤 Voice' : '💬 Text'}
-                      </Badge>
-                    </div>
-                    <span className="text-sm text-muted-foreground">
-                      {session.messages.length} messages
-                    </span>
+            <div className="space-y-4">
+              {/* Self Conversations Section */}
+              {conversationHistory.filter(session => session.isSelfConversation).length > 0 && (
+                <div>
+                  <h4 className="font-medium text-sm mb-2 text-muted-foreground">Self Conversations</h4>
+                  <div className="space-y-2">
+                    {conversationHistory
+                      .filter(session => session.isSelfConversation)
+                      .slice(0, 3)
+                      .map((session) => (
+                        <div key={session.sessionId} className="flex items-center justify-between p-3 border rounded-lg bg-muted/20">
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                Self Entry
+                              </Badge>
+                              <Badge 
+                                variant={session.conversationMedium === 'voice' ? 'default' : 'secondary'}
+                                className={session.conversationMedium === 'voice' ? 'bg-green-100 text-green-800' : ''}
+                              >
+                                {session.conversationMedium === 'voice' ? '🎤 Voice' : '💬 Text'}
+                              </Badge>
+                            </div>
+                            <span className="text-sm text-muted-foreground">
+                              {session.messages.length} {session.messages.length === 1 ? 'entry' : 'entries'}
+                            </span>
+                          </div>
+                          <Button
+                            onClick={() => resumeConversation(session)}
+                            size="sm"
+                            variant="ghost"
+                          >
+                            View Entry
+                          </Button>
+                        </div>
+                      ))}
                   </div>
-                  <Button
-                    onClick={() => resumeConversation(session)}
-                    size="sm"
-                    variant="ghost"
-                    disabled={session.conversationMedium === 'voice'}
-                  >
-                    {session.conversationMedium === 'voice' ? 'View Transcript' : 'Resume'}
-                  </Button>
                 </div>
-              ))}
+              )}
+
+              {/* AI Conversations Section */}
+              {conversationHistory.filter(session => !session.isSelfConversation).length > 0 && (
+                <div>
+                  <h4 className="font-medium text-sm mb-2 text-muted-foreground">AI Conversations</h4>
+                  <div className="space-y-2">
+                    {conversationHistory
+                      .filter(session => !session.isSelfConversation)
+                      .slice(0, 3)
+                      .map((session) => (
+                        <div key={session.sessionId} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline">
+                                {session.conversationType}
+                              </Badge>
+                              <Badge 
+                                variant={session.conversationMedium === 'voice' ? 'default' : 'secondary'}
+                                className={session.conversationMedium === 'voice' ? 'bg-green-100 text-green-800' : ''}
+                              >
+                                {session.conversationMedium === 'voice' ? '🎤 Voice' : '💬 Text'}
+                              </Badge>
+                            </div>
+                            <span className="text-sm text-muted-foreground">
+                              {session.messages.length} messages
+                            </span>
+                          </div>
+                          <Button
+                            onClick={() => resumeConversation(session)}
+                            size="sm"
+                            variant="ghost"
+                            disabled={session.conversationMedium === 'voice'}
+                          >
+                            {session.conversationMedium === 'voice' ? 'View Transcript' : 'Resume'}
+                          </Button>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

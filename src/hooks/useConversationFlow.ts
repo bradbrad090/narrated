@@ -15,6 +15,7 @@ export interface ConversationSession {
   messages: ConversationMessage[];
   context?: any;
   goals?: string[];
+  isSelfConversation?: boolean;
 }
 
 export interface ConversationContext {
@@ -86,7 +87,8 @@ export const useConversationFlow = (userId: string, bookId: string, chapterId?: 
           conversationMedium: (chat.conversation_medium as 'text' | 'voice') || 'text',
           messages,
           context: chat.context_snapshot,
-          goals
+          goals,
+          isSelfConversation: (chat as any).is_self_conversation || false
         };
       });
 
