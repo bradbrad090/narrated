@@ -40,7 +40,8 @@ const handler = async (request: Request): Promise<Response> => {
       bookId, 
       chapterId,
       conversationType = 'interview',
-      context 
+      context,
+      styleInstructions
     } = await request.json();
     
     if (!userId || !bookId) {
@@ -67,7 +68,8 @@ const handler = async (request: Request): Promise<Response> => {
         bookId,
         chapterId,
         conversationType,
-        context
+        context,
+        styleInstructions
       });
     } else if (action === 'send_message') {
       if (!sessionId || !message) {
@@ -82,7 +84,8 @@ const handler = async (request: Request): Promise<Response> => {
         message,
         userId,
         context,
-        conversationType
+        conversationType,
+        styleInstructions
       });
     } else {
       return new Response(JSON.stringify({ error: "Invalid action. Use 'start_session' or 'send_message'" }), { 
@@ -101,7 +104,7 @@ const handler = async (request: Request): Promise<Response> => {
 };
 
 async function startConversationSession(supabaseClient: any, params: any) {
-  const { userId, bookId, chapterId, conversationType, context } = params;
+  const { userId, bookId, chapterId, conversationType, context, styleInstructions } = params;
   
   // Generate a unique session ID
   const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -130,7 +133,7 @@ async function startConversationSession(supabaseClient: any, params: any) {
   }
 
   // Generate initial AI greeting based on context and type
-  const initialPrompt = buildInitialPrompt(context, conversationType);
+  const initialPrompt = buildInitialPrompt(context, conversationType, styleInstructions);
   const aiResponse = await callOpenAI(initialPrompt, []);
 
   // Update chat history with initial message
@@ -160,7 +163,7 @@ async function startConversationSession(supabaseClient: any, params: any) {
 }
 
 async function processConversationMessage(supabaseClient: any, params: any) {
-  const { sessionId, message, userId, context, conversationType } = params;
+  const { sessionId, message, userId, context, conversationType, styleInstructions } = params;
 
   // Fetch existing conversation
   const { data: chatHistory, error: fetchError } = await supabaseClient
@@ -187,7 +190,7 @@ async function processConversationMessage(supabaseClient: any, params: any) {
 
   // Generate AI response with retry logic
   const conversationHistory = updatedMessages.slice(-10); // Keep last 10 messages for context
-  const prompt = buildConversationPrompt(context, conversationType, conversationHistory);
+  const prompt = buildConversationPrompt(context, conversationType, conversationHistory, styleInstructions);
   
   let aiResponse;
   let attempts = 0;
@@ -315,7 +318,7 @@ function generateConversationGoals(type: string): string[] {
   }
 }
 
-function buildInitialPrompt(context: any, conversationType: string): string {
+function buildInitialPrompt(context: any, conversationType: string, styleInstructions?: string): string {
   const basePrompt = `You are a compassionate life coach and autobiography assistant helping someone document their life story. Your role is to engage in thoughtful conversation that draws out meaningful stories and experiences.
 
 Context about the person:
@@ -331,12 +334,14 @@ Guidelines:
 - Keep responses conversational and personal (2-3 sentences)
 - Always end with a thoughtful follow-up question
 
-Start the conversation with a warm greeting and an engaging question based on their profile.`;
+${styleInstructions ? `RESPONSE STYLE OVERRIDE: ${styleInstructions}` : ''}
+
+Start the conversation with ${styleInstructions ? 'a direct, engaging question based on their profile' : 'a warm greeting and an engaging question based on their profile'}.`;
 
   return basePrompt;
 }
 
-function buildConversationPrompt(context: any, conversationType: string, messages: any[]): string {
+function buildConversationPrompt(context: any, conversationType: string, messages: any[], styleInstructions?: string): string {
   const lastUserMessage = messages.filter(m => m.role === 'user').pop()?.content || '';
   
   return `You are a compassionate life coach helping document life stories. 
@@ -345,7 +350,7 @@ Context: ${JSON.stringify(context, null, 2)}
 Type: ${conversationType}
 Last user message: "${lastUserMessage}"
 
-Respond naturally and ask engaging follow-up questions. Keep responses warm and conversational (2-3 sentences). Always end with a question that encourages more storytelling.`;
+${styleInstructions ? `RESPONSE STYLE OVERRIDE: ${styleInstructions}` : 'Respond naturally and ask engaging follow-up questions. Keep responses warm and conversational (2-3 sentences). Always end with a question that encourages more storytelling.'}`;
 }
 
 serve(handler);

@@ -20,6 +20,8 @@ interface ConversationInterfaceProps {
   onContentGenerated?: (content: string) => void;
 }
 
+const STYLE_PROMPT = "Respond only with short, direct questions or prompts to elicit more details or advance the story. Keep responses to 1-2 sentences maximum. Avoid all pleasantries, affirmations, summaries, or chit-chat—focus solely on prompting continuation. Probe deeper on vague responses with concise follow-ups.";
+
 export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   userId,
   bookId,
@@ -244,7 +246,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
               {!currentSession ? (
                 <div className="text-center py-8">
                   <Button
-                    onClick={() => startConversation('interview')}
+                    onClick={() => startConversation('interview', STYLE_PROMPT)}
                     disabled={isLoading}
                     size="lg"
                   >
