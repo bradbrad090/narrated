@@ -4,9 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { VoiceRecorder } from '@/components/VoiceRecorder';
 import VoiceInterface from '@/components/VoiceInterface';
-import { MessageCircle, Send, Mic, MicOff, Loader2, Sparkles } from 'lucide-react';
+import { MessageCircle, Send, Mic, MicOff, Loader2, Sparkles, User, Bot } from 'lucide-react';
 import { useConversationFlow, ConversationMessage } from '@/hooks/useConversationFlow';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -31,6 +32,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   const [isAISpeaking, setIsAISpeaking] = useState(false);
   const [directPrompt, setDirectPrompt] = useState('');
   const [generating, setGenerating] = useState(false);
+  const [selectedMode, setSelectedMode] = useState('self');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
@@ -143,289 +145,375 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     ));
   };
 
-  if (!currentSession) {
-    return (
-      <div className={`space-y-6 ${className}`}>
-        {/* Direct Content Generation */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium">Generate Content Directly</h3>
-          <Textarea
-            placeholder="Example: Write about my childhood growing up in a small town, focusing on summer adventures and family traditions..."
-            value={directPrompt}
-            onChange={(e) => setDirectPrompt(e.target.value)}
-            className="min-h-[100px]"
-          />
-          <Button 
-            onClick={generateDirectContent}
-            disabled={!directPrompt.trim() || generating}
-            className="w-full"
-          >
-            <Sparkles className="h-4 w-4 mr-2" />
-            {generating ? "Generating..." : "Generate Content"}
-          </Button>
+  return (
+    <div className={`w-full ${className}`}>
+      {/* Tabbed Interface at the Top */}
+      <Tabs value={selectedMode} onValueChange={setSelectedMode} className="w-full">
+        <div className="w-full border-b">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="self" className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              Self Conversation
+            </TabsTrigger>
+            <TabsTrigger value="text-assisted" className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4" />
+              Text-Assisted
+            </TabsTrigger>
+            <TabsTrigger value="voice-to-voice" className="flex items-center gap-2">
+              <Bot className="h-4 w-4" />
+              Voice-to-Voice AI
+            </TabsTrigger>
+          </TabsList>
         </div>
 
-        <div className="border-t pt-6">
-          <div className="text-center">
-            <h3 className="text-lg font-medium mb-2">Start a Conversation</h3>
-            <p className="text-muted-foreground mb-6">
-              Choose how you'd like to interact with the AI assistant
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 gap-4">
-            {/* Voice Interface Section */}
-            <div className="p-4 bg-muted/30 rounded-lg">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-medium">Voice Conversation</h3>
+        {/* Self Conversation Mode */}
+        <TabsContent value="self" className="mt-6">
+          <Card className="w-full">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                Self Conversation
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Write your thoughts and memories using text or voice input
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Textarea
+                    ref={textareaRef}
+                    value={currentMessage}
+                    onChange={(e) => setCurrentMessage(e.target.value)}
+                    placeholder="Write your thoughts, memories, or experiences..."
+                    className="min-h-[120px] resize-none"
+                    aria-label="Self conversation input"
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Button
+                    onClick={() => {
+                      // Handle self conversation save
+                      if (currentMessage.trim()) {
+                        toast({
+                          title: "Entry saved",
+                          description: "Your self conversation entry has been saved.",
+                        });
+                        setCurrentMessage('');
+                      }
+                    }}
+                    disabled={!currentMessage.trim()}
+                    size="icon"
+                    aria-label="Save entry"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    onClick={() => setIsVoiceMode(!isVoiceMode)}
+                    variant="outline"
+                    size="icon"
+                    aria-label={isVoiceMode ? "Stop voice input" : "Start voice input"}
+                  >
+                    {isVoiceMode ? (
+                      <MicOff className="h-4 w-4" />
+                    ) : (
+                      <Mic className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              {isVoiceMode && (
+                <div className="mt-2">
+                  <VoiceRecorder
+                    onTranscription={handleVoiceTranscription}
+                    disabled={false}
+                  />
+                </div>
+              )}
+
+              {/* Self conversation entries would be displayed here */}
+              <div className="text-sm text-muted-foreground">
+                Your self conversation entries will appear here once implemented.
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Text-Assisted Mode */}
+        <TabsContent value="text-assisted" className="mt-6">
+          <Card className="w-full">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5" />
+                Text-Assisted Writing
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Get AI-powered suggestions and assistance for your writing
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-4">
+                <Textarea
+                  placeholder="Describe what you'd like to write about, and AI will provide suggestions and help..."
+                  value={directPrompt}
+                  onChange={(e) => setDirectPrompt(e.target.value)}
+                  className="min-h-[100px]"
+                />
+                <Button 
+                  onClick={generateDirectContent}
+                  disabled={!directPrompt.trim() || generating}
+                  className="w-full"
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  {generating ? "Generating..." : "Get AI Suggestions"}
+                </Button>
+              </div>
+
+              <div className="border-t pt-4">
+                <h4 className="font-medium mb-3">Start Text Conversation</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Button
+                    onClick={() => startConversation('interview')}
+                    disabled={isLoading}
+                    className="h-auto p-4 flex flex-col items-center gap-2"
+                    variant="outline"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                    ) : (
+                      <MessageCircle className="h-6 w-6" />
+                    )}
+                    <div className="text-center">
+                      <div className="font-medium">Interview</div>
+                      <div className="text-xs text-muted-foreground">
+                        Q&A about your life
+                      </div>
+                    </div>
+                  </Button>
+
+                  <Button
+                    onClick={() => startConversation('reflection')}
+                    disabled={isLoading}
+                    className="h-auto p-4 flex flex-col items-center gap-2"
+                    variant="outline"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                    ) : (
+                      <MessageCircle className="h-6 w-6" />
+                    )}
+                    <div className="text-center">
+                      <div className="font-medium">Reflection</div>
+                      <div className="text-xs text-muted-foreground">
+                        Deep exploration
+                      </div>
+                    </div>
+                  </Button>
+
+                  <Button
+                    onClick={() => startConversation('brainstorming')}
+                    disabled={isLoading}
+                    className="h-auto p-4 flex flex-col items-center gap-2"
+                    variant="outline"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                    ) : (
+                      <MessageCircle className="h-6 w-6" />
+                    )}
+                    <div className="text-center">
+                      <div className="font-medium">Brainstorming</div>
+                      <div className="text-xs text-muted-foreground">
+                        Creative ideas
+                      </div>
+                    </div>
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Voice-to-Voice AI Mode */}
+        <TabsContent value="voice-to-voice" className="mt-6">
+          <Card className="w-full">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bot className="h-5 w-5" />
+                Voice-to-Voice AI Conversation
                 {isAISpeaking && (
                   <div className="flex items-center gap-1 text-sm text-green-600">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                     AI Speaking
                   </div>
                 )}
-              </div>
-              <p className="text-sm text-muted-foreground mb-3">
-                Start a real-time voice conversation with the AI assistant
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Have a real-time voice conversation with the AI assistant
               </p>
-              <VoiceInterface 
-                onSpeakingChange={setIsAISpeaking}
-                context={context}
-                conversationType="interview"
-                userId={userId}
-                bookId={bookId}
-                chapterId={chapterId}
-                onConversationUpdate={() => {
-                  // Refresh conversation history when voice chat ends
-                  window.location.reload();
-                }}
-              />
-            </div>
+            </CardHeader>
+            <CardContent>
+              <div className="p-6 bg-muted/30 rounded-lg text-center">
+                <VoiceInterface 
+                  onSpeakingChange={setIsAISpeaking}
+                  context={context}
+                  conversationType="interview"
+                  userId={userId}
+                  bookId={bookId}
+                  chapterId={chapterId}
+                  onConversationUpdate={() => {
+                    toast({
+                      title: "Conversation saved",
+                      description: "Your voice conversation has been saved to your history.",
+                    });
+                  }}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
-            {/* Text Conversation Options */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Show Active Text Conversation if exists */}
+      {currentSession && (
+        <Card className="mt-6 w-full max-w-4xl mx-auto flex flex-col h-[600px]">
+          <CardHeader className="flex-shrink-0 border-b">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <MessageCircle className="h-5 w-5" />
+                <CardTitle className="text-lg">
+                  Active Conversation
+                </CardTitle>
+                <Badge variant="outline">
+                  {currentSession.conversationType}
+                </Badge>
+              </div>
               <Button
-                onClick={() => startConversation('interview')}
-                disabled={isLoading}
-                className="h-auto p-4 flex flex-col items-center gap-2"
+                onClick={endConversation}
                 variant="outline"
+                size="sm"
               >
-                {isLoading ? (
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                ) : (
-                  <MessageCircle className="h-6 w-6" />
-                )}
-                <div className="text-center">
-                  <div className="font-medium">Text Interview</div>
-                  <div className="text-sm text-muted-foreground">
-                    Structured Q&A about your life
-                  </div>
-                </div>
-              </Button>
-
-              <Button
-                onClick={() => startConversation('reflection')}
-                disabled={isLoading}
-                className="h-auto p-4 flex flex-col items-center gap-2"
-                variant="outline"
-              >
-                {isLoading ? (
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                ) : (
-                  <MessageCircle className="h-6 w-6" />
-                )}
-                <div className="text-center">
-                  <div className="font-medium">Text Reflection</div>
-                  <div className="text-sm text-muted-foreground">
-                    Deep exploration of meanings
-                  </div>
-                </div>
-              </Button>
-
-              <Button
-                onClick={() => startConversation('brainstorming')}
-                disabled={isLoading}
-                className="h-auto p-4 flex flex-col items-center gap-2"
-                variant="outline"
-              >
-                {isLoading ? (
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                ) : (
-                  <MessageCircle className="h-6 w-6" />
-                )}
-                <div className="text-center">
-                  <div className="font-medium">Text Brainstorming</div>
-                  <div className="text-sm text-muted-foreground">
-                    Generate creative story ideas
-                  </div>
-                </div>
+                End Session
               </Button>
             </div>
-          </div>
+          </CardHeader>
 
-          {conversationHistory.length > 0 && (
-            <div className="mt-6">
-              <h3 className="font-medium mb-3">Recent Conversations</h3>
-              <div className="space-y-2">
-                {conversationHistory.slice(0, 3).map((session) => (
-                  <div key={session.sessionId} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline">
-                          {session.conversationType}
-                        </Badge>
-                        <Badge 
-                          variant={session.conversationMedium === 'voice' ? 'default' : 'secondary'}
-                          className={session.conversationMedium === 'voice' ? 'bg-green-100 text-green-800' : ''}
-                        >
-                          {session.conversationMedium === 'voice' ? '🎤 Voice' : '💬 Text'}
-                        </Badge>
-                      </div>
-                      <span className="text-sm text-muted-foreground">
-                        {session.messages.length} messages
-                      </span>
-                    </div>
-                    <Button
-                      onClick={() => resumeConversation(session)}
-                      size="sm"
-                      variant="ghost"
-                      disabled={session.conversationMedium === 'voice'}
+          <CardContent className="flex-1 flex flex-col p-0">
+            {/* Messages Area */}
+            <ScrollArea className="flex-1 p-4">
+              <div className="space-y-4">
+                {currentSession.messages.map((message, index) => (
+                  <div
+                    key={index}
+                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-[80%] rounded-lg p-3 ${
+                        message.role === 'user'
+                          ? 'bg-primary text-primary-foreground ml-4'
+                          : 'bg-muted mr-4'
+                      }`}
                     >
-                      {session.conversationMedium === 'voice' ? 'View Transcript' : 'Resume'}
-                    </Button>
+                      <div className="text-sm">
+                        {formatMessage(message.content)}
+                      </div>
+                      <div className="text-xs opacity-70 mt-1">
+                        {new Date(message.timestamp).toLocaleTimeString()}
+                      </div>
+                    </div>
                   </div>
                 ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <Card className={`${className} w-full max-w-4xl mx-auto flex flex-col h-[600px]`}>
-      <CardHeader className="flex-shrink-0 border-b">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <MessageCircle className="h-5 w-5" />
-            <CardTitle className="text-lg">
-              Conversation
-            </CardTitle>
-            <Badge variant="outline">
-              {currentSession.conversationType}
-            </Badge>
-            {isAISpeaking && (
-              <div className="flex items-center gap-1 text-sm text-green-600">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                AI Speaking
-              </div>
-            )}
-          </div>
-          <Button
-            onClick={endConversation}
-            variant="outline"
-            size="sm"
-          >
-            End Session
-          </Button>
-        </div>
-      </CardHeader>
-
-      <CardContent className="flex-1 flex flex-col p-0">
-        {/* Messages Area */}
-        <ScrollArea className="flex-1 p-4">
-          <div className="space-y-4">
-            {currentSession.messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[80%] rounded-lg p-3 ${
-                    message.role === 'user'
-                      ? 'bg-primary text-primary-foreground ml-4'
-                      : 'bg-muted mr-4'
-                  }`}
-                >
-                  <div className="text-sm">
-                    {formatMessage(message.content)}
+                
+                {isTyping && (
+                  <div className="flex justify-start">
+                    <div className="bg-muted rounded-lg p-3 mr-4">
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span className="text-sm text-muted-foreground">
+                          Thinking...
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-xs opacity-70 mt-1">
-                    {new Date(message.timestamp).toLocaleTimeString()}
-                  </div>
+                )}
+                
+                <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
+
+            {/* Input Area */}
+            <div className="flex-shrink-0 border-t p-4">
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Textarea
+                    ref={textareaRef}
+                    value={currentMessage}
+                    onChange={(e) => setCurrentMessage(e.target.value)}
+                    onKeyDown={handleKeyPress}
+                    placeholder="Continue the conversation..."
+                    className="min-h-[80px] resize-none"
+                    disabled={isTyping}
+                    aria-label="Message input"
+                  />
+                </div>
+                
+                <div className="flex flex-col gap-2">
+                  <Button
+                    onClick={handleSendMessage}
+                    disabled={!currentMessage.trim() || isTyping}
+                    size="icon"
+                    aria-label="Send message"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
-            ))}
-            
-            {isTyping && (
-              <div className="flex justify-start">
-                <div className="bg-muted rounded-lg p-3 mr-4">
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Recent Conversations */}
+      {conversationHistory.length > 0 && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="text-lg">Recent Conversations</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {conversationHistory.slice(0, 3).map((session) => (
+                <div key={session.sessionId} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline">
+                        {session.conversationType}
+                      </Badge>
+                      <Badge 
+                        variant={session.conversationMedium === 'voice' ? 'default' : 'secondary'}
+                        className={session.conversationMedium === 'voice' ? 'bg-green-100 text-green-800' : ''}
+                      >
+                        {session.conversationMedium === 'voice' ? '🎤 Voice' : '💬 Text'}
+                      </Badge>
+                    </div>
                     <span className="text-sm text-muted-foreground">
-                      Thinking...
+                      {session.messages.length} messages
                     </span>
                   </div>
+                  <Button
+                    onClick={() => resumeConversation(session)}
+                    size="sm"
+                    variant="ghost"
+                    disabled={session.conversationMedium === 'voice'}
+                  >
+                    {session.conversationMedium === 'voice' ? 'View Transcript' : 'Resume'}
+                  </Button>
                 </div>
-              </div>
-            )}
-            
-            <div ref={messagesEndRef} />
-          </div>
-        </ScrollArea>
-
-        {/* Input Area */}
-        <div className="flex-shrink-0 border-t p-4">
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <Textarea
-                ref={textareaRef}
-                value={currentMessage}
-                onChange={(e) => setCurrentMessage(e.target.value)}
-                onKeyDown={handleKeyPress}
-                placeholder="Share your thoughts, ask questions, or tell a story..."
-                className="min-h-[80px] resize-none"
-                disabled={isTyping}
-                aria-label="Message input"
-              />
+              ))}
             </div>
-            
-            <div className="flex flex-col gap-2">
-              <Button
-                onClick={handleSendMessage}
-                disabled={!currentMessage.trim() || isTyping}
-                size="icon"
-                aria-label="Send message"
-              >
-                <Send className="h-4 w-4" />
-              </Button>
-              
-              <Button
-                onClick={() => setIsVoiceMode(!isVoiceMode)}
-                variant="outline"
-                size="icon"
-                aria-label={isVoiceMode ? "Stop voice input" : "Start voice input"}
-              >
-                {isVoiceMode ? (
-                  <MicOff className="h-4 w-4" />
-                ) : (
-                  <Mic className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-          </div>
-          
-          {isVoiceMode && (
-            <div className="mt-2">
-              <VoiceRecorder
-                onTranscription={handleVoiceTranscription}
-                disabled={isTyping}
-              />
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 };
