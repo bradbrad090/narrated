@@ -103,8 +103,7 @@ Return only the JSON object, no other text.`;
           { role: "system", content: "You are an expert biographical information extractor. Always return valid JSON." },
           { role: "user", content: extractionPrompt }
         ],
-        max_completion_tokens: 1000,
-        temperature: 0.1
+        max_completion_tokens: 1000
       }),
     });
 
