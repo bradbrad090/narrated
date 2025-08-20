@@ -7,7 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { VoiceRecorder } from '@/components/VoiceRecorder';
 import VoiceInterface from '@/components/VoiceInterface';
-import { MessageCircle, Send, Mic, MicOff, Loader2, Sparkles, User, Bot } from 'lucide-react';
+import { MessageCircle, Send, Mic, MicOff, Loader2, Sparkles, User, Bot, CheckCircle } from 'lucide-react';
 import { useConversationFlow, ConversationMessage } from '@/hooks/useConversationFlow';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -343,6 +343,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                         onClick={handleSendMessage}
                         disabled={!currentMessage.trim() || isTyping}
                         size="icon"
+                        title="Send message"
                       >
                         <Send className="h-4 w-4" />
                       </Button>
@@ -350,8 +351,9 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                         onClick={endConversation}
                         variant="outline"
                         size="icon"
+                        title="Submit conversation"
                       >
-                        <MessageCircle className="h-4 w-4" />
+                        <CheckCircle className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
