@@ -718,35 +718,6 @@ const WriteBook = () => {
               <div className="h-full p-6 overflow-auto">
                 {currentChapter ? (
                   <div className="max-w-4xl mx-auto space-y-6">
-                    {/* Chapter Title Editor */}
-                    <Card>
-                      <CardHeader>
-                        <div className="flex items-center justify-between">
-                          <input
-                            type="text"
-                            value={currentChapter.title}
-                            onChange={(e) => handleChapterTitleChange(e.target.value)}
-                            className="text-2xl font-bold bg-transparent border-none outline-none flex-1"
-                            placeholder="Chapter Title"
-                          />
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="bg-yellow-400/20 hover:bg-yellow-400/30 ml-2"
-                            onClick={() => {
-                              const inputElement = document.querySelector('.text-2xl.font-bold') as HTMLInputElement;
-                              if (inputElement) {
-                                inputElement.focus();
-                                inputElement.select();
-                              }
-                            }}
-                          >
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </CardHeader>
-                    </Card>
-
                     {/* AI Conversation Section */}
                     {showConversation && user && book && (
                       <Card className="mt-6">
