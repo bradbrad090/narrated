@@ -204,6 +204,10 @@ export type Database = {
       }
       chat_histories: {
         Row: {
+          chapter_id: string | null
+          context_snapshot: Json | null
+          conversation_goals: Json | null
+          conversation_type: string | null
           created_at: string
           id: string
           messages: Json | null
@@ -211,6 +215,10 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          chapter_id?: string | null
+          context_snapshot?: Json | null
+          conversation_goals?: Json | null
+          conversation_type?: string | null
           created_at?: string
           id?: string
           messages?: Json | null
@@ -218,6 +226,10 @@ export type Database = {
           user_id: string
         }
         Update: {
+          chapter_id?: string | null
+          context_snapshot?: Json | null
+          conversation_goals?: Json | null
+          conversation_type?: string | null
           created_at?: string
           id?: string
           messages?: Json | null
@@ -226,6 +238,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "chat_histories_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "chat_histories_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -233,6 +252,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      conversation_context_cache: {
+        Row: {
+          book_id: string
+          chapter_id: string | null
+          context_data: Json
+          created_at: string
+          expires_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          book_id: string
+          chapter_id?: string | null
+          context_data?: Json
+          created_at?: string
+          expires_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          book_id?: string
+          chapter_id?: string | null
+          context_data?: Json
+          created_at?: string
+          expires_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       orders: {
         Row: {
@@ -314,7 +363,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      cleanup_expired_context_cache: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
