@@ -34,12 +34,8 @@ const WriteBook = () => {
   const [book, setBook] = useState<any>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [currentChapter, setCurrentChapter] = useState<Chapter | null>(null);
-  const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(true);
-  const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [showTextarea, setShowTextarea] = useState(false);
-  const [storyIdea, setStoryIdea] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showConversation, setShowConversation] = useState(false);
   const [bookProfile, setBookProfile] = useState<any>(null);
@@ -73,19 +69,6 @@ const WriteBook = () => {
     return () => subscription.unsubscribe();
   }, [navigate, bookId]);
 
-  // Auto-generate story idea when page loads or chapter changes
-  useEffect(() => {
-    if (currentChapter && (!storyIdea || !loading)) {
-      generateStoryIdea();
-    }
-  }, [currentChapter, loading]);
-
-  // Clear story idea when chapter changes to trigger new generation
-  useEffect(() => {
-    if (currentChapter) {
-      setStoryIdea("");
-    }
-  }, [currentChapter?.id]);
 
   const fetchBookAndChapters = async (userId: string) => {
     try {
@@ -399,67 +382,6 @@ const WriteBook = () => {
     }
   };
 
-  const generateContent = async () => {
-    if (!prompt.trim() || !user || !book || !currentChapter) return;
-
-    console.log('Starting content generation...', { userId: user.id, bookId: book.id, prompt: prompt.substring(0, 50) + '...' });
-    setGenerating(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-autobiography', {
-        body: {
-          prompt: `Write autobiography content for ${currentChapter.title} based on this prompt: ${prompt}. ${currentChapter.content ? 'Continue from the existing content.' : 'This is the beginning of this chapter.'}`,
-          userId: user.id,
-          bookId: book.id
-        }
-      });
-
-      console.log('Function response:', { data, error });
-
-      if (error) {
-        console.error('Edge function error:', error);
-        throw error;
-      }
-
-      if (data?.error) {
-        console.error('Error in function response:', data.error);
-        throw new Error(data.error);
-      }
-
-      if (data?.content) {
-        const newContent = currentChapter.content ? currentChapter.content + "\n\n" + data.content : data.content;
-        
-        // Update current chapter state
-        const updatedChapter = { ...currentChapter, content: newContent };
-        setCurrentChapter(updatedChapter);
-        
-        // Update chapters array
-        setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
-        
-        setPrompt("");
-        
-        toast({
-          title: "Content generated!",
-          description: "AI has added new content to your chapter.",
-        });
-      } else {
-        console.warn('No content in response:', data);
-        toast({
-          title: "No content generated",
-          description: "The AI didn't generate any content. Please try again.",
-          variant: "destructive",
-        });
-      }
-    } catch (error: any) {
-      console.error('Full error object:', error);
-      toast({
-        title: "Error generating content",
-        description: error.message || "An unknown error occurred",
-        variant: "destructive",
-      });
-    } finally {
-      setGenerating(false);
-    }
-  };
 
   const saveCurrentChapter = async () => {
     if (!user || !currentChapter) return;
@@ -492,9 +414,6 @@ const WriteBook = () => {
     }
   };
 
-  const handlePromptTranscription = (transcribedText: string) => {
-    setPrompt(prev => prev ? prev + " " + transcribedText : transcribedText);
-  };
 
   const handleContentTranscription = async (transcribedText: string) => {
     if (!currentChapter) return;
@@ -543,55 +462,6 @@ const WriteBook = () => {
     setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
   };
 
-  const generateStoryIdea = async () => {
-    if (!currentChapter) return;
-    
-    try {
-      const chapterContext = `The user is currently writing "${currentChapter.title}". `;
-      const { data, error } = await supabase.functions.invoke('openai-conversation', {
-        body: { 
-          prompt: `${chapterContext}You are a creative prompt generator specializing in autobiography and memoir writing. Your task is to generate random questions that prompt users to reflect on specific times, periods, or milestones in their life story that are RELEVANT to the chapter they're currently writing.
-
-Based on the chapter title "${currentChapter.title}", generate a time-specific autobiography prompt that would be appropriate for this life phase or period. The question should be:
-
-1. Time-specific—tied to the particular life stage mentioned in the chapter title
-2. Focused on a defined moment or era to encourage vivid, personal narratives  
-3. Engaging and introspective, often starting with "Describe," "Reflect on," "What was," "When did," or "Tell about"
-4. Concise, 1-2 sentences max
-5. Relevant to the themes and life period of the current chapter
-
-Examples based on different chapter types:
-- For "Before My Birth": Ask about family history, parents' early relationship, or world events during parents' youth
-- For "Birth and Infancy": Ask about early family dynamics, first home, or family traditions around that time
-- For "Elementary School": Ask about specific school memories, childhood friendships, or family routines during those years
-- For "High School": Ask about teenage experiences, first jobs, or pivotal moments during adolescence
-- For "Marriage and Family": Ask about meeting spouse, wedding details, or early parenting experiences
-
-Generate 1 contextually appropriate autobiography prompt question for "${currentChapter.title}".` 
-        }
-      });
-
-      if (error) throw error;
-      
-      if (data?.choices?.[0]?.message?.content) {
-        setStoryIdea(data.choices[0].message.content);
-      } else {
-        throw new Error("No content received from AI");
-      }
-    } catch (error) {
-      console.error('Error generating story idea:', error);
-      // Fallback to a random prompt if API fails
-      const fallbackPrompts = [
-        "Describe your first day at a new school and how it shaped your understanding of change.",
-        "What was your earliest memory of feeling truly proud of an accomplishment in elementary school?",
-        "Reflect on a specific summer during your childhood that taught you something important about family.",
-        "When did you first realize you were becoming an adult, and what triggered that moment?",
-        "Tell about a tradition from your teenage years that you now understand differently as an adult."
-      ];
-      const randomPrompt = fallbackPrompts[Math.floor(Math.random() * fallbackPrompts.length)];
-      setStoryIdea(randomPrompt);
-    }
-  };
 
   if (loading) {
     return (
@@ -732,73 +602,31 @@ Generate 1 contextually appropriate autobiography prompt question for "${current
           
           {currentChapter ? (
                 <div className="max-w-4xl mx-auto space-y-6">
-                   {/* Conversational Assistant Section */}
+                   {/* AI Assistant Section */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center space-x-2">
                         <Sparkles className="h-5 w-5 text-primary" />
-                        <span>Conversational Assistant</span>
+                        <span>AI Assistant</span>
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {showTextarea && (
-                        <Textarea
-                          placeholder="Example: Write about my childhood growing up in a small town, focusing on summer adventures and family traditions..."
-                          value={prompt}
-                          onChange={(e) => setPrompt(e.target.value)}
-                          className="min-h-[100px]"
+                      <div className="w-full h-10">
+                        <VoiceRecorder 
+                          onTranscription={handleContentTranscription}
                         />
-                      )}
-                      
-                      {storyIdea && (
-                        <div className="p-4 bg-muted rounded-lg">
-                          <p className="text-sm text-muted-foreground font-medium">Story Idea:</p>
-                          <p className="mt-1">{storyIdea}</p>
-                        </div>
-                      )}
-
-                      <div className={`grid gap-2 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
-                        <Button 
-                          onClick={generateStoryIdea}
-                          disabled={generating}
-                          variant="outline"
-                          className="w-full h-10"
-                        >
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          Give me an idea
-                        </Button>
-                        
-                        <div className="w-full h-10">
-                          <VoiceRecorder 
-                            onTranscription={handleContentTranscription}
-                            disabled={generating}
-                          />
-                        </div>
                       </div>
 
-                      {(showTextarea && prompt.trim()) && (
-                        <div className="flex gap-2">
-                          <Button 
-                            onClick={generateContent}
-                            disabled={!prompt.trim() || generating}
-                            className="flex-1"
-                            variant="outline"
-                          >
-                            <Sparkles className="h-4 w-4 mr-2" />
-                            {generating ? "Generating..." : "Generate Content"}
-                          </Button>
-                          <Button 
-                            onClick={() => {
-                              setPrompt("");
-                              setShowTextarea(false);
-                            }}
-                            variant="outline"
-                          >
-                            <Save className="h-4 w-4 mr-2" />
-                            Save
-                          </Button>
-                        </div>
-                      )}
+                      {/* AI Conversation Button */}
+                      <div className="pt-4 border-t">
+                        <Button 
+                          onClick={() => setShowConversation(!showConversation)}
+                          variant="outline"
+                          className="w-full"
+                        >
+                          💬 {showConversation ? 'Hide' : 'Start'} AI Conversation
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
 
@@ -948,73 +776,20 @@ Generate 1 contextually appropriate autobiography prompt question for "${current
                     </Card>
 
 
-                    {/* Conversational Assistant Section */}
+                    {/* AI Assistant Section */}
                     <Card>
                       <CardHeader>
                         <CardTitle className="flex items-center space-x-2">
                           <Sparkles className="h-5 w-5 text-primary" />
-                          <span>Conversational Assistant</span>
+                          <span>AI Assistant</span>
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {showTextarea && (
-                          <Textarea
-                            placeholder="Example: Write about my childhood growing up in a small town, focusing on summer adventures and family traditions..."
-                            value={prompt}
-                            onChange={(e) => setPrompt(e.target.value)}
-                            className="min-h-[100px]"
+                        <div className="w-full h-10">
+                          <VoiceRecorder 
+                            onTranscription={handleContentTranscription}
                           />
-                        )}
-                        
-                        {storyIdea && (
-                          <div className="p-4 bg-muted rounded-lg">
-                            <p className="text-sm text-muted-foreground font-medium">Story Idea:</p>
-                            <p className="mt-1">{storyIdea}</p>
-                          </div>
-                        )}
-
-                        <div className="grid grid-cols-2 gap-2">
-                          <Button 
-                            onClick={generateStoryIdea}
-                            disabled={generating}
-                            variant="outline"
-                            className="w-full h-10"
-                          >
-                            <Sparkles className="h-4 w-4 mr-2" />
-                            Give me an idea
-                          </Button>
-                          
-                          <div className="w-full h-10">
-                            <VoiceRecorder 
-                              onTranscription={handleContentTranscription}
-                              disabled={generating}
-                            />
-                          </div>
                         </div>
-
-                        {(showTextarea && prompt.trim()) && (
-                          <div className="flex gap-2">
-                            <Button 
-                              onClick={generateContent}
-                              disabled={!prompt.trim() || generating}
-                              className="flex-1"
-                              variant="outline"
-                            >
-                              <Sparkles className="h-4 w-4 mr-2" />
-                              {generating ? "Generating..." : "Generate Content"}
-                            </Button>
-                            <Button 
-                              onClick={() => {
-                                setPrompt("");
-                                setShowTextarea(false);
-                              }}
-                              variant="outline"
-                            >
-                              <Save className="h-4 w-4 mr-2" />
-                              Save
-                            </Button>
-                          </div>
-                        )}
                         
                         {/* AI Conversation Button */}
                         <div className="pt-4 border-t">
@@ -1074,6 +849,14 @@ Generate 1 contextually appropriate autobiography prompt question for "${current
                                 userId={user.id}
                                 bookId={book.id}
                                 chapterId={currentChapter?.id}
+                                onContentGenerated={(content) => {
+                                  if (currentChapter) {
+                                    const newContent = currentChapter.content ? currentChapter.content + "\n\n" + content : content;
+                                    const updatedChapter = { ...currentChapter, content: newContent };
+                                    setCurrentChapter(updatedChapter);
+                                    setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
+                                  }
+                                }}
                               />
                             </div>
                             <div className="lg:col-span-1">

@@ -6,27 +6,34 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { VoiceRecorder } from '@/components/VoiceRecorder';
 import VoiceInterface from '@/components/VoiceInterface';
-import { MessageCircle, Send, Mic, MicOff, Loader2 } from 'lucide-react';
+import { MessageCircle, Send, Mic, MicOff, Loader2, Sparkles } from 'lucide-react';
 import { useConversationFlow, ConversationMessage } from '@/hooks/useConversationFlow';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ConversationInterfaceProps {
   userId: string;
   bookId: string;
   chapterId?: string;
   className?: string;
+  onContentGenerated?: (content: string) => void;
 }
 
 export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   userId,
   bookId,
   chapterId,
-  className = ""
+  className = "",
+  onContentGenerated
 }) => {
   const [currentMessage, setCurrentMessage] = useState('');
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const [isAISpeaking, setIsAISpeaking] = useState(false);
+  const [directPrompt, setDirectPrompt] = useState('');
+  const [generating, setGenerating] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { toast } = useToast();
 
   const {
     currentSession,
@@ -87,6 +94,45 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     setIsVoiceMode(false);
   };
 
+  const generateDirectContent = async () => {
+    if (!directPrompt.trim() || !userId || !bookId) return;
+
+    setGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-autobiography', {
+        body: {
+          prompt: `Write autobiography content based on this prompt: ${directPrompt}. Make it personal and engaging.`,
+          userId: userId,
+          bookId: bookId
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      if (data?.content && onContentGenerated) {
+        onContentGenerated(data.content);
+        setDirectPrompt("");
+        
+        toast({
+          title: "Content generated!",
+          description: "AI has generated new content for your chapter.",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error generating content",
+        description: error.message || "An unknown error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   const formatMessage = (content: string) => {
     // Simple formatting for better readability
     return content.split('\n').map((line, index) => (
@@ -99,17 +145,33 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
 
   if (!currentSession) {
     return (
-      <Card className={`${className} w-full max-w-4xl mx-auto`}>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MessageCircle className="h-6 w-6" />
-            Start a Conversation
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground">
-            Choose a conversation type to begin documenting your life story:
-          </p>
+      <div className={`space-y-6 ${className}`}>
+        {/* Direct Content Generation */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">Generate Content Directly</h3>
+          <Textarea
+            placeholder="Example: Write about my childhood growing up in a small town, focusing on summer adventures and family traditions..."
+            value={directPrompt}
+            onChange={(e) => setDirectPrompt(e.target.value)}
+            className="min-h-[100px]"
+          />
+          <Button 
+            onClick={generateDirectContent}
+            disabled={!directPrompt.trim() || generating}
+            className="w-full"
+          >
+            <Sparkles className="h-4 w-4 mr-2" />
+            {generating ? "Generating..." : "Generate Content"}
+          </Button>
+        </div>
+
+        <div className="border-t pt-6">
+          <div className="text-center">
+            <h3 className="text-lg font-medium mb-2">Start a Conversation</h3>
+            <p className="text-muted-foreground mb-6">
+              Choose how you'd like to interact with the AI assistant
+            </p>
+          </div>
           
           <div className="grid grid-cols-1 gap-4">
             {/* Voice Interface Section */}
@@ -236,8 +298,8 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
               </div>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
