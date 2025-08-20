@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Book, LogOut, Save, Sparkles, ArrowLeft, Plus, FileText, Trash2, Edit2, Type, Menu } from "lucide-react";
+import { Book, LogOut, Save, Sparkles, ArrowLeft, Plus, FileText, Trash2, Edit2, Type, Menu, MessageCircle } from "lucide-react";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
 import { ConversationInterface } from "@/components/ConversationInterface";
 import { ConversationContext } from "@/components/ConversationContext";
@@ -718,6 +718,19 @@ const WriteBook = () => {
               <div className="h-full p-6 overflow-auto">
                 {currentChapter ? (
                   <div className="max-w-4xl mx-auto space-y-6">
+                    {/* Toggle Button for AI Conversation */}
+                    <div className="flex justify-center mb-6">
+                      <Button
+                        onClick={() => setShowConversation(!showConversation)}
+                        variant={showConversation ? "secondary" : "default"}
+                        size="lg"
+                        className="shadow-lg"
+                      >
+                        <MessageCircle className="h-4 w-4 mr-2" />
+                        {showConversation ? "Hide AI Assistant" : "Start AI Conversation"}
+                      </Button>
+                    </div>
+
                     {/* AI Conversation Section */}
                     {showConversation && user && book && (
                       <Card className="mt-6">
