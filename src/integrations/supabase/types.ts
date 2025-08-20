@@ -45,15 +45,7 @@ export type Database = {
           trial_words_used?: number
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "books_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       chapters: {
         Row: {
@@ -118,15 +110,7 @@ export type Database = {
           session_id?: string | null
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "chat_histories_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       orders: {
         Row: {
@@ -159,42 +143,99 @@ export type Database = {
           total_price?: number | null
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "orders_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profiles: {
         Row: {
-          age: number | null
-          completed_signup: boolean | null
+          birth_year: number | null
+          birthplace: string | null
+          book_id: string
+          career_highlights: string[] | null
+          challenges_overcome: string[] | null
           created_at: string
-          email: string | null
+          cultural_background: string | null
+          current_location: string | null
+          education: string | null
+          family_background: string | null
           full_name: string | null
+          hobbies_interests: string[] | null
           id: string
+          key_life_events: string[] | null
+          languages_spoken: string[] | null
+          life_philosophy: string | null
+          life_themes: string[] | null
+          memorable_quotes: string[] | null
+          occupation: string | null
+          personality_traits: string[] | null
+          relationships_family: string | null
+          updated_at: string
+          user_id: string
+          values_beliefs: string | null
+          writing_style_preference: string | null
         }
         Insert: {
-          age?: number | null
-          completed_signup?: boolean | null
+          birth_year?: number | null
+          birthplace?: string | null
+          book_id: string
+          career_highlights?: string[] | null
+          challenges_overcome?: string[] | null
           created_at?: string
-          email?: string | null
+          cultural_background?: string | null
+          current_location?: string | null
+          education?: string | null
+          family_background?: string | null
           full_name?: string | null
+          hobbies_interests?: string[] | null
           id?: string
+          key_life_events?: string[] | null
+          languages_spoken?: string[] | null
+          life_philosophy?: string | null
+          life_themes?: string[] | null
+          memorable_quotes?: string[] | null
+          occupation?: string | null
+          personality_traits?: string[] | null
+          relationships_family?: string | null
+          updated_at?: string
+          user_id: string
+          values_beliefs?: string | null
+          writing_style_preference?: string | null
         }
         Update: {
-          age?: number | null
-          completed_signup?: boolean | null
+          birth_year?: number | null
+          birthplace?: string | null
+          book_id?: string
+          career_highlights?: string[] | null
+          challenges_overcome?: string[] | null
           created_at?: string
-          email?: string | null
+          cultural_background?: string | null
+          current_location?: string | null
+          education?: string | null
+          family_background?: string | null
           full_name?: string | null
+          hobbies_interests?: string[] | null
           id?: string
+          key_life_events?: string[] | null
+          languages_spoken?: string[] | null
+          life_philosophy?: string | null
+          life_themes?: string[] | null
+          memorable_quotes?: string[] | null
+          occupation?: string | null
+          personality_traits?: string[] | null
+          relationships_family?: string | null
+          updated_at?: string
+          user_id?: string
+          values_beliefs?: string | null
+          writing_style_preference?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: true
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
