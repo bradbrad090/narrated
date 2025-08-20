@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { VoiceRecorder } from '@/components/VoiceRecorder';
+import VoiceInterface from '@/components/VoiceInterface';
 import { MessageCircle, Send, Mic, MicOff, Loader2 } from 'lucide-react';
 import { useConversationFlow, ConversationMessage } from '@/hooks/useConversationFlow';
 
@@ -23,6 +24,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
 }) => {
   const [currentMessage, setCurrentMessage] = useState('');
   const [isVoiceMode, setIsVoiceMode] = useState(false);
+  const [isAISpeaking, setIsAISpeaking] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -109,63 +111,87 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
             Choose a conversation type to begin documenting your life story:
           </p>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button
-              onClick={() => startConversation('interview')}
-              disabled={isLoading}
-              className="h-auto p-4 flex flex-col items-center gap-2"
-              variant="outline"
-            >
-              {isLoading ? (
-                <Loader2 className="h-6 w-6 animate-spin" />
-              ) : (
-                <MessageCircle className="h-6 w-6" />
-              )}
-              <div className="text-center">
-                <div className="font-medium">Interview</div>
-                <div className="text-sm text-muted-foreground">
-                  Structured Q&A about your life
-                </div>
+          <div className="grid grid-cols-1 gap-4">
+            {/* Voice Interface Section */}
+            <div className="p-4 bg-muted/30 rounded-lg">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-medium">Voice Conversation</h3>
+                {isAISpeaking && (
+                  <div className="flex items-center gap-1 text-sm text-green-600">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    AI Speaking
+                  </div>
+                )}
               </div>
-            </Button>
+              <p className="text-sm text-muted-foreground mb-3">
+                Start a real-time voice conversation with the AI assistant
+              </p>
+              <VoiceInterface 
+                onSpeakingChange={setIsAISpeaking}
+                context={context}
+                conversationType="interview"
+              />
+            </div>
 
-            <Button
-              onClick={() => startConversation('reflection')}
-              disabled={isLoading}
-              className="h-auto p-4 flex flex-col items-center gap-2"
-              variant="outline"
-            >
-              {isLoading ? (
-                <Loader2 className="h-6 w-6 animate-spin" />
-              ) : (
-                <MessageCircle className="h-6 w-6" />
-              )}
-              <div className="text-center">
-                <div className="font-medium">Reflection</div>
-                <div className="text-sm text-muted-foreground">
-                  Deep exploration of meanings
+            {/* Text Conversation Options */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Button
+                onClick={() => startConversation('interview')}
+                disabled={isLoading}
+                className="h-auto p-4 flex flex-col items-center gap-2"
+                variant="outline"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                ) : (
+                  <MessageCircle className="h-6 w-6" />
+                )}
+                <div className="text-center">
+                  <div className="font-medium">Text Interview</div>
+                  <div className="text-sm text-muted-foreground">
+                    Structured Q&A about your life
+                  </div>
                 </div>
-              </div>
-            </Button>
+              </Button>
 
-            <Button
-              onClick={() => startConversation('brainstorming')}
-              disabled={isLoading}
-              className="h-auto p-4 flex flex-col items-center gap-2"
-              variant="outline"
-            >
-              {isLoading ? (
-                <Loader2 className="h-6 w-6 animate-spin" />
-              ) : (
-                <MessageCircle className="h-6 w-6" />
-              )}
-              <div className="text-center">
-                <div className="font-medium">Brainstorming</div>
-                <div className="text-sm text-muted-foreground">
-                  Generate creative story ideas
+              <Button
+                onClick={() => startConversation('reflection')}
+                disabled={isLoading}
+                className="h-auto p-4 flex flex-col items-center gap-2"
+                variant="outline"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                ) : (
+                  <MessageCircle className="h-6 w-6" />
+                )}
+                <div className="text-center">
+                  <div className="font-medium">Text Reflection</div>
+                  <div className="text-sm text-muted-foreground">
+                    Deep exploration of meanings
+                  </div>
                 </div>
-              </div>
-            </Button>
+              </Button>
+
+              <Button
+                onClick={() => startConversation('brainstorming')}
+                disabled={isLoading}
+                className="h-auto p-4 flex flex-col items-center gap-2"
+                variant="outline"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                ) : (
+                  <MessageCircle className="h-6 w-6" />
+                )}
+                <div className="text-center">
+                  <div className="font-medium">Text Brainstorming</div>
+                  <div className="text-sm text-muted-foreground">
+                    Generate creative story ideas
+                  </div>
+                </div>
+              </Button>
+            </div>
           </div>
 
           {conversationHistory.length > 0 && (
@@ -211,6 +237,12 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
             <Badge variant="outline">
               {currentSession.conversationType}
             </Badge>
+            {isAISpeaking && (
+              <div className="flex items-center gap-1 text-sm text-green-600">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                AI Speaking
+              </div>
+            )}
           </div>
           <Button
             onClick={endConversation}
