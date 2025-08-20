@@ -40,8 +40,7 @@ const handler = async (request: Request): Promise<Response> => {
       bookId, 
       chapterId,
       conversationType = 'interview',
-      context,
-      isSelfConversation = false
+      context 
     } = await request.json();
     
     if (!userId || !bookId) {
@@ -68,8 +67,7 @@ const handler = async (request: Request): Promise<Response> => {
         bookId,
         chapterId,
         conversationType,
-        context,
-        isSelfConversation
+        context
       });
     } else if (action === 'send_message') {
       if (!sessionId || !message) {
@@ -84,8 +82,7 @@ const handler = async (request: Request): Promise<Response> => {
         message,
         userId,
         context,
-        conversationType,
-        isSelfConversation
+        conversationType
       });
     } else {
       return new Response(JSON.stringify({ error: "Invalid action. Use 'start_session' or 'send_message'" }), { 
@@ -104,7 +101,7 @@ const handler = async (request: Request): Promise<Response> => {
 };
 
 async function startConversationSession(supabaseClient: any, params: any) {
-  const { userId, bookId, chapterId, conversationType, context, isSelfConversation } = params;
+  const { userId, bookId, chapterId, conversationType, context } = params;
   
   // Generate a unique session ID
   const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -122,8 +119,7 @@ async function startConversationSession(supabaseClient: any, params: any) {
       context_snapshot: context || {},
       conversation_goals: conversationGoals,
       chapter_id: chapterId,
-      messages: [],
-      is_self_conversation: isSelfConversation || false
+      messages: []
     })
     .select()
     .single();
@@ -164,7 +160,7 @@ async function startConversationSession(supabaseClient: any, params: any) {
 }
 
 async function processConversationMessage(supabaseClient: any, params: any) {
-  const { sessionId, message, userId, context, conversationType, isSelfConversation } = params;
+  const { sessionId, message, userId, context, conversationType } = params;
 
   // Fetch existing conversation
   const { data: chatHistory, error: fetchError } = await supabaseClient
@@ -189,44 +185,39 @@ async function processConversationMessage(supabaseClient: any, params: any) {
 
   const updatedMessages = [...existingMessages, userMessage];
 
-  let finalMessages = updatedMessages;
+  // Generate AI response with retry logic
+  const conversationHistory = updatedMessages.slice(-10); // Keep last 10 messages for context
+  const prompt = buildConversationPrompt(context, conversationType, conversationHistory);
+  
+  let aiResponse;
+  let attempts = 0;
+  const maxAttempts = 3;
 
-  // Only generate AI response if not in self-conversation mode
-  if (!isSelfConversation) {
-    // Generate AI response with retry logic
-    const conversationHistory = updatedMessages.slice(-10); // Keep last 10 messages for context
-    const prompt = buildConversationPrompt(context, conversationType, conversationHistory);
-    
-    let aiResponse;
-    let attempts = 0;
-    const maxAttempts = 3;
-
-    while (attempts < maxAttempts) {
-      try {
-        aiResponse = await callOpenAI(prompt, conversationHistory);
-        break;
-      } catch (error) {
-        attempts++;
-        console.error(`OpenAI call attempt ${attempts} failed:`, error);
-        
-        if (attempts === maxAttempts) {
-          aiResponse = "I apologize, but I'm having trouble responding right now. Could you please rephrase your question or try again?";
-        } else {
-          // Exponential backoff
-          await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempts) * 1000));
-        }
+  while (attempts < maxAttempts) {
+    try {
+      aiResponse = await callOpenAI(prompt, conversationHistory);
+      break;
+    } catch (error) {
+      attempts++;
+      console.error(`OpenAI call attempt ${attempts} failed:`, error);
+      
+      if (attempts === maxAttempts) {
+        aiResponse = "I apologize, but I'm having trouble responding right now. Could you please rephrase your question or try again?";
+      } else {
+        // Exponential backoff
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempts) * 1000));
       }
     }
-
-    // Add AI response to messages
-    const aiMessage = {
-      role: 'assistant',
-      content: aiResponse,
-      timestamp: new Date().toISOString()
-    };
-
-    finalMessages = [...updatedMessages, aiMessage];
   }
+
+  // Add AI response to messages
+  const aiMessage = {
+    role: 'assistant',
+    content: aiResponse,
+    timestamp: new Date().toISOString()
+  };
+
+  const finalMessages = [...updatedMessages, aiMessage];
 
   // Update chat history
   await supabaseClient
@@ -239,17 +230,11 @@ async function processConversationMessage(supabaseClient: any, params: any) {
 
   console.log('Message processed for session:', sessionId);
 
-  const responseData: any = {
+  return new Response(JSON.stringify({
+    response: aiResponse,
     sessionId,
     messageCount: finalMessages.length
-  };
-
-  // Only include AI response if not in self-conversation mode
-  if (!isSelfConversation && finalMessages.length > updatedMessages.length) {
-    responseData.response = finalMessages[finalMessages.length - 1].content;
-  }
-
-  return new Response(JSON.stringify(responseData), {
+  }), {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' }
   });
 }

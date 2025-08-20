@@ -211,7 +211,6 @@ export type Database = {
           conversation_type: string | null
           created_at: string
           id: string
-          is_self_conversation: boolean | null
           messages: Json | null
           session_id: string | null
           user_id: string
@@ -224,7 +223,6 @@ export type Database = {
           conversation_type?: string | null
           created_at?: string
           id?: string
-          is_self_conversation?: boolean | null
           messages?: Json | null
           session_id?: string | null
           user_id: string
@@ -237,7 +235,6 @@ export type Database = {
           conversation_type?: string | null
           created_at?: string
           id?: string
-          is_self_conversation?: boolean | null
           messages?: Json | null
           session_id?: string | null
           user_id?: string
