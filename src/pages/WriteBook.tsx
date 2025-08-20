@@ -602,34 +602,6 @@ const WriteBook = () => {
           
           {currentChapter ? (
                 <div className="max-w-4xl mx-auto space-y-6">
-                   {/* AI Assistant Section */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center space-x-2">
-                        <Sparkles className="h-5 w-5 text-primary" />
-                        <span>AI Assistant</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="w-full h-10">
-                        <VoiceRecorder 
-                          onTranscription={handleContentTranscription}
-                        />
-                      </div>
-
-                      {/* AI Conversation Button */}
-                      <div className="pt-4 border-t">
-                        <Button 
-                          onClick={() => setShowConversation(!showConversation)}
-                          variant="outline"
-                          className="w-full"
-                        >
-                          💬 {showConversation ? 'Hide' : 'Start'} AI Conversation
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-
                   {/* Chapter Content Editor */}
                   <Card>
                     <CardHeader>
@@ -775,64 +747,6 @@ const WriteBook = () => {
                       </CardHeader>
                     </Card>
 
-
-                    {/* AI Assistant Section */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center space-x-2">
-                          <Sparkles className="h-5 w-5 text-primary" />
-                          <span>AI Assistant</span>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="w-full h-10">
-                          <VoiceRecorder 
-                            onTranscription={handleContentTranscription}
-                          />
-                        </div>
-                        
-                        {/* AI Conversation Button */}
-                        <div className="pt-4 border-t">
-                          <Button 
-                            onClick={() => setShowConversation(!showConversation)}
-                            variant="outline"
-                            className="w-full"
-                          >
-                            💬 {showConversation ? 'Hide' : 'Start'} AI Conversation
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    {/* Chapter Content Editor */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>{currentChapter.title}</CardTitle>
-                        <CardDescription>
-                          Edit and refine your chapter content. You can manually edit the AI-generated text or write your own.
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <Textarea
-                          placeholder="Your chapter content will appear here. You can edit it directly or use the AI assistant above to generate new content..."
-                          value={currentChapter.content}
-                          onChange={(e) => handleChapterContentChange(e.target.value)}
-                          className="min-h-[500px] text-base leading-relaxed"
-                        />
-                        <div className="mt-4 flex justify-center">
-                          <Button 
-                            onClick={saveCurrentChapter}
-                            disabled={saving || !currentChapter}
-                            size="lg"
-                            className="shadow-lg"
-                          >
-                            <Save className="h-4 w-4 mr-2" />
-                            {saving ? "Saving..." : "Save"}
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
                     {/* AI Conversation Section */}
                     {showConversation && user && book && (
                       <Card className="mt-6">
@@ -869,6 +783,35 @@ const WriteBook = () => {
                         </CardContent>
                       </Card>
                     )}
+
+                    {/* Chapter Content Editor - Moved to bottom */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>{currentChapter.title}</CardTitle>
+                        <CardDescription>
+                          Edit and refine your chapter content. You can manually edit the AI-generated text or write your own.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <Textarea
+                          placeholder="Your chapter content will appear here. You can edit it directly or use the AI assistant above to generate new content..."
+                          value={currentChapter.content}
+                          onChange={(e) => handleChapterContentChange(e.target.value)}
+                          className="min-h-[500px] text-base leading-relaxed"
+                        />
+                        <div className="mt-4 flex justify-center">
+                          <Button 
+                            onClick={saveCurrentChapter}
+                            disabled={saving || !currentChapter}
+                            size="lg"
+                            className="shadow-lg"
+                          >
+                            <Save className="h-4 w-4 mr-2" />
+                            {saving ? "Saving..." : "Save"}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
                 ) : (
                   <div className="flex items-center justify-center h-full">
