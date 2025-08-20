@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.ai-conversation-realtime]
 verify_jwt = false
+
+[functions.profile-extractor]
+verify_jwt = false

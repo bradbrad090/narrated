@@ -11,6 +11,7 @@ import { Book, LogOut, Save, Sparkles, ArrowLeft, Plus, FileText, Trash2, Edit2,
 import { VoiceRecorder } from "@/components/VoiceRecorder";
 import { ConversationInterface } from "@/components/ConversationInterface";
 import { ConversationContext } from "@/components/ConversationContext";
+import { ProfileSetup } from "@/components/ProfileSetup";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -41,6 +42,7 @@ const WriteBook = () => {
   const [storyIdea, setStoryIdea] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showConversation, setShowConversation] = useState(false);
+  const [bookProfile, setBookProfile] = useState<any>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -108,6 +110,20 @@ const WriteBook = () => {
       }
       
       setBook(bookData);
+
+      // Fetch book profile
+      const { data: profileData, error: profileError } = await supabase
+        .from('book_profiles')
+        .select('*')
+        .eq('book_id', bookId)
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (profileError && profileError.code !== 'PGRST116') {
+        console.error('Error fetching book profile:', profileError);
+      } else {
+        setBookProfile(profileData);
+      }
 
       // Fetch chapters
       const { data: chaptersData, error: chaptersError } = await supabase
@@ -701,8 +717,20 @@ Generate 1 contextually appropriate autobiography prompt question for "${current
       {/* Main Content */}
       <main className={isMobile ? "min-h-screen" : "h-[calc(100vh-80px)]"}>
         {isMobile ? (
-          <div className="h-full pt-20 p-4 overflow-auto">
-            {currentChapter ? (
+        <div className="h-full pt-20 p-4 overflow-auto">
+          {/* Profile Setup Section for Mobile */}
+          {user && book && (
+            <div className="max-w-4xl mx-auto mb-6">
+              <ProfileSetup
+                userId={user.id}
+                bookId={book.id}
+                bookProfile={bookProfile}
+                onProfileUpdate={setBookProfile}
+              />
+            </div>
+          )}
+          
+          {currentChapter ? (
                 <div className="max-w-4xl mx-auto space-y-6">
                    {/* Conversational Assistant Section */}
                   <Card>
@@ -816,9 +844,20 @@ Generate 1 contextually appropriate autobiography prompt question for "${current
           <ResizablePanelGroup direction="horizontal" className="w-full">
             {/* Left Sidebar - Chapter List */}
             <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
-              <div className="h-full bg-background border-r p-4">
-                <div className="space-y-2">
-                  <h2 className="text-lg font-semibold mb-4">Chapters</h2>
+              <div className="h-full bg-background border-r p-4 overflow-auto">
+                <div className="space-y-4">
+                  {/* Profile Setup Section */}
+                  {user && book && (
+                    <ProfileSetup
+                      userId={user.id}
+                      bookId={book.id}
+                      bookProfile={bookProfile}
+                      onProfileUpdate={setBookProfile}
+                    />
+                  )}
+                  
+                  <div className="space-y-2">
+                    <h2 className="text-lg font-semibold mb-4">Chapters</h2>
                   
                   {chapters.map((chapter) => (
                     <div
@@ -867,6 +906,7 @@ Generate 1 contextually appropriate autobiography prompt question for "${current
                     <Plus className="h-4 w-4 mr-2" />
                     Add Chapter
                   </Button>
+                  </div>
                 </div>
               </div>
             </ResizablePanel>
