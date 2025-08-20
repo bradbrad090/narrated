@@ -8,3 +8,9 @@ verify_jwt = false
 
 [functions.send-password-reset]
 verify_jwt = false
+
+[functions.conversation-context-builder]
+verify_jwt = false
+
+[functions.ai-conversation-realtime]
+verify_jwt = false
