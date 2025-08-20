@@ -98,7 +98,7 @@ Return only the JSON object, no other text.`;
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: "gpt-5-2025-08-07",
+        model: "gpt-4.1-2025-04-14",
         messages: [
           { role: "system", content: "You are an expert biographical information extractor. Always return valid JSON." },
           { role: "user", content: extractionPrompt }
@@ -109,8 +109,13 @@ Return only the JSON object, no other text.`;
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('OpenAI API error:', errorText);
-      throw new Error(`OpenAI API error: ${response.status}`);
+      console.error('OpenAI API error details:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries()),
+        body: errorText
+      });
+      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
