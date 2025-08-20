@@ -12,6 +12,7 @@ interface VoiceInterfaceProps {
   bookId: string;
   chapterId?: string;
   onConversationUpdate?: () => void;
+  selfMode?: boolean; // Add support for self mode
 }
 
 const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ 
@@ -21,7 +22,8 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   userId,
   bookId,
   chapterId,
-  onConversationUpdate
+  onConversationUpdate,
+  selfMode = false
 }) => {
   const { toast } = useToast();
   const [isConnected, setIsConnected] = useState(false);
@@ -57,14 +59,24 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       // Request microphone permission first
       await navigator.mediaDevices.getUserMedia({ audio: true });
       
-      chatRef.current = new RealtimeChat(handleMessage, userId, bookId, chapterId);
-      await chatRef.current.init(context, conversationType);
-      setIsConnected(true);
-      
-      toast({
-        title: "Voice Chat Connected",
-        description: "You can now speak with the AI assistant",
-      });
+      if (selfMode) {
+        // For self mode, just enable microphone without AI processing
+        setIsConnected(true);
+        toast({
+          title: "Voice Recording Ready",
+          description: "You can now record your voice for transcription",
+        });
+      } else {
+        // For AI mode, initialize RealtimeChat
+        chatRef.current = new RealtimeChat(handleMessage, userId, bookId, chapterId);
+        await chatRef.current.init(context, conversationType);
+        setIsConnected(true);
+        
+        toast({
+          title: "Voice Chat Connected",
+          description: "You can now speak with the AI assistant",
+        });
+      }
     } catch (error) {
       console.error('Error starting conversation:', error);
       toast({

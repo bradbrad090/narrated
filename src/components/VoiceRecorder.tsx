@@ -7,11 +7,13 @@ import { Mic, MicOff, Square } from 'lucide-react';
 interface VoiceRecorderProps {
   onTranscription: (text: string) => void;
   disabled?: boolean;
+  selfMode?: boolean; // If true, bypass AI processing for self-conversation mode
 }
 
 export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ 
   onTranscription, 
-  disabled = false 
+  disabled = false,
+  selfMode = false
 }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
