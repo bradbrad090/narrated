@@ -225,6 +225,7 @@ export const useConversationFlow = (userId: string, bookId: string, chapterId?: 
             sessionId: currentSession.sessionId,
             message,
             userId,
+            bookId,
             context,
             conversationType: currentSession.conversationType
           }
