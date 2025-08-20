@@ -348,6 +348,7 @@ const [showConversation, setShowConversation] = useState(false);
     endConversation,
     resumeConversation,
     loadContext,
+    loadConversationHistory,
     saveDraft,
     loadDraft,
     clearDraft

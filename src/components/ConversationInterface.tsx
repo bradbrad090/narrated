@@ -49,7 +49,8 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     resumeConversation,
     saveDraft,
     loadDraft,
-    clearDraft
+    clearDraft,
+    loadConversationHistory
   } = useConversationFlow(userId, bookId, chapterId);
 
   // Auto-scroll to bottom when new messages arrive
@@ -94,6 +95,61 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   const handleVoiceTranscription = (text: string) => {
     setCurrentMessage(prev => prev + (prev ? ' ' : '') + text);
     setIsVoiceMode(false);
+  };
+
+  const handleSaveSelfConversation = async () => {
+    if (!currentMessage.trim() || !userId || !bookId) return;
+
+    try {
+      // Generate unique session ID for self conversation
+      const sessionId = `self_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      const selfConversationEntry = {
+        role: 'user' as const,
+        content: currentMessage.trim(),
+        timestamp: new Date().toISOString()
+      };
+
+      // Save to chat_histories table
+      const { error } = await supabase
+        .from('chat_histories')
+        .insert({
+          user_id: userId,
+          chapter_id: chapterId,
+          session_id: sessionId,
+          conversation_type: 'reflection',
+          conversation_medium: 'text',
+          is_self_conversation: true,
+          messages: [selfConversationEntry],
+          context_snapshot: context || {},
+          conversation_goals: [
+            'Document personal thoughts and reflections',
+            'Capture self-directed memories and experiences',
+            'Preserve authentic personal voice and perspective'
+          ]
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      // Refresh conversation history to show the new entry
+      await loadConversationHistory();
+      
+      toast({
+        title: "Entry saved",
+        description: "Your self conversation entry has been saved to your history.",
+      });
+      
+      setCurrentMessage('');
+    } catch (error: any) {
+      console.error('Error saving self conversation:', error);
+      toast({
+        title: "Error saving entry",
+        description: error.message || "Failed to save your entry. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const generateDirectContent = async () => {
@@ -192,16 +248,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                 </div>
                 <div className="flex flex-col gap-2">
                   <Button
-                    onClick={() => {
-                      // Handle self conversation save
-                      if (currentMessage.trim()) {
-                        toast({
-                          title: "Entry saved",
-                          description: "Your self conversation entry has been saved.",
-                        });
-                        setCurrentMessage('');
-                      }
-                    }}
+                    onClick={handleSaveSelfConversation}
                     disabled={!currentMessage.trim()}
                     size="icon"
                     aria-label="Save entry"
@@ -363,6 +410,8 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                   bookId={bookId}
                   chapterId={chapterId}
                   onConversationUpdate={() => {
+                    // Refresh conversation history to show the voice conversation
+                    loadConversationHistory();
                     toast({
                       title: "Conversation saved",
                       description: "Your voice conversation has been saved to your history.",
