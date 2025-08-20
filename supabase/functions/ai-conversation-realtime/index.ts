@@ -263,10 +263,9 @@ async function callOpenAI(prompt: string, conversationHistory: any[]): Promise<s
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: "gpt-5-2025-08-07",
+        model: "gpt-4.1-2025-04-14",
         messages: messages,
-        max_completion_tokens: 500,
-        temperature: 0.7
+        max_completion_tokens: 500
       }),
       signal: controller.signal
     });
