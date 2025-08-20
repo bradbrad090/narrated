@@ -68,6 +68,15 @@ A working autobiography creation service where users can:
 - [ ] **Content Suggestions** - AI suggests topics user might have missed
 - [ ] **Basic Fact Checking** - Highlight potential inconsistencies in dates/events
 
+#### Recipe & Legacy Content Features
+- [ ] **Recipe Conversation Mode** - Dedicated conversation flow for discussing family recipes and cooking memories
+- [ ] **Voice-to-Recipe Transcription** - Convert spoken recipe instructions into formatted cookbook-style entries
+- [ ] **Handwritten Recipe OCR** - Upload photos of handwritten recipe cards and convert to text using AI
+- [ ] **Recipe Chapter Integration** - Seamlessly integrate recipes into autobiography chapters with family stories
+- [ ] **Recipe Photo Upload** - Allow users to include photos of finished dishes or cooking process
+- [ ] **Family Recipe Collections** - Group related recipes by family member or occasion
+- [ ] **Recipe Story Context** - AI prompts to capture stories behind each recipe (origin, memories, occasions)
+
 #### Administrative Features
 - [ ] **Admin Dashboard** - Monitor user progress, orders, support requests
 - [ ] **Analytics Integration** - Track user engagement, conversion rates, drop-off points
@@ -94,6 +103,10 @@ A working autobiography creation service where users can:
 - [ ] **SEO Optimization** - Improve organic search visibility
 - [ ] **Social Media Integration** - Share progress/completion on social platforms
 - [ ] **Testimonials & Reviews** - Collect and display customer success stories
+- [ ] **Prepaid Funeral Partnerships** - Partner with funeral homes to offer autobiography services
+- [ ] **Senior Living Community Partnerships** - Market to retirement homes and senior centers
+- [ ] **Estate Planning Attorney Partnerships** - Collaborate with lawyers who help clients preserve family history
+- [ ] **Genealogy Service Partnerships** - Partner with ancestry/genealogy platforms
 
 ---
 
