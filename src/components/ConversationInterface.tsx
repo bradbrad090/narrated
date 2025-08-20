@@ -213,10 +213,10 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                   <Button
                     onClick={handleSaveSelfConversation}
                     disabled={!currentMessage.trim()}
-                    size="icon"
+                    className="min-w-[120px]"
                     aria-label="Save entry"
                   >
-                    <Send className="h-4 w-4" />
+                    Submit
                   </Button>
                   <VoiceRecorder
                     onTranscription={handleVoiceTranscription}
