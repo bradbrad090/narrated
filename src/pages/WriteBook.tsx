@@ -727,31 +727,21 @@ const WriteBook = () => {
                             Have a natural conversation to explore your memories and generate content for your autobiography.
                           </CardDescription>
                         </CardHeader>
-                        <CardContent>
-                          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                            <div className="lg:col-span-3">
-                              <ConversationInterface
-                                userId={user.id}
-                                bookId={book.id}
-                                chapterId={currentChapter?.id}
-                                onContentGenerated={(content) => {
-                                  if (currentChapter) {
-                                    const newContent = currentChapter.content ? currentChapter.content + "\n\n" + content : content;
-                                    const updatedChapter = { ...currentChapter, content: newContent };
-                                    setCurrentChapter(updatedChapter);
-                                    setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
-                                  }
-                                }}
-                              />
-                            </div>
-                            <div className="lg:col-span-1">
-                              <ConversationContext
-                                context={null}
-                                isLoading={false}
-                              />
-                            </div>
-                          </div>
-                        </CardContent>
+                         <CardContent>
+                           <ConversationInterface
+                             userId={user.id}
+                             bookId={book.id}
+                             chapterId={currentChapter?.id}
+                             onContentGenerated={(content) => {
+                               if (currentChapter) {
+                                 const newContent = currentChapter.content ? currentChapter.content + "\n\n" + content : content;
+                                 const updatedChapter = { ...currentChapter, content: newContent };
+                                 setCurrentChapter(updatedChapter);
+                                 setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
+                               }
+                             }}
+                           />
+                         </CardContent>
                       </Card>
                      )}
 
