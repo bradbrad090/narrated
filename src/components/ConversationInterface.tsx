@@ -2,12 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { VoiceRecorder } from '@/components/VoiceRecorder';
 import VoiceInterface from '@/components/VoiceInterface';
-import { MessageCircle, Send, Mic, MicOff, Loader2, Sparkles, User, Bot, CheckCircle } from 'lucide-react';
+import { SavedConversations } from '@/components/SavedConversations';
+import { MessageCircle, Send, Loader2, Sparkles, User, Bot, CheckCircle } from 'lucide-react';
 import { useConversationFlow, ConversationMessage } from '@/hooks/useConversationFlow';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -236,14 +236,9 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                         .map((session) => (
                           <div key={session.sessionId} className="p-3 border rounded-lg text-sm">
                             <div className="flex items-center gap-2 mb-1">
-                              <Badge variant="outline">
+                              <span className="text-xs text-muted-foreground">
                                 {new Date(session.messages[0]?.timestamp).toLocaleDateString()}
-                              </Badge>
-                              <Badge 
-                                variant={session.conversationMedium === 'voice' ? 'default' : 'secondary'}
-                              >
-                                {session.conversationMedium === 'voice' ? '🎤' : '💬'}
-                              </Badge>
+                              </span>
                             </div>
                             <p className="text-muted-foreground line-clamp-2">
                               {session.messages[0]?.content || 'Empty entry'}
@@ -405,96 +400,23 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
         </TabsContent>
       </Tabs>
 
-      {/* Recent Conversations */}
-      {conversationHistory.length > 0 && (
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle className="text-lg">Recent Conversations</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {/* Self Conversations Section */}
-              {conversationHistory.filter(session => session.isSelfConversation).length > 0 && (
-                <div>
-                  <h4 className="font-medium text-sm mb-2 text-muted-foreground">Self Conversations</h4>
-                  <div className="space-y-2">
-                    {conversationHistory
-                      .filter(session => session.isSelfConversation)
-                      .slice(0, 3)
-                      .map((session) => (
-                        <div key={session.sessionId} className="flex items-center justify-between p-3 border rounded-lg bg-muted/20">
-                          <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-2">
-                              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                                Self Entry
-                              </Badge>
-                              <Badge 
-                                variant={session.conversationMedium === 'voice' ? 'default' : 'secondary'}
-                                className={session.conversationMedium === 'voice' ? 'bg-green-100 text-green-800' : ''}
-                              >
-                                {session.conversationMedium === 'voice' ? '🎤 Voice' : '💬 Text'}
-                              </Badge>
-                            </div>
-                            <span className="text-sm text-muted-foreground">
-                              {session.messages.length} {session.messages.length === 1 ? 'entry' : 'entries'}
-                            </span>
-                          </div>
-                          <Button
-                            onClick={() => resumeConversation(session)}
-                            size="sm"
-                            variant="ghost"
-                          >
-                            View Entry
-                          </Button>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              )}
-
-              {/* AI Conversations Section */}
-              {conversationHistory.filter(session => !session.isSelfConversation).length > 0 && (
-                <div>
-                  <h4 className="font-medium text-sm mb-2 text-muted-foreground">AI Conversations</h4>
-                  <div className="space-y-2">
-                    {conversationHistory
-                      .filter(session => !session.isSelfConversation)
-                      .slice(0, 3)
-                      .map((session) => (
-                        <div key={session.sessionId} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-2">
-                              <Badge variant="outline">
-                                {session.conversationType}
-                              </Badge>
-                              <Badge 
-                                variant={session.conversationMedium === 'voice' ? 'default' : 'secondary'}
-                                className={session.conversationMedium === 'voice' ? 'bg-green-100 text-green-800' : ''}
-                              >
-                                {session.conversationMedium === 'voice' ? '🎤 Voice' : '💬 Text'}
-                              </Badge>
-                            </div>
-                            <span className="text-sm text-muted-foreground">
-                              {session.messages.length} messages
-                            </span>
-                          </div>
-                          <Button
-                            onClick={() => resumeConversation(session)}
-                            size="sm"
-                            variant="ghost"
-                            disabled={session.conversationMedium === 'voice'}
-                          >
-                            {session.conversationMedium === 'voice' ? 'View Transcript' : 'Resume'}
-                          </Button>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Saved Conversations */}
+      <SavedConversations 
+        conversations={conversationHistory}
+        onResumeConversation={resumeConversation}
+        onViewConversation={(session) => {
+          // For now, just resume - could add a dedicated view modal later
+          if (!session.isSelfConversation && session.conversationMedium === 'text') {
+            resumeConversation(session);
+          } else {
+            toast({
+              title: "View Conversation",
+              description: "Detailed conversation viewer coming soon!",
+            });
+          }
+        }}
+        className="mt-6"
+      />
     </div>
   );
 };
