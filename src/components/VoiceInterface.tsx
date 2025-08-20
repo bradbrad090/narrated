@@ -8,12 +8,20 @@ interface VoiceInterfaceProps {
   onSpeakingChange: (speaking: boolean) => void;
   context?: any;
   conversationType?: string;
+  userId: string;
+  bookId: string;
+  chapterId?: string;
+  onConversationUpdate?: () => void;
 }
 
 const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ 
   onSpeakingChange, 
   context, 
-  conversationType = 'interview' 
+  conversationType = 'interview',
+  userId,
+  bookId,
+  chapterId,
+  onConversationUpdate
 }) => {
   const { toast } = useToast();
   const [isConnected, setIsConnected] = useState(false);
@@ -49,7 +57,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       // Request microphone permission first
       await navigator.mediaDevices.getUserMedia({ audio: true });
       
-      chatRef.current = new RealtimeChat(handleMessage);
+      chatRef.current = new RealtimeChat(handleMessage, userId, bookId, chapterId);
       await chatRef.current.init(context, conversationType);
       setIsConnected(true);
       
@@ -75,9 +83,14 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     setIsSpeaking(false);
     onSpeakingChange(false);
     
+    // Notify parent component that conversation might have been updated
+    if (onConversationUpdate) {
+      onConversationUpdate();
+    }
+    
     toast({
       title: "Voice Chat Ended",
-      description: "Voice conversation has been disconnected",
+      description: "Voice conversation has been saved to your chat history",
     });
   };
 

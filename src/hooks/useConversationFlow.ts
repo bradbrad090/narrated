@@ -11,6 +11,7 @@ export interface ConversationMessage {
 export interface ConversationSession {
   sessionId: string;
   conversationType: 'interview' | 'reflection' | 'brainstorming';
+  conversationMedium?: 'text' | 'voice';
   messages: ConversationMessage[];
   context?: any;
   goals?: string[];
@@ -82,6 +83,7 @@ export const useConversationFlow = (userId: string, bookId: string, chapterId?: 
         return {
           sessionId: chat.session_id,
           conversationType: chat.conversation_type as 'interview' | 'reflection' | 'brainstorming',
+          conversationMedium: (chat.conversation_medium as 'text' | 'voice') || 'text',
           messages,
           context: chat.context_snapshot,
           goals

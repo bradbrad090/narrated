@@ -130,6 +130,13 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                 onSpeakingChange={setIsAISpeaking}
                 context={context}
                 conversationType="interview"
+                userId={userId}
+                bookId={bookId}
+                chapterId={chapterId}
+                onConversationUpdate={() => {
+                  // Refresh conversation history when voice chat ends
+                  window.location.reload();
+                }}
               />
             </div>
 
@@ -201,9 +208,17 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                 {conversationHistory.slice(0, 3).map((session) => (
                   <div key={session.sessionId} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex items-center gap-3">
-                      <Badge variant="outline">
-                        {session.conversationType}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline">
+                          {session.conversationType}
+                        </Badge>
+                        <Badge 
+                          variant={session.conversationMedium === 'voice' ? 'default' : 'secondary'}
+                          className={session.conversationMedium === 'voice' ? 'bg-green-100 text-green-800' : ''}
+                        >
+                          {session.conversationMedium === 'voice' ? '🎤 Voice' : '💬 Text'}
+                        </Badge>
+                      </div>
                       <span className="text-sm text-muted-foreground">
                         {session.messages.length} messages
                       </span>
@@ -212,8 +227,9 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                       onClick={() => resumeConversation(session)}
                       size="sm"
                       variant="ghost"
+                      disabled={session.conversationMedium === 'voice'}
                     >
-                      Resume
+                      {session.conversationMedium === 'voice' ? 'View Transcript' : 'Resume'}
                     </Button>
                   </div>
                 ))}

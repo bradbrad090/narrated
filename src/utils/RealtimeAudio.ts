@@ -65,14 +65,35 @@ export class RealtimeChat {
   private dc: RTCDataChannel | null = null;
   private audioEl: HTMLAudioElement;
   private recorder: AudioRecorder | null = null;
+  private sessionId: string | null = null;
+  private userId: string;
+  private bookId: string;
+  private chapterId?: string;
+  private conversationType: string;
+  private messages: Array<{role: string, content: string, timestamp: string}> = [];
+  private currentTranscript = '';
 
-  constructor(private onMessage: (message: any) => void) {
+  constructor(
+    private onMessage: (message: any) => void, 
+    userId: string, 
+    bookId: string, 
+    chapterId?: string
+  ) {
     this.audioEl = document.createElement("audio");
     this.audioEl.autoplay = true;
+    this.userId = userId;
+    this.bookId = bookId;
+    this.chapterId = chapterId;
+    this.conversationType = 'interview';
   }
 
   async init(context?: any, conversationType?: string) {
     try {
+      this.conversationType = conversationType || 'interview';
+      
+      // Generate session ID for voice conversation
+      this.sessionId = `voice_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
       // Build instructions based on context
       const instructions = this.buildInstructions(context, conversationType);
 
@@ -116,6 +137,7 @@ export class RealtimeChat {
       this.dc.addEventListener("message", (e) => {
         const event = JSON.parse(e.data);
         console.log("Received event:", event);
+        this.handleRealtimeEvent(event);
         this.onMessage(event);
       });
 
@@ -157,11 +179,123 @@ export class RealtimeChat {
         }
       });
 
+      // Create initial chat history entry for voice conversation
+      await this.createChatHistoryEntry();
+
       console.log("Voice chat ready!");
 
     } catch (error) {
       console.error("Error initializing chat:", error);
       throw error;
+    }
+  }
+
+  private handleRealtimeEvent(event: any) {
+    switch (event.type) {
+      case 'response.audio_transcript.delta':
+        // Accumulate AI speech transcript
+        this.currentTranscript += event.delta;
+        break;
+      
+      case 'response.audio_transcript.done':
+        // AI finished speaking, save the complete transcript
+        if (this.currentTranscript.trim()) {
+          this.messages.push({
+            role: 'assistant',
+            content: this.currentTranscript.trim(),
+            timestamp: new Date().toISOString()
+          });
+          this.updateChatHistory();
+          this.currentTranscript = '';
+        }
+        break;
+      
+      case 'conversation.item.input_audio_transcription.completed':
+        // User finished speaking, save their transcript
+        if (event.transcript?.trim()) {
+          this.messages.push({
+            role: 'user',
+            content: event.transcript.trim(),
+            timestamp: new Date().toISOString()
+          });
+          this.updateChatHistory();
+        }
+        break;
+    }
+  }
+
+  private async createChatHistoryEntry() {
+    if (!this.sessionId) return;
+
+    try {
+      const { error } = await supabase
+        .from('chat_histories')
+        .insert({
+          user_id: this.userId,
+          book_id: this.bookId,
+          chapter_id: this.chapterId,
+          session_id: this.sessionId,
+          conversation_type: this.conversationType,
+          conversation_medium: 'voice',
+          messages: [],
+          context_snapshot: {},
+          conversation_goals: this.generateConversationGoals()
+        });
+
+      if (error) {
+        console.error('Error creating chat history:', error);
+      }
+    } catch (error) {
+      console.error('Error creating chat history:', error);
+    }
+  }
+
+  private async updateChatHistory() {
+    if (!this.sessionId) return;
+
+    try {
+      const { error } = await supabase
+        .from('chat_histories')
+        .update({
+          messages: this.messages,
+          updated_at: new Date().toISOString()
+        })
+        .eq('session_id', this.sessionId)
+        .eq('user_id', this.userId);
+
+      if (error) {
+        console.error('Error updating chat history:', error);
+      }
+    } catch (error) {
+      console.error('Error updating chat history:', error);
+    }
+  }
+
+  private generateConversationGoals(): string[] {
+    switch (this.conversationType) {
+      case 'interview':
+        return [
+          'Gather specific life stories and experiences',
+          'Explore key relationships and influences',
+          'Document important life events chronologically',
+          'Capture personal growth and learning moments'
+        ];
+      case 'reflection':
+        return [
+          'Explore deeper meanings and life lessons',
+          'Understand personal values and beliefs',
+          'Reflect on life changes and transformations',
+          'Connect past experiences to current wisdom'
+        ];
+      case 'brainstorming':
+        return [
+          'Generate creative story ideas and themes',
+          'Identify unique personal experiences',
+          'Explore different narrative perspectives',
+          'Develop compelling chapter concepts'
+        ];
+      default:
+        return ['Engage in meaningful conversation about life experiences'];
     }
   }
 
@@ -217,6 +351,11 @@ Be warm, empathetic, and genuinely interested. Ask open-ended questions that enc
   }
 
   disconnect() {
+    // Save final state before disconnecting
+    if (this.messages.length > 0) {
+      this.updateChatHistory();
+    }
+    
     this.dc?.close();
     this.pc?.close();
     this.audioEl.srcObject = null;

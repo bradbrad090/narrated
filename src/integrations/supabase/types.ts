@@ -207,6 +207,7 @@ export type Database = {
           chapter_id: string | null
           context_snapshot: Json | null
           conversation_goals: Json | null
+          conversation_medium: string | null
           conversation_type: string | null
           created_at: string
           id: string
@@ -218,6 +219,7 @@ export type Database = {
           chapter_id?: string | null
           context_snapshot?: Json | null
           conversation_goals?: Json | null
+          conversation_medium?: string | null
           conversation_type?: string | null
           created_at?: string
           id?: string
@@ -229,6 +231,7 @@ export type Database = {
           chapter_id?: string | null
           context_snapshot?: Json | null
           conversation_goals?: Json | null
+          conversation_medium?: string | null
           conversation_type?: string | null
           created_at?: string
           id?: string
