@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Book, LogOut, Save, Sparkles, ArrowLeft, Plus, FileText, Trash2, Edit2, Type, Menu } from "lucide-react";
+import { Book, LogOut, Save, Sparkles, ArrowLeft, Plus, FileText, Trash2, Edit2, Type, Menu, Eye, EyeOff } from "lucide-react";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
 import { ConversationInterface } from "@/components/ConversationInterface";
 import { ConversationContext } from "@/components/ConversationContext";
@@ -37,6 +37,7 @@ const WriteBook = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showChapterRefinement, setShowChapterRefinement] = useState(true);
   const [bookProfile, setBookProfile] = useState<any>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -752,36 +753,60 @@ const WriteBook = () => {
                           </div>
                         </CardContent>
                       </Card>
-                    )}
+                     )}
 
-                    {/* Chapter Content Editor - Moved to bottom */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>{currentChapter.title}</CardTitle>
-                        <CardDescription>
-                          Edit and refine your chapter content. You can manually edit the AI-generated text or write your own.
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <Textarea
-                          placeholder="Your chapter content will appear here. You can edit it directly or use the AI assistant above to generate new content..."
-                          value={currentChapter.content}
-                          onChange={(e) => handleChapterContentChange(e.target.value)}
-                          className="min-h-[500px] text-base leading-relaxed"
-                        />
-                        <div className="mt-4 flex justify-center">
-                          <Button 
-                            onClick={saveCurrentChapter}
-                            disabled={saving || !currentChapter}
-                            size="lg"
-                            className="shadow-lg"
-                          >
-                            <Save className="h-4 w-4 mr-2" />
-                            {saving ? "Saving..." : "Save"}
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    {/* Toggle Button for Chapter Refinement Window */}
+                    <div className="flex justify-center my-6">
+                      <Button
+                        onClick={() => setShowChapterRefinement(!showChapterRefinement)}
+                        variant={showChapterRefinement ? "secondary" : "default"}
+                        size="lg"
+                        className="shadow-lg"
+                      >
+                        {showChapterRefinement ? (
+                          <>
+                            <EyeOff className="h-4 w-4 mr-2" />
+                            Hide my story
+                          </>
+                        ) : (
+                          <>
+                            <Eye className="h-4 w-4 mr-2" />
+                            See my story so far
+                          </>
+                        )}
+                      </Button>
+                    </div>
+
+                    {/* Chapter Refinement Window */}
+                    {showChapterRefinement && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>{currentChapter.title}</CardTitle>
+                          <CardDescription>
+                            Edit and refine your chapter content in the chapter refinement window below. You can manually edit the AI-generated text or write your own.
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <Textarea
+                            placeholder="Your chapter content will appear here. You can edit it directly or use the conversation assistant above to generate new content..."
+                            value={currentChapter.content}
+                            onChange={(e) => handleChapterContentChange(e.target.value)}
+                            className="min-h-[500px] text-base leading-relaxed"
+                          />
+                          <div className="mt-4 flex justify-center">
+                            <Button 
+                              onClick={saveCurrentChapter}
+                              disabled={saving || !currentChapter}
+                              size="lg"
+                              className="shadow-lg"
+                            >
+                              <Save className="h-4 w-4 mr-2" />
+                              {saving ? "Saving..." : "Save"}
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
                   </div>
                 ) : (
                   <div className="flex items-center justify-center h-full">
