@@ -57,7 +57,7 @@ A working autobiography creation service where users can:
 ## 📋 MEDIUM PRIORITY - Enhanced Experience
 
 #### User Experience Improvements
-- [ ] **Custom Email Branding** - Set up Resend integration for branded password reset emails from narrated.com.au
+- [X] **Custom Email Branding** - Set up Resend integration for branded password reset emails from narrated.com.au
 - [ ] **Email Notifications** - Confirmation emails, progress updates, completion notifications
 - [ ] **Auto-save Functionality** - Prevent loss of conversation progress
 - [ ] **Mobile Optimization** - Ensure conversations work well on mobile devices
@@ -73,7 +73,7 @@ A working autobiography creation service where users can:
 - [ ] **Voice-to-Recipe Transcription** - Convert spoken recipe instructions into formatted cookbook-style entries
 - [ ] **Handwritten Recipe OCR** - Upload photos of handwritten recipe cards and convert to text using AI
 - [ ] **Recipe Chapter Integration** - Seamlessly integrate recipes into autobiography chapters with family stories
-- [ ] **Recipe Photo Upload** - Allow users to include photos of finished dishes or cooking process
+- [ ] **Recipe Photo Upload** - Allow users to include photos of finished dishes or cooking process/handwritten recipe
 - [ ] **Family Recipe Collections** - Group related recipes by family member or occasion
 - [ ] **Recipe Story Context** - AI prompts to capture stories behind each recipe (origin, memories, occasions)
 
