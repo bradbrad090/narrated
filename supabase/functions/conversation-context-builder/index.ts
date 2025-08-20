@@ -68,6 +68,13 @@ const handler = async (request: Request): Promise<Response> => {
       });
     }
 
+    // Clean up expired cache entries
+    try {
+      await supabaseClient.rpc('cleanup_expired_context_cache');
+    } catch (error) {
+      console.log('Cache cleanup failed (non-critical):', error);
+    }
+
     const errors: string[] = [];
     
     // Fetch user profile
@@ -82,15 +89,38 @@ const handler = async (request: Request): Promise<Response> => {
       errors.push('Failed to fetch user profile');
     }
 
-    // Fetch book profile
-    const { data: bookProfile, error: bookError } = await supabaseClient
+    // Fetch book profile - create if doesn't exist
+    let { data: bookProfile, error: bookError } = await supabaseClient
       .from('book_profiles')
       .select('*')
       .eq('book_id', bookId)
       .eq('user_id', userId)
       .single();
 
-    if (bookError) {
+    if (bookError && bookError.code === 'PGRST116') {
+      // No book profile exists, create a basic one
+      console.log('Creating basic book profile for book:', bookId);
+      const { data: newProfile, error: createError } = await supabaseClient
+        .from('book_profiles')
+        .insert({
+          book_id: bookId,
+          user_id: userId,
+          full_name: userProfile?.full_name || 'User',
+          writing_style_preference: 'conversational',
+          life_themes: ['personal growth', 'life experiences', 'memories']
+        })
+        .select()
+        .single();
+
+      if (createError) {
+        console.error('Error creating book profile:', createError);
+        errors.push('Failed to create book profile');
+        bookProfile = null;
+      } else {
+        bookProfile = newProfile;
+        console.log('Basic book profile created successfully');
+      }
+    } else if (bookError) {
       console.error('Error fetching book profile:', bookError);
       errors.push('Failed to fetch book profile');
     }
