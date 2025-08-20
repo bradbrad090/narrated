@@ -14,6 +14,98 @@ export type Database = {
   }
   public: {
     Tables: {
+      book_profiles: {
+        Row: {
+          birth_year: number | null
+          birthplace: string | null
+          book_id: string
+          career_highlights: string[] | null
+          challenges_overcome: string[] | null
+          created_at: string
+          cultural_background: string | null
+          current_location: string | null
+          education: string | null
+          family_background: string | null
+          full_name: string | null
+          hobbies_interests: string[] | null
+          id: string
+          key_life_events: string[] | null
+          languages_spoken: string[] | null
+          life_philosophy: string | null
+          life_themes: string[] | null
+          memorable_quotes: string[] | null
+          occupation: string | null
+          personality_traits: string[] | null
+          relationships_family: string | null
+          updated_at: string
+          user_id: string
+          values_beliefs: string | null
+          writing_style_preference: string | null
+        }
+        Insert: {
+          birth_year?: number | null
+          birthplace?: string | null
+          book_id: string
+          career_highlights?: string[] | null
+          challenges_overcome?: string[] | null
+          created_at?: string
+          cultural_background?: string | null
+          current_location?: string | null
+          education?: string | null
+          family_background?: string | null
+          full_name?: string | null
+          hobbies_interests?: string[] | null
+          id?: string
+          key_life_events?: string[] | null
+          languages_spoken?: string[] | null
+          life_philosophy?: string | null
+          life_themes?: string[] | null
+          memorable_quotes?: string[] | null
+          occupation?: string | null
+          personality_traits?: string[] | null
+          relationships_family?: string | null
+          updated_at?: string
+          user_id: string
+          values_beliefs?: string | null
+          writing_style_preference?: string | null
+        }
+        Update: {
+          birth_year?: number | null
+          birthplace?: string | null
+          book_id?: string
+          career_highlights?: string[] | null
+          challenges_overcome?: string[] | null
+          created_at?: string
+          cultural_background?: string | null
+          current_location?: string | null
+          education?: string | null
+          family_background?: string | null
+          full_name?: string | null
+          hobbies_interests?: string[] | null
+          id?: string
+          key_life_events?: string[] | null
+          languages_spoken?: string[] | null
+          life_philosophy?: string | null
+          life_themes?: string[] | null
+          memorable_quotes?: string[] | null
+          occupation?: string | null
+          personality_traits?: string[] | null
+          relationships_family?: string | null
+          updated_at?: string
+          user_id?: string
+          values_beliefs?: string | null
+          writing_style_preference?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_profiles_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       books: {
         Row: {
           chapters: string | null
@@ -23,7 +115,7 @@ export type Database = {
           status: string | null
           title: string | null
           trial_words_used: number
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           chapters?: string | null
@@ -33,7 +125,7 @@ export type Database = {
           status?: string | null
           title?: string | null
           trial_words_used?: number
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           chapters?: string | null
@@ -43,17 +135,9 @@ export type Database = {
           status?: string | null
           title?: string | null
           trial_words_used?: number
-          user_id?: string | null
+          user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "books_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       chapters: {
         Row: {
@@ -102,31 +186,23 @@ export type Database = {
           id: string
           messages: Json | null
           session_id: string | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
           messages?: Json | null
           session_id?: string | null
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           created_at?: string
           id?: string
           messages?: Json | null
           session_id?: string | null
-          user_id?: string | null
+          user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "chat_histories_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       orders: {
         Row: {
@@ -137,7 +213,7 @@ export type Database = {
           quantity: number | null
           status: string | null
           total_price: number | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           book_id?: string | null
@@ -147,7 +223,7 @@ export type Database = {
           quantity?: number | null
           status?: string | null
           total_price?: number | null
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           book_id?: string | null
@@ -157,14 +233,14 @@ export type Database = {
           quantity?: number | null
           status?: string | null
           total_price?: number | null
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "orders_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
+            foreignKeyName: "orders_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
             referencedColumns: ["id"]
           },
         ]
