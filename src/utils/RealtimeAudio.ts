@@ -232,7 +232,6 @@ export class RealtimeChat {
         .from('chat_histories')
         .insert({
           user_id: this.userId,
-          book_id: this.bookId,
           chapter_id: this.chapterId,
           session_id: this.sessionId,
           conversation_type: this.conversationType,
@@ -244,6 +243,8 @@ export class RealtimeChat {
 
       if (error) {
         console.error('Error creating chat history:', error);
+      } else {
+        console.log('Voice chat history entry created successfully');
       }
     } catch (error) {
       console.error('Error creating chat history:', error);
@@ -254,17 +255,19 @@ export class RealtimeChat {
     if (!this.sessionId) return;
 
     try {
+      console.log('Updating chat history with', this.messages.length, 'messages');
       const { error } = await supabase
         .from('chat_histories')
         .update({
-          messages: this.messages,
-          updated_at: new Date().toISOString()
+          messages: this.messages
         })
         .eq('session_id', this.sessionId)
         .eq('user_id', this.userId);
 
       if (error) {
         console.error('Error updating chat history:', error);
+      } else {
+        console.log('Voice chat history updated successfully');
       }
     } catch (error) {
       console.error('Error updating chat history:', error);
