@@ -224,31 +224,6 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
               </div>
 
 
-              {/* Display recent self conversation entries */}
-              {conversationHistory.filter(session => session.isSelfConversation).length > 0 && (
-                <div className="mt-4">
-                  <h4 className="font-medium text-sm mb-2">Recent Self Entries</h4>
-                  <ScrollArea className="h-[200px]">
-                    <div className="space-y-2">
-                      {conversationHistory
-                        .filter(session => session.isSelfConversation)
-                        .slice(0, 3)
-                        .map((session) => (
-                          <div key={session.sessionId} className="p-3 border rounded-lg text-sm">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-xs text-muted-foreground">
-                                {new Date(session.messages[0]?.timestamp).toLocaleDateString()}
-                              </span>
-                            </div>
-                            <p className="text-muted-foreground line-clamp-2">
-                              {session.messages[0]?.content || 'Empty entry'}
-                            </p>
-                          </div>
-                        ))}
-                    </div>
-                  </ScrollArea>
-                </div>
-              )}
             </CardContent>
           </Card>
         </TabsContent>
