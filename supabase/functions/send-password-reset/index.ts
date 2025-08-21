@@ -138,12 +138,15 @@ serve(async (req) => {
       const tokenHash = payload.email_data?.token_hash;
       const emailActionType = payload.email_data?.email_action_type || 'recovery';
       const supabaseUrl = Deno.env.get('SUPABASE_URL');
-      const redirectTo = payload.email_data?.redirect_to;
+      
+      // Always redirect to the reset-password page
+      const origin = req.headers.get('origin') || 'https://narrated.com.au';
+      const resetPageUrl = `${origin}/reset-password?recovery=true`;
 
       // Construct the proper Supabase recovery URL
       const resetUrl = tokenHash && supabaseUrl 
-        ? `${supabaseUrl}/auth/v1/verify?token=${tokenHash}&type=${emailActionType}&redirect_to=${encodeURIComponent(redirectTo || `${req.headers.get('origin') || 'https://narrated.com.au'}/reset-password?recovery=true`)}`
-        : redirectTo;
+        ? `${supabaseUrl}/auth/v1/verify?token=${tokenHash}&type=${emailActionType}&redirect_to=${encodeURIComponent(resetPageUrl)}`
+        : resetPageUrl;
 
       if (!userEmail) {
         return new Response(
