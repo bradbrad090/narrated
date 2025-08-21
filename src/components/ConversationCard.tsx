@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { MessageCircle, Mic, User, Bot, Calendar, MessageSquare } from 'lucide-react';
-import { ConversationSession } from '@/hooks/useConversationFlow';
+import { ConversationSession } from '@/types/conversation';
 
 interface ConversationCardProps {
   session: ConversationSession;

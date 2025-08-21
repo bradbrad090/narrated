@@ -4,7 +4,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { ConversationCard } from '@/components/ConversationCard';
-import { ConversationSession } from '@/hooks/useConversationFlow';
+import { ConversationSession } from '@/types/conversation';
 import { Search, Archive, User, Bot, Mic } from 'lucide-react';
 
 interface SavedConversationsProps {

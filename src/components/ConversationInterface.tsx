@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { SavedConversations } from '@/components/SavedConversations';
-import { ConversationSession as OldConversationSession } from '@/hooks/useConversationFlow';
 import { SelfConversationMode } from '@/components/conversation/SelfConversationMode';
 import { TextAssistedMode } from '@/components/conversation/TextAssistedMode';
 import { VoiceConversationMode } from '@/components/conversation/VoiceConversationMode';
 import { Sparkles, User, Bot } from 'lucide-react';
 import { useConversationState } from '@/hooks/useConversationState';
 import { useToast } from '@/hooks/use-toast';
+import { ConversationSession } from '@/types/conversation';
 
 interface ConversationInterfaceProps {
   userId: string;
@@ -97,22 +97,13 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
 
       {/* Saved Conversations */}
       <SavedConversations 
-        conversations={conversationHistory.map(session => ({
-          ...session,
-          conversationMedium: session.conversationMedium === 'self' ? 'text' : session.conversationMedium
-        } as OldConversationSession))}
-        onResumeConversation={(session: OldConversationSession) => {
-          resumeConversation({
-            ...session,
-            createdAt: session.createdAt || new Date().toISOString()
-          });
+        conversations={conversationHistory}
+        onResumeConversation={(session: ConversationSession) => {
+          resumeConversation(session);
         }}
-        onViewConversation={(session: OldConversationSession) => {
+        onViewConversation={(session: ConversationSession) => {
           if (!session.isSelfConversation && session.conversationMedium === 'text') {
-            resumeConversation({
-              ...session,
-              createdAt: session.createdAt || new Date().toISOString()
-            });
+            resumeConversation(session);
           } else {
             toast({
               title: "View Conversation",
