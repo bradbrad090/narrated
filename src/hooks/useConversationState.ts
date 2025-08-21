@@ -1,5 +1,3 @@
-// Consolidated conversation state management hook using reducer pattern
-
 import { useReducer, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,6 +16,8 @@ import {
   conversationActions 
 } from '@/state/conversationReducer';
 import { conversationMediator } from '@/mediators/ConversationMediator';
+import { conversationRepository } from '@/repositories/ConversationRepository';
+import { contextCacheService } from '@/services/ContextCacheService';
 import { 
   ConversationErrorType, 
   createConversationError, 
@@ -63,58 +63,20 @@ export const useConversationState = ({
     try {
       dispatch(conversationActions.setLoading(true));
 
-      const { data, error } = await supabase
-        .from('chat_histories')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(CONVERSATION_CONFIG.CONVERSATION_HISTORY_LIMIT);
-
-      if (error) {
-        throw error;
+      const result = await conversationRepository.getUserConversations(userId, chapterId);
+      
+      if (result.error) {
+        throw new Error(result.error.message);
       }
 
-      const sessions: ConversationSession[] = (data as any[]).map(chat => {
-        // Parse messages with type safety
-        let messages: ConversationMessage[] = [];
-        if (Array.isArray(chat.messages)) {
-          messages = (chat.messages as unknown[]).filter((msg: any) => 
-            msg && 
-            typeof msg === 'object' && 
-            typeof msg.role === 'string' && 
-            typeof msg.content === 'string' &&
-            typeof msg.timestamp === 'string'
-          ) as ConversationMessage[];
-        }
-
-        // Parse goals with type safety
-        let goals: string[] = [];
-        if (Array.isArray(chat.conversation_goals)) {
-          goals = (chat.conversation_goals as unknown[]).filter((goal: any) => 
-            typeof goal === 'string'
-          ) as string[];
-        }
-
-        return {
-          sessionId: chat.session_id,
-          conversationType: chat.conversation_type as ConversationType,
-          conversationMedium: chat.conversation_medium as ConversationMedium,
-          messages,
-          context: chat.context_snapshot,
-          goals,
-          isSelfConversation: chat.is_self_conversation || false,
-          createdAt: chat.created_at,
-          updatedAt: chat.updated_at
-        };
-      });
-
+      const sessions = result.data.map(record => conversationRepository.mapToConversationSession(record));
       dispatch(conversationActions.setHistory(sessions));
     } catch (error) {
       handleError(error, 'loading conversation history');
     } finally {
       dispatch(conversationActions.setLoading(false));
     }
-  }, [userId, handleError]);
+  }, [userId, chapterId, handleError]);
 
   // Load conversation context
   const loadContext = useCallback(async () => {
