@@ -4,8 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageCircle, Send, Loader2, CheckCircle, Sparkles } from 'lucide-react';
-import { useConversationSession } from '@/hooks/useConversationSession';
-import { ConversationSession } from '@/hooks/useConversationFlow';
+import { useConversationState } from '@/hooks/useConversationState';
 import { CONVERSATION_CONFIG } from '@/config/conversationConfig';
 
 interface TextAssistedModeProps {
@@ -29,16 +28,14 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
 
   const {
     currentSession,
-    isLoading,
-    isTyping,
+    ui: { isLoading, isTyping },
     startConversation,
     sendMessage,
     endConversation
-  } = useConversationSession({
+  } = useConversationState({
     userId,
     bookId,
-    chapterId,
-    context
+    chapterId
   });
 
   // Auto-scroll to bottom when new messages arrive
@@ -62,7 +59,7 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
   };
 
   const handleStartConversation = () => {
-    startConversation('interview', CONVERSATION_CONFIG.STYLE_PROMPTS.CONCISE);
+    startConversation('text', 'interview', CONVERSATION_CONFIG.STYLE_PROMPTS.CONCISE);
   };
 
   const formatMessage = (content: string) => {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import VoiceInterface from '@/components/VoiceInterface';
-import { useToast } from '@/hooks/use-toast';
+import { useConversationState } from '@/hooks/useConversationState';
 import { Bot } from 'lucide-react';
 import { CONVERSATION_CONFIG } from '@/config/conversationConfig';
 
@@ -23,17 +23,21 @@ export const VoiceConversationMode: React.FC<VoiceConversationModeProps> = ({
   className = ""
 }) => {
   const [isAISpeaking, setIsAISpeaking] = useState(false);
-  const { toast } = useToast();
+  
+  const {
+    loadConversationHistory
+  } = useConversationState({
+    userId,
+    bookId,
+    chapterId
+  });
 
   const handleConversationUpdate = () => {
+    loadConversationHistory();
+    
     if (onConversationUpdate) {
       onConversationUpdate();
     }
-    
-    toast({
-      title: "Conversation saved",
-      description: "Your voice conversation has been saved to your history.",
-    });
   };
 
   return (

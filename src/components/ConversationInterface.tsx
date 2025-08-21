@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { SavedConversations } from '@/components/SavedConversations';
+import { ConversationSession as OldConversationSession } from '@/hooks/useConversationFlow';
 import { SelfConversationMode } from '@/components/conversation/SelfConversationMode';
 import { TextAssistedMode } from '@/components/conversation/TextAssistedMode';
 import { VoiceConversationMode } from '@/components/conversation/VoiceConversationMode';
 import { Sparkles, User, Bot } from 'lucide-react';
-import { useConversationFlow } from '@/hooks/useConversationFlow';
+import { useConversationState } from '@/hooks/useConversationState';
 import { useToast } from '@/hooks/use-toast';
 
 interface ConversationInterfaceProps {
@@ -29,11 +30,15 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   const { toast } = useToast();
 
   const {
-    conversationHistory,
+    history: conversationHistory,
     context,
     resumeConversation,
     loadConversationHistory
-  } = useConversationFlow(userId, bookId, chapterId);
+  } = useConversationState({
+    userId,
+    bookId,
+    chapterId
+  });
 
 
   return (
@@ -92,12 +97,22 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
 
       {/* Saved Conversations */}
       <SavedConversations 
-        conversations={conversationHistory}
-        onResumeConversation={resumeConversation}
-        onViewConversation={(session) => {
-          // For now, just resume - could add a dedicated view modal later
+        conversations={conversationHistory.map(session => ({
+          ...session,
+          conversationMedium: session.conversationMedium === 'self' ? 'text' : session.conversationMedium
+        } as OldConversationSession))}
+        onResumeConversation={(session: OldConversationSession) => {
+          resumeConversation({
+            ...session,
+            createdAt: session.createdAt || new Date().toISOString()
+          });
+        }}
+        onViewConversation={(session: OldConversationSession) => {
           if (!session.isSelfConversation && session.conversationMedium === 'text') {
-            resumeConversation(session);
+            resumeConversation({
+              ...session,
+              createdAt: session.createdAt || new Date().toISOString()
+            });
           } else {
             toast({
               title: "View Conversation",

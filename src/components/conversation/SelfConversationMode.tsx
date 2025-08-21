@@ -3,8 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { VoiceRecorder } from '@/components/VoiceRecorder';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { useConversationState } from '@/hooks/useConversationState';
 import { User } from 'lucide-react';
 import { 
   ConversationErrorType, 
@@ -30,94 +29,49 @@ export const SelfConversationMode: React.FC<SelfConversationModeProps> = ({
   className = ""
 }) => {
   const [currentMessage, setCurrentMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { toast } = useToast();
+
+  const {
+    ui: { isLoading },
+    startConversation,
+    sendMessage,
+    loadConversationHistory
+  } = useConversationState({
+    userId,
+    bookId,
+    chapterId
+  });
 
   const handleVoiceTranscription = (text: string) => {
     setCurrentMessage(prev => prev + (prev ? ' ' : '') + text);
   };
 
-  const handleError = (error: any, context: string) => {
-    const conversationError = createConversationError(
-      ConversationErrorType.NETWORK,
-      `${context}: ${error.message || 'Unknown error occurred'}`,
-      true,
-      error
-    );
-
-    console.error(`Self conversation error in ${context}:`, conversationError);
-    
-    toast({
-      title: "Error saving entry",
-      description: conversationError.message,
-      variant: "destructive",
-    });
-  };
-
   const handleSaveSelfConversation = async () => {
     if (!currentMessage.trim() || !userId || !bookId) {
-      const error = createConversationError(
-        ConversationErrorType.VALIDATION,
-        "Message content, User ID, and Book ID are required",
-        false
-      );
-      handleError(error, 'validation');
       return;
     }
 
-    setIsLoading(true);
-
     try {
-      // Generate unique session ID for self conversation
-      const sessionId = `self_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      // Start a self conversation session  
+      const session = await startConversation('self', 'reflection');
       
-      const selfConversationEntry = {
-        role: 'user' as const,
-        content: currentMessage.trim(),
-        timestamp: new Date().toISOString()
-      };
-
-      // Save to chat_histories table
-      const { error } = await supabase
-        .from('chat_histories')
-        .insert({
-          user_id: userId,
-          chapter_id: chapterId,
-          session_id: sessionId,
-          conversation_type: 'reflection',
-          conversation_medium: 'text',
-          is_self_conversation: true,
-          messages: [selfConversationEntry],
-          context_snapshot: context || {},
-          conversation_goals: [
-            'Document personal thoughts and reflections',
-            'Capture self-directed memories and experiences',
-            'Preserve authentic personal voice and perspective'
-          ]
-        });
-
-      if (error) {
-        throw error;
+      if (session) {
+        // Send the message to save it
+        await sendMessage(currentMessage.trim());
+        
+        // Refresh conversation history
+        await loadConversationHistory();
+        
+        // Notify parent component
+        if (onConversationSaved) {
+          onConversationSaved();
+        }
+        
+        setCurrentMessage('');
+        textareaRef.current?.focus();
       }
-
-      // Notify parent component
-      if (onConversationSaved) {
-        onConversationSaved();
-      }
-      
-      toast({
-        title: CONVERSATION_CONFIG.MESSAGES.ENTRY_SAVED,
-        description: "Your self conversation entry has been saved to your history.",
-      });
-      
-      setCurrentMessage('');
-      textareaRef.current?.focus();
-
     } catch (error: any) {
-      handleError(error, 'database operation');
-    } finally {
-      setIsLoading(false);
+      console.error('Error saving self conversation:', error);
     }
   };
 
