@@ -135,8 +135,15 @@ serve(async (req) => {
 
       // Extract user email and reset data
       const userEmail = payload.user?.email;
-      const resetToken = payload.email_data?.token;
+      const tokenHash = payload.email_data?.token_hash;
+      const emailActionType = payload.email_data?.email_action_type || 'recovery';
+      const supabaseUrl = Deno.env.get('SUPABASE_URL');
       const redirectTo = payload.email_data?.redirect_to;
+
+      // Construct the proper Supabase recovery URL
+      const resetUrl = tokenHash && supabaseUrl 
+        ? `${supabaseUrl}/auth/v1/verify?token=${tokenHash}&type=${emailActionType}&redirect_to=${encodeURIComponent(redirectTo || `${req.headers.get('origin') || 'https://narrated.com.au'}/reset-password?recovery=true`)}`
+        : redirectTo;
 
       if (!userEmail) {
         return new Response(
@@ -179,22 +186,11 @@ serve(async (req) => {
                   We received a request to reset your password for your Narrated account. Click the button below to securely reset your password.
                 </p>
                 
-                ${resetToken ? `
-                  <div style="background-color: hsl(35, 15%, 92%); padding: 20px; border-radius: 8px; margin: 25px 0; text-align: center;">
-                    <p style="color: hsl(220, 25%, 15%); font-size: 14px; margin: 0 0 10px; font-weight: 500;">Or use this reset code:</p>
-                    <div style="background-color: white; padding: 15px; border-radius: 6px; font-family: 'Courier New', monospace; font-size: 24px; font-weight: bold; color: hsl(220, 50%, 25%); letter-spacing: 2px;">
-                      ${resetToken}
-                    </div>
-                  </div>
-                ` : ''}
-                
-                ${redirectTo ? `
-                  <div style="text-align: center; margin: 30px 0;">
-                    <a href="${redirectTo}" style="background: linear-gradient(135deg, hsl(220, 50%, 25%), hsl(220, 60%, 35%)); color: hsl(35, 25%, 98%); padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px hsla(220, 50%, 25%, 0.3); transition: all 0.3s ease;">
-                      Reset My Password
-                    </a>
-                  </div>
-                ` : ''}
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="${resetUrl}" style="background: linear-gradient(135deg, hsl(220, 50%, 25%), hsl(220, 60%, 35%)); color: hsl(35, 25%, 98%); padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px hsla(220, 50%, 25%, 0.3); transition: all 0.3s ease;">
+                    Reset My Password
+                  </a>
+                </div>
                 
                 <div style="background-color: hsl(42, 85%, 95%); border-left: 4px solid hsl(42, 85%, 65%); padding: 15px 20px; margin: 30px 0; border-radius: 4px;">
                   <p style="color: hsl(220, 25%, 15%); font-size: 14px; margin: 0; font-weight: 500;">
