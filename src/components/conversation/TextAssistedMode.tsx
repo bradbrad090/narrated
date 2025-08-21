@@ -24,6 +24,7 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
 }) => {
   const [currentMessage, setCurrentMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const {
@@ -38,10 +39,18 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
     chapterId
   });
 
-  // Auto-scroll to bottom when new messages arrive
+  // Scroll to bottom of chat area only when there are messages
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [currentSession?.messages, isTyping]);
+    if (currentSession?.messages && currentSession.messages.length > 0) {
+      // Use setTimeout to ensure DOM has updated
+      setTimeout(() => {
+        const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
+        if (scrollContainer) {
+          scrollContainer.scrollTop = scrollContainer.scrollHeight;
+        }
+      }, 100);
+    }
+  }, [currentSession?.messages?.length, isTyping]);
 
   const handleSendMessage = async () => {
     if (!currentMessage.trim() || !currentSession) return;
@@ -101,7 +110,10 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
         ) : (
           <div className="space-y-4">
             {/* Messages Display */}
-            <ScrollArea className={`h-[${CONVERSATION_CONFIG.CONVERSATION_SCROLL_HEIGHT}] p-4 border rounded-lg`}>
+            <ScrollArea 
+              ref={scrollAreaRef}
+              className={`h-[${CONVERSATION_CONFIG.CONVERSATION_SCROLL_HEIGHT}] p-4 border rounded-lg`}
+            >
               <div className="space-y-4">
                 {currentSession.messages.map((message, index) => (
                   <div
