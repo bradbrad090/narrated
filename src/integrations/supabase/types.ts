@@ -211,8 +211,10 @@ export type Database = {
           conversation_type: string | null
           created_at: string
           id: string
+          is_self_conversation: boolean | null
           messages: Json | null
           session_id: string | null
+          updated_at: string | null
           user_id: string
         }
         Insert: {
@@ -223,8 +225,10 @@ export type Database = {
           conversation_type?: string | null
           created_at?: string
           id?: string
+          is_self_conversation?: boolean | null
           messages?: Json | null
           session_id?: string | null
+          updated_at?: string | null
           user_id: string
         }
         Update: {
@@ -235,8 +239,10 @@ export type Database = {
           conversation_type?: string | null
           created_at?: string
           id?: string
+          is_self_conversation?: boolean | null
           messages?: Json | null
           session_id?: string | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: [
