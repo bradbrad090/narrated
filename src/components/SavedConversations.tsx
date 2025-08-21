@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { ConversationCard } from '@/components/ConversationCard';
+import { VirtualizedConversationList } from '@/components/VirtualizedConversationList';
 import { ConversationSession } from '@/types/conversation';
 import { Search, Archive, User, Bot, Mic } from 'lucide-react';
+import { useDebounce } from '@/hooks/useDebounce';
+import { useOptimizedConversationList, useConversationStats } from '@/hooks/usePerformanceOptimizations';
+import { config, isFeatureEnabled, getPerformanceSetting } from '@/config/environment';
 
 interface SavedConversationsProps {
   conversations: ConversationSession[];
@@ -23,32 +27,18 @@ export const SavedConversations: React.FC<SavedConversationsProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
 
-  // Filter conversations based on search and filter
-  const filteredConversations = conversations.filter(session => {
-    // Search filter
-    const matchesSearch = searchQuery === '' || 
-      session.messages.some(msg => 
-        msg.content.toLowerCase().includes(searchQuery.toLowerCase())
-      ) ||
-      session.conversationType.toLowerCase().includes(searchQuery.toLowerCase());
+  // Performance optimizations
+  const debouncedSearchQuery = useDebounce(searchQuery, getPerformanceSetting('debounceDelay'));
+  const filteredConversations = useOptimizedConversationList(
+    conversations, 
+    debouncedSearchQuery, 
+    selectedFilter
+  );
+  const conversationStats = useConversationStats(conversations);
 
-    // Type filter
-    const matchesFilter = 
-      selectedFilter === 'all' ||
-      (selectedFilter === 'self' && session.isSelfConversation) ||
-      (selectedFilter === 'text' && !session.isSelfConversation && session.conversationMedium === 'text') ||
-      (selectedFilter === 'voice' && !session.isSelfConversation && session.conversationMedium === 'voice');
-
-    return matchesSearch && matchesFilter;
-  });
-
-  // Group conversations by type for statistics
-  const conversationStats = {
-    total: conversations.length,
-    self: conversations.filter(s => s.isSelfConversation).length,
-    textChat: conversations.filter(s => !s.isSelfConversation && s.conversationMedium === 'text').length,
-    voiceChat: conversations.filter(s => !s.isSelfConversation && s.conversationMedium === 'voice').length
-  };
+  // Determine whether to use virtualization
+  const useVirtualization = filteredConversations.length > getPerformanceSetting('virtualScrollThreshold');
+  const virtualListHeight = 500;
 
   if (conversations.length === 0) {
     return (
@@ -93,7 +83,6 @@ export const SavedConversations: React.FC<SavedConversationsProps> = ({
           />
         </div>
 
-        {/* Filter Tabs */}
         <Tabs value={selectedFilter} onValueChange={setSelectedFilter}>
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="all" className="text-xs">
@@ -114,30 +103,31 @@ export const SavedConversations: React.FC<SavedConversationsProps> = ({
           </TabsList>
 
           <TabsContent value={selectedFilter} className="mt-4">
-            <ScrollArea className="h-[500px]">
-              <div className="space-y-3">
-                {filteredConversations.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>No conversations match your search</p>
-                  </div>
-                ) : (
-                  filteredConversations
-                    .sort((a, b) => {
-                      const dateA = new Date(a.messages[0]?.timestamp || 0).getTime();
-                      const dateB = new Date(b.messages[0]?.timestamp || 0).getTime();
-                      return dateB - dateA; // Most recent first
-                    })
-                    .map((session) => (
-                      <ConversationCard
-                        key={session.sessionId}
-                        session={session}
-                        onResume={onResumeConversation}
-                        onView={onViewConversation}
-                      />
-                    ))
-                )}
+            {filteredConversations.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No conversations match your search</p>
               </div>
-            </ScrollArea>
+            ) : useVirtualization ? (
+              <VirtualizedConversationList
+                conversations={filteredConversations}
+                onResumeConversation={onResumeConversation}
+                onViewConversation={onViewConversation}
+                height={virtualListHeight}
+              />
+            ) : (
+              <ScrollArea className="h-[500px]">
+                <div className="space-y-3">
+                  {filteredConversations.map((session) => (
+                    <ConversationCard
+                      key={session.sessionId}
+                      session={session}
+                      onResume={onResumeConversation}
+                      onView={onViewConversation}
+                    />
+                  ))}
+                </div>
+              </ScrollArea>
+            )}
           </TabsContent>
         </Tabs>
       </CardContent>

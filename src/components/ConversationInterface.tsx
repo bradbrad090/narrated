@@ -4,10 +4,12 @@ import { SavedConversations } from '@/components/SavedConversations';
 import { SelfConversationMode } from '@/components/conversation/SelfConversationMode';
 import { TextAssistedMode } from '@/components/conversation/TextAssistedMode';
 import { VoiceConversationMode } from '@/components/conversation/VoiceConversationMode';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Sparkles, User, Bot } from 'lucide-react';
 import { useConversationState } from '@/hooks/useConversationState';
 import { useToast } from '@/hooks/use-toast';
 import { ConversationSession } from '@/types/conversation';
+import { isFeatureEnabled } from '@/config/environment';
 
 interface ConversationInterfaceProps {
   userId: string;
@@ -42,77 +44,101 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
 
 
   return (
-    <div className={`w-full ${className}`}>
-      {/* Tabbed Interface for Starting Conversations */}
-      <Tabs value={selectedMode} onValueChange={setSelectedMode} className="w-full">
-        <div className="w-full border-b">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="self" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              Self Conversation
-            </TabsTrigger>
-            <TabsTrigger value="text-assisted" className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4" />
-              Text-Assisted
-            </TabsTrigger>
-            <TabsTrigger value="voice-to-voice" className="flex items-center gap-2">
-              <Bot className="h-4 w-4" />
-              Voice-to-Voice AI
-            </TabsTrigger>
-          </TabsList>
-        </div>
+    <ErrorBoundary>
+      <div className={`w-full ${className}`}>
+        {/* Tabbed Interface for Starting Conversations */}
+        <Tabs value={selectedMode} onValueChange={setSelectedMode} className="w-full">
+          <div className="w-full border-b">
+            <TabsList className="grid w-full grid-cols-3">
+              {isFeatureEnabled('selfConversations') && (
+                <TabsTrigger value="self" className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  Self Conversation
+                </TabsTrigger>
+              )}
+              {isFeatureEnabled('textConversations') && (
+                <TabsTrigger value="text-assisted" className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4" />
+                  Text-Assisted
+                </TabsTrigger>
+              )}
+              {isFeatureEnabled('voiceConversations') && (
+                <TabsTrigger value="voice-to-voice" className="flex items-center gap-2">
+                  <Bot className="h-4 w-4" />
+                  Voice-to-Voice AI
+                </TabsTrigger>
+              )}
+            </TabsList>
+          </div>
 
-        {/* Self Conversation Mode */}
-        <TabsContent value="self" className="mt-6">
-          <SelfConversationMode
-            userId={userId}
-            bookId={bookId}
-            chapterId={chapterId}
-            context={context}
-            onConversationSaved={loadConversationHistory}
-          />
-        </TabsContent>
+          {/* Self Conversation Mode */}
+          {isFeatureEnabled('selfConversations') && (
+            <TabsContent value="self" className="mt-6">
+              <ErrorBoundary>
+                <SelfConversationMode
+                  userId={userId}
+                  bookId={bookId}
+                  chapterId={chapterId}
+                  context={context}
+                  onConversationSaved={loadConversationHistory}
+                />
+              </ErrorBoundary>
+            </TabsContent>
+          )}
 
-        {/* Text-Assisted Mode */}
-        <TabsContent value="text-assisted" className="mt-6">
-          <TextAssistedMode
-            userId={userId}
-            bookId={bookId}
-            chapterId={chapterId}
-            context={context}
-          />
-        </TabsContent>
+          {/* Text-Assisted Mode */}
+          {isFeatureEnabled('textConversations') && (
+            <TabsContent value="text-assisted" className="mt-6">
+              <ErrorBoundary>
+                <TextAssistedMode
+                  userId={userId}
+                  bookId={bookId}
+                  chapterId={chapterId}
+                  context={context}
+                />
+              </ErrorBoundary>
+            </TabsContent>
+          )}
 
-        {/* Voice-to-Voice AI Mode */}
-        <TabsContent value="voice-to-voice" className="mt-6">
-          <VoiceConversationMode
-            userId={userId}
-            bookId={bookId}
-            chapterId={chapterId}
-            context={context}
-            onConversationUpdate={loadConversationHistory}
-          />
-        </TabsContent>
-      </Tabs>
+          {/* Voice-to-Voice AI Mode */}
+          {isFeatureEnabled('voiceConversations') && (
+            <TabsContent value="voice-to-voice" className="mt-6">
+              <ErrorBoundary>
+                <VoiceConversationMode
+                  userId={userId}
+                  bookId={bookId}
+                  chapterId={chapterId}
+                  context={context}
+                  onConversationUpdate={loadConversationHistory}
+                />
+              </ErrorBoundary>
+            </TabsContent>
+          )}
+        </Tabs>
 
-      {/* Saved Conversations */}
-      <SavedConversations 
-        conversations={conversationHistory}
-        onResumeConversation={(session: ConversationSession) => {
-          resumeConversation(session);
-        }}
-        onViewConversation={(session: ConversationSession) => {
-          if (!session.isSelfConversation && session.conversationMedium === 'text') {
-            resumeConversation(session);
-          } else {
-            toast({
-              title: "View Conversation",
-              description: "Detailed conversation viewer coming soon!",
-            });
-          }
-        }}
-        className="mt-6"
-      />
-    </div>
+        {/* Saved Conversations */}
+        {isFeatureEnabled('conversationHistory') && (
+          <ErrorBoundary>
+            <SavedConversations 
+              conversations={conversationHistory}
+              onResumeConversation={(session: ConversationSession) => {
+                resumeConversation(session);
+              }}
+              onViewConversation={(session: ConversationSession) => {
+                if (!session.isSelfConversation && session.conversationMedium === 'text') {
+                  resumeConversation(session);
+                } else {
+                  toast({
+                    title: "View Conversation",
+                    description: "Detailed conversation viewer coming soon!",
+                  });
+                }
+              }}
+              className="mt-6"
+            />
+          </ErrorBoundary>
+        )}
+      </div>
+    </ErrorBoundary>
   );
 };
