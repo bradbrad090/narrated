@@ -121,7 +121,7 @@ export type Database = {
           status: string | null
           tier: string
           title: string | null
-          trial_words_used: number
+          usage_metrics: Json
           user_id: string
         }
         Insert: {
@@ -131,7 +131,7 @@ export type Database = {
           status?: string | null
           tier?: string
           title?: string | null
-          trial_words_used?: number
+          usage_metrics?: Json
           user_id: string
         }
         Update: {
@@ -141,7 +141,7 @@ export type Database = {
           status?: string | null
           tier?: string
           title?: string | null
-          trial_words_used?: number
+          usage_metrics?: Json
           user_id?: string
         }
         Relationships: [
