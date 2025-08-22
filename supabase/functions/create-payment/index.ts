@@ -245,6 +245,11 @@ serve(async (req) => {
         status: 200,
       });
 
+    } catch (stripeError) {
+      console.error("Stripe API error:", stripeError);
+      throw new Error(`Stripe checkout failed: ${stripeError instanceof Error ? stripeError.message : "Unknown Stripe error"}`);
+    }
+
   } catch (error) {
     console.error("Payment error:", error);
     return new Response(JSON.stringify({ 
