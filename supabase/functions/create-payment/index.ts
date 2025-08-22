@@ -59,7 +59,13 @@ serve(async (req) => {
       .eq("user_id", user.id)
       .single();
 
-    if (bookError || !bookData) {
+    if (bookError) {
+      console.error("Book query error:", bookError);
+      throw new Error(`Failed to fetch book: ${bookError.message}`);
+    }
+
+    if (!bookData) {
+      console.error("Book not found for user:", user.id, "bookId:", bookId);
       throw new Error("Book not found or access denied");
     }
     console.log("Book verified:", bookData.title);
@@ -90,13 +96,21 @@ serve(async (req) => {
         { auth: { persistSession: false } }
       );
 
-      await supabaseService
+      const { error: updateError } = await supabaseService
         .from("books")
         .update({
           tier: 'free',
           purchase_status: 'active',
         })
-        .eq("id", bookId);
+        .eq("id", bookId)
+        .eq("user_id", user.id);
+
+      if (updateError) {
+        console.error("Free tier update error:", updateError);
+        throw new Error(`Failed to activate free tier: ${updateError.message}`);
+      }
+
+      console.log("Free tier activated successfully");
 
       return new Response(JSON.stringify({ 
         success: true, 
@@ -156,17 +170,23 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    await supabaseService
+    const { error: bookUpdateError } = await supabaseService
       .from("books")
       .update({
         stripe_purchase_id: session.id,
         purchase_status: 'pending',
         tier: tier,
       })
-      .eq("id", bookId);
+      .eq("id", bookId)
+      .eq("user_id", user.id);
+
+    if (bookUpdateError) {
+      console.error("Book update error:", bookUpdateError);
+      // Don't fail the payment flow, just log the error
+    }
 
     // Create order record
-    await supabaseService
+    const { error: orderError } = await supabaseService
       .from("orders")
       .insert({
         user_id: user.id,
@@ -176,6 +196,11 @@ serve(async (req) => {
         quantity: 1,
         created_at: new Date().toISOString(),
       });
+
+    if (orderError) {
+      console.error("Order creation error:", orderError);
+      // Don't fail the payment flow, just log the error
+    }
 
     console.log("Database updated with pending payment");
 
