@@ -42,33 +42,58 @@ serve(async (req) => {
     }
 
     const token = authHeader.replace("Bearer ", "");
+    console.log("Auth token received (first 20 chars):", token.substring(0, 20) + "...");
+    
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError) throw userError;
+    if (userError) {
+      console.error("User authentication error:", userError);
+      throw userError;
+    }
     
     const user = userData.user;
     if (!user?.email) {
+      console.error("User data:", userData);
       throw new Error("User not authenticated or email not available");
     }
-    console.log("User authenticated:", user.email);
+    console.log("User authenticated:", user.email, "User ID:", user.id);
 
-    // Verify user owns the book
+    // Verify user owns the book - with detailed debugging
+    console.log("Querying book with ID:", bookId, "for user:", user.id);
+    
+    // First try without .single() to see if we get any results
+    const { data: allBooks, error: allBooksError } = await supabaseClient
+      .from("books")
+      .select("*")
+      .eq("id", bookId);
+    
+    console.log("All books with this ID:", allBooks);
+    console.log("All books error:", allBooksError);
+    
     const { data: bookData, error: bookError } = await supabaseClient
       .from("books")
       .select("*")
       .eq("id", bookId)
-      .eq("user_id", user.id)
-      .single();
+      .eq("user_id", user.id);
+
+    console.log("Book query result:", { bookData, bookError });
 
     if (bookError) {
-      console.error("Book query error:", bookError);
+      console.error("Book query error details:", {
+        code: bookError.code,
+        message: bookError.message,
+        details: bookError.details,
+        hint: bookError.hint
+      });
       throw new Error(`Failed to fetch book: ${bookError.message}`);
     }
 
-    if (!bookData) {
+    if (!bookData || bookData.length === 0) {
       console.error("Book not found for user:", user.id, "bookId:", bookId);
       throw new Error("Book not found or access denied");
     }
-    console.log("Book verified:", bookData.title);
+
+    const book = bookData[0];
+    console.log("Book verified:", book.title);
 
     // Initialize Stripe
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
@@ -144,7 +169,7 @@ serve(async (req) => {
             currency: "usd",
             product_data: { 
               name: selectedPricing.name,
-              description: `${tier} tier for "${bookData.title}"`,
+              description: `${tier} tier for "${book.title}\"`,
             },
             unit_amount: selectedPricing.amount,
           },
