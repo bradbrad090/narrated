@@ -23,11 +23,22 @@ serve(async (req) => {
 
     // Check if Stripe key is configured
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    console.log("Environment check - Stripe key exists:", !!stripeKey);
+    console.log("Environment check - All env vars:", Object.keys(Deno.env.toObject()));
+    
     if (!stripeKey) {
       console.error("STRIPE_SECRET_KEY not configured");
       throw new Error("Payment system not configured - missing Stripe key");
     }
+    
+    // Validate key format
+    if (!stripeKey.startsWith('sk_')) {
+      console.error("Invalid Stripe key format - should start with sk_");
+      throw new Error("Invalid Stripe Secret Key format");
+    }
+    
     console.log("Stripe key found:", stripeKey.substring(0, 7) + "...");
+    console.log("Stripe key type:", stripeKey.includes('test') ? 'test' : 'live');
 
     // Get request body
     const { bookId, tier }: PaymentRequest = await req.json();
