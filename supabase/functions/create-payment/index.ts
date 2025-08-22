@@ -18,28 +18,41 @@ serve(async (req) => {
   }
 
   try {
-    // Get Stripe key - try multiple approaches
-    let stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    // Debug all environment variables
+    console.log("=== COMPLETE ENV DEBUG ===");
+    const allEnv = Deno.env.toObject();
+    const envKeys = Object.keys(allEnv).sort();
+    console.log("Total env vars:", envKeys.length);
+    console.log("All env var names:", JSON.stringify(envKeys));
     
-    if (!stripeKey) {
-      console.error("STRIPE_SECRET_KEY not found, trying alternatives...");
-      stripeKey = Deno.env.get("STRIPE_SECRET");
-      if (!stripeKey) {
-        stripeKey = Deno.env.get("stripe_secret_key");
-      }
-    }
+    // Check specifically for secrets that should exist
+    const expectedSecrets = [
+      'STRIPE_SECRET_KEY',
+      'SUPABASE_URL', 
+      'SUPABASE_ANON_KEY',
+      'SUPABASE_SERVICE_ROLE_KEY',
+      'OPENAI_API_KEY'
+    ];
+    
+    console.log("Checking expected secrets:");
+    expectedSecrets.forEach(secret => {
+      const value = Deno.env.get(secret);
+      console.log(`${secret}: ${value ? 'EXISTS' : 'MISSING'}`);
+    });
+
+    // Get Stripe key with detailed logging
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    console.log("STRIPE_SECRET_KEY final check:", {
+      exists: !!stripeKey,
+      type: typeof stripeKey,
+      length: stripeKey?.length || 0,
+      startsWithSk: stripeKey?.startsWith('sk_') || false
+    });
 
     if (!stripeKey) {
-      console.error("No Stripe key found in any format");
-      return new Response(JSON.stringify({ 
-        error: "Stripe not configured - contact support" 
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500,
-      });
+      console.error("CRITICAL: STRIPE_SECRET_KEY not found in environment");
+      throw new Error("Stripe secret key not configured in Supabase secrets");
     }
-
-    console.log("Stripe key found, length:", stripeKey.length);
 
     // Get request data
     const { bookId, tier }: PaymentRequest = await req.json();
