@@ -118,8 +118,8 @@ export type Database = {
           chapters: string | null
           created_at: string
           id: string
-          is_paid: boolean
           status: string | null
+          tier: string
           title: string | null
           trial_words_used: number
           user_id: string
@@ -128,8 +128,8 @@ export type Database = {
           chapters?: string | null
           created_at?: string
           id?: string
-          is_paid?: boolean
           status?: string | null
+          tier?: string
           title?: string | null
           trial_words_used?: number
           user_id: string
@@ -138,8 +138,8 @@ export type Database = {
           chapters?: string | null
           created_at?: string
           id?: string
-          is_paid?: boolean
           status?: string | null
+          tier?: string
           title?: string | null
           trial_words_used?: number
           user_id?: string
