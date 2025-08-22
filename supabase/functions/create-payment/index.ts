@@ -19,7 +19,9 @@ serve(async (req) => {
   }
 
   try {
-    console.log("Payment function started");
+    console.log("=== PAYMENT FUNCTION STARTED ===");
+    console.log("Request method:", req.method);
+    console.log("Request headers:", JSON.stringify(Object.fromEntries(req.headers.entries())));
 
     // Check if Stripe key is configured
     console.log("=== ENVIRONMENT DEBUG START ===");
