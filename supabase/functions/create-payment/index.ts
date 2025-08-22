@@ -57,43 +57,27 @@ serve(async (req) => {
     }
     console.log("User authenticated:", user.email, "User ID:", user.id);
 
-    // Verify user owns the book - with detailed debugging
+    // Verify user owns the book
     console.log("Querying book with ID:", bookId, "for user:", user.id);
-    
-    // First try without .single() to see if we get any results
-    const { data: allBooks, error: allBooksError } = await supabaseClient
-      .from("books")
-      .select("*")
-      .eq("id", bookId);
-    
-    console.log("All books with this ID:", allBooks);
-    console.log("All books error:", allBooksError);
     
     const { data: bookData, error: bookError } = await supabaseClient
       .from("books")
       .select("*")
       .eq("id", bookId)
-      .eq("user_id", user.id);
-
-    console.log("Book query result:", { bookData, bookError });
+      .eq("user_id", user.id)
+      .maybeSingle();
 
     if (bookError) {
-      console.error("Book query error details:", {
-        code: bookError.code,
-        message: bookError.message,
-        details: bookError.details,
-        hint: bookError.hint
-      });
+      console.error("Book query error:", bookError);
       throw new Error(`Failed to fetch book: ${bookError.message}`);
     }
 
-    if (!bookData || bookData.length === 0) {
+    if (!bookData) {
       console.error("Book not found for user:", user.id, "bookId:", bookId);
       throw new Error("Book not found or access denied");
     }
 
-    const book = bookData[0];
-    console.log("Book verified:", book.title);
+    console.log("Book verified:", bookData.title);
 
     // Initialize Stripe
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
@@ -169,7 +153,7 @@ serve(async (req) => {
             currency: "usd",
             product_data: { 
               name: selectedPricing.name,
-              description: `${tier} tier for "${book.title}\"`,
+              description: `${tier} tier for "${bookData.title}\"`,
             },
             unit_amount: selectedPricing.amount,
           },
