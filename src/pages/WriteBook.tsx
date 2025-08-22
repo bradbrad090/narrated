@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { VoiceRecorder } from "@/components/VoiceRecorder";
 import { ConversationInterface } from "@/components/ConversationInterface";
 import { ConversationContext } from "@/components/ConversationContext";
 import { ProfileSetup } from "@/components/ProfileSetup";
+import PaymentButton from "@/components/PaymentButton";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -29,7 +30,9 @@ interface Chapter {
 }
 
 const WriteBook = () => {
-  const { bookId } = useParams();
+  const { bookId: paramBookId } = useParams();
+  const [searchParams] = useSearchParams();
+  const bookId = paramBookId || searchParams.get('book_id');
   const [user, setUser] = useState<User | null>(null);
   const [book, setBook] = useState<any>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
@@ -600,6 +603,33 @@ const WriteBook = () => {
             </div>
           )}
           
+          {/* Payment Section for Mobile */}
+          {user && book && (
+            <div className="max-w-4xl mx-auto mb-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Book Tier</CardTitle>
+                  <CardDescription>
+                    Choose the tier that best fits your needs. Upgrade to unlock advanced features.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <PaymentButton
+                    bookId={book.id}
+                    currentTier={book.tier as 'free' | 'paid' | 'premium'}
+                    purchaseStatus={book.purchase_status}
+                    onPaymentStart={() => {
+                      toast({
+                        title: "Processing payment...",
+                        description: "You'll be redirected to complete your payment.",
+                      });
+                    }}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+          )}
+          
           {currentChapter ? (
                 <div className="max-w-4xl mx-auto space-y-6">
                   {/* Chapter Content Editor */}
@@ -646,15 +676,40 @@ const WriteBook = () => {
             <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
               <div className="h-full bg-background border-r p-4 overflow-auto">
                 <div className="space-y-4">
-                  {/* Profile Setup Section */}
-                  {user && book && (
-                    <ProfileSetup
-                      userId={user.id}
-                      bookId={book.id}
-                      bookProfile={bookProfile}
-                      onProfileUpdate={setBookProfile}
-                    />
-                  )}
+                   {/* Profile Setup Section */}
+                   {user && book && (
+                     <ProfileSetup
+                       userId={user.id}
+                       bookId={book.id}
+                       bookProfile={bookProfile}
+                       onProfileUpdate={setBookProfile}
+                     />
+                   )}
+                   
+                   {/* Payment Section */}
+                   {user && book && (
+                     <Card className="mt-6">
+                       <CardHeader>
+                         <CardTitle>Book Tier</CardTitle>
+                         <CardDescription>
+                           Choose the tier that best fits your needs. Upgrade to unlock advanced features and unlimited content.
+                         </CardDescription>
+                       </CardHeader>
+                       <CardContent>
+                         <PaymentButton
+                           bookId={book.id}
+                           currentTier={book.tier as 'free' | 'paid' | 'premium'}
+                           purchaseStatus={book.purchase_status}
+                           onPaymentStart={() => {
+                             toast({
+                               title: "Processing payment...",
+                               description: "You'll be redirected to complete your payment.",
+                             });
+                           }}
+                         />
+                       </CardContent>
+                     </Card>
+                   )}
                   
                   <div className="space-y-2">
                     <h2 className="text-lg font-semibold mb-4">Chapters</h2>
