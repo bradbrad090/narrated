@@ -93,22 +93,31 @@ serve(async (req) => {
       });
     }
 
-    // Get user
-    const supabaseClient = createClient(
+    // Get user using service role to bypass JWT verification
+    const supabaseService = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
     );
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("Not authenticated");
-
+    
     const token = authHeader.replace("Bearer ", "");
-    const { data: userData } = await supabaseClient.auth.getUser(token);
+    console.log("Auth token received:", token.substring(0, 20) + "...");
+    
+    const { data: userData, error: authError } = await supabaseService.auth.getUser(token);
+    console.log("Auth result:", { user: userData.user?.id, email: userData.user?.email, error: authError });
+    
+    if (authError) {
+      console.error("Auth error:", authError);
+      throw new Error(`Authentication failed: ${authError.message}`);
+    }
     if (!userData.user?.email) throw new Error("Invalid user");
 
-    // Verify book ownership
+    // Verify book ownership using service role client
     console.log("Looking for book:", { bookId, userId: userData.user.id });
-    const { data: bookData, error: bookError } = await supabaseClient
+    const { data: bookData, error: bookError } = await supabaseService
       .from("books")
       .select("*")
       .eq("id", bookId)
