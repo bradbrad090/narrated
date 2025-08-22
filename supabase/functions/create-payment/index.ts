@@ -21,6 +21,14 @@ serve(async (req) => {
   try {
     console.log("Payment function started");
 
+    // Check if Stripe key is configured
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeKey) {
+      console.error("STRIPE_SECRET_KEY not configured");
+      throw new Error("Payment system not configured - missing Stripe key");
+    }
+    console.log("Stripe key found:", stripeKey.substring(0, 7) + "...");
+
     // Get request body
     const { bookId, tier }: PaymentRequest = await req.json();
     console.log("Payment request:", { bookId, tier });
@@ -132,6 +140,7 @@ serve(async (req) => {
     }
 
     // Check if customer exists in Stripe
+    console.log("Initializing Stripe with key:", stripeKey.substring(0, 7) + "...");
     const customers = await stripe.customers.list({ 
       email: user.email, 
       limit: 1 
@@ -141,85 +150,89 @@ serve(async (req) => {
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
       console.log("Existing customer found:", customerId);
+    } else {
+      console.log("No existing customer found for:", user.email);
     }
 
     // Create Stripe checkout session
-    const session = await stripe.checkout.sessions.create({
-      customer: customerId,
-      customer_email: customerId ? undefined : user.email,
-      line_items: [
-        {
-          price_data: {
-            currency: "usd",
-            product_data: { 
-              name: selectedPricing.name,
-              description: `${tier} tier for "${bookData.title}\"`,
+    console.log("Creating Stripe checkout session...");
+    try {
+      const session = await stripe.checkout.sessions.create({
+        customer: customerId,
+        customer_email: customerId ? undefined : user.email,
+        line_items: [
+          {
+            price_data: {
+              currency: "usd",
+              product_data: { 
+                name: selectedPricing.name,
+                description: `${tier} tier for "${bookData.title}\"`,
+              },
+              unit_amount: selectedPricing.amount,
             },
-            unit_amount: selectedPricing.amount,
+            quantity: 1,
           },
-          quantity: 1,
+        ],
+        mode: "payment",
+        success_url: `${req.headers.get("origin")}/payment-success?book_id=${bookId}&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${req.headers.get("origin")}/write/${bookId}`,
+        metadata: {
+          bookId: bookId,
+          userId: user.id,
+          tier: tier,
         },
-      ],
-      mode: "payment",
-      success_url: `${req.headers.get("origin")}/payment-success?book_id=${bookId}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get("origin")}/write/${bookId}`,
-      metadata: {
-        bookId: bookId,
-        userId: user.id,
-        tier: tier,
-      },
-    });
-
-    console.log("Stripe session created:", session.id);
-
-    // Update book with pending payment status
-    const supabaseService = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } }
-    );
-
-    const { error: bookUpdateError } = await supabaseService
-      .from("books")
-      .update({
-        stripe_purchase_id: session.id,
-        purchase_status: 'pending',
-        tier: tier,
-      })
-      .eq("id", bookId)
-      .eq("user_id", user.id);
-
-    if (bookUpdateError) {
-      console.error("Book update error:", bookUpdateError);
-      // Don't fail the payment flow, just log the error
-    }
-
-    // Create order record
-    const { error: orderError } = await supabaseService
-      .from("orders")
-      .insert({
-        user_id: user.id,
-        book_id: bookId,
-        status: 'pending',
-        total_price: selectedPricing.amount / 100, // Convert cents to dollars
-        quantity: 1,
-        created_at: new Date().toISOString(),
       });
 
-    if (orderError) {
-      console.error("Order creation error:", orderError);
-      // Don't fail the payment flow, just log the error
-    }
+      console.log("Stripe session created successfully:", session.id);
+      
+      // Update book with pending payment status
+      const supabaseService = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+        { auth: { persistSession: false } }
+      );
 
-    console.log("Database updated with pending payment");
+      const { error: bookUpdateError } = await supabaseService
+        .from("books")
+        .update({
+          stripe_purchase_id: session.id,
+          purchase_status: 'pending',
+          tier: tier,
+        })
+        .eq("id", bookId)
+        .eq("user_id", user.id);
 
-    return new Response(JSON.stringify({ 
-      url: session.url,
-      sessionId: session.id 
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
+      if (bookUpdateError) {
+        console.error("Book update error:", bookUpdateError);
+        // Don't fail the payment flow, just log the error
+      }
+
+      // Create order record
+      const { error: orderError } = await supabaseService
+        .from("orders")
+        .insert({
+          user_id: user.id,
+          book_id: bookId,
+          status: 'pending',
+          total_price: selectedPricing.amount / 100, // Convert cents to dollars
+          quantity: 1,
+          created_at: new Date().toISOString(),
+        });
+
+      if (orderError) {
+        console.error("Order creation error:", orderError);
+        // Don't fail the payment flow, just log the error
+      }
+
+      console.log("Database updated with pending payment");
+
+      return new Response(JSON.stringify({ 
+        url: session.url,
+        sessionId: session.id 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
 
   } catch (error) {
     console.error("Payment error:", error);
