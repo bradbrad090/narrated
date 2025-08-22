@@ -119,6 +119,7 @@ export type Database = {
           created_at: string
           id: string
           status: string | null
+          stripe_purchase_id: string | null
           tier: string
           title: string | null
           usage_metrics: Json
@@ -129,6 +130,7 @@ export type Database = {
           created_at?: string
           id?: string
           status?: string | null
+          stripe_purchase_id?: string | null
           tier?: string
           title?: string | null
           usage_metrics?: Json
@@ -139,6 +141,7 @@ export type Database = {
           created_at?: string
           id?: string
           status?: string | null
+          stripe_purchase_id?: string | null
           tier?: string
           title?: string | null
           usage_metrics?: Json
