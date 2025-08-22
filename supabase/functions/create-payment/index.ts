@@ -56,6 +56,7 @@ serve(async (req) => {
 
     // Get request data
     const { bookId, tier }: PaymentRequest = await req.json();
+    console.log("Payment request received:", { bookId, tier });
 
     if (!bookId || !tier) {
       throw new Error("Missing bookId or tier");
@@ -106,14 +107,20 @@ serve(async (req) => {
     if (!userData.user?.email) throw new Error("Invalid user");
 
     // Verify book ownership
-    const { data: bookData } = await supabaseClient
+    console.log("Looking for book:", { bookId, userId: userData.user.id });
+    const { data: bookData, error: bookError } = await supabaseClient
       .from("books")
       .select("*")
       .eq("id", bookId)
       .eq("user_id", userData.user.id)
       .maybeSingle();
 
-    if (!bookData) throw new Error("Book not found");
+    console.log("Book query result:", { bookData, bookError });
+    if (bookError) {
+      console.error("Book query error:", bookError);
+      throw new Error(`Database error: ${bookError.message}`);
+    }
+    if (!bookData) throw new Error("Book not found or access denied");
 
     // Initialize Stripe
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
