@@ -22,21 +22,42 @@ serve(async (req) => {
     console.log("Payment function started");
 
     // Check if Stripe key is configured
-    console.log("=== ENVIRONMENT DEBUG ===");
+    console.log("=== ENVIRONMENT DEBUG START ===");
     const allEnvVars = Deno.env.toObject();
-    console.log("All environment variables:", Object.keys(allEnvVars));
-    console.log("Looking for STRIPE_SECRET_KEY...");
+    console.log("Total environment variables count:", Object.keys(allEnvVars).length);
+    console.log("All environment variable names:", JSON.stringify(Object.keys(allEnvVars).sort()));
+    
+    // Check for any STRIPE-related variables
+    const stripeVars = Object.keys(allEnvVars).filter(key => 
+      key.toUpperCase().includes('STRIPE')
+    );
+    console.log("STRIPE-related variables found:", JSON.stringify(stripeVars));
+    
+    // Try different possible names
+    const possibleNames = [
+      'STRIPE_SECRET_KEY',
+      'STRIPE_SECRET',
+      'STRIPE_KEY',
+      'stripe_secret_key',
+      'Stripe_Secret_Key'
+    ];
+    
+    console.log("Checking possible STRIPE key names:");
+    possibleNames.forEach(name => {
+      const value = Deno.env.get(name);
+      console.log(`${name}: ${value ? 'EXISTS (length: ' + value.length + ')' : 'NOT FOUND'}`);
+    });
     
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    console.log("STRIPE_SECRET_KEY exists:", !!stripeKey);
-    console.log("STRIPE_SECRET_KEY type:", typeof stripeKey);
-    console.log("STRIPE_SECRET_KEY length:", stripeKey?.length || 0);
+    console.log("Final STRIPE_SECRET_KEY check:");
+    console.log("- Exists:", !!stripeKey);
+    console.log("- Type:", typeof stripeKey);
+    console.log("- Length:", stripeKey?.length || 0);
+    console.log("=== ENVIRONMENT DEBUG END ===");
     
     if (!stripeKey) {
-      console.error("STRIPE_SECRET_KEY not found in environment");
-      console.error("Available env vars that contain 'STRIPE':", 
-        Object.keys(allEnvVars).filter(key => key.includes('STRIPE')));
-      throw new Error("Payment system not configured - missing Stripe key");
+      console.error("CRITICAL ERROR: STRIPE_SECRET_KEY not found");
+      throw new Error("Payment system not configured - STRIPE_SECRET_KEY missing from environment");
     }
     
     // Validate key format
@@ -46,7 +67,7 @@ serve(async (req) => {
       throw new Error("Invalid Stripe Secret Key format");
     }
     
-    console.log("Stripe key found:", stripeKey.substring(0, 7) + "...");
+    console.log("SUCCESS: Stripe key found and validated:", stripeKey.substring(0, 7) + "...");
     console.log("Stripe key type:", stripeKey.includes('test') ? 'test' : 'live');
 
     // Get request body
