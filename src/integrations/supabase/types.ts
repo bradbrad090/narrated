@@ -118,6 +118,7 @@ export type Database = {
           chapters: string | null
           created_at: string
           id: string
+          purchase_status: string | null
           status: string | null
           stripe_purchase_id: string | null
           tier: string
@@ -129,6 +130,7 @@ export type Database = {
           chapters?: string | null
           created_at?: string
           id?: string
+          purchase_status?: string | null
           status?: string | null
           stripe_purchase_id?: string | null
           tier?: string
@@ -140,6 +142,7 @@ export type Database = {
           chapters?: string | null
           created_at?: string
           id?: string
+          purchase_status?: string | null
           status?: string | null
           stripe_purchase_id?: string | null
           tier?: string
