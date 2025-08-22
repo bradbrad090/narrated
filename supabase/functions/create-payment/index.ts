@@ -22,18 +22,27 @@ serve(async (req) => {
     console.log("Payment function started");
 
     // Check if Stripe key is configured
+    console.log("=== ENVIRONMENT DEBUG ===");
+    const allEnvVars = Deno.env.toObject();
+    console.log("All environment variables:", Object.keys(allEnvVars));
+    console.log("Looking for STRIPE_SECRET_KEY...");
+    
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    console.log("Environment check - Stripe key exists:", !!stripeKey);
-    console.log("Environment check - All env vars:", Object.keys(Deno.env.toObject()));
+    console.log("STRIPE_SECRET_KEY exists:", !!stripeKey);
+    console.log("STRIPE_SECRET_KEY type:", typeof stripeKey);
+    console.log("STRIPE_SECRET_KEY length:", stripeKey?.length || 0);
     
     if (!stripeKey) {
-      console.error("STRIPE_SECRET_KEY not configured");
+      console.error("STRIPE_SECRET_KEY not found in environment");
+      console.error("Available env vars that contain 'STRIPE':", 
+        Object.keys(allEnvVars).filter(key => key.includes('STRIPE')));
       throw new Error("Payment system not configured - missing Stripe key");
     }
     
     // Validate key format
     if (!stripeKey.startsWith('sk_')) {
       console.error("Invalid Stripe key format - should start with sk_");
+      console.error("Key starts with:", stripeKey.substring(0, 10));
       throw new Error("Invalid Stripe Secret Key format");
     }
     
