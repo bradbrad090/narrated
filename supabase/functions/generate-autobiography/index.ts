@@ -180,7 +180,7 @@ Output format: Respond only with the autobiography chapter content. Do not inclu
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'grok-beta',
+        model: 'grok-2-1212',
         messages: [
           { role: 'system', content: systemPrompt },
           { 
@@ -189,14 +189,15 @@ Output format: Respond only with the autobiography chapter content. Do not inclu
           }
         ],
         max_tokens: 3000,
-        temperature: 0.7
+        temperature: 0.7,
+        stream: false
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.text();
       console.error('xAI API error:', response.status, errorData);
-      throw new Error(`xAI API error: ${response.status}`);
+      throw new Error(`xAI API error: ${response.status} ${errorData}`);
     }
 
     const data = await response.json();
