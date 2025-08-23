@@ -14,9 +14,9 @@ serve(async (req) => {
   }
 
   try {
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-    if (!openAIApiKey) {
-      throw new Error('OpenAI API key not configured');
+    const xaiApiKey = Deno.env.get('XAI_API_KEY');
+    if (!xaiApiKey) {
+      throw new Error('XAI API key not configured');
     }
 
     const { userId, bookId, chapterId } = await req.json();
@@ -172,15 +172,15 @@ Key Guidelines:
 
 Output format: Respond only with the autobiography chapter content. Do not include explanations, summaries, or additional commentary beyond the chapter itself.`;
 
-    // Call OpenAI API
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Call X AI API
+    const response = await fetch('https://api.x.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
+        'Authorization': `Bearer ${xaiApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
+        model: 'grok-beta',
         messages: [
           { role: 'system', content: systemPrompt },
           { 
@@ -188,14 +188,15 @@ Output format: Respond only with the autobiography chapter content. Do not inclu
             content: `Please generate an autobiography chapter based on the following information:\n\n${contextContent}`
           }
         ],
-        max_completion_tokens: 3000
+        max_tokens: 3000,
+        temperature: 0.7
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.text();
-      console.error('OpenAI API error:', response.status, errorData);
-      throw new Error(`OpenAI API error: ${response.status}`);
+      console.error('xAI API error:', response.status, errorData);
+      throw new Error(`xAI API error: ${response.status}`);
     }
 
     const data = await response.json();
