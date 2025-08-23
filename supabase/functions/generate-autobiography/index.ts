@@ -172,7 +172,7 @@ Key Guidelines:
 
 Output format: Respond only with the autobiography chapter content. Do not include explanations, summaries, or additional commentary beyond the chapter itself.`;
 
-    // Call X AI API
+    // Call X AI API with Grok-4
     const response = await fetch('https://api.x.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -180,7 +180,7 @@ Output format: Respond only with the autobiography chapter content. Do not inclu
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'grok-2-1212',
+        model: 'grok-4-0709',
         messages: [
           { role: 'system', content: systemPrompt },
           { 
@@ -188,8 +188,11 @@ Output format: Respond only with the autobiography chapter content. Do not inclu
             content: `Please generate an autobiography chapter based on the following information:\n\n${contextContent}`
           }
         ],
-        max_tokens: 3000,
+        max_tokens: 4000,
         temperature: 0.7,
+        top_p: 0.9,
+        frequency_penalty: 0,
+        presence_penalty: 0,
         stream: false
       }),
     });
