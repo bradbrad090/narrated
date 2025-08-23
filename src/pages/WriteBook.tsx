@@ -683,6 +683,33 @@ const WriteBook = () => {
           
           {currentChapter ? (
                 <div className="max-w-4xl mx-auto space-y-6">
+                  {/* Conversation Section - Mobile */}
+                  {user && book && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Conversation Assistant</CardTitle>
+                        <CardDescription>
+                          Have a natural conversation to explore your memories and generate content for your autobiography.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <ConversationInterface
+                          userId={user.id}
+                          bookId={book.id}
+                          chapterId={currentChapter?.id}
+                          onContentGenerated={(content) => {
+                            if (currentChapter) {
+                              const newContent = currentChapter.content ? currentChapter.content + "\n\n" + content : content;
+                              const updatedChapter = { ...currentChapter, content: newContent };
+                              setCurrentChapter(updatedChapter);
+                              setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
+                            }
+                          }}
+                        />
+                      </CardContent>
+                    </Card>
+                  )}
+                  
                   {/* Chapter Content Editor */}
                   <Card>
                     <CardHeader>
