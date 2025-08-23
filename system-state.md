@@ -26,6 +26,10 @@
 - **profile-extractor**: Extracts profile information from conversation text
 - **realtime-token**: Creates OpenAI real-time session tokens
 
+### Payment Services
+- **create-payment**: Creates Stripe checkout sessions for book upgrades
+- **verify-payment**: Verifies payment status and updates book tier
+
 ## Authentication Flow
 - Supabase Auth with email/password
 - Auto-creates user profile on signup via `handle_new_user()` trigger
@@ -69,8 +73,19 @@
 - Profile extraction from conversation text
 - Multiple conversation types with different strategies
 
+### Payment System
+- Stripe integration for book upgrades
+- Multiple tier support (free, paid, premium)
+- Secure payment processing with session verification
+- Payment status tracking and validation
+
+### State Management
+- Centralized conversation state using reducer pattern
+- UI state management for loading, typing, speaking states
+- Draft management for conversation inputs
+- Session persistence and restoration
+
 ## Current Limitations
-- No payment processing implemented
 - No PDF generation for final books
 - No photo integration
 - No professional editing workflow
@@ -80,11 +95,26 @@
 - OPENAI_API_KEY
 - XAI_API_KEY
 - RESEND_API_KEY
+- STRIPE_SECRET_KEY
+- STRIPE_SECRET_ACCESS_KEY
 - SUPABASE_* keys
 
 ## Technology Stack
 - Frontend: React + TypeScript + Tailwind CSS + Vite
 - Backend: Supabase (PostgreSQL + Edge Functions)
 - AI: OpenAI API (GPT models + Whisper)
+- Payments: Stripe checkout and verification
 - Email: Resend API
 - Authentication: Supabase Auth
+
+## Implemented Pages
+- **Index**: Landing page with hero, benefits, and pricing
+- **Dashboard**: User dashboard with book management
+- **WriteBook**: Main writing interface with conversation modes
+- **Auth**: Authentication (login/signup)
+- **PaymentFlow**: Upgrade flow for book tiers
+- **PaymentSuccess**: Payment confirmation and verification
+- **Contact**: Contact form
+- **FAQ**: Frequently asked questions
+- **Pricing**: Pricing plans and features
+- **WhatWeDo**: Service description
