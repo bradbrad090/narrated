@@ -1,6 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,48 +14,189 @@ serve(async (req) => {
   }
 
   try {
-    const XAI_API_KEY = Deno.env.get('XAI_API_KEY');
-    if (!XAI_API_KEY) {
-      throw new Error('XAI_API_KEY is not set');
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openAIApiKey) {
+      throw new Error('OpenAI API key not configured');
     }
 
-    const { prompt, userId, bookId } = await req.json();
+    const { userId, bookId, chapterId } = await req.json();
 
-    console.log('Generating autobiography content for user:', userId, 'book:', bookId);
+    console.log('Generating autobiography for:', { userId, bookId, chapterId });
 
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Initialize Supabase client with service role key
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      throw new Error('Supabase configuration missing');
+    }
 
-    // Call xAI API
-    const response = await fetch('https://api.x.ai/v1/chat/completions', {
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: { persistSession: false }
+    });
+
+    // Fetch user profile, book profile, and conversation history
+    const [profileResult, conversationResult, chapterResult] = await Promise.all([
+      supabase
+        .from('book_profiles')
+        .select('*')
+        .eq('book_id', bookId)
+        .eq('user_id', userId)
+        .maybeSingle(),
+      supabase
+        .from('chat_histories')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('chapters')
+        .select('*')
+        .eq('id', chapterId)
+        .eq('user_id', userId)
+        .single()
+    ]);
+
+    if (profileResult.error) {
+      console.error('Profile fetch error:', profileResult.error);
+    }
+    if (conversationResult.error) {
+      console.error('Conversation fetch error:', conversationResult.error);
+    }
+    if (chapterResult.error) {
+      throw new Error('Chapter not found');
+    }
+
+    const profile = profileResult.data;
+    const conversations = conversationResult.data || [];
+    const chapter = chapterResult.data;
+
+    console.log('Data fetched:', { 
+      profileExists: !!profile,
+      conversationCount: conversations.length,
+      chapterTitle: chapter.title
+    });
+
+    // Build context for the chapter
+    let contextContent = '';
+    
+    if (profile) {
+      contextContent += `Profile Information:\n`;
+      if (profile.full_name) contextContent += `Name: ${profile.full_name}\n`;
+      if (profile.birthplace) contextContent += `Birthplace: ${profile.birthplace}\n`;
+      if (profile.birth_year) contextContent += `Birth Year: ${profile.birth_year}\n`;
+      if (profile.current_location) contextContent += `Current Location: ${profile.current_location}\n`;
+      if (profile.occupation) contextContent += `Occupation: ${profile.occupation}\n`;
+      if (profile.education) contextContent += `Education: ${profile.education}\n`;
+      if (profile.family_background) contextContent += `Family Background: ${profile.family_background}\n`;
+      if (profile.cultural_background) contextContent += `Cultural Background: ${profile.cultural_background}\n`;
+      if (profile.relationships_family) contextContent += `Relationships/Family: ${profile.relationships_family}\n`;
+      if (profile.values_beliefs) contextContent += `Values/Beliefs: ${profile.values_beliefs}\n`;
+      if (profile.life_philosophy) contextContent += `Life Philosophy: ${profile.life_philosophy}\n`;
+      
+      if (profile.personality_traits?.length) {
+        contextContent += `Personality Traits: ${profile.personality_traits.join(', ')}\n`;
+      }
+      if (profile.hobbies_interests?.length) {
+        contextContent += `Hobbies/Interests: ${profile.hobbies_interests.join(', ')}\n`;
+      }
+      if (profile.key_life_events?.length) {
+        contextContent += `Key Life Events: ${profile.key_life_events.join(', ')}\n`;
+      }
+      if (profile.career_highlights?.length) {
+        contextContent += `Career Highlights: ${profile.career_highlights.join(', ')}\n`;
+      }
+      if (profile.challenges_overcome?.length) {
+        contextContent += `Challenges Overcome: ${profile.challenges_overcome.join(', ')}\n`;
+      }
+      if (profile.life_themes?.length) {
+        contextContent += `Life Themes: ${profile.life_themes.join(', ')}\n`;
+      }
+      if (profile.memorable_quotes?.length) {
+        contextContent += `Memorable Quotes: ${profile.memorable_quotes.join(', ')}\n`;
+      }
+      if (profile.languages_spoken?.length) {
+        contextContent += `Languages Spoken: ${profile.languages_spoken.join(', ')}\n`;
+      }
+      
+      contextContent += '\n';
+    }
+
+    // Add conversation history
+    if (conversations.length > 0) {
+      contextContent += `Conversation History:\n`;
+      conversations.slice(0, 5).forEach((conv, index) => {
+        if (conv.messages && Array.isArray(conv.messages)) {
+          contextContent += `\nConversation ${index + 1} (${conv.conversation_type}):\n`;
+          conv.messages.forEach((msg: any) => {
+            if (msg.role === 'user') {
+              contextContent += `User: ${msg.content}\n`;
+            } else if (msg.role === 'assistant') {
+              contextContent += `Assistant: ${msg.content}\n`;
+            }
+          });
+        }
+      });
+      contextContent += '\n';
+    }
+
+    // Add current chapter context
+    contextContent += `Chapter Information:\n`;
+    contextContent += `Chapter Title: ${chapter.title}\n`;
+    contextContent += `Chapter Number: ${chapter.chapter_number}\n`;
+    if (chapter.content) {
+      contextContent += `Existing Content: ${chapter.content}\n`;
+    }
+
+    console.log('Context built, length:', contextContent.length);
+
+    // System prompt from Sysprompt.txt
+    const systemPrompt = `You are an expert autobiography writer specializing in transforming personal conversations and background profiles into cohesive, first-person narrative prose. Your goal is to generate a single chapter of an autobiography based solely on the provided user profile and conversation history for that chapter.
+
+Key Guidelines:
+
+1. Write exclusively in the first-person perspective (using "I", "me", "my") as if the user is narrating their own life story.
+
+2. Use only the facts, stories, experiences, and details explicitly mentioned in the provided profile and conversation history. Do not invent, add, or fabricate any new stories, events, people, or details—everything must be grounded in the user's own words and shared information.
+
+3. You may apply slight, reasonable exaggeration for dramatic effect (e.g., emphasizing emotions or the significance of a real event the user described), but only if it enhances the narrative without altering facts. For example, if the user said "It was a tough day," you could say "It was one of the toughest days I'd faced," but nothing more inventive.
+
+4. Structure the chapter as engaging narrative prose: Start with an introduction to the chapter's theme, weave in chronological or thematic elements from the conversations, and end with a reflective conclusion. Aim for 800-1500 words, divided into paragraphs with natural flow.
+
+5. Comfort the reader (who is the user) by emphasizing the authenticity: Include subtle reassurances like "Looking back on my own words..." or "As I shared in my reflections..." to remind them this is drawn directly from their real stories.
+
+6. If the conversation history includes multiple exchanges, synthesize them into a unified narrative without quoting dialogues verbatim—paraphrase and integrate naturally.
+
+7. Title the chapter based on its core theme, derived from the provided data (e.g., if the chapter focuses on childhood, title it "My Early Years in [Birthplace]").
+
+8. If any information is missing or insufficient for a full chapter, note it briefly at the end and suggest the user add more details via conversations, but still generate the best possible chapter from what's available.
+
+Output format: Respond only with the autobiography chapter content. Do not include explanations, summaries, or additional commentary beyond the chapter itself.`;
+
+    // Call OpenAI API
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${XAI_API_KEY}`,
+        'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'grok-3-latest',
+        model: 'gpt-4.1-2025-04-14',
         messages: [
-          {
-            role: 'system',
-            content: `You are a professional autobiography writer and editor. Help users write compelling, authentic autobiography content. When users provide voice transcriptions or rough text, clean up grammar, punctuation, and sentence structure while preserving their authentic voice and meaning. Focus on creating engaging narratives that capture personal experiences, emotions, and life lessons. Write in first person and maintain a conversational yet literary tone. Each response should be substantial (300-800 words) and well-structured with clear paragraphs.`
-          },
-          {
-            role: 'user',
-            content: prompt
+          { role: 'system', content: systemPrompt },
+          { 
+            role: 'user', 
+            content: `Please generate an autobiography chapter based on the following information:\n\n${contextContent}`
           }
         ],
-        max_tokens: 2000,
-        temperature: 0.7,
+        max_tokens: 3000,
+        temperature: 0.7
       }),
     });
 
     if (!response.ok) {
-      const error = await response.text();
-      console.error('xAI API error:', error);
-      throw new Error(`xAI API error: ${response.status} ${error}`);
+      const errorData = await response.text();
+      console.error('OpenAI API error:', response.status, errorData);
+      throw new Error(`OpenAI API error: ${response.status}`);
     }
 
     const data = await response.json();
@@ -63,35 +204,45 @@ serve(async (req) => {
 
     console.log('Generated content length:', generatedContent.length);
 
-    // Update the book with the new content
+    // Update the chapter in the database
     const { error: updateError } = await supabase
-      .from('books')
-      .update({
-        chapters: generatedContent,
-        status: 'in_progress'
+      .from('chapters')
+      .update({ 
+        content: generatedContent,
+        updated_at: new Date().toISOString()
       })
-      .eq('id', bookId)
+      .eq('id', chapterId)
       .eq('user_id', userId);
 
     if (updateError) {
-      console.error('Error updating book:', updateError);
-      throw updateError;
+      console.error('Database update error:', updateError);
+      throw new Error('Failed to save generated content');
     }
 
-    return new Response(JSON.stringify({ 
-      success: true,
-      content: generatedContent 
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    console.log('Chapter updated successfully');
+
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        content: generatedContent,
+        message: 'Chapter generated successfully'
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
 
   } catch (error) {
     console.error('Error in generate-autobiography function:', error);
-    return new Response(JSON.stringify({ 
-      error: error.message 
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ 
+        success: false, 
+        error: error.message 
+      }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
   }
 });

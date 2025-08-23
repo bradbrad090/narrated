@@ -465,6 +465,57 @@ const WriteBook = () => {
     setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
   };
 
+  const handleGenerateChapter = async () => {
+    if (!user || !currentChapter || !book) return;
+
+    setSaving(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-autobiography', {
+        body: {
+          userId: user.id,
+          bookId: book.id,
+          chapterId: currentChapter.id
+        }
+      });
+
+      if (error) {
+        console.error('Edge function error:', error);
+        throw new Error(error.message || 'Failed to generate chapter');
+      }
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to generate chapter');
+      }
+
+      // Update the current chapter with the generated content
+      const updatedChapter = { 
+        ...currentChapter, 
+        content: data.content,
+        updated_at: new Date().toISOString()
+      };
+      setCurrentChapter(updatedChapter);
+      setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
+
+      toast({
+        title: "Chapter generated successfully!",
+        description: "Your autobiography chapter has been created using AI.",
+      });
+
+      // Show the chapter refinement section if it's hidden
+      setShowChapterRefinement(true);
+
+    } catch (error: any) {
+      console.error('Generate chapter error:', error);
+      toast({
+        title: "Error generating chapter",
+        description: error.message || "Failed to generate chapter content. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
 
   if (loading) {
     return (
@@ -800,7 +851,20 @@ const WriteBook = () => {
                       </Card>
                      )}
 
-                    {/* Toggle Button for Chapter Refinement Window */}
+                     {/* Generate Chapter Button */}
+                    <div className="flex justify-center mb-4">
+                      <Button
+                        onClick={handleGenerateChapter}
+                        disabled={saving || !currentChapter || !user}
+                        size="lg"
+                        className="shadow-lg bg-gradient-primary hover:opacity-90"
+                      >
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        {saving ? "Generating..." : "Generate Chapter with AI"}
+                      </Button>
+                    </div>
+
+                     {/* Toggle Button for Chapter Refinement Window */}
                     <div className="flex justify-center my-6">
                       <Button
                         onClick={() => setShowChapterRefinement(!showChapterRefinement)}
