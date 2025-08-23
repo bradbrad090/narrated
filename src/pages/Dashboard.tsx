@@ -240,7 +240,7 @@ const Dashboard = () => {
             <h1 className="text-xl font-semibold">Narrated</h1>
           </a>
           <div className="flex items-center space-x-4">
-            <span className="text-sm text-muted-foreground">
+            <span className="hidden md:inline text-sm text-muted-foreground">
               Welcome, {user?.email}
             </span>
             <Button variant="outline" onClick={handleSignOut}>
