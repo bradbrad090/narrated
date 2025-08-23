@@ -188,8 +188,7 @@ Output format: Respond only with the autobiography chapter content. Do not inclu
             content: `Please generate an autobiography chapter based on the following information:\n\n${contextContent}`
           }
         ],
-        max_tokens: 3000,
-        temperature: 0.7
+        max_completion_tokens: 3000
       }),
     });
 
