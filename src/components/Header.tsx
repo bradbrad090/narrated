@@ -104,7 +104,7 @@ const Header = () => {
             {/* Mobile menu */}
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
-                <button className="md:hidden p-2 text-muted-foreground hover:text-foreground">
+                <button className="md:hidden p-3 text-muted-foreground hover:text-foreground min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation">
                   <Menu className="w-5 h-5" />
                 </button>
               </SheetTrigger>
@@ -118,21 +118,21 @@ const Header = () => {
                 <div className="flex flex-col gap-4 mt-8">
                   <a 
                     href="/what-we-do" 
-                    className="text-lg font-medium text-foreground hover:text-primary transition-colors py-2"
+                    className="text-lg font-medium text-foreground hover:text-primary transition-colors py-3 px-2 min-h-[44px] flex items-center touch-manipulation"
                     onClick={() => setIsOpen(false)}
                   >
                     What We Do
                   </a>
                   <a 
                     href="/pricing" 
-                    className="text-lg font-medium text-foreground hover:text-primary transition-colors py-2"
+                    className="text-lg font-medium text-foreground hover:text-primary transition-colors py-3 px-2 min-h-[44px] flex items-center touch-manipulation"
                     onClick={() => setIsOpen(false)}
                   >
                     Pricing
                   </a>
                   <a 
                     href="/faq" 
-                    className="text-lg font-medium text-foreground hover:text-primary transition-colors py-2"
+                    className="text-lg font-medium text-foreground hover:text-primary transition-colors py-3 px-2 min-h-[44px] flex items-center touch-manipulation"
                     onClick={() => setIsOpen(false)}
                   >
                     FAQ

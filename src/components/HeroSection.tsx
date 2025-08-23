@@ -31,7 +31,8 @@ const HeroSection = () => {
         <img 
           src={heroImage} 
           alt="Elegant vintage book with memories" 
-          className="w-full h-full object-cover opacity-20"
+          className="w-full h-full object-cover opacity-20 max-w-full"
+          loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-hero opacity-60"></div>
       </div>
@@ -58,13 +59,13 @@ const HeroSection = () => {
               placeholder="Enter your email" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="flex h-12 w-full rounded-md border border-primary-foreground/30 bg-primary-foreground/10 backdrop-blur-sm px-4 py-3 text-base text-primary-foreground placeholder:text-primary-foreground/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+              className="flex h-12 sm:h-14 w-full rounded-md border border-primary-foreground/30 bg-primary-foreground/10 backdrop-blur-sm px-4 py-3 text-base sm:text-lg text-primary-foreground placeholder:text-primary-foreground/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-transparent min-h-[44px]"
             />
             <Button 
               variant="accent" 
               size="lg" 
               onClick={handleGetStarted}
-              className="text-base sm:text-lg px-6 sm:px-8 py-3 font-semibold w-full sm:w-auto whitespace-nowrap"
+              className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 font-semibold w-full sm:w-auto whitespace-nowrap min-h-[44px] touch-manipulation"
             >
               Get Started
             </Button>

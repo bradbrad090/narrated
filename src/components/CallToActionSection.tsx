@@ -3,45 +3,45 @@ import { ArrowRight, CheckCircle } from "lucide-react";
 
 const CallToActionSection = () => {
   return (
-    <section className="py-24 bg-gradient-hero">
-      <div className="container mx-auto px-6">
+    <section className="py-12 sm:py-24 bg-gradient-hero">
+      <div className="container mx-auto px-4 sm:px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-6xl font-bold text-primary-foreground mb-6">
+          <h2 className="text-2xl sm:text-4xl md:text-6xl font-bold text-primary-foreground mb-4 sm:mb-6 leading-tight">
             Ready to Begin Your
             <span className="block text-transparent bg-gradient-accent bg-clip-text">
               Life Story?
             </span>
           </h2>
           
-          <p className="text-xl md:text-2xl text-primary-foreground/90 mb-12 leading-relaxed">
+          <p className="text-base sm:text-xl md:text-2xl text-primary-foreground/90 mb-8 sm:mb-12 leading-relaxed px-2">
             Join hundreds of people who have already preserved their legacy with Narrated.
           </p>
           
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
-            <div className="flex items-center justify-center gap-3 text-primary-foreground/90">
-              <CheckCircle className="w-5 h-5 text-accent" />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-8 mb-8 sm:mb-12">
+            <div className="flex items-center justify-center gap-3 text-primary-foreground/90 text-sm sm:text-base">
+              <CheckCircle className="w-5 h-5 text-accent flex-shrink-0" />
               <span>30-Day Money Back Guarantee</span>
             </div>
-            <div className="flex items-center justify-center gap-3 text-primary-foreground/90">
-              <CheckCircle className="w-5 h-5 text-accent" />
+            <div className="flex items-center justify-center gap-3 text-primary-foreground/90 text-sm sm:text-base">
+              <CheckCircle className="w-5 h-5 text-accent flex-shrink-0" />
               <span>Unlimited Revisions</span>
             </div>
-            <div className="flex items-center justify-center gap-3 text-primary-foreground/90">
-              <CheckCircle className="w-5 h-5 text-accent" />
+            <div className="flex items-center justify-center gap-3 text-primary-foreground/90 text-sm sm:text-base">
+              <CheckCircle className="w-5 h-5 text-accent flex-shrink-0" />
               <span>Premium Print Quality</span>
             </div>
           </div>
           
-          <div className="bg-card/10 backdrop-blur-sm rounded-2xl p-8 mb-12 border border-primary-foreground/20">
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div className="text-left">
-                <h3 className="text-2xl font-semibold text-primary-foreground mb-4">
+          <div className="bg-card/10 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-8 mb-8 sm:mb-12 border border-primary-foreground/20">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 items-center">
+              <div className="text-center md:text-left">
+                <h3 className="text-xl sm:text-2xl font-semibold text-primary-foreground mb-3 sm:mb-4">
                   Launch Special
                 </h3>
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-primary-foreground/80">
-                    <span className="line-through">$399</span>
-                    <span className="text-accent font-bold text-2xl">$199</span>
+                  <div className="flex items-center justify-center md:justify-start gap-2 text-primary-foreground/80">
+                    <span className="line-through text-base sm:text-lg">$399</span>
+                    <span className="text-accent font-bold text-xl sm:text-2xl">$199</span>
                   </div>
                   <p className="text-primary-foreground/70 text-sm">
                      Limited time offer - Save $200
@@ -49,25 +49,25 @@ const CallToActionSection = () => {
                 </div>
               </div>
               
-              <div className="text-left">
-                <h4 className="font-semibold text-primary-foreground mb-3">
+              <div className="text-center md:text-left">
+                <h4 className="font-semibold text-primary-foreground mb-3 text-base sm:text-lg">
                   What's Included:
                 </h4>
-                <ul className="space-y-2 text-primary-foreground/80 text-sm">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-accent" />
+                <ul className="space-y-2 text-primary-foreground/80 text-sm sm:text-base">
+                  <li className="flex items-center gap-2 justify-center md:justify-start">
+                    <CheckCircle className="w-4 h-4 text-accent flex-shrink-0" />
                     <span>Unlimited AI conversations</span>
                   </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-accent" />
+                  <li className="flex items-center gap-2 justify-center md:justify-start">
+                    <CheckCircle className="w-4 h-4 text-accent flex-shrink-0" />
                     <span>Professional editing & formatting</span>
                   </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-accent" />
+                  <li className="flex items-center gap-2 justify-center md:justify-start">
+                    <CheckCircle className="w-4 h-4 text-accent flex-shrink-0" />
                     <span>Premium hardcover book</span>
                   </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-accent" />
+                  <li className="flex items-center gap-2 justify-center md:justify-start">
+                    <CheckCircle className="w-4 h-4 text-accent flex-shrink-0" />
                     <span>Free worldwide shipping</span>
                   </li>
                 </ul>
@@ -78,7 +78,7 @@ const CallToActionSection = () => {
           <Button 
             variant="accent" 
             size="lg" 
-            className="text-base sm:text-xl px-6 sm:px-12 py-4 sm:py-6 font-bold group w-full sm:w-auto max-w-xs sm:max-w-none mx-auto"
+            className="text-base sm:text-xl px-6 sm:px-12 py-4 sm:py-6 font-bold group w-full sm:w-auto max-w-xs sm:max-w-none mx-auto min-h-[48px] touch-manipulation"
           >
             <span className="sm:hidden">Start Now</span>
             <span className="hidden sm:inline">Start Your Autobiography Now</span>

@@ -183,7 +183,7 @@ const Auth = () => {
       <div className="min-h-screen bg-gradient-subtle">
       <Header />
       <div className="flex items-center justify-center min-h-screen p-4 pt-20">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md mx-auto">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-semibold">
             {isForgotPassword ? "Reset Password" : isSignUp ? "Create Account" : "Welcome Back"}
@@ -213,7 +213,7 @@ const Auth = () => {
                 />
               </div>
               
-              <Button type="submit" className="w-full" variant="hero">
+              <Button type="submit" className="w-full min-h-[44px] touch-manipulation" variant="hero">
                 Send Reset Link
               </Button>
             </form>
@@ -223,7 +223,7 @@ const Auth = () => {
           <div className="space-y-3">
             <Button 
               variant="outline" 
-              className="w-full" 
+              className="w-full min-h-[44px] touch-manipulation" 
               onClick={handleGoogleAuth}
             >
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
@@ -250,14 +250,15 @@ const Auth = () => {
           <form onSubmit={handleEmailAuth} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="min-h-[44px] text-base"
+                  required
+                />
             </div>
             
             <div className="space-y-2">
@@ -279,6 +280,7 @@ const Auth = () => {
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                className="min-h-[44px] text-base"
                 required
               />
             </div>
@@ -292,12 +294,13 @@ const Auth = () => {
                   placeholder="Confirm your password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="min-h-[44px] text-base"
                   required
                 />
               </div>
             )}
 
-            <Button type="submit" className="w-full" variant="hero">
+            <Button type="submit" className="w-full min-h-[44px] touch-manipulation" variant="hero">
               {isSignUp ? "Create Account" : "Sign In"}
             </Button>
           </form>
