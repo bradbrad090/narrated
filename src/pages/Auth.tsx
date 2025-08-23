@@ -120,18 +120,11 @@ const Auth = () => {
 
   const handleGoogleAuth = async () => {
     try {
-      // Detect if user is on mobile
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: `${window.location.origin}/dashboard`,
-          // For mobile, use redirect instead of popup
-          ...(isMobile && { 
-            skipBrowserRedirect: false,
-            redirectTo: `${window.location.origin}/dashboard`
-          })
+          skipBrowserRedirect: false // Force full redirect on all devices
         }
       });
       
