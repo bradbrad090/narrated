@@ -169,14 +169,20 @@ const handler = async (request: Request): Promise<Response> => {
     // Generate conversation seeds based on context and type
     const seeds = generateConversationSeeds(contextSnapshot, conversationType);
 
-    // Limit context size to 10,000 characters
-    const contextString = JSON.stringify(contextSnapshot);
-    const truncatedContext = contextString.length > 10000 
-      ? contextString.substring(0, 10000) + '...[truncated]'
-      : contextString;
+    // Limit context size by truncating large text fields, not the JSON itself
+    if (contextSnapshot.recentChapters) {
+      contextSnapshot.recentChapters = contextSnapshot.recentChapters.map(chapter => ({
+        ...chapter,
+        content: chapter.content ? chapter.content.substring(0, 1000) : chapter.content
+      }));
+    }
+    
+    if (contextSnapshot.currentChapter?.content) {
+      contextSnapshot.currentChapter.content = contextSnapshot.currentChapter.content.substring(0, 1000);
+    }
 
     const response = {
-      context: JSON.parse(truncatedContext),
+      context: contextSnapshot,
       seeds,
       errors: errors.length > 0 ? errors : undefined
     };

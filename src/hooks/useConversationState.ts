@@ -113,9 +113,14 @@ export const useConversationState = ({
     conversationType: ConversationType,
     styleInstructions?: string
   ) => {
+    // Load context if not already loaded
     if (!state.context) {
-      handleError(new Error('Context not loaded'), 'starting conversation');
-      return;
+      try {
+        await loadContext();
+      } catch (error) {
+        handleError(error, 'loading conversation context');
+        return;
+      }
     }
 
     const params = {
@@ -255,11 +260,7 @@ export const useConversationState = ({
     loadConversationHistory();
   }, [loadConversationHistory]);
 
-  useEffect(() => {
-    if (userId && bookId) {
-      loadContext();
-    }
-  }, [loadContext]);
+  // Remove automatic context loading - load only when needed
 
   // Cleanup on unmount
   useEffect(() => {
