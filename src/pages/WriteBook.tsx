@@ -25,6 +25,7 @@ interface Chapter {
   chapter_number: number;
   title: string;
   content: string;
+  summary?: string;
   created_at: string;
   updated_at: string;
 }
@@ -487,10 +488,11 @@ const WriteBook = () => {
         throw new Error(data.error || 'Failed to generate chapter');
       }
 
-      // Update the current chapter with the generated content
+      // Update the current chapter with the generated content and summary
       const updatedChapter = { 
         ...currentChapter, 
         content: data.content,
+        summary: data.summary,
         updated_at: new Date().toISOString()
       };
       setCurrentChapter(updatedChapter);
@@ -887,12 +889,12 @@ const WriteBook = () => {
                           </CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <Textarea
-                            placeholder="Chapter summary will be generated here..."
-                            value=""
-                            readOnly
-                            className="min-h-[120px] text-base leading-relaxed bg-muted/50"
-                          />
+                           <Textarea
+                             placeholder="Chapter summary will be generated here..."
+                             value={currentChapter.summary || ""}
+                             readOnly
+                             className="min-h-[120px] text-base leading-relaxed bg-muted/50"
+                           />
                         </CardContent>
                       </Card>
 
