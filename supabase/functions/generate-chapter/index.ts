@@ -150,8 +150,15 @@ serve(async (req) => {
 
     console.log('Context built, length:', contextContent.length);
 
-    // System prompt from Sysprompt.txt
-    const systemPrompt = `You are an expert autobiography writer specializing in transforming personal conversations and background profiles into cohesive, first-person narrative prose. Your goal is to generate a single chapter of an autobiography based solely on the provided user profile and conversation history for that chapter.
+    // Read system prompt from Sysprompt.txt file
+    let systemPrompt = '';
+    try {
+      systemPrompt = await Deno.readTextFile('./Sysprompt.txt');
+      console.log('System prompt loaded from Sysprompt.txt');
+    } catch (error) {
+      console.error('Failed to read Sysprompt.txt, using fallback:', error);
+      // Fallback system prompt
+      systemPrompt = `You are an expert autobiography writer specializing in transforming personal conversations and background profiles into cohesive, first-person narrative prose. Your goal is to generate a single chapter of an autobiography based solely on the provided user profile and conversation history for that chapter.
 
 Key Guidelines:
 
@@ -172,6 +179,7 @@ Key Guidelines:
 8. If any information is missing or insufficient for a full chapter, note it briefly at the end and suggest the user add more details via conversations, but still generate the best possible chapter from what's available.
 
 Output format: Respond only with the autobiography chapter content. Do not include explanations, summaries, or additional commentary beyond the chapter itself.`;
+    }
 
     // Call X AI API with Grok-4 with retry logic
     let generatedContent = '';
