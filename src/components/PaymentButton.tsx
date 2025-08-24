@@ -41,7 +41,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
       description: 'Full featured book creation experience',
       icon: <Star className="h-5 w-5" />,
       features: ['All conversation modes', 'Unlimited chapters', 'Premium export', 'AI assistance'],
-      buttonText: 'Upgrade to Standard'
+      buttonText: 'Upgrade'
     },
     {
       id: 'premium' as const,
@@ -50,7 +50,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
       description: 'Professional book creation with advanced features',
       icon: <Crown className="h-5 w-5" />,
       features: ['Everything in Standard', 'Priority support', 'Advanced AI models', 'Professional editing'],
-      buttonText: 'Upgrade to Premium'
+      buttonText: 'Upgrade'
     }
   ];
 
