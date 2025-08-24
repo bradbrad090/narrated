@@ -94,16 +94,7 @@ export class ConversationMediator {
    * Get available conversation types for a medium
    */
   getAvailableTypes(medium: ConversationMedium): ConversationType[] {
-    switch (medium) {
-      case 'text':
-        return ['interview', 'reflection', 'brainstorming'];
-      case 'voice':
-        return ['interview', 'reflection', 'brainstorming'];
-      case 'self':
-        return ['reflection']; // Self conversations are always reflective
-      default:
-        return [];
-    }
+    return ['interview']; // Only interview type is available
   }
 
   /**

@@ -53,7 +53,7 @@ export const SelfConversationMode: React.FC<SelfConversationModeProps> = ({
 
     try {
       // Start a self conversation session  
-      const session = await startConversation('self', 'reflection');
+      const session = await startConversation('self', 'interview');
       
       if (session) {
         // Send the message to save it

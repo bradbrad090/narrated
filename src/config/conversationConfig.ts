@@ -48,7 +48,7 @@ export const CONVERSATION_CONFIG = {
 } as const;
 
 // Conversation Types
-export type ConversationType = 'interview' | 'reflection' | 'brainstorming';
+export type ConversationType = 'interview';
 export type ConversationMedium = 'text' | 'voice';
 
 // Error Types for standardized error handling

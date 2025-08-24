@@ -1,6 +1,6 @@
 // Comprehensive TypeScript interfaces for the conversation system
 
-export type ConversationType = 'interview' | 'reflection' | 'brainstorming';
+export type ConversationType = 'interview';
 export type ConversationMedium = 'text' | 'voice' | 'self';
 
 export interface ConversationMessage {

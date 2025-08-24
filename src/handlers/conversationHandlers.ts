@@ -178,12 +178,12 @@ export class SelfConversationHandler extends BaseConversationHandler {
     
     const session: ConversationSession = {
       sessionId,
-      conversationType: 'reflection', // Self conversations are always reflective
+      conversationType: 'interview', // Self conversations use interview type
       conversationMedium: 'self',
       messages: [],
       context: params.context,
       goals: [
-        'Document personal thoughts and reflections',
+        'Document personal thoughts and experiences',
         'Capture self-directed memories and experiences', 
         'Preserve authentic personal voice and perspective'
       ],

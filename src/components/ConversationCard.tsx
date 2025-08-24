@@ -25,9 +25,9 @@ export const ConversationCard: React.FC<ConversationCardProps> = ({
 
   const getConversationTypeLabel = () => {
     if (session.isSelfConversation) {
-      return 'Self Reflection';
+      return 'Self Interview';
     }
-    return `${session.conversationType.charAt(0).toUpperCase() + session.conversationType.slice(1)} Chat`;
+    return 'Interview Chat';
   };
 
   const getMediumBadge = () => {

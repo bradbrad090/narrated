@@ -10,7 +10,7 @@ export interface ConversationMessage {
 
 export interface ConversationSession {
   sessionId: string;
-  conversationType: 'interview' | 'reflection' | 'brainstorming';
+  conversationType: 'interview';
   conversationMedium?: 'text' | 'voice';
   messages: ConversationMessage[];
   context?: any;
@@ -84,7 +84,7 @@ export const useConversationFlow = (userId: string, bookId: string, chapterId?: 
 
         return {
           sessionId: chat.session_id,
-          conversationType: chat.conversation_type as 'interview' | 'reflection' | 'brainstorming',
+          conversationType: 'interview', // Default all to interview since we only support that now
           conversationMedium: (chat.conversation_medium as 'text' | 'voice') || 'text',
           messages,
           context: chat.context_snapshot,
@@ -139,7 +139,7 @@ export const useConversationFlow = (userId: string, bookId: string, chapterId?: 
   }, [userId, bookId, chapterId, currentSession?.conversationType, toast]);
 
   const startConversation = useCallback(async (
-    conversationType: 'interview' | 'reflection' | 'brainstorming',
+    conversationType: 'interview',
     styleInstructions?: string
   ) => {
     try {
