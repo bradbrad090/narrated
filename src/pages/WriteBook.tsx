@@ -25,6 +25,7 @@ interface Chapter {
   chapter_number: number;
   title: string;
   content: string;
+  summary?: string;
   created_at: string;
   updated_at: string;
 }
@@ -487,10 +488,11 @@ const WriteBook = () => {
         throw new Error(data.error || 'Failed to generate chapter');
       }
 
-      // Update the current chapter with the generated content
+      // Update the current chapter with the generated content and summary
       const updatedChapter = { 
         ...currentChapter, 
         content: data.content,
+        summary: data.summary,
         updated_at: new Date().toISOString()
       };
       setCurrentChapter(updatedChapter);
@@ -717,14 +719,26 @@ const WriteBook = () => {
                       <CardDescription>
                         Edit and refine your chapter content. You can manually edit the AI-generated text or write your own.
                       </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Textarea
-                        placeholder="Your chapter content will appear here. You can edit it directly or use the AI assistant above to generate new content..."
-                        value={currentChapter.content}
-                        onChange={(e) => handleChapterContentChange(e.target.value)}
-                        className="min-h-[500px] text-base leading-relaxed"
-                      />
+                     </CardHeader>
+                     <CardContent>
+                       {/* Chapter Summary */}
+                       {currentChapter.summary && (
+                         <div className="mb-6">
+                           <h3 className="text-sm font-medium text-muted-foreground mb-2">Chapter Summary</h3>
+                           <Textarea
+                             value={currentChapter.summary}
+                             readOnly
+                             className="min-h-[80px] text-sm bg-muted/30 resize-none cursor-default"
+                             placeholder="Chapter summary will appear here after AI generation..."
+                           />
+                         </div>
+                       )}
+                       <Textarea
+                         placeholder="Your chapter content will appear here. You can edit it directly or use the AI assistant above to generate new content..."
+                         value={currentChapter.content}
+                         onChange={(e) => handleChapterContentChange(e.target.value)}
+                         className="min-h-[500px] text-base leading-relaxed"
+                       />
                       <div className="mt-4 flex justify-center">
                         <Button 
                           onClick={saveCurrentChapter}
@@ -921,14 +935,26 @@ const WriteBook = () => {
                           <CardDescription>
                             Edit and refine your chapter content in the chapter refinement window below. You can manually edit the AI-generated text or write your own.
                           </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <Textarea
-                            placeholder="Your chapter content will appear here. You can edit it directly or use the conversation assistant above to generate new content..."
-                            value={currentChapter.content}
-                            onChange={(e) => handleChapterContentChange(e.target.value)}
-                            className="min-h-[500px] text-base leading-relaxed"
-                          />
+                         </CardHeader>
+                         <CardContent>
+                           {/* Chapter Summary */}
+                           {currentChapter.summary && (
+                             <div className="mb-6">
+                               <h3 className="text-sm font-medium text-muted-foreground mb-2">Chapter Summary</h3>
+                               <Textarea
+                                 value={currentChapter.summary}
+                                 readOnly
+                                 className="min-h-[80px] text-sm bg-muted/30 resize-none cursor-default"
+                                 placeholder="Chapter summary will appear here after AI generation..."
+                               />
+                             </div>
+                           )}
+                           <Textarea
+                             placeholder="Your chapter content will appear here. You can edit it directly or use the conversation assistant above to generate new content..."
+                             value={currentChapter.content}
+                             onChange={(e) => handleChapterContentChange(e.target.value)}
+                             className="min-h-[500px] text-base leading-relaxed"
+                           />
                           <div className="mt-4 flex justify-center">
                             <Button 
                               onClick={saveCurrentChapter}

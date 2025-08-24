@@ -237,11 +237,32 @@ Output format: Respond only with the autobiography chapter content. Do not inclu
       }
     }
 
-    // Update the chapter in the database
+    // Generate chapter summary
+    let chapterSummary = '';
+    try {
+      console.log('Generating chapter summary...');
+      const summaryResponse = await supabase.functions.invoke('generate-chapter-summary', {
+        body: { chapterContent: generatedContent }
+      });
+
+      if (summaryResponse.error) {
+        console.error('Summary generation error:', summaryResponse.error);
+        chapterSummary = 'Summary generation failed';
+      } else {
+        chapterSummary = summaryResponse.data.summary;
+        console.log('Chapter summary generated successfully');
+      }
+    } catch (summaryError) {
+      console.error('Summary generation failed:', summaryError);
+      chapterSummary = 'Summary generation failed';
+    }
+
+    // Update the chapter in the database with content and summary
     const { error: updateError } = await supabase
       .from('chapters')
       .update({ 
         content: generatedContent,
+        summary: chapterSummary,
         updated_at: new Date().toISOString()
       })
       .eq('id', chapterId)
@@ -289,6 +310,7 @@ Output format: Respond only with the autobiography chapter content. Do not inclu
       JSON.stringify({ 
         success: true, 
         content: generatedContent,
+        summary: chapterSummary,
         message: 'Chapter generated successfully'
       }),
       {
