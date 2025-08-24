@@ -717,7 +717,8 @@ const WriteBook = () => {
                           <CardTitle>Book Tier</CardTitle>
                           {!isBookTierCollapsed && (
                             <CardDescription>
-                              Choose the tier that best fits your needs. Upgrade to unlock advanced features.
+                              Choose the tier that best fits your needs.<br />
+                              Upgrade to unlock advanced features.
                             </CardDescription>
                           )}
                         </div>
@@ -843,7 +844,8 @@ const WriteBook = () => {
                                  <CardTitle>Book Tier</CardTitle>
                                  {!isBookTierCollapsed && (
                                    <CardDescription>
-                                     Choose the tier that best fits your needs. Upgrade to unlock advanced features and unlimited content.
+                                     Choose the tier that best fits your needs.<br />
+                                     Upgrade to unlock advanced features and unlimited content.
                                    </CardDescription>
                                  )}
                                </div>
