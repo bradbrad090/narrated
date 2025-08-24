@@ -95,6 +95,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                   bookId={bookId}
                   chapterId={chapterId}
                   context={context}
+                  onConversationSaved={loadConversationHistory}
                 />
               </ErrorBoundary>
             </TabsContent>

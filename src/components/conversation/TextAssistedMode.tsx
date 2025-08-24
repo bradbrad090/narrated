@@ -13,6 +13,7 @@ interface TextAssistedModeProps {
   chapterId?: string;
   context?: any;
   className?: string;
+  onConversationSaved?: () => void;
 }
 
 export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
@@ -20,7 +21,8 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
   bookId,
   chapterId,
   context,
-  className = ""
+  className = "",
+  onConversationSaved
 }) => {
   const [currentMessage, setCurrentMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -172,7 +174,10 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
                   <Send className="h-4 w-4" />
                 </Button>
                 <Button
-                  onClick={endConversation}
+                  onClick={() => {
+                    endConversation();
+                    onConversationSaved?.();
+                  }}
                   variant="outline"
                   size="icon"
                   title="Submit conversation"
