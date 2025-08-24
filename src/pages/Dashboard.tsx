@@ -136,34 +136,7 @@ const Dashboard = () => {
     if (!user) return;
 
     try {
-      // First, get all chapters for this book to cascade delete properly
-      const { data: chapters } = await supabase
-        .from('chapters')
-        .select('id')
-        .eq('book_id', bookId)
-        .eq('user_id', user.id);
-
-      if (chapters && chapters.length > 0) {
-        const chapterIds = chapters.map(chapter => chapter.id);
-        
-        // Delete chat_histories that reference these chapters
-        const { error: chatError } = await supabase
-          .from('chat_histories')
-          .delete()
-          .in('chapter_id', chapterIds)
-          .eq('user_id', user.id);
-
-        if (chatError) throw chatError;
-      }
-
-      // Delete any remaining chat_histories for this book (not chapter-specific)
-      await supabase
-        .from('chat_histories')
-        .delete()
-        .eq('user_id', user.id)
-        .like('context_snapshot', `%"book_id":"${bookId}"%`);
-
-      // Delete chapters
+      // Delete chapters (which will cascade delete related chat_histories)
       const { error: chaptersError } = await supabase
         .from('chapters')
         .delete()
@@ -180,6 +153,13 @@ const Dashboard = () => {
         .eq('user_id', user.id);
 
       if (profileError) throw profileError;
+
+      // Delete any remaining chat_histories not tied to chapters
+      await supabase
+        .from('chat_histories')
+        .delete()
+        .eq('user_id', user.id)
+        .is('chapter_id', null);
 
       // Finally delete the book
       const { error: bookError } = await supabase
