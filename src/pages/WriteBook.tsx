@@ -715,9 +715,11 @@ const WriteBook = () => {
                       <Button variant="ghost" className="flex items-center justify-between p-0 h-auto w-full">
                         <div className="text-left">
                           <CardTitle>Book Tier</CardTitle>
-                          <CardDescription>
-                            Choose the tier that best fits your needs. Upgrade to unlock advanced features.
-                          </CardDescription>
+                          {!isBookTierCollapsed && (
+                            <CardDescription>
+                              Choose the tier that best fits your needs. Upgrade to unlock advanced features.
+                            </CardDescription>
+                          )}
                         </div>
                         {isBookTierCollapsed ? (
                           <ChevronDown className="h-4 w-4" />
@@ -839,9 +841,11 @@ const WriteBook = () => {
                              <Button variant="ghost" className="flex items-center justify-between p-0 h-auto w-full">
                                <div className="text-left">
                                  <CardTitle>Book Tier</CardTitle>
-                                 <CardDescription>
-                                   Choose the tier that best fits your needs. Upgrade to unlock advanced features and unlimited content.
-                                 </CardDescription>
+                                 {!isBookTierCollapsed && (
+                                   <CardDescription>
+                                     Choose the tier that best fits your needs. Upgrade to unlock advanced features and unlimited content.
+                                   </CardDescription>
+                                 )}
                                </div>
                                {isBookTierCollapsed ? (
                                  <ChevronDown className="h-4 w-4" />
