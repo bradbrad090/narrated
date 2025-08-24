@@ -136,13 +136,59 @@ const Dashboard = () => {
     if (!user) return;
 
     try {
-      const { error } = await supabase
+      // First, get all chapters for this book to cascade delete properly
+      const { data: chapters } = await supabase
+        .from('chapters')
+        .select('id')
+        .eq('book_id', bookId)
+        .eq('user_id', user.id);
+
+      if (chapters && chapters.length > 0) {
+        const chapterIds = chapters.map(chapter => chapter.id);
+        
+        // Delete chat_histories that reference these chapters
+        const { error: chatError } = await supabase
+          .from('chat_histories')
+          .delete()
+          .in('chapter_id', chapterIds)
+          .eq('user_id', user.id);
+
+        if (chatError) throw chatError;
+      }
+
+      // Delete any remaining chat_histories for this book (not chapter-specific)
+      await supabase
+        .from('chat_histories')
+        .delete()
+        .eq('user_id', user.id)
+        .like('context_snapshot', `%"book_id":"${bookId}"%`);
+
+      // Delete chapters
+      const { error: chaptersError } = await supabase
+        .from('chapters')
+        .delete()
+        .eq('book_id', bookId)
+        .eq('user_id', user.id);
+
+      if (chaptersError) throw chaptersError;
+
+      // Delete book_profiles
+      const { error: profileError } = await supabase
+        .from('book_profiles')
+        .delete()
+        .eq('book_id', bookId)
+        .eq('user_id', user.id);
+
+      if (profileError) throw profileError;
+
+      // Finally delete the book
+      const { error: bookError } = await supabase
         .from('books')
         .delete()
         .eq('id', bookId)
         .eq('user_id', user.id);
 
-      if (error) throw error;
+      if (bookError) throw bookError;
 
       toast({
         title: "Book deleted",
