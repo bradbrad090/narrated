@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { RealtimeChat } from '@/utils/RealtimeAudio';
+import { RealtimeVoiceChat } from '@/utils/RealtimeAudioWebSocket';
 import { Mic, MicOff, Phone, PhoneOff } from 'lucide-react';
 
 interface VoiceInterfaceProps {
@@ -27,7 +27,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const chatRef = useRef<RealtimeChat | null>(null);
+  const chatRef = useRef<RealtimeVoiceChat | null>(null);
 
   const handleMessage = (event: any) => {
     console.log('Received message:', event);
@@ -57,7 +57,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       // Request microphone permission first
       await navigator.mediaDevices.getUserMedia({ audio: true });
       
-      chatRef.current = new RealtimeChat(handleMessage, userId, bookId, chapterId);
+      chatRef.current = new RealtimeVoiceChat(handleMessage, userId, bookId, chapterId);
       await chatRef.current.init(context, conversationType);
       setIsConnected(true);
       
