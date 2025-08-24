@@ -876,10 +876,28 @@ const WriteBook = () => {
                            />
                          </CardContent>
                       </Card>
-                     )}
+                      )}
 
-                     {/* Generate Chapter Button */}
-                     <div className="flex justify-center mb-4">
+                      {/* Chapter Summary Section */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Chapter Summary</CardTitle>
+                          <CardDescription>
+                            A brief summary of this chapter will appear here to help you understand the key themes and content.
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <Textarea
+                            placeholder="Chapter summary will be generated here..."
+                            value=""
+                            readOnly
+                            className="min-h-[120px] text-base leading-relaxed bg-muted/50"
+                          />
+                        </CardContent>
+                      </Card>
+
+                      {/* Generate Chapter Button */}
+                      <div className="flex justify-center mb-4">
                       <Button
                         variant="default"
                         onClick={handleGenerateChapter}
