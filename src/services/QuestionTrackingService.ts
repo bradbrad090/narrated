@@ -218,6 +218,61 @@ export class QuestionTrackingService {
   }
 
   /**
+   * Track questions from AI response and save them
+   */
+  async trackQuestionsFromResponse(
+    responseText: string,
+    userId: string,
+    bookId: string,
+    conversationType: ConversationType,
+    chapterId?: string,
+    sessionId?: string
+  ): Promise<ConversationQuestion[]> {
+    try {
+      // Extract questions from the response
+      const extractionResult = await this.extractQuestionsFromText(responseText);
+      
+      if (extractionResult.questions.length === 0) {
+        return [];
+      }
+
+      const savedQuestions: ConversationQuestion[] = [];
+
+      // Process each extracted question
+      for (const questionText of extractionResult.questions) {
+        // Check if question is duplicate
+        const duplicateCheck = await this.checkQuestionDuplicate(
+          userId,
+          bookId,
+          conversationType,
+          questionText
+        );
+
+        // Only save if not a duplicate
+        if (!duplicateCheck.isDuplicate) {
+          const savedQuestion = await this.saveQuestion(
+            userId,
+            bookId,
+            conversationType,
+            questionText,
+            sessionId,
+            chapterId
+          );
+
+          if (savedQuestion) {
+            savedQuestions.push(savedQuestion);
+          }
+        }
+      }
+
+      return savedQuestions;
+    } catch (error) {
+      console.error('Failed to track questions from response:', error);
+      return [];
+    }
+  }
+
+  /**
    * Get statistics about question usage
    */
   async getQuestionStats(userId: string, bookId: string): Promise<{

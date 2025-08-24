@@ -12,6 +12,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { ConversationStrategyFactory } from '@/strategies/conversationStrategies';
 import { CONVERSATION_CONFIG } from '@/config/conversationConfig';
+import { QuestionTrackingService } from '@/services/QuestionTrackingService';
 
 // Base handler with common functionality
 abstract class BaseConversationHandler implements ConversationMediumInterface {
@@ -60,6 +61,30 @@ abstract class BaseConversationHandler implements ConversationMediumInterface {
 
     if (error) {
       throw new Error(`Failed to update conversation: ${error.message}`);
+    }
+  }
+
+  protected async trackQuestionsInResponse(
+    response: string,
+    userId: string,
+    bookId: string,
+    conversationType: ConversationType,
+    chapterId?: string,
+    sessionId?: string
+  ): Promise<void> {
+    try {
+      const questionTrackingService = new QuestionTrackingService();
+      await questionTrackingService.trackQuestionsFromResponse(
+        response,
+        userId,
+        bookId,
+        conversationType,
+        chapterId,
+        sessionId
+      );
+    } catch (error) {
+      console.warn('Failed to track questions from AI response:', error);
+      // Don't throw - question tracking is supplementary functionality
     }
   }
 }
@@ -134,7 +159,7 @@ export class TextConversationHandler extends BaseConversationHandler {
           sessionId: params.session.sessionId,
           message: params.message,
           userId: params.userId,
-          bookId: params.userId, // This should be bookId but keeping for compatibility
+          bookId: params.bookId,
           context: params.context,
           conversationType: params.session.conversationType,
           styleInstructions: params.session.styleInstructions
@@ -156,6 +181,16 @@ export class TextConversationHandler extends BaseConversationHandler {
       ...updatedSession,
       messages: [...updatedSession.messages, aiMessage]
     };
+
+    // Track questions in AI response
+    await this.trackQuestionsInResponse(
+      data.response,
+      params.userId,
+      params.bookId,
+      params.session.conversationType,
+      params.session.context?.currentChapter?.id,
+      params.session.sessionId
+    );
 
     // Update in database
     await this.updateInDatabase(finalSession);

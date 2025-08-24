@@ -177,6 +177,7 @@ export const useConversationState = ({
       session: state.currentSession,
       message,
       userId,
+      bookId,
       context: state.context
     };
 
@@ -198,7 +199,7 @@ export const useConversationState = ({
     } finally {
       dispatch(conversationActions.setTyping(false));
     }
-  }, [state.currentSession, state.context, userId, handleError]);
+  }, [state.currentSession, state.context, userId, bookId, handleError]);
 
   // End current conversation
   const endConversation = useCallback(async () => {

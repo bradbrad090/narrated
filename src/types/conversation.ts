@@ -147,6 +147,7 @@ export interface SendMessageParams {
   session: ConversationSession;
   message: string;
   userId: string;
+  bookId: string;
   context: ConversationContext;
 }
 
