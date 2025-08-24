@@ -48,7 +48,11 @@ const Dashboard = () => {
     try {
       const { data, error } = await supabase
         .from('books')
-        .select('*, chapters(content)')
+        .select(`
+          *, 
+          chapters(content),
+          book_profiles(id)
+        `)
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
@@ -370,13 +374,23 @@ const Dashboard = () => {
                         </p>
                       </div>
                       <div className="flex gap-2">
-                        <Button 
-                          variant="outline" 
-                          className="flex-1"
-                          onClick={() => navigate(`/write/${book.id}`)}
-                        >
-                          Continue Writing
-                        </Button>
+                        {book.book_profiles && book.book_profiles.length > 0 ? (
+                          <Button 
+                            variant="outline" 
+                            className="flex-1"
+                            onClick={() => navigate(`/write/${book.id}`)}
+                          >
+                            Continue Writing
+                          </Button>
+                        ) : (
+                          <Button 
+                            variant="hero" 
+                            className="flex-1"
+                            onClick={() => navigate(`/write/${book.id}?profile=true`)}
+                          >
+                            Build Your Profile
+                          </Button>
+                        )}
                         <Button 
                           variant="outline" 
                           size="icon"

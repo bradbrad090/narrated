@@ -17,6 +17,7 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/componen
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 
 interface Chapter {
@@ -33,8 +34,9 @@ interface Chapter {
 
 const WriteBook = () => {
   const { bookId: paramBookId } = useParams();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const bookId = paramBookId || searchParams.get('book_id');
+  const profileMode = searchParams.get('profile') === 'true';
   const [user, setUser] = useState<User | null>(null);
   const [book, setBook] = useState<any>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
@@ -45,6 +47,7 @@ const WriteBook = () => {
   const [showChapterRefinement, setShowChapterRefinement] = useState(true);
   const [bookProfile, setBookProfile] = useState<any>(null);
   const [isBookTierCollapsed, setIsBookTierCollapsed] = useState(true);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -74,6 +77,27 @@ const WriteBook = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate, bookId]);
+
+  // Check for profile requirement on load
+  useEffect(() => {
+    if (book && user && profileMode && !bookProfile?.full_name) {
+      setShowProfileModal(true);
+    }
+  }, [book, user, profileMode, bookProfile]);
+
+  // Handle profile completion
+  const handleProfileUpdate = (profile: any) => {
+    setBookProfile(profile);
+    if (profile?.full_name && profileMode) {
+      // Profile is complete, remove profile parameter and show success
+      setSearchParams(new URLSearchParams());
+      setShowProfileModal(false);
+      toast({
+        title: "Profile Complete!",
+        description: "You can now start writing your autobiography.",
+      });
+    }
+  };
 
 
   const fetchBookAndChapters = async (userId: string) => {
@@ -700,7 +724,7 @@ const WriteBook = () => {
                 userId={user.id}
                 bookId={book.id}
                 bookProfile={bookProfile}
-                onProfileUpdate={setBookProfile}
+                onProfileUpdate={handleProfileUpdate}
               />
             </div>
           )}
@@ -825,12 +849,12 @@ const WriteBook = () => {
                 <div className="space-y-4">
                    {/* Profile Setup Section */}
                    {user && book && (
-                     <ProfileSetup
-                       userId={user.id}
-                       bookId={book.id}
-                       bookProfile={bookProfile}
-                       onProfileUpdate={setBookProfile}
-                     />
+                      <ProfileSetup
+                        userId={user.id}
+                        bookId={book.id}
+                        bookProfile={bookProfile}
+                        onProfileUpdate={handleProfileUpdate}
+                      />
                    )}
                    
                    {/* Payment Section */}
@@ -1071,6 +1095,26 @@ const WriteBook = () => {
           </ResizablePanelGroup>
         )}
       </main>
+
+      {/* Profile Setup Modal */}
+      <Dialog open={showProfileModal} onOpenChange={setShowProfileModal}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto">
+          <DialogHeader>
+            <DialogTitle>Complete Your Profile</DialogTitle>
+            <DialogDescription>
+              Before you can start writing your autobiography, please complete your personal profile. This helps us personalize your writing experience.
+            </DialogDescription>
+          </DialogHeader>
+          {user && book && (
+            <ProfileSetup
+              userId={user.id}
+              bookId={book.id}
+              bookProfile={bookProfile}
+              onProfileUpdate={handleProfileUpdate}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
     </>
   );
