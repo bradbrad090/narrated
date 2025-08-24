@@ -14,6 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_chapter_metadata: {
+        Row: {
+          book_id: string
+          chapter_id: string
+          conversation_id: string | null
+          created_at: string
+          generated_at: string
+          id: number
+          model_used: string
+          profile_id: string | null
+          prompt_version: string
+          source_data: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          book_id: string
+          chapter_id: string
+          conversation_id?: string | null
+          created_at?: string
+          generated_at?: string
+          id?: number
+          model_used: string
+          profile_id?: string | null
+          prompt_version: string
+          source_data?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          book_id?: string
+          chapter_id?: string
+          conversation_id?: string | null
+          created_at?: string
+          generated_at?: string
+          id?: number
+          model_used?: string
+          profile_id?: string | null
+          prompt_version?: string
+          source_data?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_chapter_metadata_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_chapter_metadata_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_chapter_metadata_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "chat_histories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_chapter_metadata_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "book_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_chapter_metadata_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       book_profiles: {
         Row: {
           birth_year: number | null
