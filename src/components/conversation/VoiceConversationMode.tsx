@@ -58,17 +58,15 @@ export const VoiceConversationMode: React.FC<VoiceConversationModeProps> = ({
         </p>
       </CardHeader>
       <CardContent>
-        <div className="p-6 bg-muted/30 rounded-lg text-center">
-          <VoiceInterface 
-            onSpeakingChange={setIsAISpeaking}
-            context={context}
-            conversationType="interview"
-            userId={userId}
-            bookId={bookId}
-            chapterId={chapterId}
-            onConversationUpdate={handleConversationUpdate}
-          />
-        </div>
+        <VoiceInterface 
+          onSpeakingChange={setIsAISpeaking}
+          context={context}
+          conversationType="interview"
+          userId={userId}
+          bookId={bookId}
+          chapterId={chapterId}
+          onConversationUpdate={handleConversationUpdate}
+        />
       </CardContent>
     </Card>
   );
