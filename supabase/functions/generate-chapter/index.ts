@@ -173,21 +173,8 @@ Key Guidelines:
 
 Output format: Respond only with the autobiography chapter content. Do not include explanations, summaries, or additional commentary beyond the chapter itself.`;
 
-    // System prompt for summary generation
-    const summaryPrompt = `You are an expert at creating concise chapter summaries for autobiographies. Based on the provided user profile and conversation history, generate a brief 3-5 sentence summary that captures the key events, characters, and themes for this chapter.
-
-The summary should:
-1. Be written in third person about the user
-2. Highlight the most important events or experiences mentioned
-3. Identify key people or relationships
-4. Capture the main themes or emotions
-5. Be concise but comprehensive
-
-Output only the summary text, no additional commentary.`;
-
-    // Generate chapter content and summary in parallel
+    // Call X AI API with Grok-4 with retry logic
     let generatedContent = '';
-    let generatedSummary = '';
     let attempts = 0;
     const maxAttempts = 3;
 
@@ -196,76 +183,41 @@ Output only the summary text, no additional commentary.`;
         console.log(`Generation attempt ${attempts + 1}`);
         
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 180000); // 180s timeout for parallel requests
+        const timeoutId = setTimeout(() => controller.abort(), 120000); // 120s timeout
 
-        // Generate both chapter content and summary in parallel
-        const [chapterResponse, summaryResponse] = await Promise.all([
-          fetch('https://api.x.ai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${xaiApiKey}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              model: 'grok-beta',
-              messages: [
-                { role: 'system', content: systemPrompt },
-                { 
-                  role: 'user', 
-                  content: `Please generate an autobiography chapter based on the following information:\n\n${contextContent}`
-                }
-              ],
-              max_tokens: 4000,
-              stream: false
-            }),
-            signal: controller.signal
+        const response = await fetch('https://api.x.ai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${xaiApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'grok-4-0709',
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { 
+                role: 'user', 
+                content: `Please generate an autobiography chapter based on the following information:\n\n${contextContent}`
+              }
+            ],
+            max_tokens: 4000,
+            stream: false
           }),
-          fetch('https://api.x.ai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${xaiApiKey}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              model: 'grok-beta',
-              messages: [
-                { role: 'system', content: summaryPrompt },
-                { 
-                  role: 'user', 
-                  content: `Please generate a concise summary for this chapter based on the following information:\n\n${contextContent}`
-                }
-              ],
-              max_tokens: 500,
-              stream: false
-            }),
-            signal: controller.signal
-          })
-        ]);
+          signal: controller.signal
+        });
 
         clearTimeout(timeoutId);
 
-        if (!chapterResponse.ok) {
-          const errorData = await chapterResponse.text();
-          console.error('Chapter generation API error:', chapterResponse.status, errorData);
-          throw new Error(`Chapter generation API error: ${chapterResponse.status} ${errorData}`);
+        if (!response.ok) {
+          const errorData = await response.text();
+          console.error('xAI API error:', response.status, errorData);
+          throw new Error(`xAI API error: ${response.status} ${errorData}`);
         }
 
-        if (!summaryResponse.ok) {
-          const errorData = await summaryResponse.text();
-          console.error('Summary generation API error:', summaryResponse.status, errorData);
-          throw new Error(`Summary generation API error: ${summaryResponse.status} ${errorData}`);
-        }
-
-        const [chapterData, summaryData] = await Promise.all([
-          chapterResponse.json(),
-          summaryResponse.json()
-        ]);
-
-        generatedContent = chapterData.choices[0].message.content;
-        generatedSummary = summaryData.choices[0].message.content;
+        const data = await response.json();
+        generatedContent = data.choices[0].message.content;
         
         console.log('Generated content length:', generatedContent.length);
-        console.log('Generated summary length:', generatedSummary.length);
         break;
 
       } catch (error) {
@@ -278,20 +230,18 @@ Output only the summary text, no additional commentary.`;
           console.log(`Retrying in ${delay}ms...`);
           await new Promise(resolve => setTimeout(resolve, delay));
         } else {
-          // Max retries reached, set error messages
+          // Max retries reached, set error message
           generatedContent = "Failed to generate chapter. Please try again.";
-          generatedSummary = "Failed to generate summary. Please try again.";
-          console.error('Max retries reached for content generation');
+          console.error('Max retries reached for chapter generation');
         }
       }
     }
 
-    // Update the chapter in the database with both content and summary
+    // Update the chapter in the database
     const { error: updateError } = await supabase
       .from('chapters')
       .update({ 
         content: generatedContent,
-        summary: generatedSummary,
         updated_at: new Date().toISOString()
       })
       .eq('id', chapterId)
@@ -339,8 +289,7 @@ Output only the summary text, no additional commentary.`;
       JSON.stringify({ 
         success: true, 
         content: generatedContent,
-        summary: generatedSummary,
-        message: 'Chapter and summary generated successfully'
+        message: 'Chapter generated successfully'
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
