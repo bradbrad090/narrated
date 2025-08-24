@@ -852,8 +852,8 @@ const WriteBook = () => {
               <div className="h-full bg-background border-r p-4 overflow-auto">
                 <div className="space-y-4">
                 
-                   {/* Profile Setup Section */}
-                   {user && book && !bookProfile?.full_name && (
+                   {/* Profile Setup Section - Only show if profile is incomplete */}
+                   {user && book && (!bookProfile?.full_name || profileMode) && (
                      <ProfileSetup
                        userId={user.id}
                        bookId={book.id}
