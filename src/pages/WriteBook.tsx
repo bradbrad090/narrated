@@ -879,12 +879,12 @@ const WriteBook = () => {
                      )}
 
                      {/* Generate Chapter Button */}
-                    <div className="flex justify-center mb-4">
+                     <div className="flex justify-center mb-4">
                       <Button
+                        variant="outline"
                         onClick={handleGenerateChapter}
                         disabled={saving || !currentChapter || !user}
                         size="lg"
-                        className="shadow-lg bg-gradient-primary hover:opacity-90"
                       >
                         <Sparkles className="h-4 w-4 mr-2" />
                         {saving ? "Generating..." : "Generate Chapter with AI"}
