@@ -192,7 +192,7 @@ Output format: Respond only with the autobiography chapter content. Do not inclu
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            model: 'grok-4-0709',
+            model: 'grok-beta',
             messages: [
               { role: 'system', content: systemPrompt },
               { 
@@ -294,7 +294,7 @@ Output format: Respond only with the autobiography chapter content. Do not inclu
           book_id: bookId,
           conversation_id: conversations[0]?.id,
           profile_id: profile?.id,
-          model_used: 'grok-4-0709',
+          model_used: 'grok-beta',
           prompt_version: 'v1.0',
           source_data: sourceData,
           generated_at: new Date().toISOString()

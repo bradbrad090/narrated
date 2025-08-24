@@ -33,7 +33,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'o3-mini-2025-01-31',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
@@ -44,7 +44,7 @@ serve(async (req) => {
             content: `Please create a concise chapter summary for the following chapter content:\n\n${chapterContent}`
           }
         ],
-        max_completion_tokens: 150,
+        max_tokens: 150,
       }),
     });
 
