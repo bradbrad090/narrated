@@ -124,10 +124,14 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
         }
       );
 
+      console.log('Profile extractor response:', { data, error });
+
       if (error) {
+        console.error('Profile extractor error:', error);
         throw error;
       }
 
+      console.log('Extracted profile:', data.profile);
       setExtractedProfile(data.profile);
       onProfileUpdate?.(data.profile);
 
