@@ -710,9 +710,9 @@ const WriteBook = () => {
             <div className="max-w-4xl mx-auto mb-6">
               <Card>
                 <Collapsible open={!isBookTierCollapsed} onOpenChange={(open) => setIsBookTierCollapsed(!open)}>
-                  <CardHeader className="pb-3">
+                  <CardHeader className={isBookTierCollapsed ? "py-4" : "pb-3"}>
                     <CollapsibleTrigger asChild>
-                      <Button variant="ghost" className="flex items-center justify-between p-0 h-auto w-full">
+                      <Button variant="ghost" className="flex items-center justify-between p-0 h-auto w-full min-h-[2.5rem]">
                         <div className="text-left">
                           <CardTitle>Book Tier</CardTitle>
                           {!isBookTierCollapsed && (
@@ -837,9 +837,9 @@ const WriteBook = () => {
                    {user && book && (
                      <Card className="mt-6">
                        <Collapsible open={!isBookTierCollapsed} onOpenChange={(open) => setIsBookTierCollapsed(!open)}>
-                         <CardHeader className="pb-3">
+                         <CardHeader className={isBookTierCollapsed ? "py-4" : "pb-3"}>
                            <CollapsibleTrigger asChild>
-                             <Button variant="ghost" className="flex items-center justify-between p-0 h-auto w-full">
+                             <Button variant="ghost" className="flex items-center justify-between p-0 h-auto w-full min-h-[2.5rem]">
                                <div className="text-left">
                                  <CardTitle>Book Tier</CardTitle>
                                  {!isBookTierCollapsed && (
