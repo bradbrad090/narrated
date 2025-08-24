@@ -113,13 +113,36 @@ export const useConversationState = ({
     conversationType: ConversationType,
     styleInstructions?: string
   ) => {
+    let context = state.context;
+    
     // Load context if not already loaded
-    if (!state.context) {
+    if (!context) {
       try {
-        await loadContext();
+        dispatch(conversationActions.setLoading(true));
+        
+        const { data, error } = await supabase.functions.invoke(
+          'conversation-context-builder',
+          {
+            body: {
+              userId,
+              bookId,
+              chapterId,
+              conversationType
+            }
+          }
+        );
+
+        if (error) {
+          throw error;
+        }
+
+        context = data.context;
+        dispatch(conversationActions.setContext(context));
       } catch (error) {
         handleError(error, 'loading conversation context');
         return;
+      } finally {
+        dispatch(conversationActions.setLoading(false));
       }
     }
 
@@ -140,7 +163,7 @@ export const useConversationState = ({
       bookId,
       chapterId,
       conversationType,
-      context: state.context,
+      context: context,
       styleInstructions: enhancedStyleInstructions
     };
 
