@@ -14,14 +14,13 @@ serve(async (req) => {
   }
 
   try {
-    const xaiApiKey = Deno.env.get('XAI_API_KEY');
-    if (!xaiApiKey) {
-      throw new Error('XAI API key not configured');
-    }
-
+    // Parse request body first to ensure it's valid
     const { userId, bookId, chapterId } = await req.json();
-
+    
     console.log('Generating chapter for:', { userId, bookId, chapterId });
+    
+    // Get XAI API key - will be checked before API call
+    const xaiApiKey = Deno.env.get('XAI_API_KEY');
 
     // Initialize Supabase client with service role key
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
@@ -181,6 +180,11 @@ Output format: Respond only with the autobiography chapter content. Do not inclu
     while (attempts < maxAttempts) {
       try {
         console.log(`Generation attempt ${attempts + 1}`);
+        
+        // Check XAI API key right before using it (handles caching issues)
+        if (!xaiApiKey) {
+          throw new Error('XAI API key not configured');
+        }
         
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 120000); // 120s timeout
