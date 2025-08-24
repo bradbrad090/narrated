@@ -101,26 +101,27 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   }, []);
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="w-full">
       {!isConnected ? (
-        <Button 
-          onClick={startConversation}
-          disabled={isConnecting}
-          className="bg-green-600 hover:bg-green-700 text-white"
-          size="sm"
-        >
-          {isConnecting ? (
-            <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-              Connecting...
-            </>
-          ) : (
-            <>
-              <Phone className="h-4 w-4 mr-2" />
-              Start Voice Chat
-            </>
-          )}
-        </Button>
+        <div className="text-center py-8">
+          <Button 
+            onClick={startConversation}
+            disabled={isConnecting}
+            size="lg"
+          >
+            {isConnecting ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current mr-2"></div>
+                Connecting...
+              </>
+            ) : (
+              <>
+                <Phone className="h-5 w-5 mr-2" />
+                Start Voice Chat
+              </>
+            )}
+          </Button>
+        </div>
       ) : (
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
