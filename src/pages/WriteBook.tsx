@@ -881,7 +881,7 @@ const WriteBook = () => {
                      {/* Generate Chapter Button */}
                      <div className="flex justify-center mb-4">
                       <Button
-                        variant="outline"
+                        variant="default"
                         onClick={handleGenerateChapter}
                         disabled={saving || !currentChapter || !user}
                         size="lg"
