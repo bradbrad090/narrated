@@ -30,9 +30,6 @@ interface GenerationResponse {
   chapter_id: string;
 }
 
-// Initialize KV store for queue
-const kv = await Deno.openKv();
-
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -115,6 +112,7 @@ serve(async (req) => {
       conversationId: conversations[0]?.id // Most recent conversation
     };
 
+    const kv = await Deno.openKv();
     await kv.enqueue(generationJob, { delay: 0 });
 
     console.log('Chapter generation job enqueued:', chapterId);
@@ -144,8 +142,12 @@ serve(async (req) => {
   }
 });
 
-// Queue listener for processing generation jobs
-kv.listenQueue(async (job: GenerationJob) => {
+// Initialize queue listener
+(async () => {
+  const kv = await Deno.openKv();
+  
+  // Queue listener for processing generation jobs
+  kv.listenQueue(async (job: GenerationJob) => {
   console.log('Processing chapter generation job:', job.chapterId);
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
@@ -276,7 +278,8 @@ kv.listenQueue(async (job: GenerationJob) => {
       console.error('Fallback update also failed:', fallbackError);
     }
   }
-});
+  });
+})();
 
 // Helper function to build context string
 function buildContext(profile: any, conversations: any[], chapter: any): string {
