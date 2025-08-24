@@ -120,7 +120,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
       {tiers.map((tier) => (
         <Card 
           key={tier.id} 
-          className={`relative ${
+          className={`relative flex flex-col ${
             isPurchased(tier.id) ? 'ring-2 ring-primary' : ''
           } ${
             currentTier === tier.id ? 'border-primary' : ''
@@ -141,8 +141,8 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
             <CardDescription>{tier.description}</CardDescription>
           </CardHeader>
           
-          <CardContent className="space-y-4">
-            <ul className="space-y-2 text-sm">
+          <CardContent className="flex flex-col flex-1">
+            <ul className="space-y-2 text-sm flex-1">
               {tier.features.map((feature, index) => (
                 <li key={index} className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-primary" />
@@ -151,26 +151,28 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
               ))}
             </ul>
             
-            <Button
-              onClick={() => handlePayment(tier.id)}
-              disabled={isLoading || isPurchased(tier.id)}
-              className="w-full"
-              variant={isPurchased(tier.id) ? "outline" : "default"}
-            >
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isPurchased(tier.id) 
-                ? "Current Plan" 
-                : isPending(tier.id)
-                ? "Payment Pending..."
-                : tier.buttonText
-              }
-            </Button>
-            
-            {isPending(tier.id) && (
-              <p className="text-sm text-muted-foreground text-center">
-                Complete your payment to activate this tier
-              </p>
-            )}
+            <div className="mt-4 space-y-2">
+              <Button
+                onClick={() => handlePayment(tier.id)}
+                disabled={isLoading || isPurchased(tier.id)}
+                className="w-full"
+                variant={isPurchased(tier.id) ? "outline" : "default"}
+              >
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isPurchased(tier.id) 
+                  ? "Current Plan" 
+                  : isPending(tier.id)
+                  ? "Payment Pending..."
+                  : tier.buttonText
+                }
+              </Button>
+              
+              {isPending(tier.id) && (
+                <p className="text-sm text-muted-foreground text-center">
+                  Complete your payment to activate this tier
+                </p>
+              )}
+            </div>
           </CardContent>
         </Card>
       ))}
