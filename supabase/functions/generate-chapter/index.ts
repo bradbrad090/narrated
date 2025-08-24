@@ -201,10 +201,6 @@ Output format: Respond only with the autobiography chapter content. Do not inclu
               }
             ],
             max_tokens: 4000,
-            temperature: 0.7,
-            top_p: 0.9,
-            frequency_penalty: 0,
-            presence_penalty: 0,
             stream: false
           }),
           signal: controller.signal
