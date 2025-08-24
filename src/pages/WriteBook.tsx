@@ -25,6 +25,7 @@ interface Chapter {
   chapter_number: number;
   title: string;
   content: string;
+  summary?: string;
   created_at: string;
   updated_at: string;
 }
@@ -516,6 +517,54 @@ const WriteBook = () => {
     }
   };
 
+  const handleGenerateSummary = async () => {
+    if (!user || !currentChapter || !book) return;
+
+    setSaving(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-summary', {
+        body: {
+          userId: user.id,
+          bookId: book.id,
+          chapterId: currentChapter.id
+        }
+      });
+
+      if (error) {
+        console.error('Edge function error:', error);
+        throw new Error(error.message || 'Failed to generate summary');
+      }
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to generate summary');
+      }
+
+      // Update the current chapter with the generated summary
+      const updatedChapter = { 
+        ...currentChapter, 
+        summary: data.summary,
+        updated_at: new Date().toISOString()
+      };
+      setCurrentChapter(updatedChapter);
+      setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
+
+      toast({
+        title: "Summary generated successfully!",
+        description: "A concise summary has been created for your chapter.",
+      });
+
+    } catch (error: any) {
+      console.error('Generate summary error:', error);
+      toast({
+        title: "Error generating summary",
+        description: error.message || "Failed to generate chapter summary. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
 
   if (loading) {
     return (
@@ -889,7 +938,7 @@ const WriteBook = () => {
                         <CardContent>
                           <Textarea
                             placeholder="Chapter summary will be generated here..."
-                            value=""
+                            value={currentChapter.summary || ""}
                             readOnly
                             className="min-h-[120px] text-base leading-relaxed bg-muted/50"
                           />
@@ -897,7 +946,7 @@ const WriteBook = () => {
                       </Card>
 
                       {/* Generate Chapter Button */}
-                      <div className="flex justify-center mb-4">
+                      <div className="flex justify-center gap-4 mb-4">
                       <Button
                         variant="default"
                         onClick={handleGenerateChapter}
@@ -906,6 +955,15 @@ const WriteBook = () => {
                       >
                         <Sparkles className="h-4 w-4 mr-2" />
                         {saving ? "Generating..." : "Generate Chapter with AI"}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={handleGenerateSummary}
+                        disabled={saving || !currentChapter || !user || !currentChapter.content.trim()}
+                        size="lg"
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        {saving ? "Generating..." : "Generate Summary"}
                       </Button>
                     </div>
 
