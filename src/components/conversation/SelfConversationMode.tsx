@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { VoiceRecorder } from '@/components/VoiceRecorder';
 import { useConversationState } from '@/hooks/useConversationState';
+import QuestionSuggestions from '@/components/QuestionSuggestions';
 import { User } from 'lucide-react';
 import { 
   ConversationErrorType, 
@@ -122,6 +123,19 @@ export const SelfConversationMode: React.FC<SelfConversationModeProps> = ({
           </div>
         </div>
       </CardContent>
+      
+      {/* Question Suggestions */}
+      <div className="mt-4">
+        <QuestionSuggestions
+          userId={userId}
+          bookId={bookId}
+          chapterId={chapterId}
+          conversationType="reflection"
+          onQuestionSelect={(question) => {
+            setCurrentMessage(question);
+          }}
+        />
+      </div>
     </Card>
   );
 };

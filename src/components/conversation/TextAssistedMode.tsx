@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageCircle, Send, Loader2, CheckCircle, Sparkles } from 'lucide-react';
 import { useConversationState } from '@/hooks/useConversationState';
 import { CONVERSATION_CONFIG } from '@/config/conversationConfig';
+import QuestionSuggestions from '@/components/QuestionSuggestions';
 
 interface TextAssistedModeProps {
   userId: string;
@@ -181,6 +182,22 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
                 </Button>
               </div>
             </div>
+          </div>
+        )}
+        
+        {/* Question Suggestions */}
+        {currentSession && (
+          <div className="mt-4">
+            <QuestionSuggestions
+              userId={userId}
+              bookId={bookId}
+              chapterId={chapterId}
+              conversationType="interview"
+              onQuestionSelect={(question) => {
+                setCurrentMessage(question);
+                textareaRef.current?.focus();
+              }}
+            />
           </div>
         )}
       </CardContent>
