@@ -82,8 +82,8 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
   };
 
   const handleSkipQuestion = () => {
-    // Add empty response for skipped question
-    const newResponses = [...responses, ''];
+    // Add space character for skipped question (not empty string)
+    const newResponses = [...responses, ' '];
     setResponses(newResponses);
     setCurrentResponse('');
     
