@@ -7,8 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Plus, Book, LogOut, Trash2, Edit2, Check, X, BarChart3 } from "lucide-react";
-import QuestionAnalyticsDashboard from "@/components/QuestionAnalyticsDashboard";
+import { Plus, Book, LogOut, Trash2, Edit2, Check, X } from "lucide-react";
 
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -16,8 +15,6 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [editingBookId, setEditingBookId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
-  const [selectedBook, setSelectedBook] = useState<string | null>(null);
-  const [showQuestionAnalytics, setShowQuestionAnalytics] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -376,21 +373,7 @@ const Dashboard = () => {
                           Created {new Date(book.created_at).toLocaleDateString()}
                         </p>
                       </div>
-                       <div className="flex gap-2">
-                         <Button 
-                           variant="outline"
-                           size="sm"
-                           onClick={() => {
-                             setSelectedBook(book.id);
-                             setShowQuestionAnalytics(true);
-                           }}
-                           className="text-blue-600 hover:text-blue-700"
-                         >
-                           <BarChart3 className="h-4 w-4 mr-1" />
-                           Analytics
-                         </Button>
-                       </div>
-                       <div className="flex gap-2 mt-2">
+                      <div className="flex gap-2">
                         {book.book_profiles && book.book_profiles.length > 0 ? (
                           <Button 
                             variant="outline" 
@@ -424,37 +407,6 @@ const Dashboard = () => {
             </div>
           )}
         </div>
-
-        {/* Question Analytics Modal/Section */}
-        {showQuestionAnalytics && selectedBook && user && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <div className="bg-background rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden">
-              <div className="p-6 border-b flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Question Analytics</h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setShowQuestionAnalytics(false);
-                    setSelectedBook(null);
-                  }}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
-                <QuestionAnalyticsDashboard
-                  userId={user.id}
-                  bookId={selectedBook}
-                  onQuestionSelect={(question) => {
-                    console.log('Selected question:', question);
-                    // You can implement question usage here
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        )}
       </main>
     </div>
     </>

@@ -382,54 +382,6 @@ export type Database = {
         }
         Relationships: []
       }
-      conversation_questions: {
-        Row: {
-          asked_at: string
-          book_id: string
-          chapter_id: string | null
-          conversation_session_id: string | null
-          conversation_type: string
-          created_at: string
-          id: string
-          question_hash: string
-          question_text: string
-          response_quality: number | null
-          semantic_keywords: string[] | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          asked_at?: string
-          book_id: string
-          chapter_id?: string | null
-          conversation_session_id?: string | null
-          conversation_type: string
-          created_at?: string
-          id?: string
-          question_hash: string
-          question_text: string
-          response_quality?: number | null
-          semantic_keywords?: string[] | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          asked_at?: string
-          book_id?: string
-          chapter_id?: string | null
-          conversation_session_id?: string | null
-          conversation_type?: string
-          created_at?: string
-          id?: string
-          question_hash?: string
-          question_text?: string
-          response_quality?: number | null
-          semantic_keywords?: string[] | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       orders: {
         Row: {
           book_id: string | null
@@ -513,27 +465,6 @@ export type Database = {
       cleanup_expired_context_cache: {
         Args: Record<PropertyKey, never>
         Returns: undefined
-      }
-      extract_question_keywords: {
-        Args: { question_text: string }
-        Returns: string[]
-      }
-      extract_questions_from_text: {
-        Args: { response_text: string }
-        Returns: string[]
-      }
-      generate_question_hash: {
-        Args: { question_text: string }
-        Returns: string
-      }
-      is_question_duplicate: {
-        Args: {
-          p_book_id: string
-          p_conversation_type: string
-          p_question_text: string
-          p_user_id: string
-        }
-        Returns: boolean
       }
     }
     Enums: {
