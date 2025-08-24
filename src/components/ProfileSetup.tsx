@@ -81,6 +81,17 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
     }
   };
 
+  const handleSkipQuestion = () => {
+    // Add empty response for skipped question
+    const newResponses = [...responses, ''];
+    setResponses(newResponses);
+    setCurrentResponse('');
+    
+    if (currentQuestion < PROFILE_QUESTIONS.length - 1) {
+      setCurrentQuestion(currentQuestion + 1);
+    }
+  };
+
   const handlePreviousQuestion = () => {
     if (currentQuestion > 0) {
       setCurrentQuestion(currentQuestion - 1);
@@ -241,13 +252,24 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                     </Button>
                     
                     <div className="flex gap-2">
-                      {currentQuestion === PROFILE_QUESTIONS.length - 1 && responses.length === PROFILE_QUESTIONS.length - 1 && currentResponse.trim() ? (
+                      <Button
+                        onClick={handleSkipQuestion}
+                        variant="outline"
+                      >
+                        Skip
+                      </Button>
+                      
+                      {currentQuestion === PROFILE_QUESTIONS.length - 1 && responses.length === PROFILE_QUESTIONS.length - 1 && (currentResponse.trim() || responses.length === PROFILE_QUESTIONS.length - 1) ? (
                         <Button
                           onClick={async () => {
-                            handleNextQuestion();
+                            if (currentResponse.trim()) {
+                              handleNextQuestion();
+                            } else {
+                              handleSkipQuestion();
+                            }
                             setTimeout(() => processConversation(), 100);
                           }}
-                          disabled={!currentResponse.trim() || isProcessing}
+                          disabled={isProcessing}
                           className="bg-green-600 hover:bg-green-700"
                         >
                           {isProcessing ? (
@@ -264,8 +286,7 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                         </Button>
                       ) : (
                         <Button
-                          onClick={handleNextQuestion}
-                          disabled={!currentResponse.trim()}
+                          onClick={currentResponse.trim() ? handleNextQuestion : handleSkipQuestion}
                         >
                           {currentQuestion === PROFILE_QUESTIONS.length - 1 ? 'Finish' : 'Next'}
                         </Button>
@@ -274,29 +295,6 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                   </div>
                 </div>
 
-                {/* Process All Responses Button */}
-                {responses.length > 0 && (
-                  <div className="border-t pt-4">
-                    <Button
-                      onClick={processConversation}
-                      disabled={isProcessing || responses.length === 0}
-                      variant="outline"
-                      className="w-full"
-                    >
-                      {isProcessing ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Processing Your Information...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          Process Current Responses ({responses.length} answers)
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                )}
               </div>
             ) : (
               /* Profile Summary */
