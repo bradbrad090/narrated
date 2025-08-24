@@ -88,7 +88,8 @@ const WriteBook = () => {
   // Handle profile completion
   const handleProfileUpdate = (profile: any) => {
     setBookProfile(profile);
-    if (profile?.full_name && profileMode) {
+    // Always close the modal when profile is processed, regardless of specific fields
+    if (profileMode && profile) {
       // Profile is complete, remove profile parameter and show success
       setSearchParams(new URLSearchParams());
       setShowProfileModal(false);
