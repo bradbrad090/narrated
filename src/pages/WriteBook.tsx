@@ -956,15 +956,15 @@ const WriteBook = () => {
                         <Sparkles className="h-4 w-4 mr-2" />
                         {saving ? "Generating..." : "Generate Chapter with AI"}
                       </Button>
-                      <Button
-                        variant="outline"
-                        onClick={handleGenerateSummary}
-                        disabled={saving || !currentChapter || !user || !currentChapter.content.trim()}
-                        size="lg"
-                      >
-                        <FileText className="h-4 w-4 mr-2" />
-                        {saving ? "Generating..." : "Generate Summary"}
-                      </Button>
+                       <Button
+                         variant="default"
+                         onClick={handleGenerateSummary}
+                         disabled={saving || !currentChapter || !user || !currentChapter.content.trim()}
+                         size="lg"
+                       >
+                         <FileText className="h-4 w-4 mr-2" />
+                         {saving ? "Generating..." : "Generate Summary"}
+                       </Button>
                     </div>
 
                      {/* Toggle Button for Chapter Refinement Window */}
