@@ -5,7 +5,7 @@
 ### Existing Components
 - **WriteBook Component**: Main interface with chapter management, AI content generation
 - **VoiceRecorder Component**: Audio transcription via `voice-to-text` edge function  
-- **Edge Functions**: `generate-autobiography`, `openai-conversation`, `voice-to-text`
+- **Edge Functions**: `generate-chapter`, `openai-conversation`, `voice-to-text`
 - **Database Tables**: `users`, `books`, `chapters`, `book_profiles`, `chat_histories`
 
 ### API Constraints

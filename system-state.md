@@ -22,7 +22,7 @@
 - **openai-conversation**: Handles conversation flow with context awareness
 - **ai-conversation-realtime**: Real-time conversation sessions with start/send message actions
 - **conversation-context-builder**: Builds conversation context from user/book/chapter data
-- **generate-autobiography**: Generates autobiography content from conversations
+- **generate-chapter**: Generates chapter content from conversations
 - **profile-extractor**: Extracts profile information from conversation text
 - **realtime-token**: Creates OpenAI real-time session tokens
 

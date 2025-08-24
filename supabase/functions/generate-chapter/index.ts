@@ -237,7 +237,7 @@ Output format: Respond only with the autobiography chapter content. Do not inclu
     );
 
   } catch (error) {
-    console.error('Error in generate-autobiography function:', error);
+    console.error('Error in generate-chapter function:', error);
     return new Response(
       JSON.stringify({ 
         success: false, 

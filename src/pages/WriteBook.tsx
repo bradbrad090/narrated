@@ -470,7 +470,7 @@ const WriteBook = () => {
 
     setSaving(true);
     try {
-      const { data, error } = await supabase.functions.invoke('generate-autobiography', {
+      const { data, error } = await supabase.functions.invoke('generate-chapter', {
         body: {
           userId: user.id,
           bookId: book.id,
