@@ -796,7 +796,7 @@ const WriteBook = () => {
         ) : (
           <ResizablePanelGroup direction="horizontal" className="w-full">
             {/* Left Sidebar - Chapter List */}
-            <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
+            <ResizablePanel defaultSize={40} minSize={20} maxSize={50}>
               <div className="h-full bg-background border-r p-4 overflow-auto">
                 <div className="space-y-4">
                    
