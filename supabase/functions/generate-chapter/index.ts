@@ -192,7 +192,7 @@ Output format: Respond only with the autobiography chapter content. Do not inclu
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            model: 'grok-beta',
+            model: 'grok-4-0709',
             messages: [
               { role: 'system', content: systemPrompt },
               { 
@@ -237,32 +237,11 @@ Output format: Respond only with the autobiography chapter content. Do not inclu
       }
     }
 
-    // Generate chapter summary
-    let chapterSummary = '';
-    try {
-      console.log('Generating chapter summary...');
-      const summaryResponse = await supabase.functions.invoke('generate-chapter-summary', {
-        body: { chapterContent: generatedContent }
-      });
-
-      if (summaryResponse.error) {
-        console.error('Summary generation error:', summaryResponse.error);
-        chapterSummary = 'Summary generation failed';
-      } else {
-        chapterSummary = summaryResponse.data.summary;
-        console.log('Chapter summary generated successfully');
-      }
-    } catch (summaryError) {
-      console.error('Summary generation failed:', summaryError);
-      chapterSummary = 'Summary generation failed';
-    }
-
-    // Update the chapter in the database with content and summary
+    // Update the chapter in the database
     const { error: updateError } = await supabase
       .from('chapters')
       .update({ 
         content: generatedContent,
-        summary: chapterSummary,
         updated_at: new Date().toISOString()
       })
       .eq('id', chapterId)
@@ -294,7 +273,7 @@ Output format: Respond only with the autobiography chapter content. Do not inclu
           book_id: bookId,
           conversation_id: conversations[0]?.id,
           profile_id: profile?.id,
-          model_used: 'grok-beta',
+          model_used: 'grok-4-0709',
           prompt_version: 'v1.0',
           source_data: sourceData,
           generated_at: new Date().toISOString()
@@ -310,7 +289,6 @@ Output format: Respond only with the autobiography chapter content. Do not inclu
       JSON.stringify({ 
         success: true, 
         content: generatedContent,
-        summary: chapterSummary,
         message: 'Chapter generated successfully'
       }),
       {
