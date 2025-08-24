@@ -28,16 +28,16 @@ interface ProfileSetupProps {
 }
 
 const PROFILE_QUESTIONS = [
-  "What's your full name and where were you born?",
-  "Tell me about your family background and childhood.",
-  "What's your occupation or career path?",
-  "Where do you currently live and what places have been important to you?",
-  "What are your main hobbies, interests, and passions?",
-  "What languages do you speak and what's your cultural background?",
-  "What are the most important themes or values in your life?",
-  "What personality traits would people use to describe you?",
-  "What are some memorable quotes or sayings that resonate with you?",
-  "What major life events, challenges, or achievements have shaped you?"
+"What is your full name and any nicknames?"
+"When and where were you born?"
+"How many siblings do you have?"
+"What did your parents do for work?"
+"Where did you grow up primarily?"
+"What was your highest level of education?"
+"What was your first job?"
+"Are you married or in a long-term relationship?"
+"Do you have any children?"
+"What is your current occupation?"
 ];
 
 export const ProfileSetup: React.FC<ProfileSetupProps> = ({
