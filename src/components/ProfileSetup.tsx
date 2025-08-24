@@ -28,16 +28,16 @@ interface ProfileSetupProps {
 }
 
 const PROFILE_QUESTIONS = [
-"What is your full name and any nicknames?"
-"When and where were you born?"
-"How many siblings do you have?"
-"What did your parents do for work?"
-"Where did you grow up primarily?"
-"What was your highest level of education?"
-"What was your first job?"
-"Are you married or in a long-term relationship?"
-"Do you have any children?"
-"What is your current occupation?"
+  "What is your full name and any nicknames?",
+  "When and where were you born?",
+  "How many siblings do you have?",
+  "What did your parents do for work?",
+  "Where did you grow up primarily?",
+  "What was your highest level of education?",
+  "What was your first job?",
+  "Are you married or in a long-term relationship?",
+  "Do you have any children?",
+  "What is your current occupation?"
 ];
 
 export const ProfileSetup: React.FC<ProfileSetupProps> = ({
