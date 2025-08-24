@@ -853,7 +853,7 @@ const WriteBook = () => {
                 <div className="space-y-4">
                 
                    {/* Profile Setup Section - Only show if profile is incomplete */}
-                   {user && book && (!bookProfile?.full_name || profileMode) && (
+                   {user && book && !bookProfile?.full_name && (
                      <ProfileSetup
                        userId={user.id}
                        bookId={book.id}
