@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Book, LogOut, Save, Sparkles, ArrowLeft, Plus, FileText, Trash2, Edit2, Type, Menu, Eye, EyeOff } from "lucide-react";
+import { Book, LogOut, Save, Sparkles, ArrowLeft, Plus, FileText, Trash2, Edit2, Type, Menu, Eye, EyeOff, ChevronDown, ChevronUp } from "lucide-react";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
 import { ConversationInterface } from "@/components/ConversationInterface";
 import { ConversationContext } from "@/components/ConversationContext";
@@ -16,6 +16,7 @@ import PaymentButton from "@/components/PaymentButton";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 
 interface Chapter {
@@ -43,6 +44,7 @@ const WriteBook = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showChapterRefinement, setShowChapterRefinement] = useState(true);
   const [bookProfile, setBookProfile] = useState<any>(null);
+  const [isBookTierCollapsed, setIsBookTierCollapsed] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -707,25 +709,40 @@ const WriteBook = () => {
           {user && book && (
             <div className="max-w-4xl mx-auto mb-6">
               <Card>
-                <CardHeader>
-                  <CardTitle>Book Tier</CardTitle>
-                  <CardDescription>
-                    Choose the tier that best fits your needs. Upgrade to unlock advanced features.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <PaymentButton
-                    bookId={book.id}
-                    currentTier={book.tier as 'free' | 'paid' | 'premium'}
-                    purchaseStatus={book.purchase_status}
-                    onPaymentStart={() => {
-                      toast({
-                        title: "Processing payment...",
-                        description: "You'll be redirected to complete your payment.",
-                      });
-                    }}
-                  />
-                </CardContent>
+                <Collapsible open={!isBookTierCollapsed} onOpenChange={(open) => setIsBookTierCollapsed(!open)}>
+                  <CardHeader className="pb-3">
+                    <CollapsibleTrigger asChild>
+                      <Button variant="ghost" className="flex items-center justify-between p-0 h-auto w-full">
+                        <div className="text-left">
+                          <CardTitle>Book Tier</CardTitle>
+                          <CardDescription>
+                            Choose the tier that best fits your needs. Upgrade to unlock advanced features.
+                          </CardDescription>
+                        </div>
+                        {isBookTierCollapsed ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <ChevronUp className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </CollapsibleTrigger>
+                  </CardHeader>
+                  <CollapsibleContent>
+                    <CardContent>
+                      <PaymentButton
+                        bookId={book.id}
+                        currentTier={book.tier as 'free' | 'paid' | 'premium'}
+                        purchaseStatus={book.purchase_status}
+                        onPaymentStart={() => {
+                          toast({
+                            title: "Processing payment...",
+                            description: "You'll be redirected to complete your payment.",
+                          });
+                        }}
+                      />
+                    </CardContent>
+                  </CollapsibleContent>
+                </Collapsible>
               </Card>
             </div>
           )}
@@ -816,27 +833,42 @@ const WriteBook = () => {
                    {/* Payment Section */}
                    {user && book && (
                      <Card className="mt-6">
-                       <CardHeader>
-                         <CardTitle>Book Tier</CardTitle>
-                         <CardDescription>
-                           Choose the tier that best fits your needs. Upgrade to unlock advanced features and unlimited content.
-                         </CardDescription>
-                       </CardHeader>
-                       <CardContent>
-                         <PaymentButton
-                           bookId={book.id}
-                           currentTier={book.tier as 'free' | 'paid' | 'premium'}
-                           purchaseStatus={book.purchase_status}
-                           onPaymentStart={() => {
-                             toast({
-                               title: "Processing payment...",
-                               description: "You'll be redirected to complete your payment.",
-                             });
-                           }}
-                         />
-                       </CardContent>
-                     </Card>
-                   )}
+                       <Collapsible open={!isBookTierCollapsed} onOpenChange={(open) => setIsBookTierCollapsed(!open)}>
+                         <CardHeader className="pb-3">
+                           <CollapsibleTrigger asChild>
+                             <Button variant="ghost" className="flex items-center justify-between p-0 h-auto w-full">
+                               <div className="text-left">
+                                 <CardTitle>Book Tier</CardTitle>
+                                 <CardDescription>
+                                   Choose the tier that best fits your needs. Upgrade to unlock advanced features and unlimited content.
+                                 </CardDescription>
+                               </div>
+                               {isBookTierCollapsed ? (
+                                 <ChevronDown className="h-4 w-4" />
+                               ) : (
+                                 <ChevronUp className="h-4 w-4" />
+                               )}
+                             </Button>
+                           </CollapsibleTrigger>
+                         </CardHeader>
+                         <CollapsibleContent>
+                           <CardContent>
+                             <PaymentButton
+                               bookId={book.id}
+                               currentTier={book.tier as 'free' | 'paid' | 'premium'}
+                               purchaseStatus={book.purchase_status}
+                                onPaymentStart={() => {
+                                  toast({
+                                    title: "Processing payment...",
+                                    description: "You'll be redirected to complete your payment.",
+                                  });
+                                }}
+                              />
+                            </CardContent>
+                          </CollapsibleContent>
+                        </Collapsible>
+                      </Card>
+                    )}
                   
                   <div className="space-y-2">
                     <h2 className="text-lg font-semibold mb-4">Chapters</h2>
