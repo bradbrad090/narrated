@@ -7,29 +7,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// TypeScript interfaces
-interface GenerationRequest {
-  userId: string;
-  bookId: string;
-  chapterId: string;
-}
-
-interface GenerationJob {
-  userId: string;
-  bookId: string;
-  chapterId: string;
-  profile: any;
-  conversations: any[];
-  chapter: any;
-  profileId?: string;
-  conversationId?: string;
-}
-
-interface GenerationResponse {
-  status: 'queued';
-  chapter_id: string;
-}
-
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -42,9 +19,9 @@ serve(async (req) => {
       throw new Error('XAI API key not configured');
     }
 
-    const { userId, bookId, chapterId }: GenerationRequest = await req.json();
+    const { userId, bookId, chapterId } = await req.json();
 
-    console.log('Generate chapter request:', { userId, bookId, chapterId });
+    console.log('Generating chapter for:', { userId, bookId, chapterId });
 
     // Initialize Supabase client with service role key
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
@@ -100,266 +77,81 @@ serve(async (req) => {
       chapterTitle: chapter.title
     });
 
-    // Enqueue generation job
-    const generationJob: GenerationJob = {
-      userId,
-      bookId,
-      chapterId,
-      profile,
-      conversations,
-      chapter,
-      profileId: profile?.id,
-      conversationId: conversations[0]?.id // Most recent conversation
-    };
-
-    const kv = await Deno.openKv();
-    await kv.enqueue(generationJob, { delay: 0 });
-
-    console.log('Chapter generation job enqueued:', chapterId);
-
-    // Return immediate response
-    const response: GenerationResponse = {
-      status: 'queued',
-      chapter_id: chapterId
-    };
-
-    return new Response(JSON.stringify(response), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-
-  } catch (error) {
-    console.error('Error in generate-chapter function:', error);
-    return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: error.message 
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    // Build context for the chapter
+    let contextContent = '';
+    
+    if (profile) {
+      contextContent += `Profile Information:\n`;
+      if (profile.full_name) contextContent += `Name: ${profile.full_name}\n`;
+      if (profile.birthplace) contextContent += `Birthplace: ${profile.birthplace}\n`;
+      if (profile.birth_year) contextContent += `Birth Year: ${profile.birth_year}\n`;
+      if (profile.current_location) contextContent += `Current Location: ${profile.current_location}\n`;
+      if (profile.occupation) contextContent += `Occupation: ${profile.occupation}\n`;
+      if (profile.education) contextContent += `Education: ${profile.education}\n`;
+      if (profile.family_background) contextContent += `Family Background: ${profile.family_background}\n`;
+      if (profile.cultural_background) contextContent += `Cultural Background: ${profile.cultural_background}\n`;
+      if (profile.relationships_family) contextContent += `Relationships/Family: ${profile.relationships_family}\n`;
+      if (profile.values_beliefs) contextContent += `Values/Beliefs: ${profile.values_beliefs}\n`;
+      if (profile.life_philosophy) contextContent += `Life Philosophy: ${profile.life_philosophy}\n`;
+      
+      if (profile.personality_traits?.length) {
+        contextContent += `Personality Traits: ${profile.personality_traits.join(', ')}\n`;
       }
-    );
-  }
-});
-
-// Initialize queue listener
-(async () => {
-  const kv = await Deno.openKv();
-  
-  // Queue listener for processing generation jobs
-  kv.listenQueue(async (job: GenerationJob) => {
-  console.log('Processing chapter generation job:', job.chapterId);
-
-  const supabaseUrl = Deno.env.get('SUPABASE_URL');
-  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-  const xaiApiKey = Deno.env.get('XAI_API_KEY');
-
-  if (!supabaseUrl || !supabaseServiceKey || !xaiApiKey) {
-    console.error('Missing required environment variables');
-    return;
-  }
-
-  const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-    auth: { persistSession: false }
-  });
-
-  let attempts = 0;
-  const maxAttempts = 3;
-  let generatedContent = '';
-
-  while (attempts < maxAttempts) {
-    try {
-      console.log(`Generation attempt ${attempts + 1} for chapter ${job.chapterId}`);
-      
-      // Build context for the chapter
-      const contextContent = buildContext(job.profile, job.conversations, job.chapter);
-      
-      // Call xAI API with timeout and retry logic
-      generatedContent = await callXAIWithRetry(contextContent, xaiApiKey);
-      
-      console.log('Generated content length:', generatedContent.length);
-      break;
-
-    } catch (error) {
-      attempts++;
-      console.error(`Generation attempt ${attempts} failed:`, error);
-      
-      if (attempts < maxAttempts) {
-        // Exponential backoff: 2^attempts * 1000ms
-        const delay = Math.pow(2, attempts) * 1000;
-        console.log(`Retrying in ${delay}ms...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
-      } else {
-        // Max retries reached, set error message
-        generatedContent = "Failed to generate chapter. Please try again.";
-        console.error('Max retries reached for chapter generation');
+      if (profile.hobbies_interests?.length) {
+        contextContent += `Hobbies/Interests: ${profile.hobbies_interests.join(', ')}\n`;
       }
-    }
-  }
-
-  try {
-    // Update the chapter in the database
-    const { error: updateError } = await supabase
-      .from('chapters')
-      .update({ 
-        content: generatedContent,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', job.chapterId)
-      .eq('user_id', job.userId);
-
-    if (updateError) {
-      console.error('Database update error:', updateError);
-      throw new Error('Failed to save generated content');
+      if (profile.key_life_events?.length) {
+        contextContent += `Key Life Events: ${profile.key_life_events.join(', ')}\n`;
+      }
+      if (profile.career_highlights?.length) {
+        contextContent += `Career Highlights: ${profile.career_highlights.join(', ')}\n`;
+      }
+      if (profile.challenges_overcome?.length) {
+        contextContent += `Challenges Overcome: ${profile.challenges_overcome.join(', ')}\n`;
+      }
+      if (profile.life_themes?.length) {
+        contextContent += `Life Themes: ${profile.life_themes.join(', ')}\n`;
+      }
+      if (profile.memorable_quotes?.length) {
+        contextContent += `Memorable Quotes: ${profile.memorable_quotes.join(', ')}\n`;
+      }
+      if (profile.languages_spoken?.length) {
+        contextContent += `Languages Spoken: ${profile.languages_spoken.join(', ')}\n`;
+      }
+      
+      contextContent += '\n';
     }
 
-    // Store metadata in ai_chapter_metadata table
-    const sourceData = {
-      profile: job.profile,
-      conversations: job.conversations.slice(0, 5), // Limit to 5 for storage
-      chapter: {
-        id: job.chapter.id,
-        title: job.chapter.title,
-        chapter_number: job.chapter.chapter_number,
-        existing_content: job.chapter.content?.substring(0, 500) // Truncate for storage
-      }
-    };
-
-    const { error: metadataError } = await supabase
-      .from('ai_chapter_metadata')
-      .insert({
-        chapter_id: job.chapterId,
-        user_id: job.userId,
-        book_id: job.bookId,
-        conversation_id: job.conversationId,
-        profile_id: job.profileId,
-        model_used: 'grok-4-0709',
-        prompt_version: 'v1.0',
-        source_data: sourceData,
-        generated_at: new Date().toISOString()
-      });
-
-    if (metadataError) {
-      console.error('Metadata storage error:', metadataError);
-      // Don't fail the entire operation for metadata errors
-    }
-
-    // Notify clients via Supabase Realtime
-    await supabase
-      .channel('chapter-updates')
-      .send({
-        type: 'broadcast',
-        event: 'chapter_generated',
-        payload: {
-          chapterId: job.chapterId,
-          userId: job.userId,
-          bookId: job.bookId,
-          success: !generatedContent.includes('Failed to generate'),
-          contentLength: generatedContent.length
+    // Add conversation history
+    if (conversations.length > 0) {
+      contextContent += `Conversation History:\n`;
+      conversations.slice(0, 5).forEach((conv, index) => {
+        if (conv.messages && Array.isArray(conv.messages)) {
+          contextContent += `\nConversation ${index + 1} (${conv.conversation_type}):\n`;
+          conv.messages.forEach((msg: any) => {
+            if (msg.role === 'user') {
+              contextContent += `User: ${msg.content}\n`;
+            } else if (msg.role === 'assistant') {
+              contextContent += `Assistant: ${msg.content}\n`;
+            }
+          });
         }
       });
+      contextContent += '\n';
+    }
 
-    console.log('Chapter generation completed successfully:', job.chapterId);
+    // Add current chapter context
+    contextContent += `Chapter Information:\n`;
+    contextContent += `Chapter Title: ${chapter.title}\n`;
+    contextContent += `Chapter Number: ${chapter.chapter_number}\n`;
+    if (chapter.content) {
+      contextContent += `Existing Content: ${chapter.content}\n`;
+    }
 
-  } catch (error) {
-    console.error('Error updating chapter or metadata:', error);
-    
-    // Try to update chapter with error message
-    try {
-      await supabase
-        .from('chapters')
-        .update({ 
-          content: "Failed to generate chapter. Please try again.",
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', job.chapterId)
-        .eq('user_id', job.userId);
-    } catch (fallbackError) {
-      console.error('Fallback update also failed:', fallbackError);
-    }
-  }
-  });
-})();
+    console.log('Context built, length:', contextContent.length);
 
-// Helper function to build context string
-function buildContext(profile: any, conversations: any[], chapter: any): string {
-  let contextContent = '';
-  
-  // Add profile information
-  if (profile) {
-    contextContent += `Profile Information:\n`;
-    if (profile.full_name) contextContent += `Name: ${profile.full_name}\n`;
-    if (profile.birthplace) contextContent += `Birthplace: ${profile.birthplace}\n`;
-    if (profile.birth_year) contextContent += `Birth Year: ${profile.birth_year}\n`;
-    if (profile.current_location) contextContent += `Current Location: ${profile.current_location}\n`;
-    if (profile.occupation) contextContent += `Occupation: ${profile.occupation}\n`;
-    if (profile.education) contextContent += `Education: ${profile.education}\n`;
-    if (profile.family_background) contextContent += `Family Background: ${profile.family_background}\n`;
-    if (profile.cultural_background) contextContent += `Cultural Background: ${profile.cultural_background}\n`;
-    if (profile.relationships_family) contextContent += `Relationships/Family: ${profile.relationships_family}\n`;
-    if (profile.values_beliefs) contextContent += `Values/Beliefs: ${profile.values_beliefs}\n`;
-    if (profile.life_philosophy) contextContent += `Life Philosophy: ${profile.life_philosophy}\n`;
-    
-    if (profile.personality_traits?.length) {
-      contextContent += `Personality Traits: ${profile.personality_traits.join(', ')}\n`;
-    }
-    if (profile.hobbies_interests?.length) {
-      contextContent += `Hobbies/Interests: ${profile.hobbies_interests.join(', ')}\n`;
-    }
-    if (profile.key_life_events?.length) {
-      contextContent += `Key Life Events: ${profile.key_life_events.join(', ')}\n`;
-    }
-    if (profile.career_highlights?.length) {
-      contextContent += `Career Highlights: ${profile.career_highlights.join(', ')}\n`;
-    }
-    if (profile.challenges_overcome?.length) {
-      contextContent += `Challenges Overcome: ${profile.challenges_overcome.join(', ')}\n`;
-    }
-    if (profile.life_themes?.length) {
-      contextContent += `Life Themes: ${profile.life_themes.join(', ')}\n`;
-    }
-    if (profile.memorable_quotes?.length) {
-      contextContent += `Memorable Quotes: ${profile.memorable_quotes.join(', ')}\n`;
-    }
-    if (profile.languages_spoken?.length) {
-      contextContent += `Languages Spoken: ${profile.languages_spoken.join(', ')}\n`;
-    }
-    
-    contextContent += '\n';
-  }
-
-  // Add conversation history (limit to 5)
-  if (conversations.length > 0) {
-    contextContent += `Conversation History:\n`;
-    conversations.slice(0, 5).forEach((conv, index) => {
-      if (conv.messages && Array.isArray(conv.messages)) {
-        contextContent += `\nConversation ${index + 1} (${conv.conversation_type}):\n`;
-        conv.messages.forEach((msg: any) => {
-          if (msg.role === 'user') {
-            contextContent += `User: ${msg.content}\n`;
-          } else if (msg.role === 'assistant') {
-            contextContent += `Assistant: ${msg.content}\n`;
-          }
-        });
-      }
-    });
-    contextContent += '\n';
-  }
-
-  // Add current chapter context
-  contextContent += `Chapter Information:\n`;
-  contextContent += `Chapter Title: ${chapter.title}\n`;
-  contextContent += `Chapter Number: ${chapter.chapter_number}\n`;
-  if (chapter.content) {
-    contextContent += `Existing Content: ${chapter.content}\n`;
-  }
-
-  return contextContent;
-}
-
-// Helper function to call xAI API with timeout
-async function callXAIWithRetry(contextContent: string, xaiApiKey: string): Promise<string> {
-  const systemPrompt = `You are an expert autobiography writer specializing in transforming personal conversations and background profiles into cohesive, first-person narrative prose. Your goal is to generate a single chapter of an autobiography based solely on the provided user profile and conversation history for that chapter.
+    // System prompt from Sysprompt.txt
+    const systemPrompt = `You are an expert autobiography writer specializing in transforming personal conversations and background profiles into cohesive, first-person narrative prose. Your goal is to generate a single chapter of an autobiography based solely on the provided user profile and conversation history for that chapter.
 
 Key Guidelines:
 
@@ -381,48 +173,144 @@ Key Guidelines:
 
 Output format: Respond only with the autobiography chapter content. Do not include explanations, summaries, or additional commentary beyond the chapter itself.`;
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+    // Call X AI API with Grok-4 with retry logic
+    let generatedContent = '';
+    let attempts = 0;
+    const maxAttempts = 3;
 
-  try {
-    const response = await fetch('https://api.x.ai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${xaiApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'grok-4-0709',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { 
-            role: 'user', 
-            content: `Please generate an autobiography chapter based on the following information:\n\n${contextContent}`
-          }
-        ],
-        max_tokens: 4000,
-        temperature: 0.7,
-        top_p: 0.9,
-        frequency_penalty: 0,
-        presence_penalty: 0,
-        stream: false
-      }),
-      signal: controller.signal
-    });
+    while (attempts < maxAttempts) {
+      try {
+        console.log(`Generation attempt ${attempts + 1}`);
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
-    clearTimeout(timeoutId);
+        const response = await fetch('https://api.x.ai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${xaiApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'grok-4-0709',
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { 
+                role: 'user', 
+                content: `Please generate an autobiography chapter based on the following information:\n\n${contextContent}`
+              }
+            ],
+            max_tokens: 4000,
+            temperature: 0.7,
+            top_p: 0.9,
+            frequency_penalty: 0,
+            presence_penalty: 0,
+            stream: false
+          }),
+          signal: controller.signal
+        });
 
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('xAI API error:', response.status, errorData);
-      throw new Error(`xAI API error: ${response.status} ${errorData}`);
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          const errorData = await response.text();
+          console.error('xAI API error:', response.status, errorData);
+          throw new Error(`xAI API error: ${response.status} ${errorData}`);
+        }
+
+        const data = await response.json();
+        generatedContent = data.choices[0].message.content;
+        
+        console.log('Generated content length:', generatedContent.length);
+        break;
+
+      } catch (error) {
+        attempts++;
+        console.error(`Generation attempt ${attempts} failed:`, error);
+        
+        if (attempts < maxAttempts) {
+          // Exponential backoff: 2^attempts * 1000ms
+          const delay = Math.pow(2, attempts) * 1000;
+          console.log(`Retrying in ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        } else {
+          // Max retries reached, set error message
+          generatedContent = "Failed to generate chapter. Please try again.";
+          console.error('Max retries reached for chapter generation');
+        }
+      }
     }
 
-    const data = await response.json();
-    return data.choices[0].message.content;
+    // Update the chapter in the database
+    const { error: updateError } = await supabase
+      .from('chapters')
+      .update({ 
+        content: generatedContent,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', chapterId)
+      .eq('user_id', userId);
+
+    if (updateError) {
+      console.error('Database update error:', updateError);
+      throw new Error('Failed to save generated content');
+    }
+
+    // Store metadata in ai_chapter_metadata table
+    try {
+      const sourceData = {
+        profile: profile,
+        conversations: conversations.slice(0, 5), // Limit to 5 for storage
+        chapter: {
+          id: chapter.id,
+          title: chapter.title,
+          chapter_number: chapter.chapter_number,
+          existing_content: chapter.content?.substring(0, 500) // Truncate for storage
+        }
+      };
+
+      await supabase
+        .from('ai_chapter_metadata')
+        .insert({
+          chapter_id: chapterId,
+          user_id: userId,
+          book_id: bookId,
+          conversation_id: conversations[0]?.id,
+          profile_id: profile?.id,
+          model_used: 'grok-4-0709',
+          prompt_version: 'v1.0',
+          source_data: sourceData,
+          generated_at: new Date().toISOString()
+        });
+    } catch (metadataError) {
+      console.error('Metadata storage error:', metadataError);
+      // Don't fail the entire operation for metadata errors
+    }
+
+    console.log('Chapter updated successfully');
+
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        content: generatedContent,
+        message: 'Chapter generated successfully'
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
 
   } catch (error) {
-    clearTimeout(timeoutId);
-    throw error;
+    console.error('Error in generate-chapter function:', error);
+    return new Response(
+      JSON.stringify({ 
+        success: false, 
+        error: error.message 
+      }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
   }
-}
+});
