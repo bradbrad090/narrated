@@ -256,7 +256,7 @@ const Dashboard = () => {
         <div className="mb-8">
           <h2 className="text-3xl font-bold mb-2">Your Dashboard</h2>
           <p className="text-muted-foreground">
-            Start writing your life story or continue working on existing books.
+            Easily manage multiple autobiographies within a single account. Start a new story for any person by completing a short profile-building quiz to capture key details, or seamlessly continue working on an existing story below:
           </p>
         </div>
 
