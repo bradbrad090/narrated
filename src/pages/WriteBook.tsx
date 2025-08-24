@@ -99,6 +99,10 @@ const WriteBook = () => {
         description: "You can now start writing your autobiography.",
       });
     }
+    // Force update to ensure profile setup is hidden
+    if (profile && (profile.full_name || profile.processed)) {
+      setBookProfile(prev => ({ ...prev, ...profile, full_name: profile.full_name || 'Completed' }));
+    }
   };
 
 
