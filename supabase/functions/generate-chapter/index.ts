@@ -183,7 +183,7 @@ Output format: Respond only with the autobiography chapter content. Do not inclu
         console.log(`Generation attempt ${attempts + 1}`);
         
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+        const timeoutId = setTimeout(() => controller.abort(), 120000); // 120s timeout
 
         const response = await fetch('https://api.x.ai/v1/chat/completions', {
           method: 'POST',
