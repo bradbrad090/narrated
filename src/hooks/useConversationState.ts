@@ -123,13 +123,25 @@ export const useConversationState = ({
       }
     }
 
+    // Extract past opening questions to avoid duplicates
+    const pastOpenings = state.history
+      .filter(session => session.conversationType === conversationType && session.messages.length > 0)
+      .map(session => session.messages.find(msg => msg.role === 'assistant')?.content)
+      .filter(Boolean)
+      .slice(-8); // Keep last 8 to avoid repetition
+
+    let enhancedStyleInstructions = styleInstructions || '';
+    if (pastOpenings.length > 0) {
+      enhancedStyleInstructions += `\n\nBegin with a fresh, open-ended question about a different aspect of their life. Do not repeat or closely paraphrase any of these past openings: ${pastOpenings.map(q => `"${q}"`).join(', ')}.`;
+    }
+
     const params = {
       userId,
       bookId,
       chapterId,
       conversationType,
       context: state.context,
-      styleInstructions
+      styleInstructions: enhancedStyleInstructions
     };
 
     const validation = conversationMediator.validateStartParams(params);

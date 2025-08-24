@@ -95,7 +95,7 @@ export class RealtimeChat {
       this.sessionId = `voice_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
       // Build instructions based on context
-      const instructions = this.buildInstructions(context, conversationType);
+      const instructions = await this.buildInstructions(context, conversationType);
 
       // Get ephemeral token from our Supabase Edge Function
       const { data, error } = await supabase.functions.invoke("realtime-token", {
@@ -302,7 +302,7 @@ export class RealtimeChat {
     }
   }
 
-  private buildInstructions(context: any, conversationType: string): string {
+  private async buildInstructions(context: any, conversationType: string): Promise<string> {
     let baseInstructions = `You are a compassionate life coach and autobiography assistant helping someone document their life story. Your role is to engage in thoughtful conversation that draws out meaningful stories and experiences.
 
 Be warm, empathetic, and genuinely interested. Ask open-ended questions that encourage storytelling and help the person explore emotions and meanings behind events. Keep responses conversational and personal.`;
@@ -325,6 +325,34 @@ Be warm, empathetic, and genuinely interested. Ask open-ended questions that enc
           baseInstructions += `\nGenerate creative story ideas and themes. Help identify unique personal experiences. Explore different narrative perspectives.`;
           break;
       }
+    }
+
+    // Get past opening questions to avoid duplicates
+    try {
+      const { data: pastSessions } = await supabase
+        .from('chat_histories')
+        .select('messages')
+        .eq('user_id', this.userId)
+        .eq('conversation_type', conversationType)
+        .eq('conversation_medium', 'voice')
+        .neq('messages', '[]')
+        .order('created_at', { ascending: false })
+        .limit(8);
+
+      if (pastSessions && pastSessions.length > 0) {
+        const pastOpenings = pastSessions
+          .map(session => {
+            const messages = Array.isArray(session.messages) ? session.messages as any[] : [];
+            return messages.find((msg: any) => msg.role === 'assistant')?.content;
+          })
+          .filter(Boolean) as string[];
+
+        if (pastOpenings.length > 0) {
+          baseInstructions += `\n\nBegin with a fresh, open-ended question about a different aspect of their life. Do not repeat or closely paraphrase any of these past openings: ${pastOpenings.map((q: string) => `"${q}"`).join(', ')}.`;
+        }
+      }
+    } catch (error) {
+      console.log('Could not fetch past conversations for duplication check:', error);
     }
 
     return baseInstructions;
