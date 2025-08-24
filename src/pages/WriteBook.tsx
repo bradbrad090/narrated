@@ -11,6 +11,7 @@ import { Book, LogOut, Save, Sparkles, ArrowLeft, Plus, FileText, Trash2, Edit2,
 import { VoiceRecorder } from "@/components/VoiceRecorder";
 import { ConversationInterface } from "@/components/ConversationInterface";
 import { ConversationContext } from "@/components/ConversationContext";
+import { ProfileSetup } from "@/components/ProfileSetup";
 
 import PaymentButton from "@/components/PaymentButton";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
@@ -36,6 +37,7 @@ const WriteBook = () => {
   const { bookId: paramBookId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const bookId = paramBookId || searchParams.get('book_id');
+  const profileMode = searchParams.get('profile') === 'true';
   const [user, setUser] = useState<User | null>(null);
   const [book, setBook] = useState<any>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
@@ -44,7 +46,9 @@ const WriteBook = () => {
   const [saving, setSaving] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showChapterRefinement, setShowChapterRefinement] = useState(true);
+  const [bookProfile, setBookProfile] = useState<any>(null);
   const [isBookTierCollapsed, setIsBookTierCollapsed] = useState(true);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -75,6 +79,28 @@ const WriteBook = () => {
     return () => subscription.unsubscribe();
   }, [navigate, bookId]);
 
+  // Check for profile requirement on load
+  useEffect(() => {
+    if (book && user && profileMode && !bookProfile?.full_name) {
+      setShowProfileModal(true);
+    }
+  }, [book, user, profileMode, bookProfile]);
+
+  // Handle profile completion
+  const handleProfileUpdate = (profile: any) => {
+    setBookProfile(profile);
+    // Always close the modal when profile is processed, regardless of specific fields
+    if (profileMode && profile) {
+      // Profile is complete, remove profile parameter and show success
+      setSearchParams(new URLSearchParams());
+      setShowProfileModal(false);
+      toast({
+        title: "Profile Complete!",
+        description: "You can now start writing your autobiography.",
+      });
+    }
+  };
+
 
 
   const fetchBookAndChapters = async (userId: string) => {
@@ -100,6 +126,20 @@ const WriteBook = () => {
       }
       
       setBook(bookData);
+
+      // Fetch book profile
+      const { data: profileData, error: profileError } = await supabase
+        .from('book_profiles')
+        .select('*')
+        .eq('book_id', bookId)
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (profileError && profileError.code !== 'PGRST116') {
+        console.error('Error fetching book profile:', profileError);
+      } else {
+        setBookProfile(profileData);
+      }
 
       // Fetch chapters
       const { data: chaptersData, error: chaptersError } = await supabase
@@ -681,6 +721,18 @@ const WriteBook = () => {
         {isMobile ? (
         <div className="h-full pt-20 p-4 overflow-auto">
           
+          {/* Profile Setup Section for Mobile */}
+          {user && book && !bookProfile?.full_name && (
+            <div className="max-w-4xl mx-auto mb-6">
+              <ProfileSetup
+                userId={user.id}
+                bookId={book.id}
+                bookProfile={bookProfile}
+                onProfileUpdate={handleProfileUpdate}
+              />
+            </div>
+          )}
+
           {/* Payment Section for Mobile */}
           {user && book && (
             <div className="max-w-4xl mx-auto mb-6">
@@ -799,7 +851,17 @@ const WriteBook = () => {
             <ResizablePanel defaultSize={40} minSize={20} maxSize={50}>
               <div className="h-full bg-background border-r p-4 overflow-auto">
                 <div className="space-y-4">
-                   
+                
+                   {/* Profile Setup Section */}
+                   {user && book && !bookProfile?.full_name && (
+                     <ProfileSetup
+                       userId={user.id}
+                       bookId={book.id}
+                       bookProfile={bookProfile}
+                       onProfileUpdate={handleProfileUpdate}
+                     />
+                   )}
+
                    {/* Payment Section */}
                    {user && book && (
                      <Card className="mt-6">
@@ -1038,6 +1100,26 @@ const WriteBook = () => {
           </ResizablePanelGroup>
         )}
       </main>
+
+      {/* Profile Setup Modal */}
+      <Dialog open={showProfileModal} onOpenChange={setShowProfileModal}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto">
+          <DialogHeader>
+            <DialogTitle>Complete Your Profile</DialogTitle>
+            <DialogDescription>
+              Before you can start writing your autobiography, please complete your personal profile. This helps us personalize your writing experience.
+            </DialogDescription>
+          </DialogHeader>
+          {user && book && (
+            <ProfileSetup
+              userId={user.id}
+              bookId={book.id}
+              bookProfile={bookProfile}
+              onProfileUpdate={handleProfileUpdate}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
     </div>
     </>
