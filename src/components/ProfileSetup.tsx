@@ -252,12 +252,14 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                     </Button>
                     
                     <div className="flex gap-2">
-                      <Button
-                        onClick={handleSkipQuestion}
-                        variant="outline"
-                      >
-                        Skip
-                      </Button>
+                      {currentQuestion !== PROFILE_QUESTIONS.length - 1 && (
+                        <Button
+                          onClick={handleSkipQuestion}
+                          variant="outline"
+                        >
+                          Skip
+                        </Button>
+                      )}
                       
                       {currentQuestion === PROFILE_QUESTIONS.length - 1 && responses.length === PROFILE_QUESTIONS.length - 1 && (currentResponse.trim() || responses.length === PROFILE_QUESTIONS.length - 1) ? (
                         <Button
@@ -269,7 +271,7 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                             }
                             setTimeout(() => processConversation(), 100);
                           }}
-                          disabled={isProcessing}
+                          disabled={isProcessing || !currentResponse.trim()}
                           className="bg-green-600 hover:bg-green-700"
                         >
                           {isProcessing ? (
@@ -286,7 +288,9 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                         </Button>
                       ) : (
                         <Button
-                          onClick={currentResponse.trim() ? handleNextQuestion : handleSkipQuestion}
+                          onClick={currentResponse.trim() || currentQuestion !== PROFILE_QUESTIONS.length - 1 ? 
+                            (currentResponse.trim() ? handleNextQuestion : handleSkipQuestion) : undefined}
+                          disabled={currentQuestion === PROFILE_QUESTIONS.length - 1 && !currentResponse.trim()}
                         >
                           {currentQuestion === PROFILE_QUESTIONS.length - 1 ? 'Finish' : 'Next'}
                         </Button>
