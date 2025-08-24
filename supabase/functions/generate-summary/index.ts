@@ -66,7 +66,7 @@ serve(async (req) => {
     console.log('Chapter found:', chapter.title);
 
     // Create summary prompt
-    const summaryPrompt = `Please create a concise summary of the following chapter in 3-5 sentences. Capture the key events, main characters, and central themes. Focus on the most important plot points and character developments.
+    const summaryPrompt = `Create a bullet-point summary of the following chapter content. Use concise bullet points that capture objective events and characters in timeline format.
 
 Chapter Title: ${chapter.title}
 Chapter Content: ${chapter.content}
@@ -87,7 +87,7 @@ Summary:`;
         messages: [
           {
             role: 'system',
-            content: 'You are an expert at creating concise, engaging chapter summaries. Write clear, informative summaries that capture the essence of the chapter in 3-5 sentences.'
+            content: 'You are a text summary tool that condenses input text into concise bullet points. Capture objective events and characters in a timeline format, avoiding narrative retelling. Exclude unnecessary words, avoid em dashes, and be direct to convey the story\'s essence in minimal words for clear user understanding.'
           },
           {
             role: 'user',
