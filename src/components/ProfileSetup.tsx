@@ -261,7 +261,7 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                         </Button>
                       )}
                       
-                      {currentQuestion === PROFILE_QUESTIONS.length - 1 && responses.length === PROFILE_QUESTIONS.length - 1 && (currentResponse.trim() || responses.length === PROFILE_QUESTIONS.length - 1) ? (
+                      {currentQuestion === PROFILE_QUESTIONS.length - 1 && responses.length === PROFILE_QUESTIONS.length - 1 ? (
                         <Button
                           onClick={async () => {
                             if (currentResponse.trim()) {
@@ -271,7 +271,7 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                             }
                             setTimeout(() => processConversation(), 100);
                           }}
-                          disabled={isProcessing || !currentResponse.trim()}
+                          disabled={isProcessing}
                           className="bg-green-600 hover:bg-green-700"
                         >
                           {isProcessing ? (
