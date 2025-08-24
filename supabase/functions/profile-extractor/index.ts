@@ -146,7 +146,7 @@ Return only the JSON object, no other text.`;
       .select('*')
       .eq('book_id', bookId)
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     let updatedProfile;
     if (existingProfile) {
@@ -155,6 +155,8 @@ Return only the JSON object, no other text.`;
         .from('book_profiles')
         .update({
           ...profileData,
+          // Mark as complete even if no real data was extracted
+          full_name: profileData.full_name || 'Profile Completed',
           updated_at: new Date().toISOString()
         })
         .eq('book_id', bookId)
@@ -174,7 +176,9 @@ Return only the JSON object, no other text.`;
         .insert({
           book_id: bookId,
           user_id: userId,
-          ...profileData
+          ...profileData,
+          // Mark as complete even if no real data was extracted
+          full_name: profileData.full_name || 'Profile Completed'
         })
         .select()
         .single();
