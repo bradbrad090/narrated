@@ -1,53 +1,55 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+}
 
-const handler = async (request: Request): Promise<Response> => {
+serve(async (req) => {
   // Handle CORS preflight requests
-  if (request.method === 'OPTIONS') {
+  if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
-  }
-
-  if (request.method !== "POST") {
-    return new Response("Method Not Allowed", { 
-      status: 405,
-      headers: corsHeaders 
-    });
   }
 
   try {
     // Initialize Supabase client
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: request.headers.get('Authorization')! },
-        },
-      }
-    );
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { conversationText, userId, bookId } = await request.json();
-    
-    if (!conversationText || !userId || !bookId) {
-      return new Response(JSON.stringify({ error: "conversationText, userId, and bookId are required" }), { 
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
+    // Parse request body
+    const { conversationText, conversationTextForProcessing, userId, bookId } = await req.json();
+
+    // Validate required parameters
+    if (!userId || !bookId) {
+      console.error('Missing required parameters:', { userId, bookId });
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Missing required parameters: userId and bookId are required' 
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400 
+        }
+      );
     }
 
-    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    
+    // Check if OpenAI API key is configured
+    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
     if (!OPENAI_API_KEY) {
-      return new Response(JSON.stringify({ error: "OpenAI API key not configured" }), { 
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
+      console.error('OpenAI API key not configured');
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'OpenAI API key not configured' 
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500 
+        }
+      );
     }
 
     console.log('Processing profile extraction for user:', userId, 'book:', bookId);
@@ -59,11 +61,18 @@ Analyze the following conversation and extract relevant personal information to 
 
 {
   "full_name": "string or null",
+  "nicknames": ["array of strings or empty array"],
   "birthplace": "string or null", 
   "birth_year": "integer or null",
+  "birth_date": "YYYY-MM-DD format string or null",
   "current_location": "string or null",
   "occupation": "string or null",
+  "first_job": "string or null",
   "education": "string or null",
+  "siblings_count": "integer or null",
+  "parents_occupations": "string or null",
+  "marital_status": "string or null",
+  "children_count": "integer or null",
   "family_background": "string or null",
   "cultural_background": "string or null", 
   "languages_spoken": ["array of strings or empty array"],
@@ -87,7 +96,7 @@ Rules:
 6. Be accurate and avoid hallucinating information not present in the text
 
 Conversation to analyze:
-${conversationText}
+${conversationTextForProcessing || conversationText}
 
 Return only the JSON object, no other text.`;
 
@@ -98,118 +107,191 @@ Return only the JSON object, no other text.`;
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: "gpt-4.1-2025-04-14",
+        model: 'gpt-4o-mini',
         messages: [
-          { role: "system", content: "You are an expert biographical information extractor. Always return valid JSON." },
-          { role: "user", content: extractionPrompt }
+          {
+            role: 'user',
+            content: extractionPrompt
+          }
         ],
-        max_completion_tokens: 1000
+        temperature: 0.3,
+        max_tokens: 2000,
       }),
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('OpenAI API error details:', {
-        status: response.status,
-        statusText: response.statusText,
-        headers: Object.fromEntries(response.headers.entries()),
-        body: errorText
-      });
-      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+      const errorData = await response.text();
+      console.error('OpenAI API error:', response.status, errorData);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Failed to process with OpenAI API',
+          details: errorData 
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500 
+        }
+      );
     }
 
-    const data = await response.json();
-    const extractedText = data.choices[0].message.content;
-    
-    console.log('Raw OpenAI response:', extractedText);
+    const aiResponse = await response.json();
+    console.log('OpenAI response:', aiResponse);
 
-    // Parse the JSON response
-    let profileData;
+    if (!aiResponse.choices || !aiResponse.choices[0] || !aiResponse.choices[0].message) {
+      console.error('Invalid OpenAI response structure:', aiResponse);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Invalid response from AI service' 
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500 
+        }
+      );
+    }
+
+    // Parse the AI response
+    let extractedData;
     try {
-      profileData = JSON.parse(extractedText);
+      const aiResponseContent = aiResponse.choices[0].message.content.trim();
+      console.log('AI response content:', aiResponseContent);
+      
+      // Try to extract JSON from the response (in case there's extra text)
+      const jsonMatch = aiResponseContent.match(/\{[\s\S]*\}/);
+      const jsonString = jsonMatch ? jsonMatch[0] : aiResponseContent;
+      
+      extractedData = JSON.parse(jsonString);
     } catch (parseError) {
-      console.error('Failed to parse OpenAI response as JSON:', parseError);
-      // Fallback: try to extract JSON from the response
-      const jsonMatch = extractedText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        profileData = JSON.parse(jsonMatch[0]);
-      } else {
-        throw new Error('Failed to extract valid JSON from OpenAI response');
+      console.error('Failed to parse AI response as JSON:', parseError);
+      console.error('Raw AI response:', aiResponse.choices[0].message.content);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Failed to parse AI response as valid JSON',
+          details: aiResponse.choices[0].message.content 
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500 
+        }
+      );
+    }
+
+    // First, store individual question responses if provided
+    if (Array.isArray(conversationText)) {
+      // If conversationText is an array of Q&A pairs, store them individually
+      for (let i = 0; i < conversationText.length; i++) {
+        const qa = conversationText[i];
+        if (qa.question && qa.answer) {
+          await supabase
+            .from('profile_question_responses')
+            .upsert({
+              user_id: userId,
+              book_id: bookId,
+              question_index: i,
+              question_text: qa.question,
+              answer_text: qa.answer,
+              updated_at: new Date().toISOString()
+            });
+        }
       }
     }
 
-    console.log('Extracted profile data:', profileData);
-
-    // Update or create the book profile
-    const { data: existingProfile } = await supabaseClient
+    // Store the extracted profile data in the database
+    const { data: existingProfile, error: fetchError } = await supabase
       .from('book_profiles')
       .select('*')
-      .eq('book_id', bookId)
       .eq('user_id', userId)
-      .maybeSingle();
+      .eq('book_id', bookId)
+      .single();
 
-    let updatedProfile;
-    if (existingProfile) {
-      // Update existing profile
-      const { data, error } = await supabaseClient
-        .from('book_profiles')
-        .update({
-          ...profileData,
-          // Mark as complete even if no real data was extracted
-          full_name: profileData.full_name || 'Profile Completed',
-          updated_at: new Date().toISOString()
-        })
-        .eq('book_id', bookId)
-        .eq('user_id', userId)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error updating book profile:', error);
-        throw new Error('Failed to update book profile');
-      }
-      updatedProfile = data;
-    } else {
-      // Create new profile
-      const { data, error } = await supabaseClient
-        .from('book_profiles')
-        .insert({
-          book_id: bookId,
-          user_id: userId,
-          ...profileData,
-          // Mark as complete even if no real data was extracted
-          full_name: profileData.full_name || 'Profile Completed'
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error creating book profile:', error);
-        throw new Error('Failed to create book profile');
-      }
-      updatedProfile = data;
+    if (fetchError && fetchError.code !== 'PGRST116') {
+      console.error('Error fetching existing profile:', fetchError);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Failed to fetch existing profile',
+          details: fetchError.message 
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500 
+        }
+      );
     }
 
-    console.log('Profile updated successfully:', updatedProfile.id);
+    let profileResult;
+    if (existingProfile) {
+      // Update existing profile
+      const { data, error } = await supabase
+        .from('book_profiles')
+        .update({
+          ...extractedData,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId)
+        .eq('book_id', bookId)
+        .select()
+        .single();
+      
+      profileResult = { data, error };
+    } else {
+      // Create new profile
+      const { data, error } = await supabase
+        .from('book_profiles')
+        .insert({
+          user_id: userId,
+          book_id: bookId,
+          ...extractedData
+        })
+        .select()
+        .single();
+      
+      profileResult = { data, error };
+    }
 
-    return new Response(JSON.stringify({
-      success: true,
-      profile: updatedProfile,
-      extractedData: profileData
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
+    if (profileResult.error) {
+      console.error('Error saving profile to database:', profileResult.error);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Failed to save profile to database',
+          details: profileResult.error.message 
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500 
+        }
+      );
+    }
+
+    console.log('Profile extraction completed successfully');
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        profile: profileResult.data,
+        extractedData
+      }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200 
+      }
+    );
 
   } catch (error) {
-    console.error('Error in profile-extractor function:', error);
-    return new Response(JSON.stringify({ 
-      error: error.message,
-      details: 'Failed to extract profile from conversation'
-    }), { 
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
+    console.error('Unexpected error in profile extraction:', error);
+    return new Response(
+      JSON.stringify({ 
+        success: false, 
+        error: 'Internal server error',
+        details: error.message 
+      }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500 
+      }
+    );
   }
-};
-
-serve(handler);
+});

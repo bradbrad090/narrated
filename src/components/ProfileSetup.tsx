@@ -48,7 +48,7 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(!bookProfile?.full_name);
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [responses, setResponses] = useState<string[]>([]);
+  const [responses, setResponses] = useState<{[key: number]: string}>({});
   const [currentResponse, setCurrentResponse] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
@@ -61,90 +61,123 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
     }
   }, [bookProfile]);
 
-  const progress = ((currentQuestion + responses.length) / PROFILE_QUESTIONS.length) * 100;
-  const isComplete = responses.length === PROFILE_QUESTIONS.length;
+  const saveQuestionResponse = async (questionIndex: number, answer: string) => {
+    try {
+      const { error } = await supabase
+        .from('profile_question_responses')
+        .upsert({
+          user_id: userId,
+          book_id: bookId,
+          question_index: questionIndex,
+          question_text: PROFILE_QUESTIONS[questionIndex],
+          answer_text: answer,
+          updated_at: new Date().toISOString()
+        });
+
+      if (error) {
+        console.error('Error saving question response:', error);
+      }
+    } catch (error) {
+      console.error('Error saving question response:', error);
+    }
+  };
+
+  const progress = ((currentQuestion + Object.keys(responses).length) / PROFILE_QUESTIONS.length) * 100;
 
   const handleVoiceTranscription = (text: string) => {
     setCurrentResponse(prev => prev + (prev ? ' ' : '') + text);
     setIsVoiceMode(false);
   };
 
-  const handleNextQuestion = () => {
+  const handleNextQuestion = async () => {
     if (currentResponse.trim()) {
-      const newResponses = [...responses, currentResponse.trim()];
-      setResponses(newResponses);
-      setCurrentResponse('');
+      const response = currentResponse.trim();
+      setResponses(prev => ({
+        ...prev,
+        [currentQuestion]: response
+      }));
       
-      if (currentQuestion < PROFILE_QUESTIONS.length - 1) {
-        setCurrentQuestion(currentQuestion + 1);
-      }
+      // Save the response to the database
+      await saveQuestionResponse(currentQuestion, response);
+    }
+    
+    if (currentQuestion < PROFILE_QUESTIONS.length - 1) {
+      setCurrentQuestion(prev => prev + 1);
+      setCurrentResponse('');
+    } else {
+      processConversation();
     }
   };
 
-  const handleSkipQuestion = () => {
-    // Add space character for skipped question (not empty string)
-    const newResponses = [...responses, ' '];
-    setResponses(newResponses);
-    setCurrentResponse('');
+  const handleSkipQuestion = async () => {
+    // Save empty response if skipped
+    await saveQuestionResponse(currentQuestion, '');
     
     if (currentQuestion < PROFILE_QUESTIONS.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
+      setCurrentQuestion(prev => prev + 1);
+      setCurrentResponse('');
+    } else {
+      processConversation();
     }
   };
 
   const handlePreviousQuestion = () => {
     if (currentQuestion > 0) {
-      setCurrentQuestion(currentQuestion - 1);
-      setCurrentResponse(responses[currentQuestion - 1] || '');
-      setResponses(responses.slice(0, -1));
+      setCurrentQuestion(prev => prev - 1);
+      const previousResponse = responses[currentQuestion - 1] || '';
+      setCurrentResponse(previousResponse);
     }
   };
 
   const processConversation = async () => {
-    if (responses.length === 0) return;
-
     setIsProcessing(true);
+    
     try {
-      // Combine all responses into a conversation text
-      const conversationText = PROFILE_QUESTIONS.map((question, index) => {
-        const response = responses[index] || '';
-        return `Q: ${question}\nA: ${response}`;
-      }).join('\n\n');
+      // Convert responses to conversation text for processing
+      const conversationText = Object.entries(responses)
+        .map(([index, response]) => `Q: ${PROFILE_QUESTIONS[parseInt(index)]}\nA: ${response}`)
+        .join('\n\n');
 
-      console.log('Processing conversation:', conversationText);
+      // Also prepare structured Q&A data for the new storage system
+      const structuredQA = Object.entries(responses).map(([index, response]) => ({
+        question: PROFILE_QUESTIONS[parseInt(index)],
+        answer: response
+      }));
 
-      const { data, error } = await supabase.functions.invoke(
-        'profile-extractor',
-        {
-          body: {
-            conversationText,
-            userId,
-            bookId
-          }
+      const { data, error } = await supabase.functions.invoke('profile-extractor', {
+        body: {
+          conversationText: structuredQA, // Send structured data for new storage
+          conversationTextForProcessing: conversationText, // Keep original text for AI processing
+          userId,
+          bookId
         }
-      );
-
-      console.log('Profile extractor response:', { data, error });
-
-      if (error) {
-        console.error('Profile extractor error:', error);
-        throw error;
-      }
-
-      console.log('Extracted profile:', data.profile);
-      setExtractedProfile(data.profile);
-      onProfileUpdate?.(data.profile);
-
-      toast({
-        title: "Profile Updated!",
-        description: "Your personal information has been extracted and saved.",
       });
 
+      if (error) {
+        console.error('Error processing profile:', error);
+        toast({
+          title: "Error",
+          description: "Failed to process your profile. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data && data.profile) {
+        setExtractedProfile(data.profile);
+        toast({
+          title: "Profile Processed",
+          description: "Your profile has been successfully extracted and saved.",
+        });
+        
+        // Call the callback to notify parent component
+        onProfileUpdate?.(data.profile);
+      }
     } catch (error) {
-      console.error('Error processing conversation:', error);
+      console.error('Error processing profile:', error);
       toast({
         title: "Error",
-        description: "Failed to process your conversation. Please try again.",
+        description: "Failed to process your profile. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -152,7 +185,7 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
     }
   };
 
-  const completionPercentage = extractedProfile ? 100 : Math.min((responses.length / PROFILE_QUESTIONS.length) * 100, 95);
+  const completionPercentage = extractedProfile ? 100 : Math.min((Object.keys(responses).length / PROFILE_QUESTIONS.length) * 100, 95);
 
   return (
     <Card className="mb-6">
@@ -191,7 +224,7 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                 <div className="bg-muted/50 p-4 rounded-lg">
                   <p className="text-sm text-muted-foreground mb-2">
                     Let's gather some basic information about you to personalize your autobiography. 
-                    You can type your answers or use voice recording.
+                    You can type your answers or use voice recording. Your progress is saved automatically.
                   </p>
                 </div>
 
@@ -204,7 +237,7 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                     <div className="flex items-center gap-2">
                       <MessageCircle className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm text-muted-foreground">
-                        {responses.length} answered
+                        {Object.keys(responses).length} answered
                       </span>
                     </div>
                   </div>
@@ -265,15 +298,14 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                         </Button>
                       )}
                       
-                      {currentQuestion === PROFILE_QUESTIONS.length - 1 && responses.length === PROFILE_QUESTIONS.length - 1 ? (
+                      {currentQuestion === PROFILE_QUESTIONS.length - 1 ? (
                         <Button
                           onClick={async () => {
                             if (currentResponse.trim()) {
-                              handleNextQuestion();
+                              await handleNextQuestion();
                             } else {
-                              handleSkipQuestion();
+                              await handleSkipQuestion();
                             }
-                            setTimeout(() => processConversation(), 100);
                           }}
                           disabled={isProcessing}
                           className="bg-green-600 hover:bg-green-700"
@@ -292,11 +324,10 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                         </Button>
                       ) : (
                         <Button
-                          onClick={currentResponse.trim() || currentQuestion !== PROFILE_QUESTIONS.length - 1 ? 
-                            (currentResponse.trim() ? handleNextQuestion : handleSkipQuestion) : undefined}
-                          disabled={currentQuestion === PROFILE_QUESTIONS.length - 1 && !currentResponse.trim()}
+                          onClick={handleNextQuestion}
+                          disabled={!currentResponse.trim()}
                         >
-                          {currentQuestion === PROFILE_QUESTIONS.length - 1 ? 'Finish' : 'Next'}
+                          Next
                         </Button>
                       )}
                     </div>
@@ -319,6 +350,12 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                       <p className="text-sm">{extractedProfile.full_name}</p>
                     </div>
                   )}
+                  {extractedProfile.nicknames && extractedProfile.nicknames.length > 0 && (
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Nicknames:</span>
+                      <p className="text-sm">{extractedProfile.nicknames.join(', ')}</p>
+                    </div>
+                  )}
                   {extractedProfile.birthplace && (
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Birthplace:</span>
@@ -331,10 +368,28 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                       <p className="text-sm">{extractedProfile.occupation}</p>
                     </div>
                   )}
+                  {extractedProfile.first_job && (
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">First Job:</span>
+                      <p className="text-sm">{extractedProfile.first_job}</p>
+                    </div>
+                  )}
                   {extractedProfile.current_location && (
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Location:</span>
                       <p className="text-sm">{extractedProfile.current_location}</p>
+                    </div>
+                  )}
+                  {extractedProfile.siblings_count !== null && (
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Siblings:</span>
+                      <p className="text-sm">{extractedProfile.siblings_count}</p>
+                    </div>
+                  )}
+                  {extractedProfile.marital_status && (
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Marital Status:</span>
+                      <p className="text-sm">{extractedProfile.marital_status}</p>
                     </div>
                   )}
                 </div>
@@ -355,7 +410,7 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                 <Button
                   onClick={() => {
                     setExtractedProfile(null);
-                    setResponses([]);
+                    setResponses({});
                     setCurrentQuestion(0);
                     setCurrentResponse('');
                   }}

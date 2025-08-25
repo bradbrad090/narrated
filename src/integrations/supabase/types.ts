@@ -97,16 +97,19 @@ export type Database = {
       }
       book_profiles: {
         Row: {
+          birth_date: string | null
           birth_year: number | null
           birthplace: string | null
           book_id: string
           career_highlights: string[] | null
           challenges_overcome: string[] | null
+          children_count: number | null
           created_at: string
           cultural_background: string | null
           current_location: string | null
           education: string | null
           family_background: string | null
+          first_job: string | null
           full_name: string | null
           hobbies_interests: string[] | null
           id: string
@@ -114,26 +117,33 @@ export type Database = {
           languages_spoken: string[] | null
           life_philosophy: string | null
           life_themes: string[] | null
+          marital_status: string | null
           memorable_quotes: string[] | null
+          nicknames: string[] | null
           occupation: string | null
+          parents_occupations: string | null
           personality_traits: string[] | null
           relationships_family: string | null
+          siblings_count: number | null
           updated_at: string
           user_id: string
           values_beliefs: string | null
           writing_style_preference: string | null
         }
         Insert: {
+          birth_date?: string | null
           birth_year?: number | null
           birthplace?: string | null
           book_id: string
           career_highlights?: string[] | null
           challenges_overcome?: string[] | null
+          children_count?: number | null
           created_at?: string
           cultural_background?: string | null
           current_location?: string | null
           education?: string | null
           family_background?: string | null
+          first_job?: string | null
           full_name?: string | null
           hobbies_interests?: string[] | null
           id?: string
@@ -141,26 +151,33 @@ export type Database = {
           languages_spoken?: string[] | null
           life_philosophy?: string | null
           life_themes?: string[] | null
+          marital_status?: string | null
           memorable_quotes?: string[] | null
+          nicknames?: string[] | null
           occupation?: string | null
+          parents_occupations?: string | null
           personality_traits?: string[] | null
           relationships_family?: string | null
+          siblings_count?: number | null
           updated_at?: string
           user_id: string
           values_beliefs?: string | null
           writing_style_preference?: string | null
         }
         Update: {
+          birth_date?: string | null
           birth_year?: number | null
           birthplace?: string | null
           book_id?: string
           career_highlights?: string[] | null
           challenges_overcome?: string[] | null
+          children_count?: number | null
           created_at?: string
           cultural_background?: string | null
           current_location?: string | null
           education?: string | null
           family_background?: string | null
+          first_job?: string | null
           full_name?: string | null
           hobbies_interests?: string[] | null
           id?: string
@@ -168,10 +185,14 @@ export type Database = {
           languages_spoken?: string[] | null
           life_philosophy?: string | null
           life_themes?: string[] | null
+          marital_status?: string | null
           memorable_quotes?: string[] | null
+          nicknames?: string[] | null
           occupation?: string | null
+          parents_occupations?: string | null
           personality_traits?: string[] | null
           relationships_family?: string | null
+          siblings_count?: number | null
           updated_at?: string
           user_id?: string
           values_beliefs?: string | null
@@ -477,6 +498,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      profile_question_responses: {
+        Row: {
+          answer_text: string | null
+          book_id: string
+          created_at: string
+          id: string
+          question_index: number
+          question_text: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answer_text?: string | null
+          book_id: string
+          created_at?: string
+          id?: string
+          question_index: number
+          question_text: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answer_text?: string | null
+          book_id?: string
+          created_at?: string
+          id?: string
+          question_index?: number
+          question_text?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       users: {
         Row: {
