@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import BenefitsSection from "@/components/BenefitsSection";
+import ContactPrompt from "@/components/ContactPrompt";
 import Footer from "@/components/Footer";
 
 const Index = () => {
@@ -29,6 +30,7 @@ const Index = () => {
         <HeroSection />
         <HowItWorksSection />
         <BenefitsSection />
+        <ContactPrompt />
         <Footer />
       </div>
     </>
