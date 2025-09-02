@@ -3,7 +3,6 @@ import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import BenefitsSection from "@/components/BenefitsSection";
-import CallToActionSection from "@/components/CallToActionSection";
 import Footer from "@/components/Footer";
 
 const Index = () => {
@@ -26,12 +25,11 @@ const Index = () => {
         <link rel="canonical" href="https://narrated.com" />
       </Helmet>
       <div className="min-h-screen">
-      <Header />
-      <HeroSection />
-      <HowItWorksSection />
-      <BenefitsSection />
-      <CallToActionSection />
-      <Footer />
+        <Header />
+        <HeroSection />
+        <HowItWorksSection />
+        <BenefitsSection />
+        <Footer />
       </div>
     </>
   );

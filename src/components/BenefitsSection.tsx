@@ -4,28 +4,15 @@ const BenefitsSection = () => {
   const benefits = [
     {
       title: "Preserve Your Legacy",
-      description: "Create a lasting treasure for your family and future generations to cherish forever.",
-      highlight: "Family Heritage"
+      description: "Create a lasting treasure for your family and future generations to cherish forever."
     },
     {
       title: "Save Time & Effort", 
-      description: "No more struggling with blank pages. Our intelligent assistant guides you through the entire storytelling process.",
-      highlight: "Effortless Writing"
+      description: "No more struggling with blank pages. Our intelligent assistant guides you through the entire storytelling process."
     },
     {
       title: "Professional Quality",
-      description: "Get the expertise of professional ghostwriters at a fraction of the cost and time.",
-      highlight: "Expert Craftsmanship"
-    },
-    {
-      title: "Complete Privacy",
-      description: "Your stories are handled with the utmost confidentiality and security throughout the process.",
-      highlight: "Secure & Private"
-    },
-    {
-      title: "Beautiful Presentation",
-      description: "Premium hardcover binding with custom cover design makes your book a work of art.", 
-      highlight: "Premium Quality"
+      description: "Get the expertise of professional ghostwriters at a fraction of the cost and time."
     }
   ];
 
@@ -42,47 +29,13 @@ const BenefitsSection = () => {
           </p>
         </div>
         
-        {/* Desktop: 2 items top row, 3 items bottom row for better symmetry */}
-        <div className="max-w-6xl mx-auto">
-          {/* First row - 2 items centered */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8 mb-4 sm:mb-8 max-w-4xl mx-auto">
-            {benefits.slice(0, 2).map((benefit, index) => (
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            {benefits.map((benefit, index) => (
               <div 
                 key={index}
-                className="bg-card rounded-xl p-6 sm:p-8 shadow-card hover:shadow-elegant transition-elegant group border border-border/50"
+                className="bg-card rounded-xl p-6 sm:p-8 shadow-card hover:shadow-elegant transition-elegant border border-border/50"
               >
-                <div className="mb-4 sm:mb-6">
-                  <div className="inline-flex items-center gap-2 bg-gradient-accent/10 rounded-full px-4 py-2 mb-4">
-                    <CheckCircle className="w-4 h-4 text-accent" />
-                    <span className="text-sm font-medium text-accent">{benefit.highlight}</span>
-                  </div>
-                </div>
-                
-                <h3 className="text-xl sm:text-2xl font-semibold text-foreground mb-3 sm:mb-4">
-                  {benefit.title}
-                </h3>
-                
-                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                  {benefit.description}
-                </p>
-              </div>
-            ))}
-          </div>
-          
-          {/* Second row - 3 items */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-8">
-            {benefits.slice(2).map((benefit, index) => (
-              <div 
-                key={index + 2}
-                className="bg-card rounded-xl p-6 sm:p-8 shadow-card hover:shadow-elegant transition-elegant group border border-border/50"
-              >
-                <div className="mb-4 sm:mb-6">
-                  <div className="inline-flex items-center gap-2 bg-gradient-accent/10 rounded-full px-4 py-2 mb-4">
-                    <CheckCircle className="w-4 h-4 text-accent" />
-                    <span className="text-sm font-medium text-accent">{benefit.highlight}</span>
-                  </div>
-                </div>
-                
                 <h3 className="text-xl sm:text-2xl font-semibold text-foreground mb-3 sm:mb-4">
                   {benefit.title}
                 </h3>
