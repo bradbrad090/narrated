@@ -1,31 +1,31 @@
-import { Heart, Clock, Users, Award, Shield, Sparkles } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 
 const BenefitsSection = () => {
   const benefits = [
     {
-      icon: Heart,
       title: "Preserve Your Legacy",
-      description: "Create a lasting treasure for your family and future generations to cherish forever."
+      description: "Create a lasting treasure for your family and future generations to cherish forever.",
+      highlight: "Family Heritage"
     },
     {
-      icon: Clock,
-      title: "Save Time & Effort",
-      description: "No more struggling with blank pages. Our intelligent assistant guides you through the entire storytelling process."
+      title: "Save Time & Effort", 
+      description: "No more struggling with blank pages. Our intelligent assistant guides you through the entire storytelling process.",
+      highlight: "Effortless Writing"
     },
     {
-      icon: Users,
       title: "Professional Quality",
-      description: "Get the expertise of professional ghostwriters at a fraction of the cost and time."
+      description: "Get the expertise of professional ghostwriters at a fraction of the cost and time.",
+      highlight: "Expert Craftsmanship"
     },
     {
-      icon: Shield,
       title: "Complete Privacy",
-      description: "Your stories are handled with the utmost confidentiality and security throughout the process."
+      description: "Your stories are handled with the utmost confidentiality and security throughout the process.",
+      highlight: "Secure & Private"
     },
     {
-      icon: Sparkles,
       title: "Beautiful Presentation",
-      description: "Premium hardcover binding with custom cover design makes your book a work of art."
+      description: "Premium hardcover binding with custom cover design makes your book a work of art.", 
+      highlight: "Premium Quality"
     }
   ];
 
@@ -42,32 +42,58 @@ const BenefitsSection = () => {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 max-w-6xl mx-auto">
-          {benefits.map((benefit, index) => {
-            const Icon = benefit.icon;
-            return (
+        {/* Desktop: 2 items top row, 3 items bottom row for better symmetry */}
+        <div className="max-w-6xl mx-auto">
+          {/* First row - 2 items centered */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8 mb-4 sm:mb-8 max-w-4xl mx-auto">
+            {benefits.slice(0, 2).map((benefit, index) => (
               <div 
                 key={index}
-                className="bg-card rounded-lg sm:rounded-xl p-4 sm:p-8 shadow-card hover:shadow-elegant transition-elegant group"
+                className="bg-card rounded-xl p-6 sm:p-8 shadow-card hover:shadow-elegant transition-elegant group border border-border/50"
               >
-                <div className="mb-3 sm:mb-6 text-center">
-                  <div className="w-10 h-10 sm:w-16 sm:h-16 bg-gradient-accent rounded-lg flex items-center justify-center group-hover:shadow-glow transition-elegant mx-auto">
-                    <Icon className="w-5 h-5 sm:w-8 sm:h-8 text-accent-foreground" />
+                <div className="mb-4 sm:mb-6">
+                  <div className="inline-flex items-center gap-2 bg-gradient-accent/10 rounded-full px-4 py-2 mb-4">
+                    <CheckCircle className="w-4 h-4 text-accent" />
+                    <span className="text-sm font-medium text-accent">{benefit.highlight}</span>
                   </div>
                 </div>
                 
-                 <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2 sm:mb-4 text-center">
-                   {benefit.title}
-                 </h3>
+                <h3 className="text-xl sm:text-2xl font-semibold text-foreground mb-3 sm:mb-4">
+                  {benefit.title}
+                </h3>
                 
                 <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
                   {benefit.description}
                 </p>
               </div>
-            );
-          })}
+            ))}
+          </div>
+          
+          {/* Second row - 3 items */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-8">
+            {benefits.slice(2).map((benefit, index) => (
+              <div 
+                key={index + 2}
+                className="bg-card rounded-xl p-6 sm:p-8 shadow-card hover:shadow-elegant transition-elegant group border border-border/50"
+              >
+                <div className="mb-4 sm:mb-6">
+                  <div className="inline-flex items-center gap-2 bg-gradient-accent/10 rounded-full px-4 py-2 mb-4">
+                    <CheckCircle className="w-4 h-4 text-accent" />
+                    <span className="text-sm font-medium text-accent">{benefit.highlight}</span>
+                  </div>
+                </div>
+                
+                <h3 className="text-xl sm:text-2xl font-semibold text-foreground mb-3 sm:mb-4">
+                  {benefit.title}
+                </h3>
+                
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                  {benefit.description}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
-        
       </div>
     </section>
   );
