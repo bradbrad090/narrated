@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import heroImage from "@/assets/hero-book.jpg";
+import heroImage from "@/assets/hero-family-portrait.jpg";
 
 const HeroSection = () => {
   const [email, setEmail] = useState("");
@@ -30,7 +30,7 @@ const HeroSection = () => {
       <div className="absolute inset-0">
         <img 
           src={heroImage} 
-          alt="Elegant vintage book with memories" 
+          alt="Warm multi-generational family portrait" 
           className="w-full h-full object-cover opacity-20 max-w-full"
           loading="lazy"
         />

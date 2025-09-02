@@ -1,6 +1,6 @@
 import { MessageCircle, PenTool, Truck } from "lucide-react";
-import conversationImage from "@/assets/conversation-flow.jpg";
-import deliveryImage from "@/assets/book-delivery.jpg";
+import conversationImage from "@/assets/conversation-family.jpg";
+import deliveryImage from "@/assets/family-book-delivery.jpg";
 
 const HowItWorksSection = () => {
   return (
@@ -36,7 +36,7 @@ const HowItWorksSection = () => {
             <div className="rounded-lg overflow-hidden shadow-card hidden sm:block">
               <img 
                 src={conversationImage} 
-                alt="AI conversation visualization" 
+                alt="Family sharing stories around dinner table" 
                 className="w-full h-48 object-cover"
               />
             </div>
@@ -92,7 +92,7 @@ const HowItWorksSection = () => {
             <div className="rounded-lg overflow-hidden shadow-card hidden sm:block">
               <img 
                 src={deliveryImage} 
-                alt="Premium book delivery" 
+                alt="Family enjoying their photo album together" 
                 className="w-full h-48 object-cover"
               />
             </div>
