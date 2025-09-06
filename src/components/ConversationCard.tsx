@@ -13,11 +13,16 @@ import { MessageCircle, Mic, User, Bot, Calendar, MessageSquare, MoreVertical, T
 import { ConversationSession } from '@/types/conversation';
 import { DeleteConversationDialog } from './DeleteConversationDialog';
 
+// Extended interface for sessions with summaries
+interface ConversationSessionWithSummary extends ConversationSession {
+  summary?: string;
+}
+
 interface ConversationCardProps {
-  session: ConversationSession;
-  onResume?: (session: ConversationSession) => void;
-  onView?: (session: ConversationSession) => void;
-  onDelete?: (session: ConversationSession) => void;
+  session: ConversationSessionWithSummary;
+  onResume?: (session: ConversationSessionWithSummary) => void;
+  onView?: (session: ConversationSessionWithSummary) => void;
+  onDelete?: (session: ConversationSessionWithSummary) => void;
   isDeleting?: boolean;
 }
 
@@ -64,6 +69,11 @@ export const ConversationCard: React.FC<ConversationCardProps> = ({
   };
 
   const getPreviewText = () => {
+    // Show AI-generated summary if available
+    if (session.summary) {
+      return session.summary;
+    }
+    
     if (session.messages.length === 0) return 'Empty conversation';
     
     const firstMessage = session.messages[0];
@@ -84,7 +94,7 @@ export const ConversationCard: React.FC<ConversationCardProps> = ({
     setShowDeleteDialog(true);
   };
 
-  const handleConfirmDelete = (session: ConversationSession) => {
+  const handleConfirmDelete = (session: ConversationSessionWithSummary) => {
     onDelete?.(session);
     setShowDeleteDialog(false);
   };

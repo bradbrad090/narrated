@@ -113,17 +113,25 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
     try {
       dispatch(conversationActions.setLoading(true));
       
-      const result = await conversationRepository.getUserConversations(userId, chapterId);
+      const { data, error } = await supabase
+        .from('chat_histories')
+        .select('*')
+        .eq('user_id', userId)
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
       
-      if (result.data && !result.error) {
-        const sessions = result.data.map(record => ({
+      if (data) {
+        const sessions = data.map(record => ({
+          id: record.id,
           sessionId: record.session_id,
           conversationType: record.conversation_type as ConversationType,
           conversationMedium: record.conversation_medium as ConversationMedium,
-          messages: Array.isArray(record.messages) ? record.messages as ConversationMessage[] : [],
+          messages: Array.isArray(record.messages) ? record.messages as unknown as ConversationMessage[] : [],
           goals: Array.isArray(record.conversation_goals) ? record.conversation_goals as string[] : [],
           isSelfConversation: record.is_self_conversation || false,
-          createdAt: record.created_at
+          createdAt: record.created_at,
+          summary: record.summary // Include summary in session
         }));
 
         dispatch(conversationActions.setHistory(sessions));
@@ -133,7 +141,7 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
     } finally {
       dispatch(conversationActions.setLoading(false));
     }
-  }, [userId, bookId, chapterId, handleError]);
+  }, [userId, handleError]);
 
   // Start a new conversation with AI greeting
   const startConversation = useCallback(async (
@@ -315,11 +323,11 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
     setDeletingSessionIds(prev => new Set(prev).add(session.sessionId));
 
     try {
-      // Delete from database
+      // Delete from database using ID if available, fallback to session_id
       const { error } = await supabase
         .from('chat_histories')
         .delete()
-        .eq('session_id', session.sessionId)
+        .eq((session as any).id ? 'id' : 'session_id', (session as any).id || session.sessionId)
         .eq('user_id', userId);
 
       if (error) throw error;

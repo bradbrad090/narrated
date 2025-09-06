@@ -325,6 +325,7 @@ export type Database = {
           is_self_conversation: boolean | null
           messages: Json | null
           session_id: string | null
+          summary: string | null
           updated_at: string | null
           user_id: string
         }
@@ -339,6 +340,7 @@ export type Database = {
           is_self_conversation?: boolean | null
           messages?: Json | null
           session_id?: string | null
+          summary?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -353,6 +355,7 @@ export type Database = {
           is_self_conversation?: boolean | null
           messages?: Json | null
           session_id?: string | null
+          summary?: string | null
           updated_at?: string | null
           user_id?: string
         }

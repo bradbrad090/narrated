@@ -4,19 +4,44 @@ import { ConversationSession, ConversationMessage, ConversationContext } from '@
 import { useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
+// Extended type for database sessions that include the database ID
+interface DatabaseConversationSession extends ConversationSession {
+  id: string;
+}
+
 export const useConversationAPI = () => {
   const { toast } = useToast();
+
+  const generateConversationSummary = useCallback(async (conversationId: string, userId: string): Promise<string | null> => {
+    try {
+      console.log('Generating summary for conversation:', conversationId);
+      
+      const { data, error } = await supabase.functions.invoke('generate-conversation-summary', {
+        body: { conversationId, userId }
+      });
+
+      if (error) {
+        console.error('Failed to generate summary:', error);
+        return null;
+      }
+
+      return data.summary;
+    } catch (error) {
+      console.error('Error generating summary:', error);
+      return null;
+    }
+  }, []);
 
   const startTextConversation = useCallback(async (
     userId: string,
     bookId: string,
     chapterId?: string,
     conversationType: string = 'interview'
-  ): Promise<ConversationSession> => {
+  ): Promise<DatabaseConversationSession> => {
     try {
       const sessionId = `text_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('chat_histories')
         .insert({
           user_id: userId,
@@ -27,11 +52,14 @@ export const useConversationAPI = () => {
           messages: [],
           context_snapshot: {} as any,
           conversation_goals: getConversationGoals(conversationType) as any
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
 
       return {
+        id: data.id,
         sessionId,
         conversationType: conversationType as any,
         conversationMedium: 'text',
@@ -88,6 +116,14 @@ export const useConversationAPI = () => {
         .eq('session_id', session.sessionId)
         .eq('user_id', userId);
 
+      // Generate summary after conversation has meaningful content (3+ messages)
+      if (finalMessages.length >= 3) {
+        const dbSession = session as DatabaseConversationSession;
+        if (dbSession.id) {
+          generateConversationSummary(dbSession.id, userId);
+        }
+      }
+
       return {
         ...session,
         messages: finalMessages
@@ -100,7 +136,7 @@ export const useConversationAPI = () => {
       });
       throw error;
     }
-  }, [toast]);
+  }, [toast, generateConversationSummary]);
 
   const startSelfConversation = useCallback(async (
     userId: string,
@@ -111,7 +147,7 @@ export const useConversationAPI = () => {
     try {
       const sessionId = `self_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-      await supabase
+      const { data, error } = await supabase
         .from('chat_histories')
         .insert({
           user_id: userId,
@@ -125,8 +161,16 @@ export const useConversationAPI = () => {
             timestamp: new Date().toISOString()
           }] as any,
           context_snapshot: {} as any,
-          conversation_goals: ['Document personal thoughts and experiences'] as any
-        });
+          conversation_goals: ['Document personal thoughts and experiences'] as any,
+          is_self_conversation: true
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Generate summary for self-conversations
+      generateConversationSummary(data.id, userId);
 
       toast({
         title: "Success",
@@ -140,12 +184,13 @@ export const useConversationAPI = () => {
       });
       throw error;
     }
-  }, [toast]);
+  }, [toast, generateConversationSummary]);
 
   return {
     startTextConversation,
     sendTextMessage,
-    startSelfConversation
+    startSelfConversation,
+    generateConversationSummary
   };
 };
 
