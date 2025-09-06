@@ -18,6 +18,8 @@ import {
   Circle,
   GripVertical 
 } from 'lucide-react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface Chapter {
   id: string;
@@ -47,6 +49,15 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
   canDelete
 }) => {
   const [isEditing, setIsEditing] = useState(false);
+  
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: chapter.id });
 
   const getWordCount = () => {
     if (!chapter.content?.trim()) return 0;
@@ -118,18 +129,29 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
   const wordCount = getWordCount();
   const pageCount = getPageCount();
 
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
   return (
     <div
+      ref={setNodeRef}
+      style={style}
       className={`group relative p-4 rounded-lg border transition-all duration-200 cursor-pointer hover:shadow-md hover:border-primary/30 ${
         isActive 
           ? 'bg-primary/5 border-primary shadow-sm' 
           : 'hover:bg-muted/50'
-      }`}
+      } ${isDragging ? 'opacity-50 shadow-lg' : ''}`}
       onClick={onSelect}
     >
       {/* Drag Handle */}
-      <div className="absolute left-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-        <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
+      <div 
+        className="absolute left-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
+        {...attributes}
+        {...listeners}
+      >
+        <GripVertical className="h-4 w-4 text-muted-foreground" />
       </div>
 
       {/* Main Content */}

@@ -14,13 +14,15 @@ import { ConversationContext } from "@/components/ConversationContext";
 import { ProfileSetup } from "@/components/ProfileSetup";
 import { DeleteChapterDialog } from "@/components/DeleteChapterDialog";
 import { ChapterCard } from "@/components/ChapterCard";
-
 import PaymentButton from "@/components/PaymentButton";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
+import { updateChapterOrder } from '@/services/chapterService';
 
 
 interface Chapter {
@@ -614,6 +616,44 @@ const WriteBook = () => {
     }
   };
 
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (!over || active.id === over.id) return;
+    
+    const oldIndex = chapters.findIndex(chapter => chapter.id === active.id);
+    const newIndex = chapters.findIndex(chapter => chapter.id === over.id);
+    
+    if (oldIndex === -1 || newIndex === -1) return;
+    
+    // Optimistically update the UI
+    const reorderedChapters = arrayMove(chapters, oldIndex, newIndex);
+    const updatedChapters = reorderedChapters.map((chapter, index) => ({
+      ...chapter,
+      chapter_number: index + 1
+    }));
+    
+    setChapters(updatedChapters);
+    
+    // Update database
+    if (user) {
+      const result = await updateChapterOrder(
+        updatedChapters.map(ch => ({ id: ch.id, chapter_number: ch.chapter_number })),
+        user.id
+      );
+      
+      if (!result.success) {
+        // Rollback on failure
+        setChapters(chapters);
+        toast({
+          title: "Failed to reorder chapters",
+          description: "Changes have been reverted. Please try again.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
 
   if (loading) {
     return (
@@ -919,24 +959,34 @@ const WriteBook = () => {
                       </Card>
                     )}
                   
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-lg font-semibold">Chapters</h2>
-                      <div className="text-xs text-muted-foreground">
-                        {chapters.length} of 14 chapters
-                      </div>
-                    </div>
-                  
-                  {chapters.map((chapter) => (
-                    <ChapterCard
-                      key={chapter.id}
-                      chapter={chapter}
-                      isActive={currentChapter?.id === chapter.id}
-                      onSelect={() => setCurrentChapter(chapter)}
-                      onDelete={() => handleDeleteChapter(chapter)}
-                      canDelete={chapters.length > 1}
-                    />
-                  ))}
+                   <div className="space-y-3">
+                     <div className="flex items-center justify-between">
+                       <h2 className="text-lg font-semibold">Chapters</h2>
+                       <div className="text-xs text-muted-foreground">
+                         {chapters.length} of 14 chapters
+                       </div>
+                     </div>
+                   
+                   <DndContext 
+                     collisionDetection={closestCenter}
+                     onDragEnd={handleDragEnd}
+                   >
+                     <SortableContext 
+                       items={chapters.map(ch => ch.id)}
+                       strategy={verticalListSortingStrategy}
+                     >
+                       {chapters.map((chapter) => (
+                         <ChapterCard
+                           key={chapter.id}
+                           chapter={chapter}
+                           isActive={currentChapter?.id === chapter.id}
+                           onSelect={() => setCurrentChapter(chapter)}
+                           onDelete={() => handleDeleteChapter(chapter)}
+                           canDelete={chapters.length > 1}
+                         />
+                       ))}
+                     </SortableContext>
+                   </DndContext>
                   
                    <div className="space-y-2 mt-4">
                      <Button
