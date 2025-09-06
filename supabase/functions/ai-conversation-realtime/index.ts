@@ -2,16 +2,32 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+// Get allowed origins from environment or default to localhost for development
+const getAllowedOrigin = (request: Request) => {
+  const origin = request.headers.get('origin');
+  const allowedOrigins = [
+    'https://keadkwromhlyvoyxvcmi.supabase.co',
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'https://your-production-domain.com' // Replace with actual domain
+  ];
+  
+  return allowedOrigins.includes(origin || '') ? origin : allowedOrigins[0];
 };
+
+const getCorsHeaders = (request: Request) => ({
+  'Access-Control-Allow-Origin': getAllowedOrigin(request),
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Credentials': 'true',
+});
 
 const handler = async (request: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (request.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: getCorsHeaders(request) });
   }
+
+  const corsHeaders = getCorsHeaders(request);
 
   if (request.method !== "POST") {
     return new Response("Method Not Allowed", { 

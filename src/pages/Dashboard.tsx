@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { SecurityHeaders } from "@/components/SecurityHeaders";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -279,11 +280,11 @@ const Dashboard = () => {
 
   return (
     <>
-      <Helmet>
-        <title>Dashboard - Your Autobiography Projects | Narrated</title>
-        <meta name="description" content="Manage your autobiography projects, create new books, and continue writing your life story with AI assistance." />
-        <meta name="robots" content="noindex, nofollow" />
-      </Helmet>
+      <SecurityHeaders 
+        title="Dashboard - Your Autobiography Projects | Narrated"
+        description="Manage your autobiography projects, create new books, and continue writing your life story with AI assistance."
+        noIndex={true}
+      />
       <div className="min-h-screen bg-gradient-subtle">
       {/* Header */}
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
