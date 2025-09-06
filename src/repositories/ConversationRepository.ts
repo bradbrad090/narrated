@@ -39,8 +39,6 @@ export class ConversationRepository extends BaseRepository {
 
   async updateSession(session: ConversationSession): Promise<RepositoryResult<ChatHistoryRecord>> {
     return this.executeTransaction(async () => {
-      console.log('Updating session:', session.sessionId);
-      
       const { data, error } = await supabase
         .from('chat_histories')
         .update({
@@ -56,7 +54,6 @@ export class ConversationRepository extends BaseRepository {
         throw new Error(`Failed to update session: ${error.message}`);
       }
       
-      console.log('Session updated successfully');
       return data as ChatHistoryRecord;
     });
   }

@@ -270,7 +270,6 @@ const WriteBook = () => {
         .eq('user_id', userId);
 
       if (existingChapters && existingChapters.length > 0) {
-        console.log('Chapters already exist, skipping creation');
         return;
       }
 
@@ -290,7 +289,6 @@ const WriteBook = () => {
       if (error) {
         // If it's a duplicate key error, try to fetch existing chapters instead
         if (error.message.includes('duplicate key')) {
-          console.log('Duplicate chapters detected, fetching existing chapters');
           const { data: existingData } = await supabase
             .from('chapters')
             .select('*')

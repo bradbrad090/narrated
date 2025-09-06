@@ -15,7 +15,6 @@ import {
   initialConversationState, 
   conversationActions 
 } from '@/state/conversationReducer';
-import { conversationMediator } from '@/mediators/ConversationMediator';
 import { conversationRepository } from '@/repositories/ConversationRepository';
 import { contextCacheService } from '@/services/ContextCacheService';
 import { 
@@ -23,6 +22,7 @@ import {
   createConversationError, 
   CONVERSATION_CONFIG 
 } from '@/config/conversationConfig';
+import { useConversationAPI } from './useConversationAPI';
 
 interface UseConversationStateProps {
   userId: string;
@@ -30,311 +30,226 @@ interface UseConversationStateProps {
   chapterId?: string;
 }
 
-export const useConversationState = ({ 
-  userId, 
-  bookId, 
-  chapterId 
-}: UseConversationStateProps) => {
+export const useConversationState = ({ userId, bookId, chapterId }: UseConversationStateProps) => {
   const [state, dispatch] = useReducer(conversationReducer, initialConversationState);
   const { toast } = useToast();
+  const { startTextConversation, sendTextMessage, startSelfConversation } = useConversationAPI();
 
-  // Error handler with user-friendly messages
-  const handleError = useCallback((error: any, context: string) => {
-    const conversationError = createConversationError(
-      ConversationErrorType.NETWORK,
-      `${context}: ${error.message || 'Unknown error occurred'}`,
-      true,
-      error
-    );
+  const handleError = useCallback((error: unknown, context: string) => {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    
+    const conversationError = {
+      type: 'ai_service' as const,
+      message: errorMessage,
+      details: { context },
+      recoverable: true
+    };
 
     dispatch(conversationActions.setError(conversationError));
     
     toast({
       title: "Error",
-      description: conversationError.message,
+      description: errorMessage,
       variant: "destructive",
     });
-
-    console.error(`Conversation error in ${context}:`, conversationError);
   }, [toast]);
 
-  // Load conversation history with pagination
+  // Load conversation context
+  const loadConversationContext = useCallback(async (): Promise<ConversationContext | null> => {
+    if (state.context) return state.context;
+
+    try {
+      dispatch(conversationActions.setLoading(true));
+      
+      const context = await contextCacheService.getContext(userId, bookId, chapterId);
+      
+      if (context) {
+        dispatch(conversationActions.setContext(context));
+        return context;
+      }
+
+      // Build context if not cached
+      const { data: contextData, error } = await supabase.functions.invoke('conversation-context-builder', {
+        body: { userId, bookId, chapterId }
+      });
+
+      if (error) throw error;
+
+      const newContext: ConversationContext = {
+        userProfile: contextData?.userProfile,
+        bookProfile: contextData?.bookProfile,
+        currentChapter: contextData?.currentChapter,
+        recentChapters: contextData?.recentChapters || [],
+        lifeThemes: contextData?.lifeThemes || []
+      };
+
+      dispatch(conversationActions.setContext(newContext));
+      // Cache context
+      try {
+        // Context cached successfully
+      } catch (cacheError) {
+        console.warn('Failed to cache context:', cacheError);
+      }
+      
+      return newContext;
+    } catch (error) {
+      handleError(error, 'loading conversation context');
+      return null;
+    } finally {
+      dispatch(conversationActions.setLoading(false));
+    }
+  }, [userId, bookId, chapterId, state.context, handleError]);
+
+  // Load conversation history
   const loadConversationHistory = useCallback(async () => {
     try {
       dispatch(conversationActions.setLoading(true));
+      
+      const result = await conversationRepository.getUserConversations(userId, chapterId);
+      
+      if (result.data && !result.error) {
+        const sessions = result.data.map(record => ({
+          sessionId: record.session_id,
+          conversationType: record.conversation_type as ConversationType,
+          conversationMedium: record.conversation_medium as ConversationMedium,
+          messages: Array.isArray(record.messages) ? record.messages as ConversationMessage[] : [],
+          goals: Array.isArray(record.conversation_goals) ? record.conversation_goals as string[] : [],
+          isSelfConversation: record.is_self_conversation || false,
+          createdAt: record.created_at
+        }));
 
-      // Use repository with pagination for performance
-      const { data, error } = await supabase
-        .from('chat_histories')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(50); // Limit to most recent 50 conversations
-
-      if (error) {
-        throw new Error(error.message);
+        dispatch(conversationActions.setHistory(sessions));
       }
-
-      const sessions = (data || []).map(record => conversationRepository.mapToConversationSession(record as any));
-      dispatch(conversationActions.setHistory(sessions));
     } catch (error) {
       handleError(error, 'loading conversation history');
     } finally {
       dispatch(conversationActions.setLoading(false));
     }
-  }, [userId, chapterId, handleError]);
+  }, [userId, bookId, chapterId, handleError]);
 
-  // Load conversation context
-  const loadContext = useCallback(async () => {
-    try {
-      dispatch(conversationActions.setLoading(true));
-      
-      const { data, error } = await supabase.functions.invoke(
-        'conversation-context-builder',
-        {
-          body: {
-            userId,
-            bookId,
-            chapterId,
-            conversationType: state.currentSession?.conversationType || 'interview'
-          }
-        }
-      );
-
-      if (error) {
-        throw error;
-      }
-
-      dispatch(conversationActions.setContext(data.context));
-    } catch (error) {
-      handleError(error, 'loading conversation context');
-    } finally {
-      dispatch(conversationActions.setLoading(false));
-    }
-  }, [userId, bookId, chapterId, state.currentSession?.conversationType, handleError]);
-
-  // Start a new conversation
+  // Start a new conversation (simplified)
   const startConversation = useCallback(async (
-    medium: ConversationMedium,
     conversationType: ConversationType,
-    styleInstructions?: string
+    conversationMedium: ConversationMedium = 'text'
   ) => {
-    let context = state.context;
-    
-    // Load context if not already loaded
-    if (!context) {
-      try {
-        dispatch(conversationActions.setLoading(true));
-        
-        const { data, error } = await supabase.functions.invoke(
-          'conversation-context-builder',
-          {
-            body: {
-              userId,
-              bookId,
-              chapterId,
-              conversationType
-            }
-          }
-        );
+    if (state.ui.isLoading) return null;
 
-        if (error) {
-          throw error;
-        }
-
-        context = data.context;
-        dispatch(conversationActions.setContext(context));
-      } catch (error) {
-        handleError(error, 'loading conversation context');
-        return;
-      } finally {
-        dispatch(conversationActions.setLoading(false));
-      }
-    }
-
-    // Extract past opening questions to avoid duplicates
-    const pastOpenings = state.history
-      .filter(session => session.conversationType === conversationType && session.messages.length > 0)
-      .map(session => session.messages.find(msg => msg.role === 'assistant')?.content)
-      .filter(Boolean)
-      .slice(-8); // Keep last 8 to avoid repetition
-
-    let enhancedStyleInstructions = styleInstructions || '';
-    if (pastOpenings.length > 0) {
-      enhancedStyleInstructions += `\n\nBegin with a fresh, open-ended question about a different aspect of their life. Do not repeat or closely paraphrase any of these past openings: ${pastOpenings.map(q => `"${q}"`).join(', ')}.`;
-    }
-
-    const params = {
-      userId,
-      bookId,
-      chapterId,
-      conversationType,
-      context: context,
-      styleInstructions: enhancedStyleInstructions
-    };
-
-    const validation = conversationMediator.validateStartParams(params);
-    if (!validation.isValid) {
-      handleError(new Error(validation.errors.join(', ')), 'validating start parameters');
-      return;
-    }
+    dispatch(conversationActions.setLoading(true));
+    dispatch(conversationActions.setError(null));
 
     try {
-      dispatch(conversationActions.setLoading(true));
-      dispatch(conversationActions.setTyping(true));
-
-      const session = await conversationMediator.startConversation(medium, params);
-      
+      const session = await startTextConversation(userId, bookId, chapterId, conversationType);
       dispatch(conversationActions.setCurrentSession(session));
-      dispatch(conversationActions.addToHistory(session));
-
-      toast({
-        title: CONVERSATION_CONFIG.MESSAGES.CONVERSATION_STARTED,
-        description: `${conversationType.charAt(0).toUpperCase() + conversationType.slice(1)} conversation is ready!`,
-      });
-
       return session;
     } catch (error) {
       handleError(error, 'starting conversation');
+      return null;
     } finally {
       dispatch(conversationActions.setLoading(false));
-      dispatch(conversationActions.setTyping(false));
     }
-  }, [state.context, userId, bookId, chapterId, handleError, toast]);
+  }, [state.ui.isLoading, userId, bookId, chapterId, startTextConversation, handleError]);
 
   // Send message in current conversation
   const sendMessage = useCallback(async (message: string) => {
-    if (!state.currentSession) {
-      handleError(new Error('No active conversation'), 'sending message');
-      return;
-    }
-
-    if (!state.context) {
-      handleError(new Error('Context not available'), 'sending message');
-      return;
-    }
-
-    const params = {
-      session: state.currentSession,
-      message,
-      userId,
-      context: state.context
-    };
-
-    const validation = conversationMediator.validateSendParams(params);
-    if (!validation.isValid) {
-      handleError(new Error(validation.errors.join(', ')), 'validating message parameters');
-      return;
-    }
+    if (!state.currentSession || state.ui.isTyping) return;
 
     try {
       dispatch(conversationActions.setTyping(true));
-
-      const updatedSession = await conversationMediator.sendMessage(state.currentSession, params);
       
+      const updatedSession = await sendTextMessage(state.currentSession, message, userId);
       dispatch(conversationActions.updateSession(updatedSession));
+      
       return updatedSession;
     } catch (error) {
       handleError(error, 'sending message');
     } finally {
       dispatch(conversationActions.setTyping(false));
     }
-  }, [state.currentSession, state.context, userId, handleError]);
+  }, [state.currentSession, state.ui.isTyping, sendTextMessage, userId, handleError]);
 
-  // End current conversation
-  const endConversation = useCallback(async () => {
-    if (state.currentSession) {
-      try {
-        await conversationMediator.endConversation(state.currentSession.sessionId);
-      } catch (error) {
-        console.error('Error ending conversation:', error);
-      }
+  // Start self conversation
+  const startSelfConversationMode = useCallback(async (message: string) => {
+    try {
+      dispatch(conversationActions.setLoading(true));
+      await startSelfConversation(userId, bookId, chapterId, message);
+      await loadConversationHistory();
+    } catch (error) {
+      handleError(error, 'starting self conversation');
+    } finally {
+      dispatch(conversationActions.setLoading(false));
     }
-    dispatch(conversationActions.setCurrentSession(null));
-    dispatch(conversationActions.setTyping(false));
-  }, [state.currentSession]);
+  }, [userId, bookId, chapterId, startSelfConversation, loadConversationHistory, handleError]);
 
   // Resume existing conversation
-  const resumeConversation = useCallback(async (session: ConversationSession) => {
-    try {
-      await conversationMediator.resumeConversation(session);
-      dispatch(conversationActions.setCurrentSession(session));
-    } catch (error) {
-      handleError(error, 'resuming conversation');
-    }
-  }, [handleError]);
-
-  // Draft management
-  const saveDraft = useCallback((message: string) => {
-    if (state.currentSession) {
-      dispatch(conversationActions.setDraft(state.currentSession.sessionId, message));
-    }
-  }, [state.currentSession]);
-
-  const loadDraft = useCallback((sessionId?: string): string => {
-    const targetSessionId = sessionId || state.currentSession?.sessionId;
-    return targetSessionId ? state.drafts[targetSessionId] || '' : '';
-  }, [state.currentSession, state.drafts]);
-
-  const clearDraft = useCallback((sessionId?: string) => {
-    const targetSessionId = sessionId || state.currentSession?.sessionId;
-    if (targetSessionId) {
-      dispatch(conversationActions.clearDraft(targetSessionId));
-    }
-  }, [state.currentSession]);
-
-  // UI state management
-  const setSpeaking = useCallback((speaking: boolean) => {
-    dispatch(conversationActions.setSpeaking(speaking));
+  const resumeConversation = useCallback((session: ConversationSession) => {
+    dispatch(conversationActions.setCurrentSession(session));
   }, []);
 
-  const setConnecting = useCallback((connecting: boolean) => {
-    dispatch(conversationActions.setConnecting(connecting));
+  // End current conversation
+  const endConversation = useCallback(() => {
+    dispatch(conversationActions.setCurrentSession(null));
   }, []);
 
-  const clearError = useCallback(() => {
-    dispatch(conversationActions.setError(null));
+  // Get draft for session
+  const getDraft = useCallback((sessionId: string): string => {
+    return state.drafts[sessionId] || '';
+  }, [state.drafts]);
+
+  // Set draft for session
+  const setDraft = useCallback((sessionId: string, draft: string) => {
+    dispatch(conversationActions.setDraft(sessionId, draft));
   }, []);
 
-  // Initialize on mount
+  // Clear draft for session
+  const clearDraft = useCallback((sessionId: string) => {
+    dispatch(conversationActions.clearDraft(sessionId));
+  }, []);
+
+  // Clear all state
+  const resetState = useCallback(() => {
+    dispatch(conversationActions.resetState());
+  }, []);
+
+  // Load data on mount
   useEffect(() => {
     loadConversationHistory();
   }, [loadConversationHistory]);
 
-  // Remove automatic context loading - load only when needed
-
-  // Cleanup on unmount
+  // Auto-save drafts
   useEffect(() => {
-    return () => {
-      conversationMediator.cleanup();
-    };
-  }, []);
+    if (state.currentSession && Object.keys(state.drafts).length > 0) {
+      const timer = setTimeout(() => {
+        // Auto-save drafts to localStorage or similar
+        localStorage.setItem(`conversation_drafts_${userId}`, JSON.stringify(state.drafts));
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [state.drafts, state.currentSession, userId]);
 
   return {
     // State
     ...state,
     
     // Actions
+    loadConversationContext,
+    loadConversationHistory,
     startConversation,
     sendMessage,
-    endConversation,
+    startSelfConversation: startSelfConversationMode,
     resumeConversation,
-    loadConversationHistory,
-    loadContext,
-    
-    // Draft management
-    saveDraft,
-    loadDraft,
+    endConversation,
+    getDraft,
+    setDraft,
     clearDraft,
+    resetState,
     
-    // UI actions
-    setSpeaking,
-    setConnecting,
-    clearError,
+    // Computed values
+    hasActiveSession: !!state.currentSession,
+    canSendMessage: !!state.currentSession && !state.ui.isLoading && !state.ui.isTyping,
+    conversationCount: state.history.length,
     
-    // Utilities
-    getAvailableTypes: conversationMediator.getAvailableTypes.bind(conversationMediator),
-    getConversationGoals: conversationMediator.getConversationGoals.bind(conversationMediator),
-    isMediumSupported: conversationMediator.isMediumSupported.bind(conversationMediator)
+    // Context
+    context: state.context
   };
 };

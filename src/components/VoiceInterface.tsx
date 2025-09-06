@@ -2,19 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { RealtimeChat } from '@/utils/RealtimeAudio';
+import { VoiceEvent, VoiceInterfaceProps } from '@/types/voice';
 import { Mic, MicOff, Phone, PhoneOff } from 'lucide-react';
 
-interface VoiceInterfaceProps {
-  onSpeakingChange: (speaking: boolean) => void;
-  context?: any;
-  conversationType?: string;
-  userId: string;
-  bookId: string;
-  chapterId?: string;
-  onConversationUpdate?: () => void;
-}
-
-const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ 
+const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   onSpeakingChange, 
   context, 
   conversationType = 'interview',
@@ -29,8 +20,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   const [isSpeaking, setIsSpeaking] = useState(false);
   const chatRef = useRef<RealtimeChat | null>(null);
 
-  const handleMessage = (event: any) => {
-    console.log('Received message:', event);
+  const handleMessage = (event: VoiceEvent) => {
     
     // Handle different event types
     if (event.type === 'response.audio.delta') {

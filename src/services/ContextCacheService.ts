@@ -59,7 +59,6 @@ export class ContextCacheService {
     // Check memory cache first
     const memoryEntry = this.memoryCache.get(cacheKey);
     if (memoryEntry && !this.isExpired(memoryEntry.expiresAt)) {
-      console.log('Context cache hit (memory):', cacheKey);
       return memoryEntry.context;
     }
 
@@ -82,7 +81,6 @@ export class ContextCacheService {
       }
 
       if (data) {
-        console.log('Context cache hit (database):', cacheKey);
         const cachedContext: CachedContext = {
           userId,
           bookId,
@@ -101,7 +99,6 @@ export class ContextCacheService {
       console.error('Error accessing context cache:', error);
     }
 
-    console.log('Context cache miss:', cacheKey);
     return null;
   }
 
@@ -151,8 +148,6 @@ export class ContextCacheService {
 
       if (error) {
         console.error('Error caching context in database:', error);
-      } else {
-        console.log('Context cached:', cacheKey);
       }
     } catch (error) {
       console.error('Error storing context cache:', error);
@@ -176,8 +171,6 @@ export class ContextCacheService {
 
       if (error) {
         console.error('Error invalidating context cache:', error);
-      } else {
-        console.log('Context cache invalidated:', cacheKey);
       }
     } catch (error) {
       console.error('Error removing context cache:', error);
@@ -195,9 +188,7 @@ export class ContextCacheService {
       }
     }
 
-    if (cleanedCount > 0) {
-      console.log(`Cleaned up ${cleanedCount} expired context cache entries`);
-    }
+    // Cleanup completed
   }
 
   async clearAllCache(): Promise<void> {

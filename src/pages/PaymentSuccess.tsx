@@ -32,8 +32,6 @@ const PaymentSuccess = () => {
 
   const verifyPayment = async (sessionId: string, bookId: string) => {
     try {
-      console.log('Verifying payment:', { sessionId, bookId });
-      
       const { data, error } = await supabase.functions.invoke('verify-payment', {
         body: {
           sessionId: sessionId,

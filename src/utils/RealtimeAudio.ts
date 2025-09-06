@@ -124,7 +124,6 @@ export class RealtimeChat {
 
       // Set up remote audio
       this.pc.ontrack = e => {
-        console.log("Received remote audio track");
         this.audioEl.srcObject = e.streams[0];
       };
 
@@ -144,7 +143,6 @@ export class RealtimeChat {
       this.dc = this.pc.createDataChannel("oai-events");
       this.dc.addEventListener("message", (e) => {
         const event = JSON.parse(e.data);
-        console.log("Received event:", event);
         this.handleRealtimeEvent(event);
         this.onMessage(event);
       });
@@ -176,7 +174,6 @@ export class RealtimeChat {
       };
       
       await this.pc.setRemoteDescription(answer);
-      console.log("WebRTC connection established");
 
       // Wait for data channel to be ready
       await new Promise((resolve) => {
@@ -189,8 +186,6 @@ export class RealtimeChat {
 
       // Create initial chat history entry for voice conversation
       await this.createChatHistoryEntry();
-
-      console.log("Voice chat ready!");
 
     } catch (error) {
       console.error("Error initializing chat:", error);
@@ -251,8 +246,6 @@ export class RealtimeChat {
 
       if (error) {
         console.error('Error creating chat history:', error);
-      } else {
-        console.log('Voice chat history entry created successfully');
       }
     } catch (error) {
       console.error('Error creating chat history:', error);
@@ -263,7 +256,6 @@ export class RealtimeChat {
     if (!this.sessionId) return;
 
     try {
-      console.log('Updating chat history with', this.messages.length, 'messages');
       const { error } = await supabase
         .from('chat_histories')
         .update({
@@ -274,8 +266,6 @@ export class RealtimeChat {
 
       if (error) {
         console.error('Error updating chat history:', error);
-      } else {
-        console.log('Voice chat history updated successfully');
       }
     } catch (error) {
       console.error('Error updating chat history:', error);
@@ -360,7 +350,7 @@ Be warm, empathetic, and genuinely interested. Ask open-ended questions that enc
         }
       }
     } catch (error) {
-      console.log('Could not fetch past conversations for duplication check:', error);
+      // Silent fail for non-critical duplication check
     }
 
     return baseInstructions;
