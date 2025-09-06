@@ -126,7 +126,7 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
   };
 
   return (
-    <Card className={`w-full ${className}`}>
+    <Card className={`w-full min-h-[320px] ${className}`}>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">

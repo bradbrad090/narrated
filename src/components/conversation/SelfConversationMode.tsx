@@ -67,7 +67,7 @@ export const SelfConversationMode: React.FC<SelfConversationModeProps> = ({
   };
 
   return (
-    <Card className={`w-full ${className}`}>
+    <Card className={`w-full min-h-[320px] ${className}`}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <User className="h-5 w-5" />
@@ -77,7 +77,7 @@ export const SelfConversationMode: React.FC<SelfConversationModeProps> = ({
           Write your thoughts and memories using text or voice input
         </p>
       </CardHeader>
-      <CardContent className="space-y-4 py-12 px-6">
+      <CardContent className="space-y-4 py-6 px-6">
         <div className="flex gap-2">
           <div className="flex-1">
             <Textarea

@@ -41,7 +41,7 @@ export const VoiceConversationMode: React.FC<VoiceConversationModeProps> = ({
   };
 
   return (
-    <Card className={`w-full ${className}`}>
+    <Card className={`w-full min-h-[320px] ${className}`}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Bot className="h-5 w-5" />
