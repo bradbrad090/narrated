@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Loader2, AlertCircle } from 'lucide-react';
@@ -91,7 +92,13 @@ const PaymentSuccess = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 flex items-center justify-center p-4">
+    <>
+      <Helmet>
+        <title>Payment Successful - Thank You | Narrated</title>
+        <meta name="description" content="Payment confirmation for your Narrated autobiography book upgrade. Your payment has been processed successfully." />
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           {isVerifying && (
@@ -171,7 +178,8 @@ const PaymentSuccess = () => {
           )}
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </>
   );
 };
 
