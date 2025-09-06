@@ -130,8 +130,7 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
           messages: Array.isArray(record.messages) ? record.messages as unknown as ConversationMessage[] : [],
           goals: Array.isArray(record.conversation_goals) ? record.conversation_goals as string[] : [],
           isSelfConversation: record.is_self_conversation || false,
-          createdAt: record.created_at,
-          summary: record.summary // Include summary in session
+          createdAt: record.created_at
         }));
 
         dispatch(conversationActions.setHistory(sessions));

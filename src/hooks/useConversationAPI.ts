@@ -12,26 +12,6 @@ interface DatabaseConversationSession extends ConversationSession {
 export const useConversationAPI = () => {
   const { toast } = useToast();
 
-  const generateConversationSummary = useCallback(async (conversationId: string, userId: string): Promise<string | null> => {
-    try {
-      console.log('Generating summary for conversation:', conversationId);
-      
-      const { data, error } = await supabase.functions.invoke('generate-conversation-summary', {
-        body: { conversationId, userId }
-      });
-
-      if (error) {
-        console.error('Failed to generate summary:', error);
-        return null;
-      }
-
-      return data.summary;
-    } catch (error) {
-      console.error('Error generating summary:', error);
-      return null;
-    }
-  }, []);
-
   const startTextConversation = useCallback(async (
     userId: string,
     bookId: string,
@@ -116,13 +96,6 @@ export const useConversationAPI = () => {
         .eq('session_id', session.sessionId)
         .eq('user_id', userId);
 
-      // Generate summary after conversation has meaningful content (3+ messages)
-      if (finalMessages.length >= 3) {
-        const dbSession = session as DatabaseConversationSession;
-        if (dbSession.id) {
-          generateConversationSummary(dbSession.id, userId);
-        }
-      }
 
       return {
         ...session,
@@ -136,7 +109,7 @@ export const useConversationAPI = () => {
       });
       throw error;
     }
-  }, [toast, generateConversationSummary]);
+  }, [toast]);
 
   const startSelfConversation = useCallback(async (
     userId: string,
@@ -169,9 +142,6 @@ export const useConversationAPI = () => {
 
       if (error) throw error;
 
-      // Generate summary for self-conversations
-      generateConversationSummary(data.id, userId);
-
       toast({
         title: "Success",
         description: "Self conversation saved successfully",
@@ -184,13 +154,12 @@ export const useConversationAPI = () => {
       });
       throw error;
     }
-  }, [toast, generateConversationSummary]);
+  }, [toast]);
 
   return {
     startTextConversation,
     sendTextMessage,
-    startSelfConversation,
-    generateConversationSummary
+    startSelfConversation
   };
 };
 
