@@ -41,9 +41,9 @@ const HeroSection = () => {
       <div className="relative z-10 container mx-auto px-6 text-center">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold text-primary-foreground mb-4 sm:mb-6 leading-relaxed pb-2">
-            <span className="block sm:inline">Your Life Story,</span>
+            <span className="block sm:inline">Tell Your Story,</span>
             <span className="block text-transparent bg-gradient-accent bg-clip-text">
-              Written by you
+              We'll Write the Book
             </span>
           </h1>
           

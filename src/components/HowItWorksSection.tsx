@@ -99,12 +99,6 @@ const HowItWorksSection = () => {
           </div>
         </div>
         
-        <div className="text-center mt-8 sm:mt-16">
-          <div className="inline-flex items-center gap-2 sm:gap-4 bg-card rounded-full px-4 sm:px-8 py-3 sm:py-4 shadow-card">
-            <span className="text-xs sm:text-sm text-muted-foreground">Timeline:</span>
-            <span className="text-sm sm:text-base font-semibold text-foreground">2-3 weeks</span>
-          </div>
-        </div>
       </div>
     </section>
   );
