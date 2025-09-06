@@ -21,12 +21,18 @@ const corsHeaders = {
 };
 
 const handler = async (request: Request): Promise<Response> => {
+  console.log('=== AI Conversation Realtime Handler Started ===');
+  console.log('Method:', request.method);
+  console.log('Headers:', Object.fromEntries(request.headers.entries()));
+
   // Handle CORS preflight requests
   if (request.method === 'OPTIONS') {
+    console.log('Handling CORS preflight');
     return new Response(null, { headers: corsHeaders });
   }
 
   if (request.method !== "POST") {
+    console.log('Invalid method:', request.method);
     return new Response("Method Not Allowed", { 
       status: 405,
       headers: corsHeaders 
@@ -34,7 +40,12 @@ const handler = async (request: Request): Promise<Response> => {
   }
 
   try {
+    console.log('Parsing request body...');
+    const requestBody = await request.json();
+    console.log('Request body:', JSON.stringify(requestBody, null, 2));
+
     // Initialize Supabase client
+    console.log('Initializing Supabase client...');
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -44,8 +55,6 @@ const handler = async (request: Request): Promise<Response> => {
         },
       }
     );
-
-    const requestBody = await request.json();
     const { 
       action, 
       sessionId, 
@@ -67,8 +76,10 @@ const handler = async (request: Request): Promise<Response> => {
     }
 
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    console.log('OpenAI API Key present:', !!OPENAI_API_KEY);
     
     if (!OPENAI_API_KEY) {
+      console.error('OpenAI API key not configured');
       return new Response(JSON.stringify({ error: "OpenAI API key not configured" }), { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -78,6 +89,7 @@ const handler = async (request: Request): Promise<Response> => {
     console.log('AI Conversation Request:', { action, sessionId, userId, conversationType });
 
     if (action === 'start_session') {
+      console.log('Starting conversation session...');
       return await startConversationSession(supabaseClient, {
         userId,
         bookId,
@@ -87,6 +99,7 @@ const handler = async (request: Request): Promise<Response> => {
         styleInstructions
       });
     } else if (action === 'send_message') {
+      console.log('Sending message...');
       if (!sessionId || !message) {
         return new Response(JSON.stringify({ error: "sessionId and message are required for send_message" }), { 
           status: 400,
@@ -103,6 +116,7 @@ const handler = async (request: Request): Promise<Response> => {
         styleInstructions
       });
     } else if (action === 'continue_conversation') {
+      console.log('Continuing conversation...');
       if (!sessionId || !message) {
         return new Response(JSON.stringify({ error: "sessionId and message are required for continue_conversation" }), { 
           status: 400,
@@ -121,6 +135,7 @@ const handler = async (request: Request): Promise<Response> => {
         fullConversationHistory: conversationHistory
       });
     } else {
+      console.error('Invalid action:', action);
       return new Response(JSON.stringify({ error: "Invalid action. Use 'start_session', 'send_message', or 'continue_conversation'" }), { 
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -129,6 +144,7 @@ const handler = async (request: Request): Promise<Response> => {
 
   } catch (error) {
     console.error('Error in ai-conversation-realtime function:', error);
+    console.error('Error stack:', error.stack);
     return new Response(JSON.stringify({ error: error.message }), { 
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -137,64 +153,80 @@ const handler = async (request: Request): Promise<Response> => {
 };
 
 async function startConversationSession(supabaseClient: any, params: any) {
+  console.log('=== Starting Conversation Session ===');
+  console.log('Params:', JSON.stringify(params, null, 2));
+  
   const { userId, bookId, chapterId, conversationType, context, styleInstructions } = params;
   
-  // Generate a unique session ID
-  const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  
-  // Create initial conversation goals based on type
-  const conversationGoals = generateConversationGoals(conversationType);
-  
-  // Create chat history entry
-  const { data: chatHistory, error: chatError } = await supabaseClient
-    .from('chat_histories')
-    .insert({
-      user_id: userId,
-      session_id: sessionId,
-      conversation_type: conversationType,
-      context_snapshot: context || {},
-      conversation_goals: conversationGoals,
-      chapter_id: chapterId,
-      messages: []
-    })
-    .select()
-    .single();
+  try {
+    // Generate a unique session ID
+    const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    console.log('Generated session ID:', sessionId);
+    
+    // Create initial conversation goals based on type
+    const conversationGoals = generateConversationGoals(conversationType);
+    console.log('Conversation goals:', conversationGoals);
+    
+    // Create chat history entry
+    console.log('Creating chat history entry...');
+    const { data: chatHistory, error: chatError } = await supabaseClient
+      .from('chat_histories')
+      .insert({
+        user_id: userId,
+        session_id: sessionId,
+        conversation_type: conversationType,
+        context_snapshot: context || {},
+        conversation_goals: conversationGoals,
+        chapter_id: chapterId,
+        messages: []
+      })
+      .select()
+      .single();
 
-  if (chatError) {
-    console.error('Error creating chat history:', chatError);
-    throw new Error('Failed to start conversation session');
-  }
-
-  // Generate initial AI greeting based on context and type
-  const initialPrompt = buildInitialPrompt(context, conversationType, styleInstructions);
-  console.log('Generated initial prompt:', initialPrompt);
-  const aiResponse = await callOpenAI(initialPrompt, []);
-  console.log('AI initial response:', aiResponse);
-
-  // Update chat history with initial message
-  const initialMessages = [
-    {
-      role: 'assistant',
-      content: aiResponse,
-      timestamp: new Date().toISOString()
+    if (chatError) {
+      console.error('Error creating chat history:', chatError);
+      throw new Error('Failed to start conversation session');
     }
-  ];
+    console.log('Chat history created successfully:', chatHistory);
 
-  await supabaseClient
-    .from('chat_histories')
-    .update({ messages: initialMessages })
-    .eq('id', chatHistory.id);
+    // Generate initial AI greeting based on context and type
+    const initialPrompt = buildInitialPrompt(context, conversationType, styleInstructions);
+    console.log('Generated initial prompt:', initialPrompt);
+    
+    const aiResponse = await callOpenAI(initialPrompt, []);
+    console.log('AI initial response:', aiResponse);
 
-  console.log('Conversation session started:', sessionId);
+    // Update chat history with initial message
+    const initialMessages = [
+      {
+        role: 'assistant',
+        content: aiResponse,
+        timestamp: new Date().toISOString()
+      }
+    ];
 
-      return new Response(JSON.stringify({
-        sessionId,
-        response: aiResponse,
-        conversationType,
-        goals: conversationGoals
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
+    console.log('Updating chat history with initial message...');
+    await supabaseClient
+      .from('chat_histories')
+      .update({ messages: initialMessages })
+      .eq('id', chatHistory.id);
+
+    console.log('Conversation session started successfully:', sessionId);
+
+    return new Response(JSON.stringify({
+      sessionId,
+      response: aiResponse,
+      conversationType,
+      goals: conversationGoals
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+    
+  } catch (error) {
+    console.error('Error in startConversationSession:', error);
+    console.error('Error stack:', error.stack);
+    throw error;
+  }
 }
 
 async function processConversationMessage(supabaseClient: any, params: any) {
@@ -281,7 +313,15 @@ async function processConversationMessage(supabaseClient: any, params: any) {
 }
 
 async function callOpenAI(prompt: string, conversationHistory: any[]): Promise<string> {
+  console.log('=== Calling OpenAI ===');
+  
   const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+  console.log('OpenAI API Key present:', !!OPENAI_API_KEY);
+  
+  if (!OPENAI_API_KEY) {
+    console.error('OpenAI API key is missing');
+    throw new Error('OpenAI API key is not configured');
+  }
   
   const messages = [
     { role: "system", content: prompt },
@@ -292,11 +332,13 @@ async function callOpenAI(prompt: string, conversationHistory: any[]): Promise<s
   ];
 
   console.log('Calling OpenAI with message count:', messages.length);
+  console.log('First system message length:', prompt.length);
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
   try {
+    console.log('Making OpenAI API request...');
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -312,18 +354,30 @@ async function callOpenAI(prompt: string, conversationHistory: any[]): Promise<s
     });
 
     clearTimeout(timeoutId);
+    console.log('OpenAI response status:', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('OpenAI API error:', errorText);
-      throw new Error(`OpenAI API error: ${response.status}`);
+      console.error('OpenAI API error response:', errorText);
+      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
-    return data.choices[0].message.content;
+    console.log('OpenAI response received successfully');
+    console.log('Response data:', JSON.stringify(data, null, 2));
+    
+    const content = data.choices[0]?.message?.content;
+    if (!content) {
+      console.error('No content in OpenAI response:', data);
+      throw new Error('No content received from OpenAI');
+    }
+    
+    return content;
 
   } catch (error) {
     clearTimeout(timeoutId);
+    console.error('Error in callOpenAI:', error);
+    console.error('Error stack:', error.stack);
     throw error;
   }
 }
