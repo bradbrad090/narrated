@@ -206,10 +206,19 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
               conversations={conversationHistory}
               onResumeConversation={(session: ConversationSession) => {
                 resumeConversation(session);
+                // Auto-switch to the appropriate tab based on conversation type
+                if (session.isSelfConversation) {
+                  setSelectedMode('self');
+                } else if (session.conversationMedium === 'text') {
+                  setSelectedMode('text-assisted');
+                } else if (session.conversationMedium === 'voice') {
+                  setSelectedMode('voice');
+                }
               }}
               onViewConversation={(session: ConversationSession) => {
                 if (!session.isSelfConversation && session.conversationMedium === 'text') {
                   resumeConversation(session);
+                  setSelectedMode('text-assisted');
                 } else {
                   toast({
                     title: "View Conversation",
