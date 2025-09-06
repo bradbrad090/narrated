@@ -154,9 +154,9 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
           Have a text conversation with AI to develop your story
         </p>
       </CardHeader>
-      <CardContent className="space-y-4 min-h-[400px] flex flex-col">
+      <CardContent className="space-y-4">
         {!currentSession ? (
-          <div className="text-center py-8 flex-1 flex items-center justify-center">
+          <div className="text-center py-8">
             <div className="space-y-4">
               <Button
                 onClick={handleStartConversation}
@@ -173,11 +173,11 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
             </div>
           </div>
         ) : (
-          <div className="space-y-4 flex-1 flex flex-col">
+          <div className="space-y-4">
             {/* Messages Display */}
             <ScrollArea 
               ref={scrollAreaRef}
-              className="h-[300px] p-4 border rounded-lg flex-1"
+              className="h-[200px] p-4 border rounded-lg"
             >
               <div className="space-y-4">
                 {currentSession.messages?.map((message, index) => {

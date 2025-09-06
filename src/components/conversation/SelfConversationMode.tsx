@@ -77,15 +77,15 @@ export const SelfConversationMode: React.FC<SelfConversationModeProps> = ({
           Write your thoughts and memories using text or voice input
         </p>
       </CardHeader>
-      <CardContent className="space-y-4 min-h-[400px] flex flex-col">
-        <div className="flex gap-2 flex-1">
+      <CardContent className="space-y-4">
+        <div className="flex gap-2">
           <div className="flex-1">
             <Textarea
               ref={textareaRef}
               value={currentMessage}
               onChange={(e) => setCurrentMessage(e.target.value)}
               placeholder="Write your thoughts, memories, or experiences..."
-              className="min-h-[300px] resize-none"
+              className="min-h-[120px] resize-none"
               aria-label="Self conversation input"
               disabled={isLoading}
             />
