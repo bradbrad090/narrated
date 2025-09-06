@@ -21,7 +21,7 @@ const Index = () => {
         <meta property="og:image" content="https://narrated.com/hero-book.jpg" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Narrated - Tell Your Story, We'll Write the Book" />
-        <meta name="twitter:description" content="Transform your memories into a beautiful autobiography with AI assistance. Share your story through conversation - no writing required." />
+        <meta name="twitter:description" content="Transform your memories into a beautiful autobiography. Share your story through conversation - no writing required." />
         <meta name="twitter:image" content="https://narrated.com/hero-book.jpg" />
         <link rel="canonical" href="https://narrated.com" />
       </Helmet>
