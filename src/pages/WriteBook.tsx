@@ -14,7 +14,6 @@ import { ConversationContext } from "@/components/ConversationContext";
 import { ProfileSetup } from "@/components/ProfileSetup";
 import { DeleteChapterDialog } from "@/components/DeleteChapterDialog";
 import { ChapterCard } from "@/components/ChapterCard";
-import { ChapterStats } from "@/components/ChapterStats";
 
 import PaymentButton from "@/components/PaymentButton";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
@@ -882,9 +881,6 @@ const WriteBook = () => {
                        onProfileUpdate={handleProfileUpdate}
                      />
                    )}
-
-                   {/* Book Progress Stats */}
-                   <ChapterStats chapters={chapters} />
 
                    {/* Payment Section - Collapsed by default to save space */}
                    {user && book && (
