@@ -99,14 +99,27 @@ export class SmartSuggestionService {
     category: keyof typeof CONVERSATION_CONFIG.CONTINUATION_PROMPTS,
     priority: number
   ): SmartSuggestion {
-    const prompts = CONVERSATION_CONFIG.CONTINUATION_PROMPTS[category];
-    const randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
+    try {
+      const prompts = CONVERSATION_CONFIG.CONTINUATION_PROMPTS[category];
+      if (prompts && prompts.length > 0) {
+        const randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
+        return {
+          type,
+          text: randomPrompt,
+          priority,
+          category
+        };
+      }
+    } catch (error) {
+      console.warn(`Invalid category ${category} for continuation prompts`);
+    }
     
+    // Fallback
     return {
       type,
-      text: randomPrompt,
+      text: "Tell me more about that...",
       priority,
-      category
+      category: 'STORY_GAPS'
     };
   }
   
