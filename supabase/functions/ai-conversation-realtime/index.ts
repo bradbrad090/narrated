@@ -48,6 +48,7 @@ const handler = async (request: Request): Promise<Response> => {
       }
     );
 
+    const requestBody = await request.json();
     const { 
       action, 
       sessionId, 
@@ -57,8 +58,9 @@ const handler = async (request: Request): Promise<Response> => {
       chapterId,
       conversationType = 'interview',
       context,
-      styleInstructions
-    } = await request.json();
+      styleInstructions,
+      conversationHistory
+    } = requestBody;
     
     if (!userId || !bookId) {
       return new Response(JSON.stringify({ error: "userId and bookId are required" }), { 
@@ -103,8 +105,26 @@ const handler = async (request: Request): Promise<Response> => {
         conversationType,
         styleInstructions
       });
+    } else if (action === 'continue_conversation') {
+      if (!sessionId || !message) {
+        return new Response(JSON.stringify({ error: "sessionId and message are required for continue_conversation" }), { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+      
+      return await processConversationMessage(supabaseClient, {
+        sessionId,
+        message,
+        userId,
+        context,
+        conversationType,
+        styleInstructions,
+        isResumedConversation: true,
+        fullConversationHistory: conversationHistory
+      });
     } else {
-      return new Response(JSON.stringify({ error: "Invalid action. Use 'start_session' or 'send_message'" }), { 
+      return new Response(JSON.stringify({ error: "Invalid action. Use 'start_session', 'send_message', or 'continue_conversation'" }), { 
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
@@ -181,7 +201,7 @@ async function startConversationSession(supabaseClient: any, params: any) {
 }
 
 async function processConversationMessage(supabaseClient: any, params: any) {
-  const { sessionId, message, userId, context, conversationType, styleInstructions } = params;
+  const { sessionId, message, userId, context, conversationType, styleInstructions, isResumedConversation = false, fullConversationHistory = null } = params;
 
   // Fetch existing conversation
   const { data: chatHistory, error: fetchError } = await supabaseClient
@@ -207,7 +227,10 @@ async function processConversationMessage(supabaseClient: any, params: any) {
   const updatedMessages = [...existingMessages, userMessage];
 
   // Generate AI response with retry logic
-  const conversationHistory = updatedMessages.slice(-10); // Keep last 10 messages for context
+  // For resumed conversations, use full history; for new ones, keep last 10 messages
+  const conversationHistory = isResumedConversation && fullConversationHistory 
+    ? fullConversationHistory 
+    : updatedMessages.slice(-10); // Keep last 10 messages for context
   const prompt = buildConversationPrompt(context, conversationType, conversationHistory, styleInstructions);
   
   let aiResponse;
@@ -284,7 +307,7 @@ async function callOpenAI(prompt: string, conversationHistory: any[]): Promise<s
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: "gpt-4.1-2025-04-14",
+        model: "gpt-5-2025-08-07",
         messages: messages,
         max_completion_tokens: 500
       }),

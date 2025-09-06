@@ -220,16 +220,20 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
       
       dispatch(conversationActions.updateSession(sessionWithUserMessage));
 
+      // Detect if this is a resumed conversation (has existing messages before the user message we just added)
+      const isResumedConversation = state.currentSession.messages.length > 1;
+      
       // Get AI response using the edge function
       const { data, error } = await supabase.functions.invoke('ai-conversation-realtime', {
         body: {
-          action: 'send_message',
+          action: isResumedConversation ? 'continue_conversation' : 'send_message',
           sessionId: state.currentSession.sessionId,
           message,
           userId,
           context: state.context,
           conversationType: state.currentSession.conversationType,
-          styleInstructions: 'Continue the interview naturally, asking follow-up questions that help the person share more details about their experiences.'
+          styleInstructions: 'Continue the interview naturally, asking follow-up questions that help the person share more details about their experiences.',
+          conversationHistory: isResumedConversation ? state.currentSession.messages.slice(0, -1) : undefined // Exclude the user message we just added
         }
       });
 

@@ -174,6 +174,16 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
           </div>
         ) : (
           <div className="space-y-4">
+            {/* Resume Indicator */}
+            {currentSession.messages.length > 1 && (
+              <div className="p-3 bg-muted/50 rounded-lg border-l-4 border-primary">
+                <div className="flex items-center gap-2 text-sm">
+                  <RotateCcw className="h-4 w-4 text-primary" />
+                  <span>Continuing conversation with {currentSession.messages.length} messages</span>
+                </div>
+              </div>
+            )}
+            
             {/* Messages Display */}
             <ScrollArea 
               ref={scrollAreaRef}
