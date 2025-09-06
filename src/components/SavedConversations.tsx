@@ -80,36 +80,38 @@ export const SavedConversations: React.FC<SavedConversationsProps> = ({
           />
         </div>
 
-        {/* Filter Tabs */}
-        <div className="flex gap-2">
-          <Select value={selectedFilter} onValueChange={setSelectedFilter}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Filter conversations" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All ({conversationStats.total})</SelectItem>
-              <SelectItem value="self">Self ({conversationStats.self})</SelectItem>
-              <SelectItem value="text">Text Chat ({conversationStats.textChat})</SelectItem>
-              <SelectItem value="voice">Voice Chat ({conversationStats.voiceChat})</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
 
-        {/* Statistics */}
+        {/* Filter Buttons */}
         <div className="flex flex-wrap gap-2 mb-4">
-          <Badge variant="outline" className="flex items-center gap-1">
+          <Badge 
+            variant={selectedFilter === 'all' ? 'default' : 'outline'} 
+            className="flex items-center gap-1 cursor-pointer hover:bg-muted transition-colors"
+            onClick={() => setSelectedFilter('all')}
+          >
             <MessageSquare className="h-3 w-3" />
             {conversationStats.total} Total
           </Badge>
-          <Badge variant="outline" className="flex items-center gap-1">
+          <Badge 
+            variant={selectedFilter === 'self' ? 'default' : 'outline'} 
+            className="flex items-center gap-1 cursor-pointer hover:bg-muted transition-colors"
+            onClick={() => setSelectedFilter('self')}
+          >
             <User className="h-3 w-3" />
             {conversationStats.self} Self
           </Badge>
-          <Badge variant="outline" className="flex items-center gap-1">
+          <Badge 
+            variant={selectedFilter === 'text' ? 'default' : 'outline'} 
+            className="flex items-center gap-1 cursor-pointer hover:bg-muted transition-colors"
+            onClick={() => setSelectedFilter('text')}
+          >
             <MessageSquare className="h-3 w-3" />
             {conversationStats.textChat} Text Chat
           </Badge>
-          <Badge variant="outline" className="flex items-center gap-1">
+          <Badge 
+            variant={selectedFilter === 'voice' ? 'default' : 'outline'} 
+            className="flex items-center gap-1 cursor-pointer hover:bg-muted transition-colors"
+            onClick={() => setSelectedFilter('voice')}
+          >
             <Mic className="h-3 w-3" />
             {conversationStats.voiceChat} Voice Chat
           </Badge>
