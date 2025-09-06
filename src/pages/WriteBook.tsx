@@ -997,7 +997,7 @@ const WriteBook = () => {
                      
                      <DragOverlay>
                        {activeChapterId ? (
-                         <div className="p-4 rounded-lg border bg-background shadow-xl opacity-90 transform rotate-3">
+                         <div className="p-4 rounded-lg border bg-background shadow-xl opacity-90">
                            <div className="flex items-center gap-2">
                              <div className="h-3 w-3 rounded-full bg-primary/20" />
                              <h3 className="font-medium text-sm">
