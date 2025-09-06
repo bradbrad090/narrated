@@ -155,7 +155,7 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
-        {!currentSession ? (
+        {!currentSession || (currentSession && currentSession.messages.length === 0) ? (
           <div className="text-center py-8">
             <div className="space-y-4">
               <Button

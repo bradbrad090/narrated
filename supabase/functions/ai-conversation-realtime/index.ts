@@ -145,7 +145,10 @@ const handler = async (request: Request): Promise<Response> => {
   } catch (error) {
     console.error('Error in ai-conversation-realtime function:', error);
     console.error('Error stack:', error.stack);
-    return new Response(JSON.stringify({ error: error.message }), { 
+    return new Response(JSON.stringify({ 
+      error: error.message || 'Internal server error',
+      details: error.stack || 'No stack trace available'
+    }), { 
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
@@ -219,13 +222,20 @@ async function startConversationSession(supabaseClient: any, params: any) {
       conversationType,
       goals: conversationGoals
     }), {
+      status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
     
   } catch (error) {
     console.error('Error in startConversationSession:', error);
     console.error('Error stack:', error.stack);
-    throw error;
+    return new Response(JSON.stringify({ 
+      error: error.message || 'Failed to start conversation session',
+      details: error.stack || 'No stack trace available'
+    }), { 
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   }
 }
 
@@ -308,6 +318,7 @@ async function processConversationMessage(supabaseClient: any, params: any) {
     sessionId,
     messageCount: finalMessages.length
   }), {
+    status: 200,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' }
   });
 }

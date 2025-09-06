@@ -282,7 +282,17 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
 
   // Resume existing conversation
   const resumeConversation = useCallback((session: ConversationSession) => {
+    console.log('Resuming conversation with session:', session);
+    console.log('Session has', session.messages?.length || 0, 'messages');
     dispatch(conversationActions.setCurrentSession(session));
+    
+    // Auto-start text conversation if there are messages
+    if (session.messages && session.messages.length > 0) {
+      // Session is already loaded with messages, ready for new messages
+      console.log('Conversation resumed successfully with', session.messages.length, 'messages');
+    } else {
+      console.log('Resumed session has no messages, will show start button');
+    }
   }, []);
 
   // End current conversation
