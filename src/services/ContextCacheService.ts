@@ -16,12 +16,23 @@ export class ContextCacheService {
   private memoryCache = new Map<string, CachedContext>();
   private readonly CACHE_DURATION_MINUTES = 30;
   private readonly CLEANUP_INTERVAL_MINUTES = 5;
+  private readonly MAX_CACHE_SIZE = 100;
+  private cleanupInterval: NodeJS.Timeout | null = null;
 
   constructor() {
-    // Set up periodic cleanup
-    setInterval(() => {
+    // Set up periodic cleanup with proper cleanup
+    this.cleanupInterval = setInterval(() => {
       this.cleanupExpiredCache();
     }, this.CLEANUP_INTERVAL_MINUTES * 60 * 1000);
+  }
+
+  // Add cleanup method
+  destroy() {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+      this.cleanupInterval = null;
+    }
+    this.memoryCache.clear();
   }
 
   private generateCacheKey(userId: string, bookId: string, chapterId?: string): string {
@@ -111,6 +122,14 @@ export class ContextCacheService {
       expiresAt,
       createdAt: new Date().toISOString()
     };
+
+    // Implement LRU eviction when cache is full
+    if (this.memoryCache.size >= this.MAX_CACHE_SIZE) {
+      const firstKey = this.memoryCache.keys().next().value;
+      if (firstKey) {
+        this.memoryCache.delete(firstKey);
+      }
+    }
 
     // Store in memory cache
     this.memoryCache.set(cacheKey, cachedContext);

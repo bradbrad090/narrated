@@ -85,7 +85,15 @@ export class RealtimeChat {
     this.bookId = bookId;
     this.chapterId = chapterId;
     this.conversationType = 'interview';
+    
+    // Bind cleanup methods for proper memory management
+    this.handleBeforeUnload = this.handleBeforeUnload.bind(this);
+    window.addEventListener('beforeunload', this.handleBeforeUnload);
   }
+
+  private handleBeforeUnload = () => {
+    this.disconnect();
+  };
 
   async init(context?: any, conversationType?: string) {
     try {
@@ -387,8 +395,17 @@ Be warm, empathetic, and genuinely interested. Ask open-ended questions that enc
       this.updateChatHistory();
     }
     
+    // Properly clean up all resources
     this.dc?.close();
     this.pc?.close();
     this.audioEl.srcObject = null;
+    
+    // Remove event listeners to prevent memory leaks
+    window.removeEventListener('beforeunload', this.handleBeforeUnload);
+    
+    // Clean up references
+    this.dc = null;
+    this.pc = null;
+    this.sessionId = null;
   }
 }

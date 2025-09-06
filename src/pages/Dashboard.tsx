@@ -46,18 +46,45 @@ const Dashboard = () => {
 
   const fetchBooks = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      // Optimize: Fetch books without heavy chapter content
+      const { data: booksData, error: booksError } = await supabase
         .from('books')
         .select(`
           *, 
-          chapters(content),
           book_profiles(id)
         `)
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setBooks(data || []);
+      if (booksError) throw booksError;
+
+      // Fetch chapter counts separately for performance
+      const booksWithStats = await Promise.all(
+        (booksData || []).map(async (book) => {
+          const { count } = await supabase
+            .from('chapters')
+            .select('*', { count: 'exact', head: true })
+            .eq('book_id', book.id);
+
+          const { data: wordCountData } = await supabase
+            .from('chapters')
+            .select('content')
+            .eq('book_id', book.id);
+
+          const wordCount = (wordCountData || []).reduce((total, chapter) => {
+            const content = chapter.content || '';
+            return total + content.split(/\s+/).filter(word => word.length > 0).length;
+          }, 0);
+
+          return {
+            ...book,
+            chapters: { length: count || 0 },
+            wordCount
+          };
+        })
+      );
+
+      setBooks(booksWithStats);
     } catch (error: any) {
       toast({
         title: "Error fetching books",
@@ -227,15 +254,11 @@ const Dashboard = () => {
   };
 
   const getWordCount = (book: any) => {
-    if (!book.chapters || book.chapters.length === 0) return 0;
-    return book.chapters.reduce((total: number, chapter: any) => {
-      const content = chapter.content || '';
-      return total + content.split(/\s+/).filter((word: string) => word.length > 0).length;
-    }, 0);
+    return book.wordCount || 0;
   };
 
   const getChapterCount = (book: any) => {
-    return book.chapters ? book.chapters.length : 0;
+    return book.chapters?.length || 0;
   };
 
   const getEstimatedPages = (wordCount: number) => {

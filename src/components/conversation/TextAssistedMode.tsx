@@ -41,16 +41,20 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
     chapterId
   });
 
-  // Scroll to bottom of chat area only when there are messages
+  // Optimized scroll to bottom with proper cleanup
   useEffect(() => {
     if (currentSession?.messages && currentSession.messages.length > 0) {
-      // Use setTimeout to ensure DOM has updated
-      setTimeout(() => {
-        const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
-        if (scrollContainer) {
-          scrollContainer.scrollTop = scrollContainer.scrollHeight;
-        }
-      }, 100);
+      // Use requestAnimationFrame for better performance
+      const timeoutId = setTimeout(() => {
+        requestAnimationFrame(() => {
+          const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
+          if (scrollContainer) {
+            scrollContainer.scrollTop = scrollContainer.scrollHeight;
+          }
+        });
+      }, 50); // Reduced timeout for better responsiveness
+
+      return () => clearTimeout(timeoutId);
     }
   }, [currentSession?.messages?.length, isTyping]);
 

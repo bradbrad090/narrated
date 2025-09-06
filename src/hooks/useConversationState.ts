@@ -58,18 +58,24 @@ export const useConversationState = ({
     console.error(`Conversation error in ${context}:`, conversationError);
   }, [toast]);
 
-  // Load conversation history
+  // Load conversation history with pagination
   const loadConversationHistory = useCallback(async () => {
     try {
       dispatch(conversationActions.setLoading(true));
 
-      const result = await conversationRepository.getUserConversations(userId, chapterId);
-      
-      if (result.error) {
-        throw new Error(result.error.message);
+      // Use repository with pagination for performance
+      const { data, error } = await supabase
+        .from('chat_histories')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(50); // Limit to most recent 50 conversations
+
+      if (error) {
+        throw new Error(error.message);
       }
 
-      const sessions = result.data.map(record => conversationRepository.mapToConversationSession(record));
+      const sessions = (data || []).map(record => conversationRepository.mapToConversationSession(record as any));
       dispatch(conversationActions.setHistory(sessions));
     } catch (error) {
       handleError(error, 'loading conversation history');
