@@ -1,4 +1,4 @@
-import { useReducer, useCallback, useEffect } from 'react';
+import { useReducer, useCallback, useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -33,6 +33,7 @@ interface UseConversationStateProps {
 
 export const useConversationState = ({ userId, bookId, chapterId }: UseConversationStateProps) => {
   const [state, dispatch] = useReducer(conversationReducer, initialConversationState);
+  const [deletingSessionIds, setDeletingSessionIds] = useState<Set<string>>(new Set());
   const { toast } = useToast();
   const { startTextConversation, sendTextMessage, startSelfConversation } = useConversationAPI();
   
@@ -308,9 +309,62 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
     }
   }, [state.drafts, state.currentSession, userId]);
 
+  // Delete conversation
+  const deleteConversation = useCallback(async (session: ConversationSession) => {
+    // Add to deleting set
+    setDeletingSessionIds(prev => new Set(prev).add(session.sessionId));
+
+    try {
+      // Delete from database
+      const { error } = await supabase
+        .from('chat_histories')
+        .delete()
+        .eq('session_id', session.sessionId)
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      // Remove from local state
+      dispatch(conversationActions.setHistory(
+        state.history.filter(s => s.sessionId !== session.sessionId)
+      ));
+
+      // Clear any associated drafts
+      const draftKey = `conversation_draft_${session.sessionId}`;
+      localStorage.removeItem(draftKey);
+      dispatch(conversationActions.clearDraft(session.sessionId));
+
+      // If this was the current session, end it
+      if (state.currentSession?.sessionId === session.sessionId) {
+        dispatch(conversationActions.setCurrentSession(null));
+      }
+
+      toast({
+        title: "Conversation Deleted",
+        description: "The conversation has been permanently removed.",
+      });
+
+    } catch (error: any) {
+      console.error('Failed to delete conversation:', error);
+      toast({
+        title: "Delete Failed",
+        description: error.message || "Failed to delete conversation. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      // Remove from deleting set
+      setDeletingSessionIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(session.sessionId);
+        return newSet;
+      });
+    }
+  }, [userId, state.currentSession, state.history, toast]);
+
   return {
     // State
     ...state,
+    deletingSessionIds,
     
     // Actions
     loadConversationContext,
@@ -320,6 +374,7 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
     startSelfConversation: startSelfConversationMode,
     resumeConversation,
     endConversation,
+    deleteConversation,
     getDraft,
     setDraft,
     clearDraft,

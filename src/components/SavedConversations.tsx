@@ -14,6 +14,8 @@ interface SavedConversationsProps {
   conversations: ConversationSession[];
   onResumeConversation?: (session: ConversationSession) => void;
   onViewConversation?: (session: ConversationSession) => void;
+  onDeleteConversation?: (session: ConversationSession) => void;
+  deletingSessionIds?: Set<string>;
   className?: string;
 }
 
@@ -21,6 +23,8 @@ export const SavedConversations: React.FC<SavedConversationsProps> = ({
   conversations,
   onResumeConversation,
   onViewConversation,
+  onDeleteConversation,
+  deletingSessionIds = new Set(),
   className = ""
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -43,6 +47,10 @@ export const SavedConversations: React.FC<SavedConversationsProps> = ({
   const handleViewConversation = useCallback((session: ConversationSession) => {
     onViewConversation?.(session);
   }, [onViewConversation]);
+
+  const handleDeleteConversation = useCallback((session: ConversationSession) => {
+    onDeleteConversation?.(session);
+  }, [onDeleteConversation]);
 
   if (conversations.length === 0) {
     return (
@@ -129,6 +137,8 @@ export const SavedConversations: React.FC<SavedConversationsProps> = ({
             conversations={filteredConversations}
             onResumeConversation={handleResumeConversation}
             onViewConversation={handleViewConversation}
+            onDeleteConversation={handleDeleteConversation}
+            deletingSessionIds={deletingSessionIds}
             height={400}
           />
         ) : (
@@ -140,6 +150,8 @@ export const SavedConversations: React.FC<SavedConversationsProps> = ({
                   session={session}
                   onResume={handleResumeConversation}
                   onView={handleViewConversation}
+                  onDelete={handleDeleteConversation}
+                  isDeleting={deletingSessionIds.has(session.sessionId)}
                 />
               ))}
             </div>

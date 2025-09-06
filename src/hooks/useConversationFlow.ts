@@ -33,6 +33,7 @@ export const useConversationFlow = (userId: string, bookId: string, chapterId?: 
   const [context, setContext] = useState<ConversationContext | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [deletingSessionIds, setDeletingSessionIds] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
   // Load conversation history on mount
@@ -310,6 +311,59 @@ export const useConversationFlow = (userId: string, bookId: string, chapterId?: 
     }
   }, [currentSession]);
 
+  // Delete conversation
+  const deleteConversation = useCallback(async (session: ConversationSession) => {
+    if (!userId) return;
+
+    // Add to deleting set
+    setDeletingSessionIds(prev => new Set(prev).add(session.sessionId));
+
+    try {
+      // Delete from database
+      const { error } = await supabase
+        .from('chat_histories')
+        .delete()
+        .eq('session_id', session.sessionId)
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      // Remove from local state
+      setConversationHistory(prev => 
+        prev.filter(s => s.sessionId !== session.sessionId)
+      );
+
+      // Clear any associated drafts
+      const draftKey = `conversation_draft_${session.sessionId}`;
+      localStorage.removeItem(draftKey);
+
+      // If this was the current session, end it
+      if (currentSession?.sessionId === session.sessionId) {
+        setCurrentSession(null);
+      }
+
+      toast({
+        title: "Conversation Deleted",
+        description: "The conversation has been permanently removed.",
+      });
+
+    } catch (error: any) {
+      console.error('Failed to delete conversation:', error);
+      toast({
+        title: "Delete Failed",
+        description: error.message || "Failed to delete conversation. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      // Remove from deleting set
+      setDeletingSessionIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(session.sessionId);
+        return newSet;
+      });
+    }
+  }, [userId, currentSession, toast]);
+
 // Integration with WriteBook component - pass these props to ConversationInterface
 // Example usage in WriteBook.tsx:
 /*
@@ -350,10 +404,12 @@ const [showConversation, setShowConversation] = useState(false);
     context,
     isLoading,
     isTyping,
+    deletingSessionIds,
     startConversation,
     sendMessage,
     endConversation,
     resumeConversation,
+    deleteConversation,
     loadContext,
     loadConversationHistory,
     saveDraft,

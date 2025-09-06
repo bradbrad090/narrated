@@ -7,6 +7,8 @@ interface VirtualizedConversationListProps {
   conversations: ConversationSession[];
   onResumeConversation?: (session: ConversationSession) => void;
   onViewConversation?: (session: ConversationSession) => void;
+  onDeleteConversation?: (session: ConversationSession) => void;
+  deletingSessionIds?: Set<string>;
   height: number;
   itemHeight?: number;
 }
@@ -18,11 +20,19 @@ interface ListItemProps {
     conversations: ConversationSession[];
     onResumeConversation?: (session: ConversationSession) => void;
     onViewConversation?: (session: ConversationSession) => void;
+    onDeleteConversation?: (session: ConversationSession) => void;
+    deletingSessionIds?: Set<string>;
   };
 }
 
 const ListItem = memo(({ index, style, data }: ListItemProps) => {
-  const { conversations, onResumeConversation, onViewConversation } = data;
+  const { 
+    conversations, 
+    onResumeConversation, 
+    onViewConversation, 
+    onDeleteConversation,
+    deletingSessionIds = new Set()
+  } = data;
   const session = conversations[index];
 
   if (!session) {
@@ -35,6 +45,8 @@ const ListItem = memo(({ index, style, data }: ListItemProps) => {
         session={session}
         onResume={onResumeConversation}
         onView={onViewConversation}
+        onDelete={onDeleteConversation}
+        isDeleting={deletingSessionIds.has(session.sessionId)}
       />
     </div>
   );
@@ -46,14 +58,18 @@ export const VirtualizedConversationList = memo<VirtualizedConversationListProps
   conversations,
   onResumeConversation,
   onViewConversation,
+  onDeleteConversation,
+  deletingSessionIds = new Set(),
   height,
   itemHeight = 120
 }) => {
   const itemData = useMemo(() => ({
     conversations,
     onResumeConversation,
-    onViewConversation
-  }), [conversations, onResumeConversation, onViewConversation]);
+    onViewConversation,
+    onDeleteConversation,
+    deletingSessionIds
+  }), [conversations, onResumeConversation, onViewConversation, onDeleteConversation, deletingSessionIds]);
 
   if (conversations.length === 0) {
     return (

@@ -41,7 +41,9 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     currentSession,
     resumeConversation,
     loadConversationHistory,
-    hasActiveSession
+    hasActiveSession,
+    deleteConversation,
+    deletingSessionIds
   } = useConversationState({
     userId,
     bookId,
@@ -215,6 +217,8 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                   });
                 }
               }}
+              onDeleteConversation={deleteConversation}
+              deletingSessionIds={deletingSessionIds}
               className="mt-6"
             />
           </ErrorBoundary>
