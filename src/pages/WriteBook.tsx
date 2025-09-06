@@ -669,19 +669,19 @@ const WriteBook = () => {
                               <FileText className="h-4 w-4 flex-shrink-0" />
                               <span className="font-medium text-sm truncate">{chapter.title}</span>
                             </div>
-                           {chapters.length > 1 && (
-                             <Button
-                               variant="ghost"
-                               size="sm"
-                               className="opacity-0 group-hover:opacity-100 transition-opacity"
-                               onClick={(e) => {
-                                 e.stopPropagation();
-                                 handleDeleteChapter(chapter);
-                               }}
-                             >
-                               <Trash2 className="h-3 w-3" />
-                             </Button>
-                           )}
+                            {chapters.length > 1 && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="hover:bg-yellow-100 hover:text-yellow-800 transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteChapter(chapter);
+                                }}
+                              >
+                                <MoreVertical className="h-3 w-3" />
+                              </Button>
+                            )}
                           </div>
                           <p className="text-xs text-muted-foreground mt-1">
                             {(() => {

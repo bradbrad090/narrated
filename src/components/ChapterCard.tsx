@@ -152,13 +152,13 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="h-6 w-6 p-0 hover:bg-yellow-100 hover:text-yellow-800 transition-colors"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <MoreVertical className="h-3 w-3" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="bg-background border shadow-md z-50">
                 <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setIsEditing(true); }}>
                   <Edit2 className="h-4 w-4 mr-2" />
                   Rename Chapter
