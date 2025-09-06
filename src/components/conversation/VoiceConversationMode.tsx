@@ -57,7 +57,7 @@ export const VoiceConversationMode: React.FC<VoiceConversationModeProps> = ({
           Have a real-time voice conversation with the AI assistant
         </p>
       </CardHeader>
-      <CardContent>
+      <CardContent className="min-h-[400px] flex flex-col justify-center">
         <VoiceInterface 
           onSpeakingChange={setIsAISpeaking}
           context={context}

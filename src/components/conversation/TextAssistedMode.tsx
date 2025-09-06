@@ -154,28 +154,30 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
           Have a text conversation with AI to develop your story
         </p>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 min-h-[400px] flex flex-col">
         {!currentSession ? (
-          <div className="text-center py-8">
-            <Button
-              onClick={handleStartConversation}
-              disabled={isLoading}
-              size="lg"
-            >
-              {isLoading ? (
-                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-              ) : (
-                <MessageCircle className="h-5 w-5 mr-2" />
-              )}
-              {CONVERSATION_CONFIG.BUTTON_TEXT.START_CONVERSATION}
-            </Button>
+          <div className="text-center py-8 flex-1 flex items-center justify-center">
+            <div className="space-y-4">
+              <Button
+                onClick={handleStartConversation}
+                disabled={isLoading}
+                size="lg"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                ) : (
+                  <MessageCircle className="h-5 w-5 mr-2" />
+                )}
+                {CONVERSATION_CONFIG.BUTTON_TEXT.START_CONVERSATION}
+              </Button>
+            </div>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4 flex-1 flex flex-col">
             {/* Messages Display */}
             <ScrollArea 
               ref={scrollAreaRef}
-              className={`h-[${CONVERSATION_CONFIG.CONVERSATION_SCROLL_HEIGHT}] p-4 border rounded-lg`}
+              className="h-[300px] p-4 border rounded-lg flex-1"
             >
               <div className="space-y-4">
                 {currentSession.messages?.map((message, index) => {
