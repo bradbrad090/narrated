@@ -23,6 +23,7 @@ import {
   CONVERSATION_CONFIG 
 } from '@/config/conversationConfig';
 import { useConversationAPI } from './useConversationAPI';
+import { useSmartConversationFlow } from './useSmartConversationFlow';
 
 interface UseConversationStateProps {
   userId: string;
@@ -34,6 +35,12 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
   const [state, dispatch] = useReducer(conversationReducer, initialConversationState);
   const { toast } = useToast();
   const { startTextConversation, sendTextMessage, startSelfConversation } = useConversationAPI();
+  
+  // Smart conversation flow analysis
+  const smartFlow = useSmartConversationFlow({
+    currentSession: state.currentSession,
+    conversationHistory: state.history
+  });
 
   const handleError = useCallback((error: unknown, context: string) => {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
@@ -248,6 +255,13 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
     hasActiveSession: !!state.currentSession,
     canSendMessage: !!state.currentSession && !state.ui.isLoading && !state.ui.isTyping,
     conversationCount: state.history.length,
+    
+    // Smart Flow Features
+    conversationInsights: smartFlow.conversationInsights,
+    conversationPattern: smartFlow.conversationPattern,
+    optimalStyle: smartFlow.optimalStyle,
+    continuationSuggestions: smartFlow.continuationSuggestions,
+    isHealthyConversation: smartFlow.isHealthyConversation,
     
     // Context
     context: state.context

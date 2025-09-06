@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { SavedConversations } from '@/components/SavedConversations';
 import { SelfConversationMode } from '@/components/conversation/SelfConversationMode';
 import { TextAssistedMode } from '@/components/conversation/TextAssistedMode';
 import { VoiceConversationMode } from '@/components/conversation/VoiceConversationMode';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { Sparkles, User, Bot } from 'lucide-react';
+import { Sparkles, User, Bot, RotateCcw, Zap } from 'lucide-react';
 import { useConversationState } from '@/hooks/useConversationState';
 import { useToast } from '@/hooks/use-toast';
 import { ConversationSession } from '@/types/conversation';
 import { isFeatureEnabled } from '@/config/environment';
+import { CONVERSATION_CONFIG } from '@/config/conversationConfig';
 
 interface ConversationInterfaceProps {
   userId: string;
@@ -29,27 +32,115 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   onContentGenerated
 }) => {
   const [selectedMode, setSelectedMode] = useState('self');
+  const [showQuickResume, setShowQuickResume] = useState(false);
   const { toast } = useToast();
 
   const {
     history: conversationHistory,
     context,
+    currentSession,
     resumeConversation,
-    loadConversationHistory
+    loadConversationHistory,
+    hasActiveSession
   } = useConversationState({
     userId,
     bookId,
     chapterId
   });
 
+  // Smart mode recommendation based on conversation history
+  const getRecommendedMode = () => {
+    if (!conversationHistory.length) return 'self';
+    
+    const recentTextConversations = conversationHistory
+      .filter(s => s.conversationMedium === 'text' && !s.isSelfConversation)
+      .slice(0, 3);
+    
+    if (recentTextConversations.length > 0) {
+      return 'text-assisted'; // User has been using text conversations
+    }
+    
+    return 'self';
+  };
+
+  // Quick resume feature
+  const getResumableSession = (): ConversationSession | null => {
+    return conversationHistory.find(session => 
+      !session.isSelfConversation && 
+      session.conversationMedium === 'text' &&
+      session.messages.length > 1 && 
+      session.messages.length < 20 // Not too long
+    ) || null;
+  };
+
+  useEffect(() => {
+    const resumableSession = getResumableSession();
+    setShowQuickResume(!!resumableSession && !hasActiveSession);
+  }, [conversationHistory, hasActiveSession]);
+
+  const handleQuickResume = () => {
+    const resumableSession = getResumableSession();
+    if (resumableSession) {
+      resumeConversation(resumableSession);
+      setSelectedMode('text-assisted');
+      setShowQuickResume(false);
+      toast({
+        title: CONVERSATION_CONFIG.MESSAGES.CONVERSATION_RESUMED,
+        description: "Continuing where you left off",
+      });
+    }
+  };
+
+  const handleSmartModeSwitch = () => {
+    const recommendedMode = getRecommendedMode();
+    setSelectedMode(recommendedMode);
+    toast({
+      title: "Smart Mode",
+      description: `Switched to ${recommendedMode} based on your conversation patterns`,
+    });
+  };
+
 
   return (
     <ErrorBoundary>
       <div className={`w-full ${className}`}>
+        {/* Quick Actions */}
+        {showQuickResume && (
+          <div className="mb-4 p-3 bg-muted/50 rounded-lg border border-dashed">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <RotateCcw className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Continue your conversation</span>
+                <Badge variant="secondary" className="text-xs">
+                  {getResumableSession()?.messages.length || 0} messages
+                </Badge>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleQuickResume}
+                  size="sm"
+                  className="h-7"
+                >
+                  Resume
+                </Button>
+                <Button
+                  onClick={() => setShowQuickResume(false)}
+                  variant="outline"
+                  size="sm"
+                  className="h-7"
+                >
+                  Dismiss
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Tabbed Interface for Starting Conversations */}
         <Tabs value={selectedMode} onValueChange={setSelectedMode} className="w-full">
           <div className="w-full border-b">
-            <TabsList className="grid w-full grid-cols-3">
+            <div className="flex items-center justify-between mb-2">
+              <TabsList className="grid grid-cols-3 flex-1 max-w-md">
               {isFeatureEnabled('selfConversations') && (
                 <TabsTrigger value="self" className="flex items-center gap-2">
                   <User className="h-4 w-4" />
@@ -68,7 +159,19 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                   Voice-to-Voice AI
                 </TabsTrigger>
               )}
-            </TabsList>
+              </TabsList>
+              
+              <Button
+                onClick={handleSmartModeSwitch}
+                variant="outline"
+                size="sm"
+                className="ml-2 flex items-center gap-1"
+                title="Smart mode recommendation"
+              >
+                <Zap className="h-3 w-3" />
+                Smart
+              </Button>
+            </div>
           </div>
 
           {/* Self Conversation Mode */}
