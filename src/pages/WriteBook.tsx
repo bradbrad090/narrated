@@ -12,6 +12,7 @@ import { VoiceRecorder } from "@/components/VoiceRecorder";
 import { ConversationInterface } from "@/components/ConversationInterface";
 import { ConversationContext } from "@/components/ConversationContext";
 import { ProfileSetup } from "@/components/ProfileSetup";
+import { DeleteChapterDialog } from "@/components/DeleteChapterDialog";
 
 import PaymentButton from "@/components/PaymentButton";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
@@ -49,6 +50,9 @@ const WriteBook = () => {
   const [bookProfile, setBookProfile] = useState<any>(null);
   const [isBookTierCollapsed, setIsBookTierCollapsed] = useState(true);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [chapterToDelete, setChapterToDelete] = useState<Chapter | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -365,7 +369,7 @@ const WriteBook = () => {
     createNewChapter(user.id, nextChapterNumber, `Chapter ${nextChapterNumber}`);
   };
 
-  const handleDeleteChapter = async (chapterId: string) => {
+  const handleDeleteChapter = (chapter: Chapter) => {
     if (chapters.length <= 1) {
       toast({
         title: "Cannot delete",
@@ -375,6 +379,13 @@ const WriteBook = () => {
       return;
     }
 
+    setChapterToDelete(chapter);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDeleteChapter = async (chapterId: string) => {
+    setIsDeleting(true);
+    
     try {
       const { error } = await supabase
         .from('chapters')
@@ -395,12 +406,17 @@ const WriteBook = () => {
         title: "Chapter deleted",
         description: "The chapter has been removed from your book.",
       });
+      
+      setShowDeleteDialog(false);
+      setChapterToDelete(null);
     } catch (error: any) {
       toast({
         title: "Error deleting chapter",
         description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -656,10 +672,10 @@ const WriteBook = () => {
                                 variant="ghost"
                                 size="sm"
                                 className="opacity-0 group-hover:opacity-100 transition-opacity"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteChapter(chapter.id);
-                                }}
+                             onClick={(e) => {
+                               e.stopPropagation();
+                               handleDeleteChapter(chapter);
+                             }}
                               >
                                 <Trash2 className="h-3 w-3" />
                               </Button>
@@ -931,10 +947,10 @@ const WriteBook = () => {
                             variant="ghost"
                             size="sm"
                             className="opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteChapter(chapter.id);
-                            }}
+                           onClick={(e) => {
+                             e.stopPropagation();
+                             handleDeleteChapter(chapter);
+                           }}
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>
@@ -1123,6 +1139,15 @@ const WriteBook = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Chapter Dialog */}
+      <DeleteChapterDialog
+        isOpen={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        chapter={chapterToDelete}
+        onConfirmDelete={confirmDeleteChapter}
+        isDeleting={isDeleting}
+      />
 
     </div>
     </>
