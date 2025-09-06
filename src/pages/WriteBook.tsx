@@ -323,7 +323,7 @@ const WriteBook = () => {
     }
   };
 
-  const createNewChapter = async (userId: string, chapterNumber: number, title: string) => {
+  const createNewChapter = async (userId: string, chapterNumber: number, title: string, content: string = "") => {
     try {
       const { data, error } = await supabase
         .from('chapters')
@@ -332,7 +332,7 @@ const WriteBook = () => {
           user_id: userId,
           chapter_number: chapterNumber,
           title: title,
-          content: ""
+          content: content
         })
         .select()
         .single();
@@ -354,6 +354,69 @@ const WriteBook = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const restoreDefaultChapter = async (chapterNumber: number) => {
+    if (!user) return;
+    
+    const defaultTitles = [
+      "Chapter 1: Before My Birth",
+      "Chapter 2: Birth and Infancy",
+      "Chapter 3: Toddler Years", 
+      "Chapter 4: Starting School",
+      "Chapter 5: Elementary School",
+      "Chapter 6: Junior High",
+      "Chapter 7: High School",
+      "Chapter 8: High School Graduation",
+      "Chapter 9: College Years",
+      "Chapter 10: Entering the Workforce",
+      "Chapter 11: Marriage and Family",
+      "Chapter 12: Mid-Career Years",
+      "Chapter 13: Empty Nest Phase",
+      "Chapter 14: Approaching Retirement"
+    ];
+
+    const defaultDescriptions = [
+      "", // Chapter 1: Before My Birth
+      "", // Chapter 2: Birth and Infancy
+      "", // Chapter 3: Toddler Years
+      "", // Chapter 4: Starting School
+      "", // Chapter 5: Elementary School
+      "", // Chapter 6: Junior High
+      "", // Chapter 7: High School
+      "", // Chapter 8: High School Graduation
+      "", // Chapter 9: College Years
+      "", // Chapter 10: Entering the Workforce
+      "Meeting a partner, wedding milestones, starting a home, and the joys of parenthood.", // Chapter 11
+      "Professional peaks, promotions, work-life balance struggles, and overcoming mid-career hurdles.", // Chapter 12
+      "Watching kids leave home, reevaluating relationships, and personal reinventions in later adulthood.", // Chapter 13
+      "Winding down work, new hobbies, health reflections, and embracing post-career freedom amid global changes." // Chapter 14
+    ];
+
+    const title = defaultTitles[chapterNumber - 1];
+    const content = defaultDescriptions[chapterNumber - 1];
+    
+    if (!title) {
+      toast({
+        title: "Invalid chapter number",
+        description: "Chapter number must be between 1 and 14.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if chapter already exists
+    const existingChapter = chapters.find(ch => ch.chapter_number === chapterNumber);
+    if (existingChapter) {
+      toast({
+        title: "Chapter already exists",
+        description: `Chapter ${chapterNumber} already exists in your book.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    await createNewChapter(user.id, chapterNumber, title, content);
   };
 
   const handleAddChapter = () => {
@@ -949,14 +1012,28 @@ const WriteBook = () => {
                     </div>
                   ))}
                   
-                  <Button
-                    variant="outline"
-                    className="w-full mt-4"
-                    onClick={handleAddChapter}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Chapter
-                  </Button>
+                   <div className="space-y-2">
+                     <Button
+                       variant="outline"
+                       className="w-full"
+                       onClick={handleAddChapter}
+                     >
+                       <Plus className="h-4 w-4 mr-2" />
+                       Add Chapter
+                     </Button>
+                     
+                     {/* Restore Chapter 1 button if it's missing */}
+                     {!chapters.find(ch => ch.chapter_number === 1) && (
+                       <Button
+                         variant="secondary"
+                         className="w-full"
+                         onClick={() => restoreDefaultChapter(1)}
+                       >
+                         <FileText className="h-4 w-4 mr-2" />
+                         Restore Chapter 1
+                       </Button>
+                     )}
+                   </div>
                   </div>
                 </div>
               </div>
