@@ -15,19 +15,16 @@ const getAllowedOrigin = (request: Request) => {
   return allowedOrigins.includes(origin || '') ? origin : allowedOrigins[0];
 };
 
-const getCorsHeaders = (request: Request) => ({
-  'Access-Control-Allow-Origin': getAllowedOrigin(request),
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Credentials': 'true',
-});
+};
 
 const handler = async (request: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (request.method === 'OPTIONS') {
-    return new Response(null, { headers: getCorsHeaders(request) });
+    return new Response(null, { headers: corsHeaders });
   }
-
-  const corsHeaders = getCorsHeaders(request);
 
   if (request.method !== "POST") {
     return new Response("Method Not Allowed", { 
@@ -190,14 +187,14 @@ async function startConversationSession(supabaseClient: any, params: any) {
 
   console.log('Conversation session started:', sessionId);
 
-  return new Response(JSON.stringify({
-    sessionId,
-    response: aiResponse,
-    conversationType,
-    goals: conversationGoals
-  }), {
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-  });
+      return new Response(JSON.stringify({
+        sessionId,
+        response: aiResponse,
+        conversationType,
+        goals: conversationGoals
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
 }
 
 async function processConversationMessage(supabaseClient: any, params: any) {

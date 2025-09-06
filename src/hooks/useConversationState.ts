@@ -149,12 +149,16 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
   ) => {
     if (state.ui.isLoading) return null;
 
+    console.log('Starting conversation:', { conversationType, conversationMedium, userId, bookId, chapterId }); // Debug log
+
     dispatch(conversationActions.setLoading(true));
     dispatch(conversationActions.setError(null));
 
     try {
       // Load context first if not available
       const conversationContext = await loadConversationContext();
+      
+      console.log('Context loaded:', conversationContext); // Debug log
       
       // Call the edge function to start conversation with AI greeting
       const { data, error } = await supabase.functions.invoke('ai-conversation-realtime', {
@@ -168,6 +172,8 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
           styleInstructions: 'Be warm, welcoming, and start with an engaging opening question that helps the person begin sharing their story.'
         }
       });
+
+      console.log('Edge function response:', { data, error }); // Debug log
 
       if (error) throw error;
 
@@ -191,6 +197,7 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
       dispatch(conversationActions.setCurrentSession(session));
       return session;
     } catch (error) {
+      console.error('Error in startConversation:', error); // Debug log
       handleError(error, 'starting conversation');
       return null;
     } finally {
