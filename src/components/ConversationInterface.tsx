@@ -7,7 +7,7 @@ import { SelfConversationMode } from '@/components/conversation/SelfConversation
 import { TextAssistedMode } from '@/components/conversation/TextAssistedMode';
 import { VoiceConversationMode } from '@/components/conversation/VoiceConversationMode';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { Sparkles, User, Bot, RotateCcw, Zap } from 'lucide-react';
+import { Sparkles, User, Bot, RotateCcw } from 'lucide-react';
 import { useConversationState } from '@/hooks/useConversationState';
 import { useToast } from '@/hooks/use-toast';
 import { ConversationSession } from '@/types/conversation';
@@ -48,7 +48,6 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     chapterId
   });
 
-  // Smart mode recommendation based on conversation history
   const getRecommendedMode = () => {
     if (!conversationHistory.length) return 'self';
     
@@ -91,15 +90,6 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     }
   };
 
-  const handleSmartModeSwitch = () => {
-    const recommendedMode = getRecommendedMode();
-    setSelectedMode(recommendedMode);
-    toast({
-      title: "Smart Mode",
-      description: `Switched to ${recommendedMode} based on your conversation patterns`,
-    });
-  };
-
 
   return (
     <ErrorBoundary>
@@ -139,8 +129,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
         {/* Tabbed Interface for Starting Conversations */}
         <Tabs value={selectedMode} onValueChange={setSelectedMode} className="w-full">
           <div className="w-full border-b">
-            <div className="flex items-center justify-between mb-2">
-              <TabsList className="grid grid-cols-3 flex-1 max-w-md">
+            <TabsList className="grid w-full grid-cols-3">
               {isFeatureEnabled('selfConversations') && (
                 <TabsTrigger value="self" className="flex items-center gap-2">
                   <User className="h-4 w-4" />
@@ -159,19 +148,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                   Voice-to-Voice AI
                 </TabsTrigger>
               )}
-              </TabsList>
-              
-              <Button
-                onClick={handleSmartModeSwitch}
-                variant="outline"
-                size="sm"
-                className="ml-2 flex items-center gap-1"
-                title="Smart mode recommendation"
-              >
-                <Zap className="h-3 w-3" />
-                Smart
-              </Button>
-            </div>
+            </TabsList>
           </div>
 
           {/* Self Conversation Mode */}
