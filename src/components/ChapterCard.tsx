@@ -200,18 +200,6 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
             <span>{getLastModified()}</span>
           </div>
         </div>
-
-        {/* Progress Bar */}
-        <div className="mt-3 w-full bg-muted rounded-full h-1">
-          <div 
-            className={`h-1 rounded-full transition-all duration-300 ${
-              wordCount === 0 ? 'w-0' :
-              wordCount < 100 ? 'w-1/4 bg-yellow-400' :
-              wordCount < 500 ? 'w-1/2 bg-blue-400' :
-              'w-full bg-green-400'
-            }`}
-          />
-        </div>
       </div>
     </div>
   );
