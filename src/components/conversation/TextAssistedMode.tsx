@@ -74,7 +74,7 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
   };
 
   const handleStartConversation = () => {
-    startConversation('text', 'interview', CONVERSATION_CONFIG.STYLE_PROMPTS.CONCISE);
+    startConversation('interview');
   };
 
   const formatMessage = (content: string) => {

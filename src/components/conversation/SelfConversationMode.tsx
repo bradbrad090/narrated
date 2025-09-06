@@ -33,9 +33,7 @@ export const SelfConversationMode: React.FC<SelfConversationModeProps> = ({
 
   const {
     ui: { isLoading },
-    startConversation,
-    sendMessage,
-    loadConversationHistory
+    startSelfConversation
   } = useConversationState({
     userId,
     bookId,
@@ -52,23 +50,16 @@ export const SelfConversationMode: React.FC<SelfConversationModeProps> = ({
     }
 
     try {
-      // Start a self conversation session  
-      const session = await startConversation('self', 'interview');
+      // Use the dedicated self conversation function
+      await startSelfConversation(currentMessage.trim());
       
-      if (session) {
-        // Send the message to save it
-        await sendMessage(currentMessage.trim());
-        
-        // Refresh conversation history
-        await loadConversationHistory();
-        
-        // Notify parent component
-        if (onConversationSaved) {
-          onConversationSaved();
-        }
-        
-        setCurrentMessage('');
-        textareaRef.current?.focus();
+      // Clear the input
+      setCurrentMessage('');
+      textareaRef.current?.focus();
+      
+      // Notify parent component
+      if (onConversationSaved) {
+        onConversationSaved();
       }
     } catch (error: any) {
       console.error('Error saving self conversation:', error);

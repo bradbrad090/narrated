@@ -1,7 +1,7 @@
 // Comprehensive TypeScript interfaces for the conversation system
 
-export type ConversationType = 'interview';
-export type ConversationMedium = 'text' | 'voice' | 'self';
+export type ConversationType = 'interview' | 'self';
+export type ConversationMedium = 'text' | 'voice';
 
 export interface ConversationMessage {
   role: 'user' | 'assistant';
