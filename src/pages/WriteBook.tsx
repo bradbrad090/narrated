@@ -20,7 +20,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
+import { DndContext, closestCenter, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { updateChapterOrder } from '@/services/chapterService';
 
@@ -56,6 +56,7 @@ const WriteBook = () => {
   const [chapterToDelete, setChapterToDelete] = useState<Chapter | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [activeChapterId, setActiveChapterId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -616,8 +617,14 @@ const WriteBook = () => {
     }
   };
 
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveChapterId(event.active.id as string);
+  };
+
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
+    
+    setActiveChapterId(null);
     
     if (!over || active.id === over.id) return;
     
@@ -969,6 +976,7 @@ const WriteBook = () => {
                    
                    <DndContext 
                      collisionDetection={closestCenter}
+                     onDragStart={handleDragStart}
                      onDragEnd={handleDragEnd}
                    >
                      <SortableContext 
@@ -986,6 +994,19 @@ const WriteBook = () => {
                          />
                        ))}
                      </SortableContext>
+                     
+                     <DragOverlay>
+                       {activeChapterId ? (
+                         <div className="p-4 rounded-lg border bg-background shadow-xl opacity-90 transform rotate-3">
+                           <div className="flex items-center gap-2">
+                             <div className="h-3 w-3 rounded-full bg-primary/20" />
+                             <h3 className="font-medium text-sm">
+                               {chapters.find(ch => ch.id === activeChapterId)?.title}
+                             </h3>
+                           </div>
+                         </div>
+                       ) : null}
+                     </DragOverlay>
                    </DndContext>
                   
                    <div className="space-y-2 mt-4">
