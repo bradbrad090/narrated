@@ -12,7 +12,6 @@ import { useOptimizedConversationList, useConversationStats } from '@/hooks/useP
 
 interface SavedConversationsProps {
   conversations: ConversationSession[];
-  onResumeConversation?: (session: ConversationSession) => void;
   onViewConversation?: (session: ConversationSession) => void;
   onDeleteConversation?: (session: ConversationSession) => void;
   deletingSessionIds?: Set<string>;
@@ -21,7 +20,6 @@ interface SavedConversationsProps {
 
 export const SavedConversations: React.FC<SavedConversationsProps> = ({
   conversations,
-  onResumeConversation,
   onViewConversation,
   onDeleteConversation,
   deletingSessionIds = new Set(),
@@ -40,10 +38,6 @@ export const SavedConversations: React.FC<SavedConversationsProps> = ({
   const conversationStats = useConversationStats(conversations);
 
   // Memoize handlers to prevent unnecessary re-renders
-  const handleResumeConversation = useCallback((session: ConversationSession) => {
-    onResumeConversation?.(session);
-  }, [onResumeConversation]);
-
   const handleViewConversation = useCallback((session: ConversationSession) => {
     onViewConversation?.(session);
   }, [onViewConversation]);
@@ -135,7 +129,6 @@ export const SavedConversations: React.FC<SavedConversationsProps> = ({
         ) : filteredConversations.length > 20 ? (
           <VirtualizedConversationList
             conversations={filteredConversations}
-            onResumeConversation={handleResumeConversation}
             onViewConversation={handleViewConversation}
             onDeleteConversation={handleDeleteConversation}
             deletingSessionIds={deletingSessionIds}
@@ -148,7 +141,6 @@ export const SavedConversations: React.FC<SavedConversationsProps> = ({
                 <ConversationCard
                   key={session.sessionId}
                   session={session}
-                  onResume={handleResumeConversation}
                   onView={handleViewConversation}
                   onDelete={handleDeleteConversation}
                   isDeleting={deletingSessionIds.has(session.sessionId)}

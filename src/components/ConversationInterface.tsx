@@ -7,7 +7,7 @@ import { SelfConversationMode } from '@/components/conversation/SelfConversation
 import { TextAssistedMode } from '@/components/conversation/TextAssistedMode';
 import { VoiceConversationMode } from '@/components/conversation/VoiceConversationMode';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { Sparkles, User, Bot, RotateCcw } from 'lucide-react';
+import { Sparkles, User, Bot } from 'lucide-react';
 import { useConversationState } from '@/hooks/useConversationState';
 import { useToast } from '@/hooks/use-toast';
 import { ConversationSession } from '@/types/conversation';
@@ -32,16 +32,13 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   onContentGenerated
 }) => {
   const [selectedMode, setSelectedMode] = useState('self');
-  const [showQuickResume, setShowQuickResume] = useState(false);
   const { toast } = useToast();
 
   const {
     history: conversationHistory,
     context,
     currentSession,
-    resumeConversation,
     loadConversationHistory,
-    hasActiveSession,
     deleteConversation,
     deletingSessionIds
   } = useConversationState({
@@ -64,69 +61,13 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     return 'self';
   };
 
-  // Quick resume feature
-  const getResumableSession = (): ConversationSession | null => {
-    return conversationHistory.find(session => 
-      !session.isSelfConversation && 
-      session.conversationMedium === 'text' &&
-      session.messages.length > 1 && 
-      session.messages.length < 20 // Not too long
-    ) || null;
-  };
-
-  useEffect(() => {
-    const resumableSession = getResumableSession();
-    setShowQuickResume(!!resumableSession && !hasActiveSession);
-  }, [conversationHistory, hasActiveSession]);
-
-  const handleQuickResume = () => {
-    const resumableSession = getResumableSession();
-    if (resumableSession) {
-      resumeConversation(resumableSession);
-      setSelectedMode('text-assisted');
-      setShowQuickResume(false);
-      toast({
-        title: CONVERSATION_CONFIG.MESSAGES.CONVERSATION_RESUMED,
-        description: "Continuing where you left off",
-      });
-    }
-  };
+  // Quick resume feature removed - users can only view and delete conversations
 
 
   return (
     <ErrorBoundary>
       <div className={`w-full ${className}`}>
-        {/* Quick Actions */}
-        {showQuickResume && (
-          <div className="mb-4 p-3 bg-muted/50 rounded-lg border border-dashed">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <RotateCcw className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Continue your conversation</span>
-                <Badge variant="secondary" className="text-xs">
-                  {getResumableSession()?.messages.length || 0} messages
-                </Badge>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleQuickResume}
-                  size="sm"
-                  className="h-7"
-                >
-                  Resume
-                </Button>
-                <Button
-                  onClick={() => setShowQuickResume(false)}
-                  variant="outline"
-                  size="sm"
-                  className="h-7"
-                >
-                  Dismiss
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Quick Actions removed - no resume functionality */}
 
         {/* Tabbed Interface for Starting Conversations */}
         <Tabs value={selectedMode} onValueChange={setSelectedMode} className="w-full">
@@ -204,27 +145,11 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           <ErrorBoundary>
             <SavedConversations 
               conversations={conversationHistory}
-              onResumeConversation={(session: ConversationSession) => {
-                resumeConversation(session);
-                // Auto-switch to the appropriate tab based on conversation type
-                if (session.isSelfConversation) {
-                  setSelectedMode('self');
-                } else if (session.conversationMedium === 'text') {
-                  setSelectedMode('text-assisted');
-                } else if (session.conversationMedium === 'voice') {
-                  setSelectedMode('voice');
-                }
-              }}
               onViewConversation={(session: ConversationSession) => {
-                if (!session.isSelfConversation && session.conversationMedium === 'text') {
-                  resumeConversation(session);
-                  setSelectedMode('text-assisted');
-                } else {
-                  toast({
-                    title: "View Conversation",
-                    description: "Detailed conversation viewer coming soon!",
-                  });
-                }
+                toast({
+                  title: "View Conversation",
+                  description: "Detailed conversation viewer coming soon!",
+                });
               }}
               onDeleteConversation={deleteConversation}
               deletingSessionIds={deletingSessionIds}

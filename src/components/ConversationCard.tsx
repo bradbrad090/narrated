@@ -9,13 +9,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MessageCircle, Mic, User, Bot, Calendar, MessageSquare, MoreVertical, Trash2, Play, Eye } from 'lucide-react';
+import { MessageCircle, Mic, User, Bot, Calendar, MessageSquare, MoreVertical, Trash2, Eye } from 'lucide-react';
 import { ConversationSession } from '@/types/conversation';
 import { DeleteConversationDialog } from './DeleteConversationDialog';
 
 interface ConversationCardProps {
   session: ConversationSession;
-  onResume?: (session: ConversationSession) => void;
   onView?: (session: ConversationSession) => void;
   onDelete?: (session: ConversationSession) => void;
   isDeleting?: boolean;
@@ -23,7 +22,6 @@ interface ConversationCardProps {
 
 export const ConversationCard: React.FC<ConversationCardProps> = ({
   session,
-  onResume,
   onView,
   onDelete,
   isDeleting = false
@@ -127,30 +125,17 @@ export const ConversationCard: React.FC<ConversationCardProps> = ({
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-            {/* Primary Action Button */}
-            {session.isSelfConversation || session.conversationMedium === 'voice' ? (
-              <Button
-                onClick={() => onView?.(session)}
-                size="sm"
-                variant="outline"
-                className="text-xs h-7"
-                disabled={isDeleting}
-              >
-                <Eye className="h-3 w-3 mr-1" />
-                View
-              </Button>
-            ) : (
-              <Button
-                onClick={() => onResume?.(session)}
-                size="sm"
-                variant="outline"
-                className="text-xs h-7"
-                disabled={isDeleting}
-              >
-                <Play className="h-3 w-3 mr-1" />
-                Resume
-              </Button>
-            )}
+            {/* Primary Action Button - Always View */}
+            <Button
+              onClick={() => onView?.(session)}
+              size="sm"
+              variant="outline"
+              className="text-xs h-7"
+              disabled={isDeleting}
+            >
+              <Eye className="h-3 w-3 mr-1" />
+              View
+            </Button>
 
             {/* More Actions Dropdown */}
             <DropdownMenu>
@@ -166,18 +151,11 @@ export const ConversationCard: React.FC<ConversationCardProps> = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                {/* Alternative actions */}
-                {session.isSelfConversation || session.conversationMedium === 'voice' ? (
-                  <DropdownMenuItem onClick={() => onView?.(session)}>
-                    <Eye className="h-4 w-4 mr-2" />
-                    View Conversation
-                  </DropdownMenuItem>
-                ) : (
-                  <DropdownMenuItem onClick={() => onResume?.(session)}>
-                    <Play className="h-4 w-4 mr-2" />
-                    Resume Conversation
-                  </DropdownMenuItem>
-                )}
+                {/* View action in dropdown */}
+                <DropdownMenuItem onClick={() => onView?.(session)}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  View Conversation
+                </DropdownMenuItem>
                 
                 <DropdownMenuSeparator />
                 

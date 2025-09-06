@@ -38,7 +38,6 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
     startConversation,
     sendMessage,
     endConversation,
-    resumeConversation,
     conversationInsights,
     continuationSuggestions,
     isHealthyConversation
@@ -104,12 +103,7 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
     setShowSuggestions(false);
   };
 
-  const handleResumeOptimized = () => {
-    // Smart continuation: if we have a recent session, resume it
-    if (currentSession) {
-      resumeConversation(currentSession);
-    }
-  };
+  // Resume functionality removed - users can only view and delete conversations
 
   const formatMessage = (content: string | undefined | null) => {
     // Handle undefined, null, or empty content
