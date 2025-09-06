@@ -111,7 +111,12 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
     }
   };
 
-  const formatMessage = (content: string) => {
+  const formatMessage = (content: string | undefined | null) => {
+    // Handle undefined, null, or empty content
+    if (!content || typeof content !== 'string') {
+      return <span className="text-muted-foreground italic">No content</span>;
+    }
+    
     return content.split('\n').map((line, index) => (
       <React.Fragment key={index}>
         {line}
@@ -173,27 +178,35 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
               className={`h-[${CONVERSATION_CONFIG.CONVERSATION_SCROLL_HEIGHT}] p-4 border rounded-lg`}
             >
               <div className="space-y-4">
-                {currentSession.messages.map((message, index) => (
-                  <div
-                    key={index}
-                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
+                {currentSession.messages?.map((message, index) => {
+                  // Safety check for message structure
+                  if (!message || typeof message !== 'object') {
+                    console.warn('Invalid message structure at index', index, message);
+                    return null;
+                  }
+                  
+                  return (
                     <div
-                      className={`max-w-[80%] p-3 rounded-lg ${
-                        message.role === 'user'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted'
-                      }`}
+                      key={index}
+                      className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
-                      <div className="text-sm">
-                        {formatMessage(message.content)}
-                      </div>
-                      <div className="text-xs opacity-70 mt-1">
-                        {new Date(message.timestamp).toLocaleTimeString()}
+                      <div
+                        className={`max-w-[80%] p-3 rounded-lg ${
+                          message.role === 'user'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted'
+                        }`}
+                      >
+                        <div className="text-sm">
+                          {formatMessage(message.content)}
+                        </div>
+                        <div className="text-xs opacity-70 mt-1">
+                          {message.timestamp ? new Date(message.timestamp).toLocaleTimeString() : 'No timestamp'}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 {isTyping && (
                   <div className="flex justify-start">
                     <div className="bg-muted p-3 rounded-lg">
