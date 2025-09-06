@@ -134,7 +134,7 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
     }
   }, [userId, bookId, chapterId, handleError]);
 
-  // Start a new conversation (simplified)
+  // Start a new conversation with AI greeting
   const startConversation = useCallback(async (
     conversationType: ConversationType,
     conversationMedium: ConversationMedium = 'text'
@@ -145,7 +145,41 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
     dispatch(conversationActions.setError(null));
 
     try {
-      const session = await startTextConversation(userId, bookId, chapterId, conversationType);
+      // Load context first if not available
+      const conversationContext = await loadConversationContext();
+      
+      // Call the edge function to start conversation with AI greeting
+      const { data, error } = await supabase.functions.invoke('ai-conversation-realtime', {
+        body: {
+          action: 'start_session',
+          userId,
+          bookId,
+          chapterId,
+          conversationType,
+          context: conversationContext,
+          styleInstructions: 'Be warm, welcoming, and start with an engaging opening question that helps the person begin sharing their story.'
+        }
+      });
+
+      if (error) throw error;
+
+      const session: ConversationSession = {
+        sessionId: data.sessionId,
+        conversationType,
+        conversationMedium,
+        messages: [
+          {
+            role: 'assistant',
+            content: data.response,
+            timestamp: new Date().toISOString()
+          }
+        ],
+        context: conversationContext,
+        goals: data.goals,
+        isSelfConversation: false,
+        createdAt: new Date().toISOString()
+      };
+
       dispatch(conversationActions.setCurrentSession(session));
       return session;
     } catch (error) {
@@ -154,7 +188,7 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
     } finally {
       dispatch(conversationActions.setLoading(false));
     }
-  }, [state.ui.isLoading, userId, bookId, chapterId, startTextConversation, handleError]);
+  }, [state.ui.isLoading, userId, bookId, chapterId, loadConversationContext, handleError]);
 
   // Send message in current conversation
   const sendMessage = useCallback(async (message: string) => {
@@ -163,16 +197,56 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
     try {
       dispatch(conversationActions.setTyping(true));
       
-      const updatedSession = await sendTextMessage(state.currentSession, message, userId);
-      dispatch(conversationActions.updateSession(updatedSession));
+      // Add user message to current session immediately for better UX
+      const userMessage: ConversationMessage = {
+        role: 'user',
+        content: message,
+        timestamp: new Date().toISOString()
+      };
+
+      const updatedMessages = [...state.currentSession.messages, userMessage];
+      const sessionWithUserMessage = {
+        ...state.currentSession,
+        messages: updatedMessages
+      };
       
-      return updatedSession;
+      dispatch(conversationActions.updateSession(sessionWithUserMessage));
+
+      // Get AI response using the edge function
+      const { data, error } = await supabase.functions.invoke('ai-conversation-realtime', {
+        body: {
+          action: 'send_message',
+          sessionId: state.currentSession.sessionId,
+          message,
+          userId,
+          context: state.context,
+          conversationType: state.currentSession.conversationType,
+          styleInstructions: 'Continue the interview naturally, asking follow-up questions that help the person share more details about their experiences.'
+        }
+      });
+
+      if (error) throw error;
+
+      // Add AI response
+      const aiMessage: ConversationMessage = {
+        role: 'assistant',
+        content: data.response,
+        timestamp: new Date().toISOString()
+      };
+
+      const finalSession = {
+        ...sessionWithUserMessage,
+        messages: [...updatedMessages, aiMessage]
+      };
+
+      dispatch(conversationActions.updateSession(finalSession));
+      return finalSession;
     } catch (error) {
       handleError(error, 'sending message');
     } finally {
       dispatch(conversationActions.setTyping(false));
     }
-  }, [state.currentSession, state.ui.isTyping, sendTextMessage, userId, handleError]);
+  }, [state.currentSession, state.ui.isTyping, state.context, userId, handleError]);
 
   // Start self conversation
   const startSelfConversationMode = useCallback(async (message: string) => {

@@ -134,7 +134,9 @@ async function startConversationSession(supabaseClient: any, params: any) {
 
   // Generate initial AI greeting based on context and type
   const initialPrompt = buildInitialPrompt(context, conversationType, styleInstructions);
+  console.log('Generated initial prompt:', initialPrompt);
   const aiResponse = await callOpenAI(initialPrompt, []);
+  console.log('AI initial response:', aiResponse);
 
   // Update chat history with initial message
   const initialMessages = [
