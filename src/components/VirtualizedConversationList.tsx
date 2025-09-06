@@ -5,7 +5,6 @@ import { ConversationSession } from '@/types/conversation';
 
 interface VirtualizedConversationListProps {
   conversations: ConversationSession[];
-  onViewConversation?: (session: ConversationSession) => void;
   onDeleteConversation?: (session: ConversationSession) => void;
   deletingSessionIds?: Set<string>;
   height: number;
@@ -17,7 +16,6 @@ interface ListItemProps {
   style: React.CSSProperties;
   data: {
     conversations: ConversationSession[];
-    onViewConversation?: (session: ConversationSession) => void;
     onDeleteConversation?: (session: ConversationSession) => void;
     deletingSessionIds?: Set<string>;
   };
@@ -26,7 +24,6 @@ interface ListItemProps {
 const ListItem = memo(({ index, style, data }: ListItemProps) => {
   const { 
     conversations, 
-    onViewConversation, 
     onDeleteConversation,
     deletingSessionIds = new Set()
   } = data;
@@ -40,7 +37,6 @@ const ListItem = memo(({ index, style, data }: ListItemProps) => {
     <div style={style} className="px-2 py-1">
       <ConversationCard
         session={session}
-        onView={onViewConversation}
         onDelete={onDeleteConversation}
         isDeleting={deletingSessionIds.has(session.sessionId)}
       />
@@ -52,7 +48,6 @@ ListItem.displayName = 'ListItem';
 
 export const VirtualizedConversationList = memo<VirtualizedConversationListProps>(({
   conversations,
-  onViewConversation,
   onDeleteConversation,
   deletingSessionIds = new Set(),
   height,
@@ -60,10 +55,9 @@ export const VirtualizedConversationList = memo<VirtualizedConversationListProps
 }) => {
   const itemData = useMemo(() => ({
     conversations,
-    onViewConversation,
     onDeleteConversation,
     deletingSessionIds
-  }), [conversations, onViewConversation, onDeleteConversation, deletingSessionIds]);
+  }), [conversations, onDeleteConversation, deletingSessionIds]);
 
   if (conversations.length === 0) {
     return (

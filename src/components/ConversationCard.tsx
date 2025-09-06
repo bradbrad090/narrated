@@ -2,27 +2,18 @@ import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MessageCircle, Mic, User, Bot, Calendar, MessageSquare, MoreVertical, Trash2, Eye } from 'lucide-react';
+import { MessageCircle, Mic, User, Bot, Calendar, MessageSquare, Trash2 } from 'lucide-react';
 import { ConversationSession } from '@/types/conversation';
 import { DeleteConversationDialog } from './DeleteConversationDialog';
 
 interface ConversationCardProps {
   session: ConversationSession;
-  onView?: (session: ConversationSession) => void;
   onDelete?: (session: ConversationSession) => void;
   isDeleting?: boolean;
 }
 
 export const ConversationCard: React.FC<ConversationCardProps> = ({
   session,
-  onView,
   onDelete,
   isDeleting = false
 }) => {
@@ -111,7 +102,7 @@ export const ConversationCard: React.FC<ConversationCardProps> = ({
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
-                {conversationDate.toLocaleDateString()}
+                Created {conversationDate.toLocaleDateString()} {conversationDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </div>
               <div className="flex items-center gap-1">
                 <MessageSquare className="h-3 w-3" />
@@ -125,50 +116,17 @@ export const ConversationCard: React.FC<ConversationCardProps> = ({
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-            {/* Primary Action Button - Always View */}
+            {/* Delete Button */}
             <Button
-              onClick={() => onView?.(session)}
+              onClick={handleDeleteClick}
               size="sm"
               variant="outline"
-              className="text-xs h-7"
+              className="text-xs h-7 text-destructive hover:text-destructive"
               disabled={isDeleting}
             >
-              <Eye className="h-3 w-3 mr-1" />
-              View
+              <Trash2 className="h-3 w-3 mr-1" />
+              Delete
             </Button>
-
-            {/* More Actions Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 w-7 p-0"
-                  disabled={isDeleting}
-                >
-                  <MoreVertical className="h-3 w-3" />
-                  <span className="sr-only">More actions</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                {/* View action in dropdown */}
-                <DropdownMenuItem onClick={() => onView?.(session)}>
-                  <Eye className="h-4 w-4 mr-2" />
-                  View Conversation
-                </DropdownMenuItem>
-                
-                <DropdownMenuSeparator />
-                
-                {/* Delete option */}
-                <DropdownMenuItem
-                  onClick={handleDeleteClick}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Conversation
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
 

@@ -145,12 +145,6 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           <ErrorBoundary>
             <SavedConversations 
               conversations={conversationHistory}
-              onViewConversation={(session: ConversationSession) => {
-                toast({
-                  title: "View Conversation",
-                  description: "Detailed conversation viewer coming soon!",
-                });
-              }}
               onDeleteConversation={deleteConversation}
               deletingSessionIds={deletingSessionIds}
               className="mt-6"

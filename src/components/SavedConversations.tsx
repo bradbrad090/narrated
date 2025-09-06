@@ -12,7 +12,6 @@ import { useOptimizedConversationList, useConversationStats } from '@/hooks/useP
 
 interface SavedConversationsProps {
   conversations: ConversationSession[];
-  onViewConversation?: (session: ConversationSession) => void;
   onDeleteConversation?: (session: ConversationSession) => void;
   deletingSessionIds?: Set<string>;
   className?: string;
@@ -20,7 +19,6 @@ interface SavedConversationsProps {
 
 export const SavedConversations: React.FC<SavedConversationsProps> = ({
   conversations,
-  onViewConversation,
   onDeleteConversation,
   deletingSessionIds = new Set(),
   className = ""
@@ -38,10 +36,6 @@ export const SavedConversations: React.FC<SavedConversationsProps> = ({
   const conversationStats = useConversationStats(conversations);
 
   // Memoize handlers to prevent unnecessary re-renders
-  const handleViewConversation = useCallback((session: ConversationSession) => {
-    onViewConversation?.(session);
-  }, [onViewConversation]);
-
   const handleDeleteConversation = useCallback((session: ConversationSession) => {
     onDeleteConversation?.(session);
   }, [onDeleteConversation]);
@@ -129,7 +123,6 @@ export const SavedConversations: React.FC<SavedConversationsProps> = ({
         ) : filteredConversations.length > 20 ? (
           <VirtualizedConversationList
             conversations={filteredConversations}
-            onViewConversation={handleViewConversation}
             onDeleteConversation={handleDeleteConversation}
             deletingSessionIds={deletingSessionIds}
             height={400}
@@ -141,7 +134,6 @@ export const SavedConversations: React.FC<SavedConversationsProps> = ({
                 <ConversationCard
                   key={session.sessionId}
                   session={session}
-                  onView={handleViewConversation}
                   onDelete={handleDeleteConversation}
                   isDeleting={deletingSessionIds.has(session.sessionId)}
                 />
