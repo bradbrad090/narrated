@@ -7,12 +7,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Book, LogOut, Save, Sparkles, ArrowLeft, Plus, FileText, Trash2, Edit2, Type, Menu, Eye, EyeOff, ChevronDown, ChevronUp } from "lucide-react";
+import { Book, LogOut, Save, Sparkles, ArrowLeft, Plus, FileText, Trash2, Edit2, Type, Menu, Eye, EyeOff, ChevronDown, ChevronUp, Clock, CheckCircle2, Circle, MoreVertical, GripVertical } from "lucide-react";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
 import { ConversationInterface } from "@/components/ConversationInterface";
 import { ConversationContext } from "@/components/ConversationContext";
 import { ProfileSetup } from "@/components/ProfileSetup";
 import { DeleteChapterDialog } from "@/components/DeleteChapterDialog";
+import { ChapterCard } from "@/components/ChapterCard";
+import { ChapterStats } from "@/components/ChapterStats";
 
 import PaymentButton from "@/components/PaymentButton";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
@@ -667,19 +669,19 @@ const WriteBook = () => {
                               <FileText className="h-4 w-4 flex-shrink-0" />
                               <span className="font-medium text-sm truncate">{chapter.title}</span>
                             </div>
-                            {chapters.length > 1 && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="opacity-0 group-hover:opacity-100 transition-opacity"
-                             onClick={(e) => {
-                               e.stopPropagation();
-                               handleDeleteChapter(chapter);
-                             }}
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            )}
+                           {chapters.length > 1 && (
+                             <Button
+                               variant="ghost"
+                               size="sm"
+                               className="opacity-0 group-hover:opacity-100 transition-opacity"
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 handleDeleteChapter(chapter);
+                               }}
+                             >
+                               <Trash2 className="h-3 w-3" />
+                             </Button>
+                           )}
                           </div>
                           <p className="text-xs text-muted-foreground mt-1">
                             {(() => {
@@ -881,21 +883,18 @@ const WriteBook = () => {
                      />
                    )}
 
-                   {/* Payment Section */}
+                   {/* Book Progress Stats */}
+                   <ChapterStats chapters={chapters} />
+
+                   {/* Payment Section - Collapsed by default to save space */}
                    {user && book && (
-                     <Card className="mt-6">
+                     <Card className="mb-4">
                        <Collapsible open={!isBookTierCollapsed} onOpenChange={(open) => setIsBookTierCollapsed(!open)}>
-                         <CardHeader className={isBookTierCollapsed ? "py-4" : "pb-3"}>
+                         <CardHeader className="py-3">
                            <CollapsibleTrigger asChild>
-                             <Button variant="ghost" className="flex items-center justify-between p-0 h-auto w-full min-h-[2.5rem]">
+                             <Button variant="ghost" className="flex items-center justify-between p-0 h-auto w-full">
                                <div className="text-left">
-                                 <CardTitle>Book Tier</CardTitle>
-                                 {!isBookTierCollapsed && (
-                                   <CardDescription>
-                                     Choose the tier that best fits your needs.<br />
-                                     Upgrade to unlock advanced features and unlimited content.
-                                   </CardDescription>
-                                 )}
+                                 <CardTitle className="text-sm">Book Tier</CardTitle>
                                </div>
                                {isBookTierCollapsed ? (
                                  <ChevronDown className="h-4 w-4" />
@@ -906,7 +905,7 @@ const WriteBook = () => {
                            </CollapsibleTrigger>
                          </CardHeader>
                          <CollapsibleContent>
-                           <CardContent>
+                           <CardContent className="pt-0">
                              <PaymentButton
                                bookId={book.id}
                                currentTier={book.tier as 'free' | 'paid' | 'premium'}
@@ -924,56 +923,35 @@ const WriteBook = () => {
                       </Card>
                     )}
                   
-                  <div className="space-y-2">
-                    <h2 className="text-lg font-semibold mb-4">Chapters</h2>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg font-semibold">Chapters</h2>
+                      <div className="text-xs text-muted-foreground">
+                        {chapters.length} of 14 chapters
+                      </div>
+                    </div>
                   
                   {chapters.map((chapter) => (
-                    <div
+                    <ChapterCard
                       key={chapter.id}
-                      className={`p-3 rounded-lg border cursor-pointer transition-colors group ${
-                        currentChapter?.id === chapter.id 
-                          ? 'bg-primary/10 border-primary' 
-                          : 'hover:bg-muted'
-                      }`}
-                      onClick={() => setCurrentChapter(chapter)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <FileText className="h-4 w-4" />
-                          <span className="font-medium">{chapter.title}</span>
-                        </div>
-                        {chapters.length > 1 && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="opacity-0 group-hover:opacity-100 transition-opacity"
-                           onClick={(e) => {
-                             e.stopPropagation();
-                             handleDeleteChapter(chapter);
-                           }}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {(() => {
-                          const words = chapter.content.trim() ? chapter.content.split(/\s+/).length : 0;
-                          const pages = Math.ceil(words / 300);
-                          return `${words} words • ${pages} page${pages !== 1 ? 's' : ''}`;
-                        })()}
-                      </p>
-                    </div>
+                      chapter={chapter}
+                      isActive={currentChapter?.id === chapter.id}
+                      onSelect={() => setCurrentChapter(chapter)}
+                      onDelete={() => handleDeleteChapter(chapter)}
+                      canDelete={chapters.length > 1}
+                    />
                   ))}
                   
-                   <Button
-                     variant="outline"
-                     className="w-full mt-4"
-                     onClick={handleAddChapter}
-                   >
-                     <Plus className="h-4 w-4 mr-2" />
-                     Add Chapter
-                   </Button>
+                   <div className="space-y-2 mt-4">
+                     <Button
+                       variant="outline"
+                       className="w-full hover:bg-primary/5 hover:border-primary/30 transition-colors"
+                       onClick={handleAddChapter}
+                     >
+                       <Plus className="h-4 w-4 mr-2" />
+                       Add New Chapter
+                     </Button>
+                   </div>
                   </div>
                 </div>
               </div>
