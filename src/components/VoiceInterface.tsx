@@ -30,9 +30,8 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       setIsSpeaking(false);
       onSpeakingChange(false);
     } else if (event.type === 'session.created') {
-      console.log('Session created successfully');
+      // Session created successfully
     } else if (event.type === 'error') {
-      console.error('Voice chat error:', event);
       toast({
         title: "Voice Chat Error",
         description: event.error?.message || "An error occurred during voice chat",

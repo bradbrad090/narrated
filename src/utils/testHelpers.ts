@@ -130,7 +130,7 @@ export const measureExecutionTime = async <T>(
   const duration = performance.now() - start;
   
   if (label && process.env.NODE_ENV === 'development') {
-    console.log(`${label} took ${duration.toFixed(2)}ms`);
+    // Performance measurement: ${label} took ${duration.toFixed(2)}ms
   }
   
   return { result, duration };

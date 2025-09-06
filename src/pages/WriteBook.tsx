@@ -140,7 +140,7 @@ const WriteBook = () => {
         .maybeSingle();
 
       if (profileError && profileError.code !== 'PGRST116') {
-        console.error('Error fetching book profile:', profileError);
+        // Error fetching book profile, continuing without it
       } else {
         setBookProfile(profileData);
       }
@@ -313,11 +313,11 @@ const WriteBook = () => {
         title: "Template chapters created!",
         description: "14 default chapters have been added to help you get started.",
       });
-    } catch (error: any) {
-      console.error('Error in createDefaultChapters:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       toast({
         title: "Error creating chapters",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -850,7 +850,7 @@ const WriteBook = () => {
         ) : (
           <ResizablePanelGroup direction="horizontal" className="w-full">
             {/* Left Sidebar - Chapter List */}
-            <ResizablePanel defaultSize={40} minSize={20} maxSize={50}>
+            <ResizablePanel defaultSize={35} minSize={20} maxSize={50}>
               <div className="h-full bg-background border-r p-4 overflow-auto">
                 <div className="space-y-4">
                 
@@ -965,7 +965,7 @@ const WriteBook = () => {
             <ResizableHandle withHandle />
 
             {/* Right Side - Content Editor */}
-            <ResizablePanel defaultSize={75}>
+            <ResizablePanel defaultSize={65}>
               <div className="h-full p-6 overflow-auto">
                 {currentChapter ? (
                   <div className="max-w-4xl mx-auto space-y-6">
