@@ -18,9 +18,12 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
   const chatRef = useRef<RealtimeChat | null>(null);
+  const mountedRef = useRef(true);
 
   const handleMessage = (event: VoiceEvent) => {
+    if (!mountedRef.current) return;
     
     // Handle different event types
     if (event.type === 'response.audio.delta') {
@@ -30,46 +33,77 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       setIsSpeaking(false);
       onSpeakingChange(false);
     } else if (event.type === 'session.created') {
-      // Session created successfully
+      setConnectionError(null);
+      toast({
+        title: "Voice Chat Connected",
+        description: "You can now speak with the AI assistant",
+      });
     } else if (event.type === 'error') {
+      const errorMessage = event.error?.message || "An error occurred during voice chat";
+      setConnectionError(errorMessage);
+      setIsConnected(false);
+      setIsSpeaking(false);
+      onSpeakingChange(false);
+      
       toast({
         title: "Voice Chat Error",
-        description: event.error?.message || "An error occurred during voice chat",
+        description: errorMessage,
         variant: "destructive",
       });
     }
   };
 
   const startConversation = async () => {
+    if (isConnecting || isConnected) return;
+    
     setIsConnecting(true);
+    setConnectionError(null);
+    
     try {
-      // Request microphone permission first
-      await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Check microphone permissions first
+      const permissions = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+      if (permissions.state === 'denied') {
+        throw new Error('Microphone access is required for voice chat. Please enable microphone permissions in your browser settings.');
+      }
+      
+      // Test microphone access
+      const testStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      testStream.getTracks().forEach(track => track.stop()); // Clean up test stream
+      
+      if (!mountedRef.current) return;
       
       chatRef.current = new RealtimeChat(handleMessage, userId, bookId, chapterId);
       await chatRef.current.init(context, conversationType);
-      setIsConnected(true);
+      
+      if (mountedRef.current) {
+        setIsConnected(true);
+      }
+      
+    } catch (error) {
+      if (!mountedRef.current) return;
+      
+      const errorMessage = error instanceof Error ? error.message : 'Failed to start voice conversation';
+      setConnectionError(errorMessage);
       
       toast({
-        title: "Voice Chat Connected",
-        description: "You can now speak with the AI assistant",
-      });
-    } catch (error) {
-      console.error('Error starting conversation:', error);
-      toast({
         title: "Connection Error",
-        description: error instanceof Error ? error.message : 'Failed to start voice conversation',
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
-      setIsConnecting(false);
+      if (mountedRef.current) {
+        setIsConnecting(false);
+      }
     }
   };
 
   const endConversation = () => {
+    if (!isConnected) return;
+    
     chatRef.current?.disconnect();
     setIsConnected(false);
     setIsSpeaking(false);
+    setConnectionError(null);
     onSpeakingChange(false);
     
     // Notify parent component that conversation might have been updated
@@ -84,7 +118,10 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   };
 
   useEffect(() => {
+    mountedRef.current = true;
+    
     return () => {
+      mountedRef.current = false;
       chatRef.current?.disconnect();
     };
   }, []);
@@ -92,11 +129,12 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   return (
     <div className="w-full">
       {!isConnected ? (
-        <div className="text-center py-8">
+        <div className="text-center py-8 space-y-4">
           <Button 
             onClick={startConversation}
             disabled={isConnecting}
             size="lg"
+            className="min-w-[200px]"
           >
             {isConnecting ? (
               <>
@@ -110,13 +148,23 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
               </>
             )}
           </Button>
+          
+          {connectionError && (
+            <div className="text-sm text-destructive bg-destructive/10 px-4 py-2 rounded-md max-w-md mx-auto">
+              {connectionError}
+            </div>
+          )}
+          
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+            Click to start a voice conversation. Make sure your microphone is enabled.
+          </p>
         </div>
       ) : (
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
             {isSpeaking ? (
               <>
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
                 AI Speaking
               </>
             ) : (

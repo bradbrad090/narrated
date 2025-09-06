@@ -5,11 +5,17 @@ export class AudioRecorder {
   private audioContext: AudioContext | null = null;
   private processor: ScriptProcessorNode | null = null;
   private source: MediaStreamAudioSourceNode | null = null;
+  private isRecording = false;
 
   constructor(private onAudioData: (audioData: Float32Array) => void) {}
 
   async start() {
+    if (this.isRecording) {
+      throw new Error('AudioRecorder is already recording');
+    }
+
     try {
+      // Request microphone with optimized settings for voice
       this.stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           sampleRate: 24000,
@@ -20,43 +26,74 @@ export class AudioRecorder {
         }
       });
       
+      // Create AudioContext with proper sample rate
       this.audioContext = new AudioContext({
         sampleRate: 24000,
+        latencyHint: 'interactive'
       });
       
+      // Resume AudioContext if suspended (iOS Safari requirement)
+      if (this.audioContext.state === 'suspended') {
+        await this.audioContext.resume();
+      }
+      
       this.source = this.audioContext.createMediaStreamSource(this.stream);
-      this.processor = this.audioContext.createScriptProcessor(4096, 1, 1);
+      
+      // Use smaller buffer size for lower latency
+      this.processor = this.audioContext.createScriptProcessor(2048, 1, 1);
       
       this.processor.onaudioprocess = (e) => {
+        if (!this.isRecording) return;
+        
         const inputData = e.inputBuffer.getChannelData(0);
-        this.onAudioData(new Float32Array(inputData));
+        // Copy data to prevent issues with buffer reuse
+        const audioData = new Float32Array(inputData.length);
+        audioData.set(inputData);
+        this.onAudioData(audioData);
       };
       
       this.source.connect(this.processor);
       this.processor.connect(this.audioContext.destination);
+      
+      this.isRecording = true;
     } catch (error) {
-      console.error('Error accessing microphone:', error);
-      throw error;
+      this.cleanup();
+      throw new Error(`Failed to start audio recording: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
   stop() {
-    if (this.source) {
-      this.source.disconnect();
-      this.source = null;
+    this.isRecording = false;
+    this.cleanup();
+  }
+
+  private cleanup() {
+    try {
+      if (this.source) {
+        this.source.disconnect();
+        this.source = null;
+      }
+      if (this.processor) {
+        this.processor.disconnect();
+        this.processor = null;
+      }
+      if (this.stream) {
+        this.stream.getTracks().forEach(track => {
+          track.stop();
+        });
+        this.stream = null;
+      }
+      if (this.audioContext && this.audioContext.state !== 'closed') {
+        this.audioContext.close();
+        this.audioContext = null;
+      }
+    } catch (error) {
+      // Silent cleanup - don't throw during cleanup
     }
-    if (this.processor) {
-      this.processor.disconnect();
-      this.processor = null;
-    }
-    if (this.stream) {
-      this.stream.getTracks().forEach(track => track.stop());
-      this.stream = null;
-    }
-    if (this.audioContext) {
-      this.audioContext.close();
-      this.audioContext = null;
-    }
+  }
+
+  get recording() {
+    return this.isRecording;
   }
 }
 
@@ -72,6 +109,10 @@ export class RealtimeChat {
   private conversationType: string;
   private messages: Array<{role: string, content: string, timestamp: string}> = [];
   private currentTranscript = '';
+  private isConnected = false;
+  private connectionTimeout: NodeJS.Timeout | null = null;
+  private retryCount = 0;
+  private maxRetries = 3;
 
   constructor(
     private onMessage: (message: any) => void, 
@@ -79,8 +120,19 @@ export class RealtimeChat {
     bookId: string, 
     chapterId?: string
   ) {
+    // Create audio element with better configuration
     this.audioEl = document.createElement("audio");
     this.audioEl.autoplay = true;
+    this.audioEl.preload = 'auto';
+    
+    // Optimize audio element for voice
+    try {
+      this.audioEl.setAttribute('playsinline', 'true');
+      this.audioEl.setAttribute('webkit-playsinline', 'true');
+    } catch (error) {
+      // Ignore if not supported
+    }
+    
     this.userId = userId;
     this.bookId = bookId;
     this.chapterId = chapterId;
@@ -96,11 +148,25 @@ export class RealtimeChat {
   };
 
   async init(context?: any, conversationType?: string) {
+    if (this.isConnected) {
+      throw new Error('Chat session is already connected');
+    }
+
+    this.retryCount = 0;
+    return this.initWithRetry(context, conversationType);
+  }
+
+  private async initWithRetry(context?: any, conversationType?: string): Promise<void> {
     try {
       this.conversationType = conversationType || 'interview';
       
       // Generate session ID for voice conversation
       this.sessionId = `voice_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      // Set connection timeout
+      this.connectionTimeout = setTimeout(() => {
+        throw new Error('Connection timeout - please try again');
+      }, 30000);
 
       // Build instructions based on context
       const instructions = await this.buildInstructions(context, conversationType);
@@ -119,15 +185,40 @@ export class RealtimeChat {
 
       const EPHEMERAL_KEY = data.client_secret.value;
 
-      // Create peer connection
-      this.pc = new RTCPeerConnection();
+      // Create peer connection with optimized configuration
+      this.pc = new RTCPeerConnection({
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' }
+        ],
+        iceCandidatePoolSize: 10
+      });
 
-      // Set up remote audio
-      this.pc.ontrack = e => {
-        this.audioEl.srcObject = e.streams[0];
+      // Set up connection state monitoring
+      this.pc.onconnectionstatechange = () => {
+        if (this.pc?.connectionState === 'connected') {
+          this.isConnected = true;
+          this.clearConnectionTimeout();
+        } else if (this.pc?.connectionState === 'failed') {
+          this.handleConnectionFailure();
+        }
       };
 
-      // Add local audio track
+      // Set up remote audio with error handling
+      this.pc.ontrack = (e) => {
+        try {
+          this.audioEl.srcObject = e.streams[0];
+          
+          // Handle audio element errors
+          this.audioEl.onerror = (error) => {
+            this.onMessage({ type: 'error', error: { message: 'Audio playback error' } });
+          };
+        } catch (error) {
+          this.onMessage({ type: 'error', error: { message: 'Failed to set up audio stream' } });
+        }
+      };
+
+      // Get microphone with improved error handling
       const ms = await navigator.mediaDevices.getUserMedia({ 
         audio: {
           sampleRate: 24000,
@@ -137,23 +228,46 @@ export class RealtimeChat {
           autoGainControl: true
         }
       });
-      this.pc.addTrack(ms.getTracks()[0]);
+      
+      const audioTrack = ms.getTracks()[0];
+      this.pc.addTrack(audioTrack);
 
-      // Set up data channel
-      this.dc = this.pc.createDataChannel("oai-events");
+      // Set up data channel with improved error handling
+      this.dc = this.pc.createDataChannel("oai-events", {
+        ordered: true
+      });
+      
       this.dc.addEventListener("message", (e) => {
-        const event = JSON.parse(e.data);
-        this.handleRealtimeEvent(event);
-        this.onMessage(event);
+        try {
+          const event = JSON.parse(e.data);
+          this.handleRealtimeEvent(event);
+          this.onMessage(event);
+        } catch (error) {
+          this.onMessage({ 
+            type: 'error', 
+            error: { message: 'Failed to parse message from server' } 
+          });
+        }
+      });
+
+      this.dc.addEventListener("error", (error) => {
+        this.onMessage({ 
+          type: 'error', 
+          error: { message: 'Data channel error' } 
+        });
       });
 
       // Create and set local description
-      const offer = await this.pc.createOffer();
+      const offer = await this.pc.createOffer({
+        offerToReceiveAudio: true,
+        offerToReceiveVideo: false
+      });
       await this.pc.setLocalDescription(offer);
 
-      // Connect to OpenAI's Realtime API
+      // Connect to OpenAI's Realtime API with retry logic
       const baseUrl = "https://api.openai.com/v1/realtime";
       const model = "gpt-4o-realtime-preview-2024-12-17";
+      
       const sdpResponse = await fetch(`${baseUrl}?model=${model}`, {
         method: "POST",
         body: offer.sdp,
@@ -161,6 +275,7 @@ export class RealtimeChat {
           Authorization: `Bearer ${EPHEMERAL_KEY}`,
           "Content-Type": "application/sdp"
         },
+        signal: AbortSignal.timeout(20000) // 20 second timeout
       });
 
       if (!sdpResponse.ok) {
@@ -175,22 +290,51 @@ export class RealtimeChat {
       
       await this.pc.setRemoteDescription(answer);
 
-      // Wait for data channel to be ready
-      await new Promise((resolve) => {
-        if (this.dc?.readyState === 'open') {
-          resolve(void 0);
-        } else {
-          this.dc?.addEventListener('open', () => resolve(void 0), { once: true });
-        }
-      });
+      // Wait for data channel to be ready with timeout
+      await Promise.race([
+        new Promise<void>((resolve) => {
+          if (this.dc?.readyState === 'open') {
+            resolve();
+          } else {
+            this.dc?.addEventListener('open', () => resolve(), { once: true });
+          }
+        }),
+        new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error('Data channel timeout')), 15000);
+        })
+      ]);
 
       // Create initial chat history entry for voice conversation
       await this.createChatHistoryEntry();
+      
+      this.clearConnectionTimeout();
 
     } catch (error) {
-      console.error("Error initializing chat:", error);
+      this.clearConnectionTimeout();
+      
+      if (this.retryCount < this.maxRetries && error instanceof Error && 
+          (error.message.includes('timeout') || error.message.includes('network'))) {
+        this.retryCount++;
+        await new Promise(resolve => setTimeout(resolve, 1000 * this.retryCount));
+        return this.initWithRetry(context, conversationType);
+      }
+      
       throw error;
     }
+  }
+
+  private clearConnectionTimeout() {
+    if (this.connectionTimeout) {
+      clearTimeout(this.connectionTimeout);
+      this.connectionTimeout = null;
+    }
+  }
+
+  private handleConnectionFailure() {
+    this.onMessage({ 
+      type: 'error', 
+      error: { message: 'Connection failed - please try reconnecting' } 
+    });
   }
 
   private handleRealtimeEvent(event: any) {
@@ -380,22 +524,57 @@ Be warm, empathetic, and genuinely interested. Ask open-ended questions that enc
   }
 
   disconnect() {
+    this.isConnected = false;
+    this.clearConnectionTimeout();
+    
     // Save final state before disconnecting
     if (this.messages.length > 0) {
-      this.updateChatHistory();
+      this.updateChatHistory().catch(() => {
+        // Silent fail for final save
+      });
     }
     
-    // Properly clean up all resources
-    this.dc?.close();
-    this.pc?.close();
-    this.audioEl.srcObject = null;
+    // Clean up audio recording
+    if (this.recorder) {
+      this.recorder.stop();
+      this.recorder = null;
+    }
+    
+    // Properly clean up all WebRTC resources
+    try {
+      if (this.dc) {
+        this.dc.close();
+        this.dc = null;
+      }
+      
+      if (this.pc) {
+        this.pc.close();
+        this.pc = null;
+      }
+      
+      // Clean up audio element
+      if (this.audioEl.srcObject) {
+        const stream = this.audioEl.srcObject as MediaStream;
+        stream.getTracks().forEach(track => track.stop());
+        this.audioEl.srcObject = null;
+      }
+      
+      // Remove all event listeners
+      this.audioEl.onerror = null;
+      
+    } catch (error) {
+      // Silent cleanup failure
+    }
     
     // Remove event listeners to prevent memory leaks
     window.removeEventListener('beforeunload', this.handleBeforeUnload);
     
     // Clean up references
-    this.dc = null;
-    this.pc = null;
     this.sessionId = null;
+    this.retryCount = 0;
+  }
+
+  get connected() {
+    return this.isConnected && this.dc?.readyState === 'open';
   }
 }
