@@ -108,7 +108,7 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
     }
   }, [userId, bookId, chapterId, state.context, handleError]);
 
-  // Load conversation history
+  // Load conversation history with cleanup
   const loadConversationHistory = useCallback(async () => {
     try {
       dispatch(conversationActions.setLoading(true));
@@ -122,7 +122,33 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
       if (error) throw error;
       
       if (data) {
-        const sessions = data.map(record => ({
+        // Filter out empty conversations and map to sessions
+        const validConversations = data.filter(record => {
+          const messages = Array.isArray(record.messages) ? record.messages : [];
+          return messages.length > 0; // Only keep conversations with messages
+        });
+
+        // Clean up empty conversations from database
+        const emptyConversations = data.filter(record => {
+          const messages = Array.isArray(record.messages) ? record.messages : [];
+          return messages.length === 0;
+        });
+
+        if (emptyConversations.length > 0) {
+          console.log(`Cleaning up ${emptyConversations.length} empty conversations`);
+          const { error: deleteError } = await supabase
+            .from('chat_histories')
+            .delete()
+            .in('id', emptyConversations.map(conv => conv.id));
+          
+          if (deleteError) {
+            console.error('Failed to clean up empty conversations:', deleteError);
+          } else {
+            console.log('Successfully cleaned up empty conversations');
+          }
+        }
+
+        const sessions = validConversations.map(record => ({
           id: record.id,
           sessionId: record.session_id,
           conversationType: record.conversation_type as ConversationType,
@@ -142,14 +168,17 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
     }
   }, [userId, handleError]);
 
-  // Start a new conversation with AI greeting
+  // Start conversation with loading protection
   const startConversation = useCallback(async (
     conversationType: ConversationType,
     conversationMedium: ConversationMedium = 'text'
   ) => {
-    if (state.ui.isLoading) return null;
+    if (state.ui.isLoading) {
+      console.log('Conversation start blocked - already loading');
+      return null;
+    }
 
-    console.log('Starting conversation:', { conversationType, conversationMedium, userId, bookId, chapterId }); // Debug log
+    console.log('Starting conversation:', { conversationType, conversationMedium, userId, bookId, chapterId });
 
     dispatch(conversationActions.setLoading(true));
     dispatch(conversationActions.setError(null));
@@ -158,7 +187,7 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
       // Load context first if not available
       const conversationContext = await loadConversationContext();
       
-      console.log('Context loaded:', conversationContext); // Debug log
+      console.log('Context loaded:', conversationContext);
       
       // Call the edge function to start conversation with AI greeting
       const { data, error } = await supabase.functions.invoke('ai-conversation-realtime', {
@@ -173,7 +202,7 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
         }
       });
 
-      console.log('Edge function response:', { data, error }); // Debug log
+      console.log('Edge function response:', { data, error });
 
       if (error) throw error;
 
@@ -195,15 +224,19 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
       };
 
       dispatch(conversationActions.setCurrentSession(session));
+      
+      // Refresh conversation history to show the new conversation
+      await loadConversationHistory();
+      
       return session;
     } catch (error) {
-      console.error('Error in startConversation:', error); // Debug log
+      console.error('Error in startConversation:', error);
       handleError(error, 'starting conversation');
       return null;
     } finally {
       dispatch(conversationActions.setLoading(false));
     }
-  }, [state.ui.isLoading, userId, bookId, chapterId, loadConversationContext, handleError]);
+  }, [state.ui.isLoading, userId, bookId, chapterId, loadConversationContext, loadConversationHistory, handleError]);
 
   // Send message in current conversation
   const sendMessage = useCallback(async (message: string) => {

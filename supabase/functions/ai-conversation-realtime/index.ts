@@ -170,8 +170,15 @@ async function startConversationSession(supabaseClient: any, params: any) {
     const conversationGoals = generateConversationGoals(conversationType);
     console.log('Conversation goals:', conversationGoals);
     
-    // Create chat history entry
-    console.log('Creating chat history entry...');
+    // Generate initial AI greeting FIRST - don't create database record until we know OpenAI works
+    const initialPrompt = buildInitialPrompt(context, conversationType, styleInstructions);
+    console.log('Generated initial prompt:', initialPrompt);
+    
+    const aiResponse = await callOpenAI(initialPrompt, []);
+    console.log('AI initial response received successfully');
+
+    // Only create chat history entry AFTER successful OpenAI response
+    console.log('Creating chat history entry after successful OpenAI response...');
     const { data: chatHistory, error: chatError } = await supabaseClient
       .from('chat_histories')
       .insert({
@@ -181,38 +188,20 @@ async function startConversationSession(supabaseClient: any, params: any) {
         context_snapshot: context || {},
         conversation_goals: conversationGoals,
         chapter_id: chapterId,
-        messages: []
+        messages: [{
+          role: 'assistant',
+          content: aiResponse,
+          timestamp: new Date().toISOString()
+        }]
       })
       .select()
       .single();
 
     if (chatError) {
       console.error('Error creating chat history:', chatError);
-      throw new Error('Failed to start conversation session');
+      throw new Error('Failed to create conversation session');
     }
     console.log('Chat history created successfully:', chatHistory);
-
-    // Generate initial AI greeting based on context and type
-    const initialPrompt = buildInitialPrompt(context, conversationType, styleInstructions);
-    console.log('Generated initial prompt:', initialPrompt);
-    
-    const aiResponse = await callOpenAI(initialPrompt, []);
-    console.log('AI initial response:', aiResponse);
-
-    // Update chat history with initial message
-    const initialMessages = [
-      {
-        role: 'assistant',
-        content: aiResponse,
-        timestamp: new Date().toISOString()
-      }
-    ];
-
-    console.log('Updating chat history with initial message...');
-    await supabaseClient
-      .from('chat_histories')
-      .update({ messages: initialMessages })
-      .eq('id', chatHistory.id);
 
     console.log('Conversation session started successfully:', sessionId);
 
@@ -357,9 +346,10 @@ async function callOpenAI(prompt: string, conversationHistory: any[]): Promise<s
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: "gpt-5-2025-08-07",
+        model: "gpt-4.1-2025-04-14", // More reliable model
         messages: messages,
-        max_completion_tokens: 500
+        max_completion_tokens: 800, // Increased token limit
+        temperature: 0.8 // Add temperature for creative responses
       }),
       signal: controller.signal
     });
@@ -377,12 +367,16 @@ async function callOpenAI(prompt: string, conversationHistory: any[]): Promise<s
     console.log('OpenAI response received successfully');
     console.log('Response data:', JSON.stringify(data, null, 2));
     
-    const content = data.choices[0]?.message?.content;
+    const content = data.choices[0]?.message?.content?.trim();
     if (!content) {
       console.error('No content in OpenAI response:', data);
-      throw new Error('No content received from OpenAI');
+      console.error('Choices array:', data.choices);
+      console.error('First choice:', data.choices[0]);
+      console.error('Message object:', data.choices[0]?.message);
+      throw new Error('No content received from OpenAI - response was empty');
     }
     
+    console.log('OpenAI response content length:', content.length);
     return content;
 
   } catch (error) {
