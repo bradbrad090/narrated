@@ -78,7 +78,10 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
 
       // Build context if not cached
       const { data: contextData, error } = await supabase.functions.invoke('conversation-context-builder', {
-        body: { userId, bookId, chapterId }
+        body: { userId, bookId, chapterId },
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
 
       if (error) throw error;
@@ -199,6 +202,9 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
           conversationType,
           context: conversationContext,
           styleInstructions: 'Be warm, welcoming, and start with an engaging opening question that helps the person begin sharing their story.'
+        },
+        headers: {
+          'Content-Type': 'application/json'
         }
       });
 
@@ -274,6 +280,9 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
           conversationType: state.currentSession.conversationType,
           styleInstructions: 'Continue the interview naturally, asking follow-up questions that help the person share more details about their experiences.',
           conversationHistory: isResumedConversation ? state.currentSession.messages.slice(0, -1) : undefined // Exclude the user message we just added
+        },
+        headers: {
+          'Content-Type': 'application/json'
         }
       });
 

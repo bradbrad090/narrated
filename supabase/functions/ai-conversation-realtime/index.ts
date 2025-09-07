@@ -24,11 +24,16 @@ const handler = async (request: Request): Promise<Response> => {
   }
 
   try {
+    console.log('Authenticating user...');
+    // Authenticate user
+    const { user } = await getAuthContext(request);
+    console.log('User authenticated:', user.id);
+
     console.log('Parsing request body...');
     const requestBody = await request.json();
     console.log('Request body:', JSON.stringify(requestBody, null, 2));
 
-    // Initialize Supabase client
+    // Initialize Supabase client with auth
     console.log('Initializing Supabase client...');
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -51,6 +56,15 @@ const handler = async (request: Request): Promise<Response> => {
       styleInstructions,
       conversationHistory
     } = requestBody;
+    
+    // Validate that userId matches authenticated user
+    if (userId !== user.id) {
+      console.error('User ID mismatch:', { provided: userId, authenticated: user.id });
+      return new Response(JSON.stringify({ error: "Unauthorized: User ID mismatch" }), { 
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
     
     if (!userId || !bookId) {
       return new Response(JSON.stringify({ error: "userId and bookId are required" }), { 
