@@ -263,6 +263,8 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
           sessionId: state.currentSession.sessionId,
           message,
           userId,
+          bookId,
+          chapterId,
           context: state.context,
           conversationType: state.currentSession.conversationType,
           styleInstructions: 'Continue the interview naturally, asking follow-up questions that help the person share more details about their experiences.',
