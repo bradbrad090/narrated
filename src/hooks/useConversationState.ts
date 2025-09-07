@@ -76,7 +76,14 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
         return context;
       }
 
-      // Build context if not cached
+      // Build context if not cached - use test function first
+      console.log('Testing context builder...');
+      const testContextResponse = await supabase.functions.invoke('test-conversation', {
+        body: { userId, bookId, chapterId, action: 'test_context' }
+      });
+      
+      console.log('Test context response:', testContextResponse);
+      
       const { data: contextData, error } = await supabase.functions.invoke('conversation-context-builder', {
         body: { userId, bookId, chapterId },
         headers: {
@@ -192,23 +199,17 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
       
       console.log('Context loaded:', conversationContext);
       
-      // Call the edge function to start conversation with AI greeting
-      const { data, error } = await supabase.functions.invoke('ai-conversation-realtime', {
+      // Use the simple AI chat function as fallback
+      console.log('Using simple AI chat function...');
+      const { data, error } = await supabase.functions.invoke('simple-ai-chat', {
         body: {
-          action: 'start_session',
           userId,
           bookId,
-          chapterId,
-          conversationType,
-          context: conversationContext,
-          styleInstructions: 'Be warm, welcoming, and start with an engaging opening question that helps the person begin sharing their story.'
-        },
-        headers: {
-          'Content-Type': 'application/json'
+          message: 'Hello! I would like to start documenting my life story. Can you help me begin with an engaging question?'
         }
       });
 
-      console.log('Edge function response:', { data, error });
+      console.log('Simple AI response:', { data, error });
 
       if (error) throw error;
 
@@ -224,7 +225,7 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
           }
         ],
         context: conversationContext,
-        goals: data.goals,
+        goals: ['Start documenting life story'],
         isSelfConversation: false,
         createdAt: new Date().toISOString()
       };
@@ -269,20 +270,12 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
       // Detect if this is a resumed conversation (has existing messages before the user message we just added)
       const isResumedConversation = state.currentSession.messages.length > 1;
       
-      // Get AI response using the edge function
-      const { data, error } = await supabase.functions.invoke('ai-conversation-realtime', {
+      // Send message to simple AI chat for now
+      const { data, error } = await supabase.functions.invoke('simple-ai-chat', {
         body: {
-          action: isResumedConversation ? 'continue_conversation' : 'send_message',
-          sessionId: state.currentSession.sessionId,
-          message,
           userId,
-          context: state.context,
-          conversationType: state.currentSession.conversationType,
-          styleInstructions: 'Continue the interview naturally, asking follow-up questions that help the person share more details about their experiences.',
-          conversationHistory: isResumedConversation ? state.currentSession.messages.slice(0, -1) : undefined // Exclude the user message we just added
-        },
-        headers: {
-          'Content-Type': 'application/json'
+          bookId,
+          message
         }
       });
 
