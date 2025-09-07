@@ -68,8 +68,27 @@ const handler = async (request: Request): Promise<Response> => {
       conversationHistory
     } = requestBody;
     
+    console.log('Extracted parameters:', { 
+      action, 
+      sessionId, 
+      message, 
+      userId, 
+      bookId, 
+      chapterId, 
+      conversationType,
+      hasContext: !!context,
+      styleInstructions 
+    });
+    
     if (!userId || !bookId) {
-      return new Response(JSON.stringify({ error: "userId and bookId are required" }), { 
+      console.error('Missing required parameters:', { 
+        userId: userId || 'MISSING', 
+        bookId: bookId || 'MISSING' 
+      });
+      return new Response(JSON.stringify({ 
+        error: "userId and bookId are required",
+        received: { userId: !!userId, bookId: !!bookId }
+      }), { 
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
