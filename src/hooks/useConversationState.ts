@@ -239,7 +239,12 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
 
   // Send message in current conversation
   const sendMessage = useCallback(async (message: string) => {
-    if (!state.currentSession || state.ui.isTyping) return;
+    if (!state.currentSession || state.ui.isTyping) {
+      console.log('Send message blocked:', { hasSession: !!state.currentSession, isTyping: state.ui.isTyping });
+      return;
+    }
+
+    console.log('Sending message:', { message, sessionId: state.currentSession.sessionId, currentMessages: state.currentSession.messages.length });
 
     try {
       dispatch(conversationActions.setTyping(true));
@@ -259,10 +264,7 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
       
       dispatch(conversationActions.updateSession(sessionWithUserMessage));
 
-      // Detect if this is a resumed conversation (has existing messages before the user message we just added)
-      const isResumedConversation = state.currentSession.messages.length > 1;
-      
-      // Get AI response using the edge function
+      // Always use continue_conversation action for sending messages in an existing session
       const { data, error } = await supabase.functions.invoke('ai-conversation-realtime', {
         body: {
           action: 'continue_conversation',
@@ -274,9 +276,11 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
           context: state.context,
           conversationType: state.currentSession.conversationType,
           styleInstructions: 'Continue the interview naturally, asking follow-up questions that help the person share more details about their experiences.',
-          conversationHistory: state.currentSession.messages // Pass the full conversation history for proper context
+          conversationHistory: state.currentSession.messages // Pass the current conversation history
         }
       });
+
+      console.log('AI response received:', { data, error, sessionId: state.currentSession.sessionId });
 
       if (error) throw error;
 
