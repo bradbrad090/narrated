@@ -34,7 +34,7 @@ serve(async (req) => {
       auth: { persistSession: false }
     });
 
-    // Fetch user profile, book profile, and conversation history
+    // Fetch user profile, book profile, and conversation history for this specific chapter
     const [profileResult, conversationResult, chapterResult] = await Promise.all([
       supabase
         .from('book_profiles')
@@ -46,8 +46,9 @@ serve(async (req) => {
         .from('chat_histories')
         .select('*')
         .eq('user_id', userId)
+        .eq('chapter_id', chapterId) // Filter conversations by chapter_id
         .order('created_at', { ascending: false })
-        .limit(5),
+        .limit(10), // Increased limit since we're now chapter-specific
       supabase
         .from('chapters')
         .select('*')
@@ -73,7 +74,8 @@ serve(async (req) => {
     console.log('Data fetched:', { 
       profileExists: !!profile,
       conversationCount: conversations.length,
-      chapterTitle: chapter.title
+      chapterTitle: chapter.title,
+      chapterSpecificConversations: true
     });
 
     // Build context for the chapter
@@ -121,10 +123,10 @@ serve(async (req) => {
       contextContent += '\n';
     }
 
-    // Add conversation history
+    // Add conversation history (chapter-specific)
     if (conversations.length > 0) {
-      contextContent += `Conversation History:\n`;
-      conversations.slice(0, 5).forEach((conv, index) => {
+      contextContent += `Conversation History for this Chapter:\n`;
+      conversations.forEach((conv, index) => {
         if (conv.messages && Array.isArray(conv.messages)) {
           contextContent += `\nConversation ${index + 1} (${conv.conversation_type}):\n`;
           conv.messages.forEach((msg: any) => {
@@ -150,7 +152,7 @@ serve(async (req) => {
     console.log('Context built, length:', contextContent.length);
 
     // System prompt from Sysprompt.txt
-    const systemPrompt = `You are an expert autobiography writer specializing in transforming personal conversations and background profiles into cohesive, first-person narrative prose. Your goal is to generate a single chapter of an autobiography based solely on the provided user profile and conversation history for that chapter.
+    const systemPrompt = `You are an expert autobiography writer specializing in transforming personal conversations and background profiles into cohesive, first-person narrative prose. Your goal is to generate a single chapter of an autobiography based solely on the provided user profile and conversation history specifically for this chapter.
 
 Key Guidelines:
 
@@ -260,7 +262,7 @@ Output format: Respond only with the autobiography chapter content. Do not inclu
     try {
       const sourceData = {
         profile: profile,
-        conversations: conversations.slice(0, 5), // Limit to 5 for storage
+        conversations: conversations, // All chapter-specific conversations
         chapter: {
           id: chapter.id,
           title: chapter.title,
