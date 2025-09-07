@@ -106,11 +106,17 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
     try {
       dispatch(conversationActions.setLoading(true));
       
-      const { data, error } = await supabase
+      let query = supabase
         .from('chat_histories')
         .select('*')
-        .eq('user_id', userId)
-        .order('updated_at', { ascending: false });
+        .eq('user_id', userId);
+      
+      // Filter by chapter if chapterId is provided
+      if (chapterId) {
+        query = query.eq('chapter_id', chapterId);
+      }
+      
+      const { data, error } = await query.order('updated_at', { ascending: false });
 
       if (error) throw error;
       
@@ -159,7 +165,7 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
     } finally {
       dispatch(conversationActions.setLoading(false));
     }
-  }, [userId, handleError]);
+  }, [userId, chapterId, handleError]);
 
   // Start conversation with loading protection
   const startConversation = useCallback(async (
