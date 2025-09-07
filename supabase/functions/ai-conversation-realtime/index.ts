@@ -451,6 +451,7 @@ Acknowledge prior responses briefly only to set up the next question; never summ
 Probe for sensory details or feelings only if they naturally flow from the prior response. 
 For potentially fuzzy memories, add a one-word nudge like "fuzzy?" only if needed (e.g., "It's okay if fuzzy—..."). 
 Keep responses to 1 sentence: minimal empathetic setup + one easy question. Always end with that question, staying non-judgmental and encouraging through phrasing, without digressing or wrapping up.
+MOST IMPORTANT: All questions must relate to and support the chapter title theme - ensure every question connects to the specific chapter being worked on.
 
 ${styleInstructions ? `RESPONSE STYLE OVERRIDE: ${styleInstructions}` : ''}
 
@@ -479,6 +480,7 @@ Acknowledge prior responses briefly only to set up the next question; never summ
 Probe for sensory details or feelings only if they naturally flow from the prior response. 
 For potentially fuzzy memories, add a one-word nudge like "fuzzy?" only if needed (e.g., "It's okay if fuzzy—..."). 
 Keep responses to 1 sentence: minimal empathetic setup + one easy question. Always end with that question, staying non-judgmental and encouraging through phrasing, without digressing or wrapping up.
+MOST IMPORTANT: All questions must relate to and support the chapter title theme - ensure every question connects to the specific chapter being worked on.
 
 ${styleInstructions ? `RESPONSE STYLE OVERRIDE: ${styleInstructions}` : ''}
 
