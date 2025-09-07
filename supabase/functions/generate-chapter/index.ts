@@ -1,7 +1,11 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { getAuthContext } from '../_shared/auth.ts';
-import { corsHeaders } from '../_shared/cors.ts';
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -10,24 +14,25 @@ serve(async (req) => {
   }
 
   try {
-    const { bookId, chapterId } = await req.json();
+    // Parse request body first to ensure it's valid
+    const { userId, bookId, chapterId } = await req.json();
     
-    if (!bookId || !chapterId) {
-      return new Response(JSON.stringify({ error: 'Missing required parameters' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    console.log('Generating chapter for:', { userId, bookId, chapterId });
+    
+    // Get XAI API key - will be checked before API call
+    const xaiApiKey = Deno.env.get('XAI_API_KEY');
+
+    // Initialize Supabase client with service role key
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      throw new Error('Supabase configuration missing');
     }
 
-    // Get authenticated user and supabase client
-    const { user, supabase } = await getAuthContext(req);
-    const userId = user.id;
-    
-    // Get XAI API key
-    const xaiApiKey = Deno.env.get('XAI_API_KEY');
-    if (!xaiApiKey) {
-      throw new Error('XAI API key not configured');
-    }
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: { persistSession: false }
+    });
 
     // Fetch user profile, book profile, and conversation history
     const [profileResult, conversationResult, chapterResult] = await Promise.all([

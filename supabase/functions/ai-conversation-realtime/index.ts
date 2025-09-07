@@ -1,8 +1,24 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { getAuthContext } from '../_shared/auth.ts';
-import { corsHeaders } from '../_shared/cors.ts';
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+// Get allowed origins from environment or default to localhost for development
+const getAllowedOrigin = (request: Request) => {
+  const origin = request.headers.get('origin');
+  const allowedOrigins = [
+    'https://keadkwromhlyvoyxvcmi.supabase.co',
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'https://your-production-domain.com' // Replace with actual domain
+  ];
+  
+  return allowedOrigins.includes(origin || '') ? origin : allowedOrigins[0];
+};
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
 const handler = async (request: Request): Promise<Response> => {
   console.log('=== AI Conversation Realtime Handler Started ===');
@@ -24,33 +40,11 @@ const handler = async (request: Request): Promise<Response> => {
   }
 
   try {
-    console.log('=== Edge Function Called ===');
-    console.log('Request method:', request.method);
-    console.log('Request headers:', Object.fromEntries(request.headers.entries()));
-
-    // Temporarily skip authentication for debugging
     console.log('Parsing request body...');
-    let requestBody;
-    try {
-      const rawBody = await request.text();
-      console.log('Raw request body:', rawBody);
-      if (!rawBody || rawBody.trim() === '') {
-        throw new Error('Empty request body');
-      }
-      requestBody = JSON.parse(rawBody);
-    } catch (parseError) {
-      console.error('Failed to parse request body:', parseError);
-      return new Response(JSON.stringify({ 
-        error: "Invalid JSON in request body",
-        details: parseError.message 
-      }), { 
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-    console.log('Parsed request body:', JSON.stringify(requestBody, null, 2));
+    const requestBody = await request.json();
+    console.log('Request body:', JSON.stringify(requestBody, null, 2));
 
-    // Initialize Supabase client with auth
+    // Initialize Supabase client
     console.log('Initializing Supabase client...');
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -74,11 +68,7 @@ const handler = async (request: Request): Promise<Response> => {
       conversationHistory
     } = requestBody;
     
-    // Temporarily skip user validation for debugging
-    console.log('Processing action:', action);
-    
     if (!userId || !bookId) {
-      console.error('Missing required fields:', { userId, bookId });
       return new Response(JSON.stringify({ error: "userId and bookId are required" }), { 
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

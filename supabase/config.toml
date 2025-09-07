@@ -1,10 +1,10 @@
 project_id = "keadkwromhlyvoyxvcmi"
 
 [functions.openai-conversation]
-verify_jwt = true
+verify_jwt = false
 
 [functions.voice-to-autobiography]
-verify_jwt = true
+verify_jwt = false
 
 [functions.send-password-reset]
 verify_jwt = false
@@ -16,25 +16,19 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.profile-extractor]
-verify_jwt = true
+verify_jwt = false
 
 [functions.realtime-token]
-verify_jwt = true
+verify_jwt = false
 
 [functions.create-payment]
-verify_jwt = true
+verify_jwt = false
 
 [functions.generate-chapter]
-verify_jwt = true
+verify_jwt = false
 
 [functions.generate-summary]
-verify_jwt = true
+verify_jwt = false
 
 [functions.verify-payment]
 verify_jwt = true
-
-[functions.test-conversation]
-verify_jwt = false
-
-[functions.simple-ai-chat]
-verify_jwt = false

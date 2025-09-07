@@ -62,27 +62,51 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
     });
   }, [toast]);
 
-  // Load conversation context - simplified version
+  // Load conversation context
   const loadConversationContext = useCallback(async (): Promise<ConversationContext | null> => {
     if (state.context) return state.context;
 
     try {
-      // For now, return a simple context without making API calls
-      const simpleContext: ConversationContext = {
-        userProfile: null,
-        bookProfile: null,
-        currentChapter: null,
-        recentChapters: [],
-        lifeThemes: []
+      dispatch(conversationActions.setLoading(true));
+      
+      const context = await contextCacheService.getContext(userId, bookId, chapterId);
+      
+      if (context) {
+        dispatch(conversationActions.setContext(context));
+        return context;
+      }
+
+      // Build context if not cached
+      const { data: contextData, error } = await supabase.functions.invoke('conversation-context-builder', {
+        body: { userId, bookId, chapterId }
+      });
+
+      if (error) throw error;
+
+      const newContext: ConversationContext = {
+        userProfile: contextData?.userProfile,
+        bookProfile: contextData?.bookProfile,
+        currentChapter: contextData?.currentChapter,
+        recentChapters: contextData?.recentChapters || [],
+        lifeThemes: contextData?.lifeThemes || []
       };
 
-      dispatch(conversationActions.setContext(simpleContext));
-      return simpleContext;
+      dispatch(conversationActions.setContext(newContext));
+      // Cache context
+      try {
+        // Context cached successfully
+      } catch (cacheError) {
+        console.warn('Failed to cache context:', cacheError);
+      }
+      
+      return newContext;
     } catch (error) {
       handleError(error, 'loading conversation context');
       return null;
+    } finally {
+      dispatch(conversationActions.setLoading(false));
     }
-  }, [state.context, handleError]);
+  }, [userId, bookId, chapterId, state.context, handleError]);
 
   // Load conversation history with cleanup
   const loadConversationHistory = useCallback(async () => {
@@ -160,17 +184,25 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
     dispatch(conversationActions.setError(null));
 
     try {
-      // Skip context loading for now - use simple approach
-      console.log('Using simple AI chat function directly...');
-      const { data, error } = await supabase.functions.invoke('simple-ai-chat', {
+      // Load context first if not available
+      const conversationContext = await loadConversationContext();
+      
+      console.log('Context loaded:', conversationContext);
+      
+      // Call the edge function to start conversation with AI greeting
+      const { data, error } = await supabase.functions.invoke('ai-conversation-realtime', {
         body: {
+          action: 'start_session',
           userId,
           bookId,
-          message: 'Hello! I would like to start documenting my life story. Can you help me begin with an engaging question?'
+          chapterId,
+          conversationType,
+          context: conversationContext,
+          styleInstructions: 'Be warm, welcoming, and start with an engaging opening question that helps the person begin sharing their story.'
         }
       });
 
-      console.log('Simple AI response:', { data, error });
+      console.log('Edge function response:', { data, error });
 
       if (error) throw error;
 
@@ -185,8 +217,8 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
             timestamp: new Date().toISOString()
           }
         ],
-        context: null, // Skip context for now
-        goals: ['Start documenting life story'],
+        context: conversationContext,
+        goals: data.goals,
         isSelfConversation: false,
         createdAt: new Date().toISOString()
       };
@@ -231,24 +263,32 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
       // Detect if this is a resumed conversation (has existing messages before the user message we just added)
       const isResumedConversation = state.currentSession.messages.length > 1;
       
-      // Send message to simple AI chat for now
-      const { data, error } = await supabase.functions.invoke('simple-ai-chat', {
+      // Get AI response using the edge function
+      const { data, error } = await supabase.functions.invoke('ai-conversation-realtime', {
         body: {
+          action: isResumedConversation ? 'continue_conversation' : 'send_message',
+          sessionId: state.currentSession.sessionId,
+          message,
           userId,
-          bookId,
-          message
+          context: state.context,
+          conversationType: state.currentSession.conversationType,
+          styleInstructions: 'Continue the interview naturally, asking follow-up questions that help the person share more details about their experiences.',
+          conversationHistory: isResumedConversation ? state.currentSession.messages.slice(0, -1) : undefined // Exclude the user message we just added
         }
       });
 
       if (error) throw error;
 
+      // Add AI response
+      const aiMessage: ConversationMessage = {
+        role: 'assistant',
+        content: data.response,
+        timestamp: new Date().toISOString()
+      };
+
       const finalSession = {
         ...sessionWithUserMessage,
-        messages: [...updatedMessages, {
-          role: 'assistant' as const,
-          content: data.response,
-          timestamp: new Date().toISOString()
-        }]
+        messages: [...updatedMessages, aiMessage]
       };
 
       dispatch(conversationActions.updateSession(finalSession));

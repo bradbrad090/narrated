@@ -1,7 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { getAuthContext } from '../_shared/auth.ts';
-import { corsHeaders } from '../_shared/cors.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -11,23 +15,30 @@ serve(async (req) => {
 
   try {
     const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
     if (!OPENAI_API_KEY) {
       throw new Error('OpenAI API key not configured');
     }
 
-    const { bookId, chapterId } = await req.json();
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+      throw new Error('Supabase configuration not found');
+    }
 
-    if (!bookId || !chapterId) {
+    const { userId, bookId, chapterId } = await req.json();
+
+    if (!userId || !bookId || !chapterId) {
       return new Response(JSON.stringify({ error: 'Missing required parameters' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Get authenticated user and supabase client
-    const { user, supabase } = await getAuthContext(req);
-    const userId = user.id;
+    console.log('Generating summary for:', { userId, bookId, chapterId });
+
+    // Initialize Supabase client
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     // Fetch chapter content
     const { data: chapter, error: chapterError } = await supabase
@@ -52,7 +63,7 @@ serve(async (req) => {
       });
     }
 
-    console.log('Summary generation started for chapter:', chapterId);
+    console.log('Chapter found:', chapter.title);
 
     // Create summary prompt
     const summaryPrompt = `Create a bullet-point summary of the following chapter content. Use concise bullet points that capture objective events and characters in timeline format.

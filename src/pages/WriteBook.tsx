@@ -523,17 +523,12 @@ const WriteBook = () => {
 
     setSaving(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('Not authenticated');
-
       const { data, error } = await supabase.functions.invoke('generate-chapter', {
         body: {
+          userId: user.id,
           bookId: book.id,
           chapterId: currentChapter.id
-        },
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        }
       });
 
       if (error) {
@@ -579,17 +574,12 @@ const WriteBook = () => {
 
     setSaving(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('Not authenticated');
-
       const { data, error } = await supabase.functions.invoke('generate-summary', {
         body: {
+          userId: user.id,
           bookId: book.id,
           chapterId: currentChapter.id
-        },
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        }
       });
 
       if (error) {

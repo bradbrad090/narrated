@@ -1,7 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { getAuthContext } from '../_shared/auth.ts';
-import { corsHeaders } from '../_shared/cors.ts';
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
 interface ContextSnapshot {
   userProfile: any;
@@ -26,50 +29,20 @@ const handler = async (request: Request): Promise<Response> => {
   }
 
   try {
-    console.log('=== Context Builder Called ===');
-    console.log('Request method:', request.method);
-    console.log('Request headers:', Object.fromEntries(request.headers.entries()));
-
-    // Temporarily skip authentication for debugging
-    console.log('Parsing request body...');
-    let requestBody;
-    try {
-      const rawBody = await request.text();
-      console.log('Raw request body:', rawBody);
-      if (!rawBody || rawBody.trim() === '') {
-        throw new Error('Empty request body');
-      }
-      requestBody = JSON.parse(rawBody);
-    } catch (parseError) {
-      console.error('Failed to parse request body:', parseError);
-      return new Response(JSON.stringify({ 
-        error: "Invalid JSON in request body",
-        details: parseError.message 
-      }), { 
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-
-    // Initialize Supabase client with auth
-    console.log('Initializing Supabase client...');
+    // Initialize Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       {
         global: {
-          headers: { Authorization: request.headers.get('Authorization') || '' },
+          headers: { Authorization: request.headers.get('Authorization')! },
         },
       }
     );
 
-    const { userId, bookId, chapterId, conversationType = 'interview' } = requestBody;
-    
-    // Temporarily skip user validation for debugging
-    console.log('Processing request for user:', userId, 'book:', bookId);
+    const { userId, bookId, chapterId, conversationType = 'interview' } = await request.json();
     
     if (!userId || !bookId) {
-      console.error('Missing required fields:', { userId, bookId });
       return new Response(JSON.stringify({ error: "userId and bookId are required" }), { 
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -86,7 +59,7 @@ const handler = async (request: Request): Promise<Response> => {
       .eq('book_id', bookId)
       .eq('chapter_id', chapterId)
       .gt('expires_at', new Date().toISOString())
-      .maybeSingle();
+      .single();
 
     if (cachedContext) {
       console.log('Using cached context');
@@ -109,7 +82,7 @@ const handler = async (request: Request): Promise<Response> => {
       .from('users')
       .select('*')
       .eq('id', userId)
-      .maybeSingle();
+      .single();
 
     if (userError) {
       console.error('Error fetching user profile:', userError);
@@ -122,9 +95,9 @@ const handler = async (request: Request): Promise<Response> => {
       .select('*')
       .eq('book_id', bookId)
       .eq('user_id', userId)
-      .maybeSingle();
+      .single();
 
-    if (!bookProfile && !bookError) {
+    if (bookError && bookError.code === 'PGRST116') {
       // No book profile exists, create a basic one
       console.log('Creating basic book profile for book:', bookId);
       const { data: newProfile, error: createError } = await supabaseClient
@@ -160,7 +133,7 @@ const handler = async (request: Request): Promise<Response> => {
         .select('*')
         .eq('id', chapterId)
         .eq('user_id', userId)
-        .maybeSingle();
+        .single();
 
       if (chapterError) {
         console.error('Error fetching current chapter:', chapterError);
