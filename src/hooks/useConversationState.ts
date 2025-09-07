@@ -243,45 +243,44 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
       console.log('Send message blocked:', { hasSession: !!state.currentSession, isTyping: state.ui.isTyping });
       return;
     }
-
     console.log('Sending message:', { message, sessionId: state.currentSession.sessionId, currentMessages: state.currentSession.messages.length });
-
     try {
       dispatch(conversationActions.setTyping(true));
-      
-      // Add user message to current session immediately for better UX
+
+      // Create user message
       const userMessage: ConversationMessage = {
         role: 'user',
         content: message,
         timestamp: new Date().toISOString()
       };
 
+      // Create updated messages array including the new user message
       const updatedMessages = [...state.currentSession.messages, userMessage];
       const sessionWithUserMessage = {
         ...state.currentSession,
         messages: updatedMessages
       };
-      
+
+      // Update UI with user message
       dispatch(conversationActions.updateSession(sessionWithUserMessage));
 
-      // Always use continue_conversation action for sending messages in an existing session
+      // Send API request with the updated conversation history
       const { data, error } = await supabase.functions.invoke('ai-conversation-realtime', {
         body: {
           action: 'continue_conversation',
           sessionId: state.currentSession.sessionId,
-          message,
+          message, // Keep this for API compatibility, if needed
           userId,
           bookId,
           chapterId,
           context: state.context,
           conversationType: state.currentSession.conversationType,
           styleInstructions: 'Continue the interview naturally, asking follow-up questions that help the person share more details about their experiences.',
-          conversationHistory: state.currentSession.messages // Pass the current conversation history
+          conversationHistory: updatedMessages // Pass the updated messages including the new user message
         }
       });
 
       console.log('AI response received:', { data, error, sessionId: state.currentSession.sessionId });
-
       if (error) throw error;
 
       // Add AI response
@@ -290,12 +289,10 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
         content: data.response,
         timestamp: new Date().toISOString()
       };
-
       const finalSession = {
         ...sessionWithUserMessage,
         messages: [...updatedMessages, aiMessage]
       };
-
       dispatch(conversationActions.updateSession(finalSession));
       return finalSession;
     } catch (error) {
@@ -303,7 +300,7 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
     } finally {
       dispatch(conversationActions.setTyping(false));
     }
-  }, [state.currentSession, state.ui.isTyping, state.context, userId, handleError]);
+  }, [state.currentSession, state.ui.isTyping, state.context, userId, bookId, chapterId, handleError]);
 
   // Start self conversation
   const startSelfConversationMode = useCallback(async (message: string) => {
