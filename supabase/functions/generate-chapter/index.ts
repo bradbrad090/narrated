@@ -34,8 +34,8 @@ serve(async (req) => {
       auth: { persistSession: false }
     });
 
-    // Fetch user profile, book profile, and conversation history for this specific chapter
-    const [profileResult, conversationResult, chapterResult] = await Promise.all([
+    // Fetch user profile, book profile, chapter-specific conversations, current chapter, and all chapters for context
+    const [profileResult, conversationResult, chapterResult, allChaptersResult] = await Promise.all([
       supabase
         .from('book_profiles')
         .select('*')
@@ -54,7 +54,13 @@ serve(async (req) => {
         .select('*')
         .eq('id', chapterId)
         .eq('user_id', userId)
-        .single()
+        .single(),
+      supabase
+        .from('chapters')
+        .select('id, title, chapter_number, summary, content')
+        .eq('book_id', bookId)
+        .eq('user_id', userId)
+        .order('chapter_number', { ascending: true })
     ]);
 
     if (profileResult.error) {
@@ -66,16 +72,21 @@ serve(async (req) => {
     if (chapterResult.error) {
       throw new Error('Chapter not found');
     }
+    if (allChaptersResult.error) {
+      console.error('All chapters fetch error:', allChaptersResult.error);
+    }
 
     const profile = profileResult.data;
     const conversations = conversationResult.data || [];
     const chapter = chapterResult.data;
+    const allChapters = allChaptersResult.data || [];
 
     console.log('Data fetched:', { 
       profileExists: !!profile,
       conversationCount: conversations.length,
       chapterTitle: chapter.title,
-      chapterSpecificConversations: true
+      chapterSpecificConversations: true,
+      totalChaptersCount: allChapters.length
     });
 
     // Build context for the chapter
@@ -141,8 +152,24 @@ serve(async (req) => {
       contextContent += '\n';
     }
 
+    // Add all chapter summaries for context and continuity
+    if (allChapters.length > 0) {
+      contextContent += `Existing Chapters Overview (for context and continuity):\n`;
+      allChapters.forEach((ch) => {
+        contextContent += `Chapter ${ch.chapter_number}: ${ch.title}\n`;
+        if (ch.summary) {
+          contextContent += `Summary: ${ch.summary}\n`;
+        } else if (ch.content && ch.content.length > 200) {
+          // If no summary but has content, provide a brief excerpt
+          contextContent += `Content excerpt: ${ch.content.substring(0, 200)}...\n`;
+        }
+        contextContent += '\n';
+      });
+      contextContent += '\n';
+    }
+
     // Add current chapter context
-    contextContent += `Chapter Information:\n`;
+    contextContent += `Current Chapter Information:\n`;
     contextContent += `Chapter Title: ${chapter.title}\n`;
     contextContent += `Chapter Number: ${chapter.chapter_number}\n`;
     if (chapter.content) {
@@ -151,8 +178,8 @@ serve(async (req) => {
 
     console.log('Context built, length:', contextContent.length);
 
-    // System prompt from Sysprompt.txt
-    const systemPrompt = `You are an expert autobiography writer specializing in transforming personal conversations and background profiles into cohesive, first-person narrative prose. Your goal is to generate a single chapter of an autobiography based solely on the provided user profile and conversation history specifically for this chapter.
+    // System prompt updated to include chapter context awareness
+    const systemPrompt = `You are an expert autobiography writer specializing in transforming personal conversations and background profiles into cohesive, first-person narrative prose. Your goal is to generate a single chapter of an autobiography based on the provided user profile, chapter-specific conversation history, and existing chapter summaries for context.
 
 Key Guidelines:
 
@@ -160,17 +187,21 @@ Key Guidelines:
 
 2. Use only the facts, stories, experiences, and details explicitly mentioned in the provided profile and conversation history. Do not invent, add, or fabricate any new stories, events, people, or details—everything must be grounded in the user's own words and shared information.
 
-3. You may apply slight, reasonable exaggeration for dramatic effect (e.g., emphasizing emotions or the significance of a real event the user described), but only if it enhances the narrative without altering facts. For example, if the user said "It was a tough day," you could say "It was one of the toughest days I'd faced," but nothing more inventive.
+3. CHAPTER CONTINUITY: Use the provided chapter summaries to understand what has already been covered in other chapters. Avoid repeating the same stories or details that have been thoroughly explored elsewhere. If a story or event was mentioned in conversations but already covered in another chapter, reference it briefly rather than retelling it in full.
 
-4. Structure the chapter as engaging narrative prose: Start with an introduction to the chapter's theme, weave in chronological or thematic elements from the conversations, and end with a reflective conclusion. Aim for 800-1500 words, divided into paragraphs with natural flow.
+4. SUBTLE CONNECTIONS: Where appropriate and natural, create subtle links to other chapters (e.g., "As I mentioned earlier in my story..." or "This would later connect to..."), but only if the information supports such connections.
 
-5. Comfort the reader (who is the user) by emphasizing the authenticity: Include subtle reassurances like "Looking back on my own words..." or "As I shared in my reflections..." to remind them this is drawn directly from their real stories.
+5. You may apply slight, reasonable exaggeration for dramatic effect (e.g., emphasizing emotions or the significance of a real event the user described), but only if it enhances the narrative without altering facts.
 
-6. If the conversation history includes multiple exchanges, synthesize them into a unified narrative without quoting dialogues verbatim—paraphrase and integrate naturally.
+6. Structure the chapter as engaging narrative prose: Start with an introduction to the chapter's theme, weave in chronological or thematic elements from the conversations, and end with a reflective conclusion. Aim for 800-1500 words, divided into paragraphs with natural flow.
 
-7. Title the chapter based on its core theme, derived from the provided data (e.g., if the chapter focuses on childhood, title it "My Early Years in [Birthplace]").
+7. Comfort the reader (who is the user) by emphasizing the authenticity: Include subtle reassurances like "Looking back on my own words..." or "As I shared in my reflections..." to remind them this is drawn directly from their real stories.
 
-8. If any information is missing or insufficient for a full chapter, note it briefly at the end and suggest the user add more details via conversations, but still generate the best possible chapter from what's available.
+8. If the conversation history includes multiple exchanges, synthesize them into a unified narrative without quoting dialogues verbatim—paraphrase and integrate naturally.
+
+9. Title the chapter based on its core theme, derived from the provided data (e.g., if the chapter focuses on childhood, title it "My Early Years in [Birthplace]").
+
+10. If any information is missing or insufficient for a full chapter, note it briefly at the end and suggest the user add more details via conversations, but still generate the best possible chapter from what's available.
 
 Output format: Respond only with the autobiography chapter content. Do not include explanations, summaries, or additional commentary beyond the chapter itself.`;
 
@@ -268,7 +299,14 @@ Output format: Respond only with the autobiography chapter content. Do not inclu
           title: chapter.title,
           chapter_number: chapter.chapter_number,
           existing_content: chapter.content?.substring(0, 500) // Truncate for storage
-        }
+        },
+        allChapters: allChapters.map(ch => ({
+          id: ch.id,
+          title: ch.title,
+          chapter_number: ch.chapter_number,
+          summary: ch.summary,
+          contentExcerpt: ch.content?.substring(0, 200)
+        }))
       };
 
       await supabase
