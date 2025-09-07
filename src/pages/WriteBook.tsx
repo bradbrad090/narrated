@@ -438,6 +438,29 @@ const WriteBook = () => {
     }
   };
 
+  const saveCurrentConversationAndSwitchChapter = async (newChapter: Chapter) => {
+    try {
+      // Get the current conversation session to save it before switching
+      const conversationElement = document.querySelector('[data-conversation-interface]');
+      if (conversationElement) {
+        // Trigger save of current conversation if there's an active session
+        const saveEvent = new CustomEvent('saveCurrentConversation');
+        conversationElement.dispatchEvent(saveEvent);
+        
+        // Small delay to ensure conversation is saved before switching
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
+      setCurrentChapter(newChapter);
+      setSidebarOpen(false);
+    } catch (error: any) {
+      console.error('Error saving conversation before chapter switch:', error);
+      // Still switch chapter even if save fails
+      setCurrentChapter(newChapter);
+      setSidebarOpen(false);
+    }
+  };
+
 
   const saveCurrentChapter = async () => {
     if (!user || !currentChapter) return;
@@ -705,10 +728,7 @@ const WriteBook = () => {
                               ? 'bg-primary/10 border-primary' 
                               : 'hover:bg-muted'
                           }`}
-                          onClick={() => {
-                            setCurrentChapter(chapter);
-                            setSidebarOpen(false);
-                          }}
+                          onClick={() => saveCurrentConversationAndSwitchChapter(chapter)}
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-2 flex-1 min-w-0">
@@ -988,7 +1008,7 @@ const WriteBook = () => {
                            key={chapter.id}
                            chapter={chapter}
                            isActive={currentChapter?.id === chapter.id}
-                           onSelect={() => setCurrentChapter(chapter)}
+                           onSelect={() => saveCurrentConversationAndSwitchChapter(chapter)}
                            onDelete={() => handleDeleteChapter(chapter)}
                            canDelete={chapters.length > 1}
                          />

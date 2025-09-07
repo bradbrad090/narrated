@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ConversationSession } from '@/types/conversation';
 import { isFeatureEnabled } from '@/config/environment';
 import { CONVERSATION_CONFIG } from '@/config/conversationConfig';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ConversationInterfaceProps {
   userId: string;
@@ -33,6 +34,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
 }) => {
   const [selectedMode, setSelectedMode] = useState('self');
   const { toast } = useToast();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const {
     history: conversationHistory,
@@ -46,6 +48,70 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     bookId,
     chapterId
   });
+
+  // Save current conversation when chapter changes
+  const saveCurrentConversation = useCallback(async () => {
+    if (currentSession && currentSession.messages.length > 0) {
+      try {
+        // Check if conversation has an ID (exists in database)
+        const conversationId = (currentSession as any).id;
+        
+        if (conversationId) {
+          // Update existing conversation
+          const { error } = await supabase
+            .from('chat_histories')
+            .update({
+              chapter_id: chapterId, // Link to current chapter
+              messages: currentSession.messages as any,
+              conversation_type: currentSession.conversationType,
+              conversation_medium: currentSession.conversationMedium || 'text',
+              conversation_goals: (currentSession.goals || []) as any,
+              is_self_conversation: currentSession.isSelfConversation || false,
+              context_snapshot: (currentSession.context || {}) as any,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', conversationId);
+
+          if (error) throw error;
+        } else {
+          // Insert new conversation  
+          const { error } = await supabase
+            .from('chat_histories')
+            .insert({
+              user_id: userId,
+              chapter_id: chapterId, // Link to current chapter
+              messages: currentSession.messages as any,
+              conversation_type: currentSession.conversationType,
+              conversation_medium: currentSession.conversationMedium || 'text',
+              conversation_goals: (currentSession.goals || []) as any,
+              is_self_conversation: currentSession.isSelfConversation || false,
+              context_snapshot: (currentSession.context || {}) as any
+            });
+
+          if (error) throw error;
+        }
+        
+        console.log('Conversation saved successfully before chapter switch');
+      } catch (error) {
+        console.error('Failed to save conversation before chapter switch:', error);
+      }
+    }
+  }, [currentSession, userId, chapterId]);
+
+  // Listen for save events from parent component
+  useEffect(() => {
+    const handleSaveEvent = () => {
+      saveCurrentConversation();
+    };
+
+    const element = containerRef.current;
+    if (element) {
+      element.addEventListener('saveCurrentConversation', handleSaveEvent);
+      return () => {
+        element.removeEventListener('saveCurrentConversation', handleSaveEvent);
+      };
+    }
+  }, [saveCurrentConversation]);
 
   const getRecommendedMode = () => {
     if (!conversationHistory.length) return 'self';
@@ -66,7 +132,11 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
 
   return (
     <ErrorBoundary>
-      <div className={`w-full ${className}`}>
+      <div 
+        ref={containerRef}
+        data-conversation-interface
+        className={`w-full ${className}`}
+      >
         {/* Quick Actions removed - no resume functionality */}
 
         {/* Tabbed Interface for Starting Conversations */}
