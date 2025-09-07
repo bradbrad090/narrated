@@ -281,16 +281,13 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
 
       if (error) throw error;
 
-      // Add AI response
-      const aiMessage: ConversationMessage = {
-        role: 'assistant',
-        content: data.response,
-        timestamp: new Date().toISOString()
-      };
-
       const finalSession = {
         ...sessionWithUserMessage,
-        messages: [...updatedMessages, aiMessage]
+        messages: [...updatedMessages, {
+          role: 'assistant' as const,
+          content: data.response,
+          timestamp: new Date().toISOString()
+        }]
       };
 
       dispatch(conversationActions.updateSession(finalSession));
