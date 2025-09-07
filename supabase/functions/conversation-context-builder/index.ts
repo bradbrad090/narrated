@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { getAuthContext } from '../_shared/auth.ts';
 import { corsHeaders } from '../_shared/cors.ts';
 
@@ -25,7 +26,33 @@ const handler = async (request: Request): Promise<Response> => {
   }
 
   try {
-    // Initialize Supabase client
+    console.log('Authenticating user...');
+    // Authenticate user
+    const { user } = await getAuthContext(request);
+    console.log('User authenticated:', user.id);
+
+    console.log('Parsing request body...');
+    let requestBody;
+    try {
+      const rawBody = await request.text();
+      console.log('Raw request body:', rawBody);
+      if (!rawBody || rawBody.trim() === '') {
+        throw new Error('Empty request body');
+      }
+      requestBody = JSON.parse(rawBody);
+    } catch (parseError) {
+      console.error('Failed to parse request body:', parseError);
+      return new Response(JSON.stringify({ 
+        error: "Invalid JSON in request body",
+        details: parseError.message 
+      }), { 
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Initialize Supabase client with auth
+    console.log('Initializing Supabase client...');
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -36,7 +63,16 @@ const handler = async (request: Request): Promise<Response> => {
       }
     );
 
-    const { userId, bookId, chapterId, conversationType = 'interview' } = await request.json();
+    const { userId, bookId, chapterId, conversationType = 'interview' } = requestBody;
+    
+    // Validate that userId matches authenticated user
+    if (userId !== user.id) {
+      console.error('User ID mismatch:', { provided: userId, authenticated: user.id });
+      return new Response(JSON.stringify({ error: "Unauthorized: User ID mismatch" }), { 
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
     
     if (!userId || !bookId) {
       return new Response(JSON.stringify({ error: "userId and bookId are required" }), { 
@@ -55,7 +91,7 @@ const handler = async (request: Request): Promise<Response> => {
       .eq('book_id', bookId)
       .eq('chapter_id', chapterId)
       .gt('expires_at', new Date().toISOString())
-      .single();
+      .maybeSingle();
 
     if (cachedContext) {
       console.log('Using cached context');
@@ -78,7 +114,7 @@ const handler = async (request: Request): Promise<Response> => {
       .from('users')
       .select('*')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
     if (userError) {
       console.error('Error fetching user profile:', userError);
@@ -91,9 +127,9 @@ const handler = async (request: Request): Promise<Response> => {
       .select('*')
       .eq('book_id', bookId)
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
-    if (bookError && bookError.code === 'PGRST116') {
+    if (!bookProfile && !bookError) {
       // No book profile exists, create a basic one
       console.log('Creating basic book profile for book:', bookId);
       const { data: newProfile, error: createError } = await supabaseClient
@@ -129,7 +165,7 @@ const handler = async (request: Request): Promise<Response> => {
         .select('*')
         .eq('id', chapterId)
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (chapterError) {
         console.error('Error fetching current chapter:', chapterError);

@@ -30,7 +30,24 @@ const handler = async (request: Request): Promise<Response> => {
     console.log('User authenticated:', user.id);
 
     console.log('Parsing request body...');
-    const requestBody = await request.json();
+    let requestBody;
+    try {
+      const rawBody = await request.text();
+      console.log('Raw request body:', rawBody);
+      if (!rawBody || rawBody.trim() === '') {
+        throw new Error('Empty request body');
+      }
+      requestBody = JSON.parse(rawBody);
+    } catch (parseError) {
+      console.error('Failed to parse request body:', parseError);
+      return new Response(JSON.stringify({ 
+        error: "Invalid JSON in request body",
+        details: parseError.message 
+      }), { 
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
     console.log('Request body:', JSON.stringify(requestBody, null, 2));
 
     // Initialize Supabase client with auth
