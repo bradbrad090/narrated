@@ -7,7 +7,7 @@
 @layer base {
   :root {
     /* Base colors - warm cream background with deep navy text */
-    --background: 35 25% 98%;
+    --background: 35 30% 95%;
     --foreground: 220 25% 15%;
 
     /* Card system - subtle warmth */
@@ -76,7 +76,7 @@
 
   .dark {
     /* Dark mode - rich dark navy with warm accents */
-    --background: 220 35% 8%;
+    --background: 220 40% 6%;
     --foreground: 35 25% 95%;
 
     --card: 220 30% 10%;
