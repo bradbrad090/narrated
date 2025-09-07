@@ -443,9 +443,9 @@ const WriteBook = () => {
       // Get the current conversation session to save it before switching
       const conversationElement = document.querySelector('[data-conversation-interface]');
       if (conversationElement) {
-        // Trigger save of current conversation if there's an active session
-        const saveEvent = new CustomEvent('saveCurrentConversation');
-        conversationElement.dispatchEvent(saveEvent);
+        // Trigger save and end current conversation
+        const saveAndEndEvent = new CustomEvent('saveAndEndConversation');
+        conversationElement.dispatchEvent(saveAndEndEvent);
         
         // Small delay to ensure conversation is saved before switching
         await new Promise(resolve => setTimeout(resolve, 100));

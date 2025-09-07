@@ -42,7 +42,8 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     currentSession,
     loadConversationHistory,
     deleteConversation,
-    deletingSessionIds
+    deletingSessionIds,
+    endConversation
   } = useConversationState({
     userId,
     bookId,
@@ -104,14 +105,24 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       saveCurrentConversation();
     };
 
+    const handleSaveAndEndEvent = () => {
+      saveCurrentConversation();
+      // End the current conversation and reset to start state
+      endConversation();
+      // Reset to the default tab
+      setSelectedMode('self');
+    };
+
     const element = containerRef.current;
     if (element) {
       element.addEventListener('saveCurrentConversation', handleSaveEvent);
+      element.addEventListener('saveAndEndConversation', handleSaveAndEndEvent);
       return () => {
         element.removeEventListener('saveCurrentConversation', handleSaveEvent);
+        element.removeEventListener('saveAndEndConversation', handleSaveAndEndEvent);
       };
     }
-  }, [saveCurrentConversation]);
+  }, [saveCurrentConversation, endConversation]);
 
   const getRecommendedMode = () => {
     if (!conversationHistory.length) return 'self';
