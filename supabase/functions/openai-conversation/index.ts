@@ -1,10 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { getAuthContext } from '../_shared/auth.ts';
+import { corsHeaders } from '../_shared/cors.ts';
 
 const handler = async (request: Request): Promise<Response> => {
   // Handle CORS preflight requests
@@ -20,6 +17,9 @@ const handler = async (request: Request): Promise<Response> => {
   }
 
   try {
+    // Authenticate user
+    const { user } = await getAuthContext(request);
+    
     const { prompt } = await request.json();
     
     if (!prompt) {

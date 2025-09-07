@@ -1,24 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-// Get allowed origins from environment or default to localhost for development
-const getAllowedOrigin = (request: Request) => {
-  const origin = request.headers.get('origin');
-  const allowedOrigins = [
-    'https://keadkwromhlyvoyxvcmi.supabase.co',
-    'http://localhost:3000',
-    'http://localhost:5173',
-    'https://your-production-domain.com' // Replace with actual domain
-  ];
-  
-  return allowedOrigins.includes(origin || '') ? origin : allowedOrigins[0];
-};
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { getAuthContext } from '../_shared/auth.ts';
+import { corsHeaders } from '../_shared/cors.ts';
 
 const handler = async (request: Request): Promise<Response> => {
   console.log('=== AI Conversation Realtime Handler Started ===');

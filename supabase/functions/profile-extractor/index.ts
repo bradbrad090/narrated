@@ -1,10 +1,7 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { getAuthContext } from '../_shared/auth.ts';
+import { corsHeaders } from '../_shared/cors.ts';
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -13,28 +10,21 @@ serve(async (req) => {
   }
 
   try {
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const { conversationText, bookId } = await req.json();
 
-    // Parse request body
-    const { conversationText, conversationTextForProcessing, userId, bookId } = await req.json();
-
-    // Validate required parameters
-    if (!userId || !bookId) {
-      console.error('Missing required parameters:', { userId, bookId });
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Missing required parameters: userId and bookId are required' 
-        }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400 
-        }
-      );
+    if (!bookId) {
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: 'Missing required parameter: bookId' 
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400 
+      });
     }
+
+    // Get authenticated user and supabase client
+    const { user, supabase } = await getAuthContext(req);
+    const userId = user.id;
 
     // Check if OpenAI API key is configured
     const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');

@@ -1,10 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { getAuthContext } from '../_shared/auth.ts';
+import { corsHeaders } from '../_shared/cors.ts';
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -13,6 +10,9 @@ serve(async (req) => {
   }
 
   try {
+    // Authenticate user first
+    const { user } = await getAuthContext(req);
+    
     const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
     if (!OPENAI_API_KEY) {
       throw new Error('OPENAI_API_KEY is not set');
