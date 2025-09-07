@@ -49,7 +49,7 @@ const WriteBook = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [showChapterRefinement, setShowChapterRefinement] = useState(true);
+  const [showChapterRefinement, setShowChapterRefinement] = useState(false);
   const [bookProfile, setBookProfile] = useState<any>(null);
   const [isBookTierCollapsed, setIsBookTierCollapsed] = useState(true);
   const [showProfileModal, setShowProfileModal] = useState(false);
