@@ -62,61 +62,27 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
     });
   }, [toast]);
 
-  // Load conversation context
+  // Load conversation context - simplified version
   const loadConversationContext = useCallback(async (): Promise<ConversationContext | null> => {
     if (state.context) return state.context;
 
     try {
-      dispatch(conversationActions.setLoading(true));
-      
-      const context = await contextCacheService.getContext(userId, bookId, chapterId);
-      
-      if (context) {
-        dispatch(conversationActions.setContext(context));
-        return context;
-      }
-
-      // Build context if not cached - use test function first
-      console.log('Testing context builder...');
-      const testContextResponse = await supabase.functions.invoke('test-conversation', {
-        body: { userId, bookId, chapterId, action: 'test_context' }
-      });
-      
-      console.log('Test context response:', testContextResponse);
-      
-      const { data: contextData, error } = await supabase.functions.invoke('conversation-context-builder', {
-        body: { userId, bookId, chapterId },
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (error) throw error;
-
-      const newContext: ConversationContext = {
-        userProfile: contextData?.userProfile,
-        bookProfile: contextData?.bookProfile,
-        currentChapter: contextData?.currentChapter,
-        recentChapters: contextData?.recentChapters || [],
-        lifeThemes: contextData?.lifeThemes || []
+      // For now, return a simple context without making API calls
+      const simpleContext: ConversationContext = {
+        userProfile: null,
+        bookProfile: null,
+        currentChapter: null,
+        recentChapters: [],
+        lifeThemes: []
       };
 
-      dispatch(conversationActions.setContext(newContext));
-      // Cache context
-      try {
-        // Context cached successfully
-      } catch (cacheError) {
-        console.warn('Failed to cache context:', cacheError);
-      }
-      
-      return newContext;
+      dispatch(conversationActions.setContext(simpleContext));
+      return simpleContext;
     } catch (error) {
       handleError(error, 'loading conversation context');
       return null;
-    } finally {
-      dispatch(conversationActions.setLoading(false));
     }
-  }, [userId, bookId, chapterId, state.context, handleError]);
+  }, [state.context, handleError]);
 
   // Load conversation history with cleanup
   const loadConversationHistory = useCallback(async () => {
@@ -194,13 +160,8 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
     dispatch(conversationActions.setError(null));
 
     try {
-      // Load context first if not available
-      const conversationContext = await loadConversationContext();
-      
-      console.log('Context loaded:', conversationContext);
-      
-      // Use the simple AI chat function as fallback
-      console.log('Using simple AI chat function...');
+      // Skip context loading for now - use simple approach
+      console.log('Using simple AI chat function directly...');
       const { data, error } = await supabase.functions.invoke('simple-ai-chat', {
         body: {
           userId,
@@ -224,7 +185,7 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
             timestamp: new Date().toISOString()
           }
         ],
-        context: conversationContext,
+        context: null, // Skip context for now
         goals: ['Start documenting life story'],
         isSelfConversation: false,
         createdAt: new Date().toISOString()
