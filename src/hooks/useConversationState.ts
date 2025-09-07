@@ -265,7 +265,7 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
       // Get AI response using the edge function
       const { data, error } = await supabase.functions.invoke('ai-conversation-realtime', {
         body: {
-          action: isResumedConversation ? 'continue_conversation' : 'send_message',
+          action: 'continue_conversation',
           sessionId: state.currentSession.sessionId,
           message,
           userId,
@@ -274,7 +274,7 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
           context: state.context,
           conversationType: state.currentSession.conversationType,
           styleInstructions: 'Continue the interview naturally, asking follow-up questions that help the person share more details about their experiences.',
-          conversationHistory: isResumedConversation ? state.currentSession.messages.slice(0, -1) : undefined // Exclude the user message we just added
+          conversationHistory: state.currentSession.messages // Pass the full conversation history for proper context
         }
       });
 

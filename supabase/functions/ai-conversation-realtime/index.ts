@@ -274,10 +274,8 @@ async function processConversationMessage(supabaseClient: any, params: any) {
   const updatedMessages = [...existingMessages, userMessage];
 
   // Generate AI response with retry logic
-  // For resumed conversations, use full history; for new ones, keep last 10 messages
-  const conversationHistory = isResumedConversation && fullConversationHistory 
-    ? fullConversationHistory 
-    : updatedMessages.slice(-10); // Keep last 10 messages for context
+  // Use full conversation history provided from frontend for proper context
+  const conversationHistory = fullConversationHistory || updatedMessages.slice(-10); // Use provided history or keep last 10 messages for context
   const prompt = buildConversationPrompt(context, conversationType, conversationHistory, styleInstructions);
   
   let aiResponse;
