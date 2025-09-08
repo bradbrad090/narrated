@@ -26,7 +26,7 @@ serve(async (req) => {
       throw new Error('Supabase configuration not found');
     }
 
-    const { userId, bookId, chapterId } = await req.json();
+    const { userId, bookId, chapterId, conversationHistory } = await req.json();
 
     if (!userId || !bookId || !chapterId) {
       return new Response(JSON.stringify({ error: 'Missing required parameters' }), {
@@ -40,38 +40,65 @@ serve(async (req) => {
     // Initialize Supabase client
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Fetch chapter content
-    const { data: chapter, error: chapterError } = await supabase
-      .from('chapters')
-      .select('content, title')
-      .eq('id', chapterId)
-      .eq('user_id', userId)
-      .single();
+    let summaryPrompt: string;
+    let chapterTitle = '';
 
-    if (chapterError || !chapter) {
-      console.error('Chapter fetch error:', chapterError);
-      return new Response(JSON.stringify({ error: 'Chapter not found' }), {
-        status: 404,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    if (conversationHistory && Array.isArray(conversationHistory) && conversationHistory.length > 0) {
+      // Generate summary from conversation history
+      const { data: chapter } = await supabase
+        .from('chapters')
+        .select('title')
+        .eq('id', chapterId)
+        .eq('user_id', userId)
+        .single();
 
-    if (!chapter.content || chapter.content.trim() === '') {
-      return new Response(JSON.stringify({ error: 'Chapter content is empty' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+      chapterTitle = chapter?.title || 'Chapter';
+      
+      const conversationText = conversationHistory
+        .map(msg => `${msg.role === 'assistant' ? 'AI' : 'User'}: ${msg.content}`)
+        .join('\n');
 
-    console.log('Chapter found:', chapter.title);
+      summaryPrompt = `Create a bullet-point summary based on the following conversation about a life story chapter. Focus on the key life events, experiences, and stories shared by the user. Use concise bullet points that capture objective events and experiences in timeline format.
 
-    // Create summary prompt
-    const summaryPrompt = `Create a bullet-point summary of the following chapter content. Use concise bullet points that capture objective events and characters in timeline format.
+Chapter Title: ${chapterTitle}
+Conversation:
+${conversationText}
+
+Summary:`;
+    } else {
+      // Fallback: Fetch chapter content and generate summary from existing content
+      const { data: chapter, error: chapterError } = await supabase
+        .from('chapters')
+        .select('content, title')
+        .eq('id', chapterId)
+        .eq('user_id', userId)
+        .single();
+
+      if (chapterError || !chapter) {
+        console.error('Chapter fetch error:', chapterError);
+        return new Response(JSON.stringify({ error: 'Chapter not found or no conversation history provided' }), {
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      if (!chapter.content || chapter.content.trim() === '') {
+        return new Response(JSON.stringify({ error: 'Chapter content is empty and no conversation history provided' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      chapterTitle = chapter.title;
+      summaryPrompt = `Create a bullet-point summary of the following chapter content. Use concise bullet points that capture objective events and characters in timeline format.
 
 Chapter Title: ${chapter.title}
 Chapter Content: ${chapter.content}
 
 Summary:`;
+    }
+
+    console.log('Generating summary for:', chapterTitle);
 
     console.log('Calling OpenAI for summary generation...');
 

@@ -322,11 +322,11 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
     const sessionToEnd = state.currentSession;
     dispatch(conversationActions.setCurrentSession(null));
     
-    // Auto-generate and fetch summary if we have a chapterId and just ended a session
+    // Auto-generate summary if we have a chapterId and just ended a session
     if (chapterId && sessionToEnd && sessionToEnd.messages.length > 0) {
       try {
-        // First, generate the chapter content and summary
-        const { data: generationData, error: generationError } = await supabase.functions.invoke('generate-chapter', {
+        // Generate summary directly from conversation history
+        const { data: generationData, error: generationError } = await supabase.functions.invoke('generate-summary', {
           body: {
             userId,
             bookId,
@@ -336,28 +336,20 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
         });
 
         if (generationError) {
-          console.error('Chapter generation error:', generationError);
+          console.error('Summary generation error:', generationError);
           throw generationError;
         }
 
         if (!generationData?.success) {
-          throw new Error(generationData?.error || 'Failed to generate chapter');
+          throw new Error(generationData?.error || 'Failed to generate summary');
         }
 
-        // Then fetch the generated summary
-        const { data: summaryData, error: summaryError } = await supabase
-          .from('chapters')
-          .select('summary')
-          .eq('id', chapterId)
-          .single();
-        
-        if (summaryError) throw summaryError;
-        
-        if (summaryData?.summary) {
-          return summaryData.summary;
+        // Return the generated summary
+        if (generationData?.summary) {
+          return generationData.summary;
         }
       } catch (error) {
-        console.error('Failed to generate/fetch summary:', error);
+        console.error('Failed to generate summary:', error);
         toast({
           title: "Summary generation failed",
           description: "Could not generate chapter summary",
