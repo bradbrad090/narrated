@@ -258,17 +258,18 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
             </p>
             
             {/* Submission Controls */}
-            {!submitted && (
+            {!submitted ? (
               <button 
-                onClick={submitConversation}
+                onClick={() => {
+                  console.log('Submit button clicked!');
+                  submitConversation();
+                }}
                 disabled={loadingSummary}
                 className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded mt-2 disabled:opacity-50"
               >
                 {loadingSummary ? "Processing..." : "Confirm & Submit"}
               </button>
-            )}
-            
-            {submitted && (
+            ) : (
               <div className="mt-2 text-green-600 font-medium">
                 ✓ Submitted! PDF generating...
               </div>
