@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageCircle, Send, Loader2, CheckCircle, Sparkles, RotateCcw } from 'lucide-react';
-import { useConversationState } from '@/hooks/useConversationState';
 import { CONVERSATION_CONFIG } from '@/config/conversationConfig';
 
 interface TextAssistedModeProps {
@@ -14,6 +13,12 @@ interface TextAssistedModeProps {
   context?: any;
   className?: string;
   onConversationSaved?: () => void;
+  // Props passed from parent to avoid duplicate state
+  currentSession?: any;
+  ui?: { isLoading: boolean; isTyping: boolean };
+  startConversation?: (type: string) => void;
+  sendMessage?: (message: string) => void;
+  endConversation?: () => void;
 }
 
 export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
@@ -22,7 +27,13 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
   chapterId,
   context,
   className = "",
-  onConversationSaved
+  onConversationSaved,
+  // Use props from parent instead of separate state hook
+  currentSession,
+  ui = { isLoading: false, isTyping: false },
+  startConversation,
+  sendMessage,
+  endConversation
 }) => {
   const [currentMessage, setCurrentMessage] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(true);
@@ -30,17 +41,8 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const {
-    currentSession,
-    ui: { isLoading, isTyping },
-    startConversation,
-    sendMessage,
-    endConversation
-  } = useConversationState({
-    userId,
-    bookId,
-    chapterId
-  });
+  // Remove the duplicate useConversationState hook since we get the state from props
+  const { isLoading, isTyping } = ui;
 
   // Debug session state
   console.log('🔸 TextAssistedMode session state:', { 
@@ -69,8 +71,8 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
   }, [currentSession?.messages?.length, isTyping]);
 
   const handleSendMessage = async () => {
-    if (!currentMessage.trim() || !currentSession) {
-      console.log('🔷 Send message blocked:', { hasMessage: !!currentMessage.trim(), hasSession: !!currentSession });
+    if (!currentMessage.trim() || !currentSession || !sendMessage) {
+      console.log('🔷 Send message blocked:', { hasMessage: !!currentMessage.trim(), hasSession: !!currentSession, hasSendMessage: !!sendMessage });
       return;
     }
 
@@ -89,7 +91,9 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
 
   const handleStartConversation = () => {
     console.log('🔶 Starting text conversation...');
-    startConversation('interview');
+    if (startConversation) {
+      startConversation('interview');
+    }
   };
 
   // Resume functionality removed - users can only view and delete conversations

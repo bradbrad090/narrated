@@ -55,7 +55,9 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     deletingSessionIds,
     endConversation,
     submitConversation,
-    submitted
+    submitted,
+    startConversation,
+    sendMessage
   } = useConversationState({
     userId,
     bookId,
@@ -287,6 +289,11 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                   chapterId={chapterId}
                   context={context}
                   onConversationSaved={loadConversationHistory}
+                  currentSession={currentSession}
+                  ui={{ isLoading: false, isTyping: false }}
+                  startConversation={startConversation}
+                  sendMessage={sendMessage}
+                  endConversation={endConversation}
                 />
               </ErrorBoundary>
             </TabsContent>
