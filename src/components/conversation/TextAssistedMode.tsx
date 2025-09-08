@@ -198,8 +198,10 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
                 </Button>
                 <Button
                   onClick={() => {
-                    endConversation();
-                    onConversationSaved?.();
+                    // Dispatch event to parent to handle save and summary generation
+                    const event = new CustomEvent('saveAndEndConversation');
+                    const container = document.querySelector('[data-conversation-interface]');
+                    container?.dispatchEvent(event);
                   }}
                   variant="outline"
                   size="icon"

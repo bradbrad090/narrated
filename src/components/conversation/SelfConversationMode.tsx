@@ -57,10 +57,10 @@ export const SelfConversationMode: React.FC<SelfConversationModeProps> = ({
       setCurrentMessage('');
       textareaRef.current?.focus();
       
-      // Notify parent component
-      if (onConversationSaved) {
-        onConversationSaved();
-      }
+      // Dispatch event to parent to handle save and summary generation
+      const event = new CustomEvent('saveAndEndConversation');
+      const container = document.querySelector('[data-conversation-interface]');
+      container?.dispatchEvent(event);
     } catch (error: any) {
       console.error('Error saving self conversation:', error);
     }
