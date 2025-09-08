@@ -42,6 +42,15 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
     chapterId
   });
 
+  // Debug session state
+  console.log('🔸 TextAssistedMode session state:', { 
+    hasSession: !!currentSession, 
+    sessionId: currentSession?.sessionId,
+    messageCount: currentSession?.messages?.length || 0,
+    isLoading,
+    isTyping 
+  });
+
   // Optimized scroll to bottom with proper cleanup
   useEffect(() => {
     if (currentSession?.messages && currentSession.messages.length > 0) {
@@ -60,8 +69,12 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
   }, [currentSession?.messages?.length, isTyping]);
 
   const handleSendMessage = async () => {
-    if (!currentMessage.trim() || !currentSession) return;
+    if (!currentMessage.trim() || !currentSession) {
+      console.log('🔷 Send message blocked:', { hasMessage: !!currentMessage.trim(), hasSession: !!currentSession });
+      return;
+    }
 
+    console.log('🔷 Sending message:', { message: currentMessage.trim(), sessionId: currentSession.sessionId });
     await sendMessage(currentMessage);
     setCurrentMessage('');
     textareaRef.current?.focus();
@@ -75,6 +88,7 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
   };
 
   const handleStartConversation = () => {
+    console.log('🔶 Starting text conversation...');
     startConversation('interview');
   };
 
