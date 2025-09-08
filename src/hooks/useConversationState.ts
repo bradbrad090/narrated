@@ -317,10 +317,37 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
 
   // Resume conversation functionality removed - users can only view and delete conversations
 
-  // End current conversation
-  const endConversation = useCallback(() => {
+  // End current conversation and fetch summary
+  const endConversation = useCallback(async () => {
+    const sessionToEnd = state.currentSession;
     dispatch(conversationActions.setCurrentSession(null));
-  }, []);
+    
+    // Auto-fetch summary if we have a chapterId and just ended a session
+    if (chapterId && sessionToEnd) {
+      try {
+        const { data, error } = await supabase
+          .from('chapters')
+          .select('summary')
+          .eq('id', chapterId)
+          .single();
+        
+        if (error) throw error;
+        
+        if (data?.summary) {
+          return data.summary;
+        }
+      } catch (error) {
+        console.error('Failed to fetch summary:', error);
+        toast({
+          title: "Summary unavailable",
+          description: "Could not load chapter summary",
+          variant: "destructive",
+        });
+      }
+    }
+    
+    return null;
+  }, [chapterId, state.currentSession, toast]);
 
   // Get draft for session
   const getDraft = useCallback((sessionId: string): string => {
