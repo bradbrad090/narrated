@@ -33,6 +33,7 @@ interface UseConversationStateProps {
 export const useConversationState = ({ userId, bookId, chapterId }: UseConversationStateProps) => {
   const [state, dispatch] = useReducer(conversationReducer, initialConversationState);
   const [deletingSessionIds, setDeletingSessionIds] = useState<Set<string>>(new Set());
+  const [submitted, setSubmitted] = useState(false);
   const { toast } = useToast();
   const { startTextConversation, sendTextMessage, startSelfConversation } = useConversationAPI();
 
@@ -374,6 +375,38 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
     return null;
   }, [chapterId, state.currentSession, userId, bookId, toast]);
 
+  // Submit conversation and enqueue PDF job
+  const submitConversation = useCallback(async () => {
+    if (!chapterId) return;
+    
+    try {
+      // Update chapter status to submitted
+      await supabase
+        .from('chapters')
+        .update({ status: 'submitted' })
+        .eq('id', chapterId);
+      
+      // Enqueue PDF job (using SQL function as client doesn't have queue methods)
+      await supabase.rpc('pgmq_send', {
+        queue_name: 'pdf_jobs',
+        msg: { type: 'chapter', chapter_id: chapterId }
+      });
+      
+      setSubmitted(true);
+      toast({
+        title: "Conversation submitted",
+        description: "PDF is being generated...",
+      });
+    } catch (error) {
+      console.error('Failed to submit conversation:', error);
+      toast({
+        title: "Submission failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
+  }, [chapterId, toast]);
+
   // Get draft for session
   const getDraft = useCallback((sessionId: string): string => {
     return state.drafts[sessionId] || '';
@@ -480,6 +513,8 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
     setDraft,
     clearDraft,
     resetState,
+    submitConversation,
+    submitted,
     
     // Computed values
     hasActiveSession: !!state.currentSession,

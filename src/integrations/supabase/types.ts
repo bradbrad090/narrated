@@ -269,6 +269,7 @@ export type Database = {
           content: string | null
           created_at: string
           id: string
+          status: string | null
           summary: string | null
           title: string
           updated_at: string
@@ -280,6 +281,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
+          status?: string | null
           summary?: string | null
           title?: string
           updated_at?: string
@@ -291,6 +293,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
+          status?: string | null
           summary?: string | null
           title?: string
           updated_at?: string
