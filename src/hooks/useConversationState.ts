@@ -320,11 +320,12 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
   // End current conversation and generate summary
   const endConversation = useCallback(async () => {
     const sessionToEnd = state.currentSession;
-    dispatch(conversationActions.setCurrentSession(null));
     
     // Auto-generate summary if we have a chapterId and just ended a session
     if (chapterId && sessionToEnd && sessionToEnd.messages.length > 0) {
       try {
+        console.log('Generating summary from conversation:', { chapterId, messagesCount: sessionToEnd.messages.length });
+        
         // Generate summary directly from conversation history
         const { data: generationData, error: generationError } = await supabase.functions.invoke('generate-summary', {
           body: {
@@ -335,6 +336,8 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
           }
         });
 
+        console.log('Summary generation response:', { generationData, generationError });
+
         if (generationError) {
           console.error('Summary generation error:', generationError);
           throw generationError;
@@ -344,18 +347,28 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
           throw new Error(generationData?.error || 'Failed to generate summary');
         }
 
+        // Clear the session after successful summary generation
+        dispatch(conversationActions.setCurrentSession(null));
+
         // Return the generated summary
         if (generationData?.summary) {
+          console.log('Summary generated successfully:', generationData.summary);
           return generationData.summary;
         }
       } catch (error) {
         console.error('Failed to generate summary:', error);
+        // Clear session even if summary generation fails
+        dispatch(conversationActions.setCurrentSession(null));
         toast({
           title: "Summary generation failed",
           description: "Could not generate chapter summary",
           variant: "destructive",
         });
       }
+    } else {
+      console.log('No session to end or generate summary for:', { chapterId, sessionToEnd: !!sessionToEnd, messagesLength: sessionToEnd?.messages?.length });
+      // Clear the session if there's one but no valid data
+      dispatch(conversationActions.setCurrentSession(null));
     }
     
     return null;

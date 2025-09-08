@@ -124,10 +124,16 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       saveCurrentConversation();
     };
 
-    const handleSaveAndEndEvent = () => {
-      saveCurrentConversation();
-      // End the current conversation and reset to start state
-      handleEndConversation();
+    const handleSaveAndEndEvent = async () => {
+      console.log('handleSaveAndEndEvent triggered', { currentSession });
+      
+      // First save the conversation
+      await saveCurrentConversation();
+      
+      // Then end the conversation and generate summary
+      // We need to call endConversation before clearing the session
+      await handleEndConversation();
+      
       // Reset to the default tab
       setSelectedMode('self');
     };
