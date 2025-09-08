@@ -317,37 +317,57 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
 
   // Resume conversation functionality removed - users can only view and delete conversations
 
-  // End current conversation and fetch summary
+  // End current conversation and generate summary
   const endConversation = useCallback(async () => {
     const sessionToEnd = state.currentSession;
     dispatch(conversationActions.setCurrentSession(null));
     
-    // Auto-fetch summary if we have a chapterId and just ended a session
-    if (chapterId && sessionToEnd) {
+    // Auto-generate and fetch summary if we have a chapterId and just ended a session
+    if (chapterId && sessionToEnd && sessionToEnd.messages.length > 0) {
       try {
-        const { data, error } = await supabase
+        // First, generate the chapter content and summary
+        const { data: generationData, error: generationError } = await supabase.functions.invoke('generate-chapter', {
+          body: {
+            userId,
+            bookId,
+            chapterId,
+            conversationHistory: sessionToEnd.messages
+          }
+        });
+
+        if (generationError) {
+          console.error('Chapter generation error:', generationError);
+          throw generationError;
+        }
+
+        if (!generationData?.success) {
+          throw new Error(generationData?.error || 'Failed to generate chapter');
+        }
+
+        // Then fetch the generated summary
+        const { data: summaryData, error: summaryError } = await supabase
           .from('chapters')
           .select('summary')
           .eq('id', chapterId)
           .single();
         
-        if (error) throw error;
+        if (summaryError) throw summaryError;
         
-        if (data?.summary) {
-          return data.summary;
+        if (summaryData?.summary) {
+          return summaryData.summary;
         }
       } catch (error) {
-        console.error('Failed to fetch summary:', error);
+        console.error('Failed to generate/fetch summary:', error);
         toast({
-          title: "Summary unavailable",
-          description: "Could not load chapter summary",
+          title: "Summary generation failed",
+          description: "Could not generate chapter summary",
           variant: "destructive",
         });
       }
     }
     
     return null;
-  }, [chapterId, state.currentSession, toast]);
+  }, [chapterId, state.currentSession, userId, bookId, toast]);
 
   // Get draft for session
   const getDraft = useCallback((sessionId: string): string => {
