@@ -39,6 +39,13 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   const { toast } = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
 
+  console.log('ConversationInterface state:', { 
+    showSummary, 
+    summary: summary?.substring(0, 50) + '...', 
+    loadingSummary,
+    selectedMode 
+  });
+
   const {
     history: conversationHistory,
     context,
@@ -276,6 +283,11 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
             )}
           </div>
         )}
+        
+        {/* Debug info */}
+        <div className="mt-2 text-xs text-gray-500">
+          Debug: showSummary={String(showSummary)}, submitted={String(submitted)}, summary length={summary?.length || 0}
+        </div>
 
       </div>
     </ErrorBoundary>
