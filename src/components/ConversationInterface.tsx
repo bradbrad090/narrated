@@ -57,7 +57,8 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     submitConversation,
     submitted,
     startConversation,
-    sendMessage
+    sendMessage,
+    resetState
   } = useConversationState({
     userId,
     bookId,
@@ -337,8 +338,22 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                 {loadingSummary ? "Processing..." : "Confirm & Submit"}
               </button>
             ) : (
-              <div className="mt-2 text-green-600 font-medium">
-                ✓ Submitted! PDF generating...
+              <div className="mt-2 space-y-2">
+                <div className="text-green-600 font-medium">
+                  ✓ Submitted! PDF generating...
+                </div>
+                <button
+                  onClick={() => {
+                    console.log('🔄 Starting new conversation...');
+                    setShowSummary(false);
+                    setSummary('');
+                    resetState();
+                    setSelectedMode('text-assisted');
+                  }}
+                  className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-4 py-2 rounded text-sm"
+                >
+                  Start New Conversation
+                </button>
               </div>
             )}
           </div>
