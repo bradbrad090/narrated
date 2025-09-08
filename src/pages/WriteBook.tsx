@@ -1052,6 +1052,24 @@ const WriteBook = () => {
                 {currentChapter ? (
                   <div className="max-w-4xl mx-auto space-y-6">
                     {/* Conversation Section */}
+                      {/* Chapter Summary Section */}
+                      <Card className="mt-6">
+                        <CardHeader>
+                          <CardTitle>Chapter Summary</CardTitle>
+                          <CardDescription>
+                            A brief summary of this chapter will appear here to help you understand the key themes and content.
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <Textarea
+                            placeholder="Chapter summary will be generated here..."
+                            value={currentChapter.summary || ""}
+                            readOnly
+                            className="min-h-[120px] text-base leading-relaxed bg-muted/50"
+                          />
+                        </CardContent>
+                      </Card>
+
                     {user && book && (
                       <Card className="mt-6">
                         <CardHeader>
@@ -1075,26 +1093,8 @@ const WriteBook = () => {
                              }}
                            />
                          </CardContent>
-                      </Card>
-                      )}
-
-                      {/* Chapter Summary Section */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Chapter Summary</CardTitle>
-                          <CardDescription>
-                            A brief summary of this chapter will appear here to help you understand the key themes and content.
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <Textarea
-                            placeholder="Chapter summary will be generated here..."
-                            value={currentChapter.summary || ""}
-                            readOnly
-                            className="min-h-[120px] text-base leading-relaxed bg-muted/50"
-                          />
-                        </CardContent>
-                      </Card>
+                    </Card>
+                    )}
 
                       {/* Generate Chapter Button */}
                       <div className="flex justify-center gap-4 mb-4">
