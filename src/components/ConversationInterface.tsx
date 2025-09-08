@@ -64,7 +64,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
 
   // Handle conversation end with summary fetch
   const handleEndConversation = useCallback(async () => {
-    console.log('🟣 handleEndConversation started', { loadingSummary });
+    console.log('🟣 handleEndConversation started', { loadingSummary, currentSession: !!currentSession });
     setLoadingSummary(true);
     try {
       console.log('🟣 Calling endConversation...');
@@ -77,7 +77,37 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
         setSummary(truncatedSummary);
         setShowSummary(true);
       } else {
-        console.log('🟣 No summary result received');
+        console.log('🟣 No summary result - checking if there are conversation messages to generate summary from');
+        
+        // If no summary from endConversation but we have a current session with messages,
+        // try to generate summary directly
+        if (currentSession && currentSession.messages && currentSession.messages.length > 0) {
+          console.log('🟣 Found session with messages, generating summary directly...', { messagesCount: currentSession.messages.length });
+          
+          try {
+            const { data: summaryData, error: summaryError } = await supabase.functions.invoke('generate-summary', {
+              body: {
+                userId,
+                bookId,
+                chapterId,
+                conversationHistory: currentSession.messages
+              }
+            });
+            
+            console.log('🟣 Direct summary generation result:', { summaryData, summaryError });
+            
+            if (!summaryError && summaryData?.success && summaryData.summary) {
+              const truncatedSummary = summaryData.summary.length > 300 ? `${summaryData.summary.slice(0, 300)}...` : summaryData.summary;
+              setSummary(truncatedSummary);
+              setShowSummary(true);
+              console.log('🟣 Direct summary generation successful');
+            } else {
+              console.error('🔴 Direct summary generation failed:', summaryError || summaryData?.error);
+            }
+          } catch (directSummaryError) {
+            console.error('🔴 Direct summary generation error:', directSummaryError);
+          }
+        }
       }
     } catch (error) {
       console.error('🔴 Error in handleEndConversation:', error);
@@ -86,7 +116,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       console.log('🟣 Setting loadingSummary=false');
       setLoadingSummary(false);
     }
-  }, [endConversation]);
+  }, [endConversation, currentSession, userId, bookId, chapterId]);
 
   // Save current conversation when chapter changes
   const saveCurrentConversation = useCallback(async () => {
