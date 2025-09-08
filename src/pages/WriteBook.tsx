@@ -10,6 +10,9 @@ import { User } from "@supabase/supabase-js";
 import { Book, LogOut, Save, Sparkles, ArrowLeft, Plus, FileText, Trash2, Edit2, Type, Menu, Eye, EyeOff, ChevronDown, ChevronUp, Clock, CheckCircle2, Circle, MoreVertical, GripVertical } from "lucide-react";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
 import { ConversationInterface } from "@/components/ConversationInterface";
+import { SavedConversations } from "@/components/SavedConversations";
+import { useConversationState } from "@/hooks/useConversationState";
+import { isFeatureEnabled } from "@/config/environment";
 import { ConversationContext } from "@/components/ConversationContext";
 import { ProfileSetup } from "@/components/ProfileSetup";
 import { DeleteChapterDialog } from "@/components/DeleteChapterDialog";
@@ -60,6 +63,17 @@ const WriteBook = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
+
+  // Add conversation state for SavedConversations
+  const {
+    history: conversationHistory,
+    deleteConversation,
+    deletingSessionIds,
+  } = useConversationState({
+    userId: user?.id || '',
+    bookId: book?.id || '',
+    chapterId: currentChapter?.id
+  });
 
   useEffect(() => {
     // Check if user is logged in
@@ -1095,6 +1109,25 @@ const WriteBook = () => {
                           />
                         </CardContent>
                       </Card>
+
+                      {/* Saved Conversations Section */}
+                      {isFeatureEnabled('conversationHistory') && user && book && (
+                        <Card className="mt-6">
+                          <CardHeader>
+                            <CardTitle>Saved Conversations</CardTitle>
+                            <CardDescription>
+                              View and manage your previous conversations for this chapter.
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <SavedConversations 
+                              conversations={conversationHistory}
+                              onDeleteConversation={deleteConversation}
+                              deletingSessionIds={deletingSessionIds}
+                            />
+                          </CardContent>
+                        </Card>
+                      )}
 
                       {/* Generate Chapter Button */}
                       <div className="flex justify-center gap-4 mb-4">

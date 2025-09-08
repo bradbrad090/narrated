@@ -257,17 +257,6 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           </div>
         )}
 
-        {/* Saved Conversations */}
-        {isFeatureEnabled('conversationHistory') && (
-          <ErrorBoundary>
-            <SavedConversations 
-              conversations={conversationHistory}
-              onDeleteConversation={deleteConversation}
-              deletingSessionIds={deletingSessionIds}
-              className="mt-6"
-            />
-          </ErrorBoundary>
-        )}
       </div>
     </ErrorBoundary>
   );
