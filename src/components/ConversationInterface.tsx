@@ -64,16 +64,26 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
 
   // Handle conversation end with summary fetch
   const handleEndConversation = useCallback(async () => {
+    console.log('🟣 handleEndConversation started', { loadingSummary });
     setLoadingSummary(true);
     try {
+      console.log('🟣 Calling endConversation...');
       const summaryResult = await endConversation();
+      console.log('🟣 endConversation result:', { summaryResult, length: summaryResult?.length });
+      
       if (summaryResult) {
-        setSummary(summaryResult.length > 300 ? `${summaryResult.slice(0, 300)}...` : summaryResult);
+        const truncatedSummary = summaryResult.length > 300 ? `${summaryResult.slice(0, 300)}...` : summaryResult;
+        console.log('🟣 Setting summary and showSummary=true', { truncatedSummary });
+        setSummary(truncatedSummary);
         setShowSummary(true);
+      } else {
+        console.log('🟣 No summary result received');
       }
     } catch (error) {
+      console.error('🔴 Error in handleEndConversation:', error);
       // Error already handled in endConversation
     } finally {
+      console.log('🟣 Setting loadingSummary=false');
       setLoadingSummary(false);
     }
   }, [endConversation]);
@@ -130,31 +140,44 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   // Listen for save events from parent component
   useEffect(() => {
     const handleSaveEvent = () => {
+      console.log('🟡 handleSaveEvent triggered');
       saveCurrentConversation();
     };
 
     const handleSaveAndEndEvent = async () => {
-      console.log('handleSaveAndEndEvent triggered', { currentSession });
+      console.log('🟢 handleSaveAndEndEvent triggered', { currentSession, hasMessages: currentSession?.messages?.length });
       
       // First save the conversation
+      console.log('🟢 Starting saveCurrentConversation...');
       await saveCurrentConversation();
+      console.log('🟢 saveCurrentConversation completed');
       
       // Then end the conversation and generate summary
       // We need to call endConversation before clearing the session
+      console.log('🟢 Starting handleEndConversation...');
       await handleEndConversation();
+      console.log('🟢 handleEndConversation completed');
       
       // Reset to the default tab
+      console.log('🟢 Resetting to self mode');
       setSelectedMode('self');
     };
 
     const element = containerRef.current;
+    console.log('🔧 Setting up event listeners', { element, hasElement: !!element });
+    
     if (element) {
       element.addEventListener('saveCurrentConversation', handleSaveEvent);
       element.addEventListener('saveAndEndConversation', handleSaveAndEndEvent);
+      console.log('🔧 Event listeners added successfully');
+      
       return () => {
+        console.log('🔧 Cleaning up event listeners');
         element.removeEventListener('saveCurrentConversation', handleSaveEvent);
         element.removeEventListener('saveAndEndConversation', handleSaveAndEndEvent);
       };
+    } else {
+      console.error('🔴 No container element found for event listeners');
     }
   }, [saveCurrentConversation, handleEndConversation]);
 

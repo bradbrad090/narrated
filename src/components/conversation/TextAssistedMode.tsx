@@ -198,12 +198,18 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
                 </Button>
                 <Button
                   onClick={() => {
-                    console.log('Submit conversation button clicked');
+                    console.log('🔵 Submit conversation button clicked');
                     // Dispatch event to parent to handle save and summary generation
                     const event = new CustomEvent('saveAndEndConversation');
                     const container = document.querySelector('[data-conversation-interface]');
-                    console.log('Dispatching saveAndEndConversation event', { container });
-                    container?.dispatchEvent(event);
+                    console.log('🔵 Dispatching saveAndEndConversation event', { container, eventCreated: !!event });
+                    
+                    if (container) {
+                      container.dispatchEvent(event);
+                      console.log('🔵 Event dispatched successfully');
+                    } else {
+                      console.error('🔴 Container not found for event dispatch');
+                    }
                   }}
                   variant="outline"
                   size="icon"
