@@ -592,6 +592,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      pgmq_send: {
+        Args: { msg: Json; queue_name: string }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never

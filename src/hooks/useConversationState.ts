@@ -387,7 +387,7 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
         .eq('id', chapterId);
       
       // Enqueue PDF job (using SQL function as client doesn't have queue methods)
-      await supabase.rpc('pgmq_send', {
+      await supabase.rpc('pgmq_send' as any, {
         queue_name: 'pdf_jobs',
         msg: { type: 'chapter', chapter_id: chapterId }
       });

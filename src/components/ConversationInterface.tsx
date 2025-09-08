@@ -46,7 +46,9 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     loadConversationHistory,
     deleteConversation,
     deletingSessionIds,
-    endConversation
+    endConversation,
+    submitConversation,
+    submitted
   } = useConversationState({
     userId,
     bookId,
@@ -251,9 +253,26 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           <div className="p-4 bg-card rounded-lg border mt-6">
             <h2 className="text-lg font-semibold mb-2">Chapter Summary</h2>
             <p className="text-sm text-muted-foreground mb-2">{summary}</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground mb-2">
               The AI has crafted your full chapter behind the scenes.
             </p>
+            
+            {/* Submission Controls */}
+            {!submitted && (
+              <button 
+                onClick={submitConversation}
+                disabled={loadingSummary}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded mt-2 disabled:opacity-50"
+              >
+                {loadingSummary ? "Processing..." : "Confirm & Submit"}
+              </button>
+            )}
+            
+            {submitted && (
+              <div className="mt-2 text-green-600 font-medium">
+                ✓ Submitted! PDF generating...
+              </div>
+            )}
           </div>
         )}
 
