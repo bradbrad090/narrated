@@ -323,7 +323,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
             <textarea 
               value={summary} 
               readOnly 
-              className="w-full h-48 p-3 text-sm text-muted-foreground bg-background border border-border rounded resize-none mb-2"
+              className="w-full h-32 p-3 text-sm text-muted-foreground bg-background border border-border rounded resize-none mb-2"
             />
             <p className="text-xs text-muted-foreground mb-2">
               The AI has crafted your full chapter behind the scenes.
