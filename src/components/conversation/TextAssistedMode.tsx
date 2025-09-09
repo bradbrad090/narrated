@@ -95,11 +95,11 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
   };
 
   return (
-    <Card className={`w-full min-h-[320px] ${className}`}>
+    <Card className={`w-full min-h-[320px] ${className}`} data-chapter-summary="true">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Sparkles className="h-5 w-5" />
-          Text-Assisted Conversation
+          Text-Assisted Conversation - Chapter Summary
         </CardTitle>
         <p className="text-sm text-muted-foreground">
           Have a text conversation with AI to develop your story
