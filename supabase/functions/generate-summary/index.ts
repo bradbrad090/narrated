@@ -42,6 +42,7 @@ serve(async (req) => {
 
     let summaryPrompt: string;
     let chapterTitle = '';
+    let finalConversationHistory = conversationHistory;
 
     // Check if conversation history is provided
     if (!conversationHistory || !Array.isArray(conversationHistory) || conversationHistory.length === 0) {
@@ -83,7 +84,7 @@ serve(async (req) => {
         });
       }
 
-      conversationHistory = allMessages;
+      finalConversationHistory = allMessages;
     }
 
     // Get chapter title
@@ -96,7 +97,7 @@ serve(async (req) => {
 
     chapterTitle = chapter?.title || 'Chapter';
     
-    const conversationText = conversationHistory
+    const conversationText = finalConversationHistory
       .map(msg => `${msg.role === 'assistant' ? 'AI' : 'User'}: ${msg.content}`)
       .join('\n');
 
