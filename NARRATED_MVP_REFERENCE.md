@@ -1,203 +1,344 @@
-NARRATED_MVP_REFERENCE.md
-Narrated MVP Implementation Guide: PDF Export Flow
-This document outlines the minimal viable implementation for the core PDF export feature in Narrated, an AI-powered autobiography creation platform. It focuses on extending the conversation end flow to generate chapter summaries, allow user confirmation, process PDFs asynchronously via queue, and provide download UI.
-Tech Stack Alignment: Builds on React/TypeScript frontend (useConversationFlow.ts, ConversationInterface.tsx), Supabase backend (edge functions, pgmq queue, Storage), and existing patterns from architecture (e.g., generate-chapter for summaries, real-time channels).
-MVP Goals:
+# Narrated MVP Reference: Tasks 1-4 Implementation Guide
 
-End-to-end: Conversation end → Summary display → Submit → PDF gen/upload → Download.
-Anti-Bloat: Total ~49 LOC added; reuse existing hooks, states, Supabase client, toast, Spinner, Tailwind classes (btn-primary), reducer actions (SET_LOADING), and postgres_changes subscriptions. No new files except one edge function. Conditionals skip redundant code (e.g., sub if state set).
-Assumptions: chapterId/summary in hook state; generate-chapter edge function exists; pgmq pdf_jobs queue set up; add pdf_url: text and status enum ('submitted', 'pdf_ready') to chapters schema if missing (one-time migration). Channel: 'chapters-status' (verify in repo).
-Security/Performance: RLS via auth client; sequential async (no races); filtered subs; error toasts.
-Testing: Manual via npm start + supabase start; optional Jest mocks for async.
+## Overview
 
-Deploy: After changes, run supabase functions deploy process-pdf-queue (Task 3); add cron in supabase/config.toml (e.g., 0 * * * * for hourly poll).
+This plan consolidates Tasks 1-4 for a hands-off MVP focusing on automatic summary display, simple submission, and unified async PDF processing. **Total effort: 10-13 hours** (Task 1: 2h, Task 2: 1.5h, Unified 3-4: 6.5h). Anti-bloat measures include embedding UI in existing components, shared logic in one PDF function (~100-150 LOC total), reusing real-time channels, and inline templates. Prerequisites require one-time Supabase setup (0.5-1 hour) and verification of existing infrastructure.
 
-Task 1: Implement Summary Display After Conversation End
-Preparation
-Objective: At conversation end (via handleConversationEnd in useConversationFlow.ts), invoke generate-chapter to populate chapters.summary, then set showSummary: true for UI render in ConversationInterface.tsx. Reuse existing flow—no new aggregation logic.
-Assumptions: chapterId in state; Supabase client. Add showSummary: boolean and summary: string minimally if absent.
-Risks: Gen timeout—reuse loading. Fallback empty string on fail.
-Plan: ~10 LOC (dispatch in handler, conditional JSX). No new files.
-Step 1: Update Handler in useConversationFlow.ts
-typescript// Extend state minimally if needed
-interface ConversationFlowState { /* ... existing */ showSummary: boolean; summary: string; }
+**Key constraints:** Use TypeScript, async/await everywhere, RLS for all queries, deploy via Git, test incrementally with <50 LOC net add per task. Focus on seamless MVP without unnecessary abstractions.
 
-// In handleConversationEnd (existing, after convo save)
-const handleConversationEnd = async () => {
-  dispatch({ type: 'SET_LOADING', payload: true });
-  try {
-    // Call existing generate-chapter (reuse edge function call pattern)
-    const { data, error } = await supabase.functions.invoke('generate-chapter', { body: { chapter_id: chapterId } });
-    if (error) throw error;
-    // Assume data includes summary; update state
-    dispatch({ type: 'SET_SUMMARY', payload: data.summary || '' });
-    dispatch({ type: 'SET_SHOW_SUMMARY', payload: true });
-    toast.success('Summary generated!');
-  } catch (error) {
-    toast.error('Failed to generate summary.');
-  } finally {
-    dispatch({ type: 'SET_LOADING', payload: false });
-  }
-};
+---
 
-// Reducer additions (~2 LOC)
-case 'SET_SHOW_SUMMARY': return { ...state, showSummary: payload };
-case 'SET_SUMMARY': return { ...state, summary: payload };
-Explanation: Chains gen call then dispatch for sequential flow; reuses loading/toast. Why? Minimal extension of existing end handler. LOC: 8. Validates: No race—await before UI toggle.
-Step 2: Render Summary in ConversationInterface.tsx
-tsx// In render, after messages (conditional on showSummary)
-{showSummary && (
-  <div className="summary-section p-4 bg-gray-100 rounded"> {/* Reuse Tailwind */}
-    <h3 className="font-bold">Chapter Summary</h3>
-    <p>{summary}</p>
-    {/* Placeholder for Task 2 button */}
-  </div>
-)}
-Explanation: Inline div reuses styles; props from hook. Why? Simple toggle without new component. LOC: 5. Validates: Hides pre-gen; displays post-dispatch.
-Testing
-Manual: Run npm start/supabase start; end convo—see loading, then summary div. Check DB: chapters.summary populated. Optional Jest: Mock invoke, expect dispatch.
-Task 1 Complete
-~13 LOC; clean display reusing flow. Proceed to Task 2 (extend summary div with button).
+## Prerequisites (One-Time: 0.5-1 hour)
 
-Task 2: Add "Confirm and Submit" Button
-Preparation
-Objective: Extend Task 1 summary with button; on click, update chapters.status='submitted', enqueue pdf_jobs, set submitted: true to hide summary. Reuse Task 1 state/channel.
-Assumptions: Task 1's showSummary/summary; add submitted: boolean minimally. Channel 'chapters-status' (conditional if exists).
-Risks: Enqueue fail—error toast, no hide. Assume pgmq in scope (e.g., supabase.pgMQ).
-Plan: ~12 LOC (handler/sub in hook; button in Task 1 div). Consolidate reducer for auto-hide.
-Step 1: Handler and Subscription in useConversationFlow.ts
-typescript// Extend state: submitted?: boolean;
+1. **Enable Supabase Queues:** Dashboard > Extensions > pgmq
+   ```sql
+   SELECT pgmq.create('pdf_jobs');
+   ```
 
-// Handler (~6 LOC)
-const handleSubmitChapter = async () => {
-  if (loading || submitted) return;
-  dispatch({ type: 'SET_LOADING', payload: true });
-  try {
-    const { error } = await supabase.from('chapters').update({ status: 'submitted' }).eq('id', chapterId);
-    if (error) throw error;
-    // Enqueue (reuse pgmq pattern)
-    const queue = supabase.pgMQ('pdf_jobs');
-    await queue.send([{ chapter_id: chapterId, summary }]);
-    dispatch({ type: 'SET_SUBMITTED', payload: true }); // Auto-hides via reducer
-    toast.success('Submitted for PDF!');
-  } catch (e) {
-    toast.error('Submit failed.');
-    // // await fallbackPdf(); // Commented to avoid bloat
-  } finally {
-    dispatch({ type: 'SET_LOADING', payload: false });
-  }
-};
+2. **Add PDF URL Column:**
+   ```sql
+   ALTER TABLE books ADD COLUMN full_pdf_url TEXT;
+   ```
 
-// Subscription (~3 LOC, conditional)
-useEffect(() => {
-  if (submitted || !chapterId) return; // Skip if set
-  const channel = supabase.channel('chapters-status');
-  channel.on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'chapters', filter: `id=eq.${chapterId}` },
-    (p) => p.new.status === 'submitted' && dispatch({ type: 'SET_SUBMITTED', payload: true })
-  ).subscribe();
-  return () => supabase.removeChannel(channel);
-}, [chapterId, submitted]); // Deps avoid churn
+3. **Verify Global Toast Utility:** Confirm `utils.ts` has simple wrapper (5-10 LOC)
+   ```typescript
+   export const toast = {
+     error: (msg: string) => // existing toast implementation
+   }
+   ```
 
-// Reducer (~2 LOC)
-case 'SET_SUBMITTED': return { ...state, submitted: payload, showSummary: !payload };
-Explanation: Guards prevent spam; chains await for consistency. Reuses pgmq. LOC: 11. Validates: Sub skips if submitted; reducer hides summary.
-Step 2: Button in ConversationInterface.tsx
-tsx// Update Task 1 div: {showSummary && !submitted && ( <div className="summary-section ...">
-    <h3>Chapter Summary</h3>
-    <p>{summary}</p>
-    <div className="mt-4 flex justify-center">
-      <button onClick={handleSubmitChapter} disabled={loading || submitted} className="btn-primary disabled:opacity-50 px-4 py-2">
-        {loading ? <Spinner size="sm" /> : 'Confirm and Submit'}
-      </button>
-    </div>
-  </div>
-)}
-{submitted && <div className="text-green-600 text-center">PDF generating...</div>}
-Explanation: Inline in existing div; conditional !submitted. Reuses Spinner/class. LOC: 8 (net +3 from Task 1). Validates: Disables post-submit; hides summary.
-Testing
-Manual: End convo (Task 1), click button—DB status update (chapters.status='submitted'), queue insert (SELECT * FROM pgmq.pdf_jobs), hide + toast. Error: No hide. Optional Jest: Mock update/send, expect dispatch/toast.
-Task 2 Complete
-~12 LOC; one-click UX with auto-hide. Proceed to Task 3 (backend processing).
+4. **Test Chapter Generation:** Manual test that `generate-chapter` populates summary/content eagerly
 
-Task 3: Implement Backend PDF Queue Processor
-Preparation
-Objective: Edge function to dequeue pdf_jobs, generate simple PDF from summary/content, upload to Storage, update chapters.pdf_url. Triggered by cron.
-Assumptions: pgmq setup; pdf-lib via esm.sh (Deno compat). Reuse Storage for upload.
-Risks: Lib incompatibility—fallback to text file (comment). Stateless for scale.
-Plan: New supabase/functions/process-pdf-queue/index.ts (~15 LOC); cron config. No frontend impact.
-Step 1: Create process-pdf-queue Edge Function
-typescript// supabase/functions/process-pdf-queue/index.ts (Deno)
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-// Note: pdf-lib may need verification; fallback to simple text if issues
-import * as pdf from 'https://esm.sh/pdf-lib@1.17.1';
+---
 
-const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+## Task 1: Integrate Summary Display Post-Conversation
 
-serve(async (req) => {
-  try {
-    const queue = supabase.pgMQ('pdf_jobs');
-    const msg = await queue.read(); // Dequeue one
-    if (!msg) return new Response('No jobs', { status: 200 });
+**Objective:** Automate fetch and inline display of existing summary right after conversation end, embedded in ConversationInterface.tsx.
 
-    const { chapter_id, summary } = msg.payload;
-    // Fetch content
-    const { data: chapter } = await supabase.from('chapters').select('content').eq('id', chapter_id).single();
-    // Simple PDF (extend with summary/content)
-    const pdfDoc = await pdf.PDFDocument.create();
-    const page = pdfDoc.addPage();
-    page.drawText(`${summary}\n\n${chapter.content}`, { x: 50, y: 500 });
-    const pdfBytes = await pdfDoc.save();
+### Steps
 
-    // Upload
-    const fileName = `pdf/${chapter_id}.pdf`;
-    await supabase.storage.from('pdfs').upload(fileName, pdfBytes, { contentType: 'application/pdf' });
-    const { data: { publicUrl } } = supabase.storage.from('pdfs').getPublicUrl(fileName);
+1. **Update Flow Logic** (1 hour)
+   ```typescript
+   // In useConversationFlow.ts - extend handleConversationEnd()
+   const handleConversationEnd = async () => {
+     // After generate-chapter call
+     const { data } = await supabase
+       .from('chapters')
+       .select('summary')
+       .eq('id', chapterId)
+       .single();
+     
+     setSummary(data.summary);
+     setShowSummary(true);
+   };
+   ```
 
-    // Update DB (triggers channel)
-    await supabase.from('chapters').update({ pdf_url: publicUrl }).eq('id', chapter_id);
-    await queue.delete(msg); // Ack
-    return new Response('Processed', { status: 200 });
-  } catch (e) {
-    console.error(e); // Log for monitoring
-    // Fallback: // await supabase.from('pdf_jobs').archive(msg); // Retry logic if needed
-    return new Response('Error', { status: 500 });
-  }
-});
-Explanation: Dequeues, gens/uploads/updates; simple PDF to minimize. Reuses service role/Storage. LOC: 15. Validates: DB update fires sub (for Task 4); error logs.
-Step 2: Schedule Cron
-In supabase/config.toml or dashboard: Add job 0 * * * * supabase functions invoke process-pdf-queue (hourly; adjust for load).
-Explanation: Config-only; no code bloat. Validates: Async processing.
-Testing
-Manual: supabase functions deploy process-pdf-queue; enqueue (Task 2), invoke—check Storage PDF, chapters.pdf_url. Queue empty post-run. Optional: Mock queue/DB in Deno test.
-Task 3 Complete
-~15 LOC; offloads PDF gen. Proceed to Task 4 (UI download).
+2. **Embed UI** (0.5 hour)
+   ```tsx
+   // In ConversationInterface.tsx - below message list
+   {showSummary && (
+     <div className="p-4 bg-white rounded shadow mt-4">
+       <h2 className="text-lg font-bold">Chapter Summary</h2>
+       <p className="mt-2">{summary.slice(0, 300)}...</p>
+       <p className="text-sm text-gray-500 mt-2">
+         The AI has crafted your full chapter behind the scenes.
+       </p>
+     </div>
+   )}
+   ```
 
-Task 4: UI for PDF Status and Download
-Preparation
-Objective: Post-submit (Task 2), extend sub for pdf_url update; add download link in UI (reuse submitted div).
-Assumptions: Task 2's sub/channel; add pdfUrl?: string minimally.
-Risks: Sub miss—DB fetch fallback (but reuse sub, no poll).
-Plan: ~8 LOC (extend sub/reducer, JSX link). No new state bloat.
-Step 1: Extend Subscription in useConversationFlow.ts
-typescript// Update Task 2 sub payload handler (~3 LOC)
-if (payload.new.status === 'submitted') {
-  dispatch({ type: 'SET_SUBMITTED', payload: true });
-} else if (payload.new.pdf_url) { // New case
-  dispatch({ type: 'SET_PDF_URL', payload: payload.new.pdf_url });
-}
+3. **Error Handling** (0.5 hour)
+   ```typescript
+   try {
+     // fetch logic above
+   } catch (error) {
+     toast.error("Failed to load summary—retry?");
+     setShowRetry(true);
+   }
+   ```
 
-// Reducer (~1 LOC)
-case 'SET_PDF_URL': return { ...state, pdfUrl: payload };
-Explanation: Extends existing sub. Reuses dispatch. LOC: 4. Validates: Triggers on Task 3 update.
-Step 2: Download UI in ConversationInterface.tsx
-tsx// Update submitted div from Task 2: {submitted && !pdfUrl && <div className="text-green-600 text-center">PDF generating...</div>}
-{submitted && pdfUrl && (
-  <div className="text-center mt-4">
-    <p>PDF ready!</p>
-    <a href={pdfUrl} download className="btn-primary underline">Download PDF</a>
-  </div>
-)}
-Explanation: Conditional link reuses class; props from hook. LOC: 5. Validates: Appears post-sub; direct download.
-Testing
-Manual: Submit (Task 2), process (Task 3)—link appears, click downloads. Verify sub on DB update.
+### Anti-Bloat Notes
+- ~20-30 LOC total (inline JSX, no new files)
+- Truncate summary at 300 words
+- Reuse existing styles/state—no new CSS/vars
+- Remove any manual "Generate Summary" buttons
+
+### Testing
+- 2-3 Jest mocks in existing hook tests (success fetch shows div; error shows toast)
+- Manual: Record → Auto-display; verify no content leak
+
+### AI Prompts
+
+1. **AI Prompt 1:** "Senior React dev: CoT for embedding summary fetch in existing handleConversationEnd(): 1. Await generation. 2. Fetch summary only via Supabase. 3. Set state/toggle flag. Minimal TS code (~20 LOC); reuse client/effects. Constraints: No new components; error toast via global util only."
+
+2. **AI Prompt 2:** "UI expert: Few-shot inline summary in convo interface: Example {end && <div>Text</div>}. Now: Conditional div post-messages with summary + note. Tailwind responsive, no props/state vars."
+
+3. **AI Prompt 3:** "Error pro: Add try-catch to fetch in hook. Structured: Risks (network/RLS), minimal code, 2 test mocks. Reuse global toast; no retry logic."
+
+---
+
+## Task 2: Implement Submission Confirmation
+
+**Objective:** Add one-click button in summary section to update status and enqueue PDF job. Reuse real-time for status if convo channel exists.
+
+### Steps
+
+1. **Add Handler** (0.75 hour)
+   ```typescript
+   const handleSubmit = async () => {
+     await supabase
+       .from('chapters')
+       .update({ status: 'submitted' })
+       .eq('id', chapterId);
+     
+     await supabase.queue.send({
+       queue_name: 'pdf_jobs',
+       message: { type: 'chapter', chapter_id: chapterId }
+     });
+     
+     setSubmitted(true);
+   };
+   ```
+
+2. **Embed UI** (0.5 hour)
+   ```tsx
+   // Below summary div
+   {!submitted && (
+     <button 
+       onClick={handleSubmit} 
+       className="bg-blue-500 text-white px-4 py-2 rounded mt-2" 
+       disabled={loading}
+     >
+       Confirm & Submit
+     </button>
+   )}
+   
+   {submitted && (
+     <div className="mt-2 text-green-600">
+       Submitted! PDF generating...
+     </div>
+   )}
+   ```
+
+3. **Error Handling** (0.25 hour)
+   ```typescript
+   try {
+     // handler logic above
+   } catch (error) {
+     toast.error("Submission failed—try again?");
+   }
+   ```
+
+### Anti-Bloat Notes
+- ~15-20 LOC (inline button, no new state)
+- Simple enqueue payload
+- Reuse existing channel—add one subscription if needed (~5 LOC)
+- No auto-retry—user can click again
+
+### Testing
+- 2 mocks in hook tests (update + enqueue calls)
+- Manual: Submit → verify DB/queue update
+
+### AI Prompts
+
+1. **AI Prompt 1:** "Fullstack: Submit handler in existing hook—update status, enqueue {type:'chapter', id}. Reuse convo real-time for status. Minimal async code (~15 LOC); fallback direct call commented. Constraints: No new channels if possible."
+
+2. **AI Prompt 2:** "UI: CoT for button in summary section: 1. Conditional on !submitted. 2. Click → handler. Few-shot: Simple disabled button. Tailwind only."
+
+---
+
+## Unified Task 3-4: Develop PDF Queue Consumer
+
+**Objective:** Single edge function processes queue for both chapter (single PDF) and book (compiled PDF). Frontend trigger for book via Dashboard.
+
+### Steps
+
+1. **Function Setup** (1 hour)
+   ```typescript
+   // supabase/functions/pdf-processor/index.ts
+   import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+   
+   serve(async () => {
+     while (true) {
+       const { data: msg } = await supabase.queue.consume({
+         queue_name: 'pdf_jobs'
+       });
+       
+       if (!msg) continue;
+       
+       await processJob(msg.message);
+       await supabase.queue.ack({ msg_id: msg.msg_id });
+     }
+   });
+   ```
+
+2. **Shared Processing Logic** (2.5 hours)
+   ```typescript
+   async function processJob(job: any) {
+     let html: string;
+     let filename: string;
+     
+     if (job.type === 'chapter') {
+       const { data } = await supabase
+         .from('chapters')
+         .select('content, title')
+         .eq('id', job.chapter_id)
+         .single();
+       
+       html = `<html><head><style>
+         body{font-family:serif;margin:1in;}
+         h1{font-size:24pt;}
+       </style></head><body>
+         <h1>${data.title}</h1>
+         <div class="content">${data.content}</div>
+       </body></html>`;
+       
+       filename = `chapter-${job.chapter_id}.pdf`;
+     }
+     
+     if (job.type === 'book') {
+       const { data: chapters } = await supabase
+         .from('chapters')
+         .select('content, title, chapter_number')
+         .eq('book_id', job.book_id)
+         .eq('status', 'submitted')
+         .order('chapter_number')
+         .limit(10);
+       
+       html = `<html><head><style>
+         body{font-family:serif;margin:1in;}
+         h1{font-size:24pt;}
+       </style></head><body>
+         <h1>${bookTitle}</h1>
+         <ol class="toc">
+           ${chapters.map(c => 
+             `<li>Chapter ${c.chapter_number}: ${c.title}</li>`
+           ).join('')}
+         </ol>
+         ${chapters.map(c => 
+           `<h2>${c.title}</h2>${c.content}`
+         ).join('')}
+       </body></html>`;
+       
+       filename = `book-${job.book_id}-full.pdf`;
+     }
+     
+     // Generate PDF
+     const browser = await puppeteer.launch({
+       executablePath: await chromium.executablePath(),
+       args: chromium.args
+     });
+     
+     const page = await browser.newPage();
+     await page.setContent(html);
+     const pdfBuffer = await page.pdf({
+       format: 'A4',
+       printBackground: true
+     });
+     await browser.close();
+     
+     // Upload & Update DB
+     const { data: { publicUrl } } = await supabase.storage
+       .from('pdfs')
+       .upload(filename, pdfBuffer);
+     
+     if (job.type === 'chapter') {
+       await supabase.from('chapters')
+         .update({ pdf_url: publicUrl })
+         .eq('id', job.chapter_id);
+     } else {
+       await supabase.from('books')
+         .update({ full_pdf_url: publicUrl })
+         .eq('id', job.book_id);
+     }
+   }
+   ```
+
+3. **Book Trigger** (0.5 hour)
+   ```typescript
+   // In dashboard hook
+   const { count } = await supabase
+     .from('chapters')
+     .select('id', { count: 'exact', head: true })
+     .eq('book_id', bookId)
+     .eq('status', 'submitted');
+   
+   if (count >= 3) {
+     await supabase.queue.send({
+       queue_name: 'pdf_jobs',
+       message: { type: 'book', book_id: bookId }
+     });
+   }
+   ```
+
+4. **Error Handling** (0.5 hour)
+   ```typescript
+   try {
+     await processJob(job);
+   } catch (error) {
+     await supabase.queue.move_to_dead_letter({ msg_id });
+     await supabase.from('chapters')
+       .update({ status: 'pdf_failed' })
+       .eq('id', job.chapter_id || job.book_id);
+   }
+   ```
+
+### Anti-Bloat Notes
+- ~100-150 LOC total (shared fetch/HTML/Puppeteer functions)
+- Slice chapters to 10 max
+- No TOC pages (simple list only)
+- Use Storage bucket 'pdfs' (create if needed)
+- Dead-letter queue auto-configured
+
+### Testing
+- CLI serve local function
+- Manual enqueue via SQL insert mock message
+- Verify PDFs (1 chapter, 1 book with 3 dummy chapters)
+- 4 Jest mocks for function flows
+
+### AI Prompts
+
+1. **AI Prompt 1:** "Edge dev: CoT for unified pdf-processor: 1. Consume/ack loop. 2. Branch on type (chapter: single select; book: multi order/limit 10). 3. Shared HTML (simple chapter; book prepends TOC list). 4. Puppeteer gen/upload/DB update. Minimal Deno code (~100 LOC); service role. Constraints: Inline style/strings; no extras like pages."
+
+2. **AI Prompt 2:** "Templating: Few-shot shared HTML func: Input {type, data}. Example chapter: <h1>title</h1>content. Book: Add <ol>${map li title}</ol> before sections. Minimal inline CSS (serif, margins)."
+
+3. **AI Prompt 3:** "Dashboard trigger + tests: React query for count >=3, enqueue book. 4 manual/CLI tests (chapter/book success/error). Concise code."
+
+---
+
+## Appendix: Cross-Task Tips
+
+| Area | Guideline | Notes |
+|------|-----------|--------|
+| **Deployment** | Git push auto-deploys functions | No manual deployment needed |
+| **Testing** | Test incrementally after each task | Full flow: record → submit → download |
+| **Performance** | Reuse existing channels/clients | Avoid new WebSocket connections |
+| **Storage** | Create 'pdfs' bucket if missing | Set appropriate RLS policies |
+| **Error Recovery** | User can retry failed operations | No complex retry logic needed |
+| **Scaling** | Queue handles concurrency naturally | Dead letter for failed jobs |
+
+### Common Pitfalls
+- Don't create new components for UI changes
+- Verify RLS policies on new columns
+- Test PDF generation with real chapter content
+- Ensure service role permissions for queue operations

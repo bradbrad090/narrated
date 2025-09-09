@@ -41,11 +41,11 @@ export const VoiceConversationMode: React.FC<VoiceConversationModeProps> = ({
   };
 
   return (
-    <Card className={`w-full min-h-[320px] ${className}`} data-chapter-summary="true">
+    <Card className={`w-full min-h-[320px] ${className}`}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Bot className="h-5 w-5" />
-          Voice-to-Voice AI Conversation - Chapter Summary
+          Voice-to-Voice AI Conversation
           {isAISpeaking && (
             <div className="flex items-center gap-1 text-sm text-green-600">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>

@@ -67,11 +67,11 @@ export const SelfConversationMode: React.FC<SelfConversationModeProps> = ({
   };
 
   return (
-    <Card className={`w-full min-h-[320px] ${className}`} data-chapter-summary="true">
+    <Card className={`w-full min-h-[320px] ${className}`}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <User className="h-5 w-5" />
-          Self Conversation - Chapter Summary
+          Self Conversation
         </CardTitle>
         <p className="text-sm text-muted-foreground">
           Write your thoughts and memories using text or voice input

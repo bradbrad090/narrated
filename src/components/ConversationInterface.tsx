@@ -36,9 +36,6 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   const [showSummary, setShowSummary] = useState(false);
   const [summary, setSummary] = useState<string>('');
   const [loadingSummary, setLoadingSummary] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [autoShowSummary, setAutoShowSummary] = useState(false);
   const { toast } = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -49,8 +46,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     loadConversationHistory,
     deleteConversation,
     deletingSessionIds,
-    endConversation,
-    submitConversation
+    endConversation
   } = useConversationState({
     userId,
     bookId,
@@ -72,72 +68,6 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       setLoadingSummary(false);
     }
   }, [endConversation]);
-
-  // Generate summary from existing conversations
-  const generateSummaryFromHistory = useCallback(async () => {
-    if (!chapterId || conversationHistory.length === 0) return;
-    
-    setLoadingSummary(true);
-    try {
-      // Get the most recent conversation with messages
-      const recentConversation = conversationHistory.find(conv => conv.messages && conv.messages.length > 0);
-      
-      if (recentConversation) {
-        const { data: generationData, error: generationError } = await supabase.functions.invoke('generate-summary', {
-          body: {
-            userId,
-            bookId,
-            chapterId,
-            conversationHistory: recentConversation.messages
-          }
-        });
-
-        if (generationError) {
-          console.error('Summary generation error:', generationError);
-          setSummary("Based on your conversations, we'll generate a comprehensive chapter for your autobiography.");
-        } else if (generationData?.success && generationData?.summary) {
-          setSummary(generationData.summary.length > 300 ? `${generationData.summary.slice(0, 300)}...` : generationData.summary);
-        } else {
-          setSummary("Based on your conversations, we'll generate a comprehensive chapter for your autobiography.");
-        }
-      } else {
-        setSummary("Based on your conversations, we'll generate a comprehensive chapter for your autobiography.");
-      }
-      
-      setAutoShowSummary(true);
-    } catch (error) {
-      console.error('Failed to generate summary from history:', error);
-      setSummary("Based on your conversations, we'll generate a comprehensive chapter for your autobiography.");
-      setAutoShowSummary(true);
-    } finally {
-      setLoadingSummary(false);
-    }
-  }, [chapterId, conversationHistory, userId, bookId]);
-
-  // Handle submit for PDF generation
-  const handleSubmit = useCallback(async () => {
-    if (!chapterId || submitting || submitted) return;
-    
-    setSubmitting(true);
-    try {
-      await submitConversation();
-      setSubmitted(true);
-      setShowSummary(false);
-      setAutoShowSummary(false); // Hide auto summary after submission
-      toast({
-        title: "Submitted for PDF generation",
-        description: "Your chapter is being processed...",
-      });
-    } catch (error) {
-      toast({
-        title: "Submission failed",
-        description: "Please try again",
-        variant: "destructive",
-      });
-    } finally {
-      setSubmitting(false);
-    }
-  }, [chapterId, submitting, submitted, submitConversation, toast]);
 
   // Save current conversation when chapter changes
   const saveCurrentConversation = useCallback(async () => {
@@ -187,13 +117,6 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       }
     }
   }, [currentSession, userId, chapterId]);
-
-  // Auto-show submit button when conversations exist
-  useEffect(() => {
-    if (chapterId && conversationHistory.length > 0 && !submitted && !autoShowSummary && !showSummary) {
-      generateSummaryFromHistory();
-    }
-  }, [chapterId, conversationHistory.length, submitted, autoShowSummary, showSummary, generateSummaryFromHistory]);
 
   // Listen for save events from parent component
   useEffect(() => {
@@ -323,12 +246,13 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           )}
         </Tabs>
 
-        {/* Submission Status */}
-        {submitted && (
-          <div className="p-4 bg-green-50 border border-green-200 rounded-lg mt-6 text-center">
-            <p className="text-green-800 font-medium">PDF Generation in Progress</p>
-            <p className="text-sm text-green-600 mt-1">
-              Your chapter has been submitted and is being processed into a PDF.
+        {/* Auto-generated Summary Display */}
+        {showSummary && (
+          <div className="p-4 bg-card rounded-lg border mt-6">
+            <h2 className="text-lg font-semibold mb-2">Chapter Summary</h2>
+            <p className="text-sm text-muted-foreground mb-2">{summary}</p>
+            <p className="text-xs text-muted-foreground">
+              The AI has crafted your full chapter behind the scenes.
             </p>
           </div>
         )}

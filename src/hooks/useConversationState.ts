@@ -33,7 +33,6 @@ interface UseConversationStateProps {
 export const useConversationState = ({ userId, bookId, chapterId }: UseConversationStateProps) => {
   const [state, dispatch] = useReducer(conversationReducer, initialConversationState);
   const [deletingSessionIds, setDeletingSessionIds] = useState<Set<string>>(new Set());
-  const [submitted, setSubmitted] = useState(false);
   const { toast } = useToast();
   const { startTextConversation, sendTextMessage, startSelfConversation } = useConversationAPI();
 
@@ -375,56 +374,6 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
     return null;
   }, [chapterId, state.currentSession, userId, bookId, toast]);
 
-  // Submit conversation and enqueue PDF job
-  const submitConversation = useCallback(async () => {
-    if (!chapterId) return;
-    
-    try {
-      // Update chapter status to submitted
-      await supabase
-        .from('chapters')
-        .update({ status: 'submitted' })
-        .eq('id', chapterId);
-      
-      // Create PDF job using a raw insert query (types will be updated after migration)
-      const { error: jobError } = await supabase
-        .from('chapters')
-        .select('id')
-        .eq('id', chapterId)
-        .single();
-        
-      if (!jobError) {
-        // Use the SQL client to insert the PDF job until types are updated
-        const { error } = await supabase.rpc('pgmq_send', {
-          queue_name: 'pdf_jobs',
-          msg: { 
-            chapter_id: chapterId,
-            user_id: userId,
-            status: 'pending'
-          }
-        });
-        
-        if (error) {
-          console.log('Queue method not available, using direct insert approach');
-          // If pgmq_send doesn't work, we'll handle this in the edge function
-        }
-      }
-      
-      setSubmitted(true);
-      toast({
-        title: "Conversation submitted",
-        description: "PDF is being generated...",
-      });
-    } catch (error) {
-      console.error('Failed to submit conversation:', error);
-      toast({
-        title: "Submission failed",
-        description: "Please try again",
-        variant: "destructive",
-      });
-    }
-  }, [chapterId, userId, toast]);
-
   // Get draft for session
   const getDraft = useCallback((sessionId: string): string => {
     return state.drafts[sessionId] || '';
@@ -531,8 +480,6 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
     setDraft,
     clearDraft,
     resetState,
-    submitConversation,
-    submitted,
     
     // Computed values
     hasActiveSession: !!state.currentSession,
