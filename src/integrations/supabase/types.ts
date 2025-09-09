@@ -269,6 +269,8 @@ export type Database = {
           content: string | null
           created_at: string
           id: string
+          pdf_url: string | null
+          status: string | null
           summary: string | null
           title: string
           updated_at: string
@@ -280,6 +282,8 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
+          pdf_url?: string | null
+          status?: string | null
           summary?: string | null
           title?: string
           updated_at?: string
@@ -291,6 +295,8 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
+          pdf_url?: string | null
+          status?: string | null
           summary?: string | null
           title?: string
           updated_at?: string
@@ -499,6 +505,42 @@ export type Database = {
           },
         ]
       }
+      pdf_jobs: {
+        Row: {
+          chapter_id: string
+          created_at: string
+          error_message: string | null
+          id: string
+          pdf_url: string | null
+          processed_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          chapter_id: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          pdf_url?: string | null
+          processed_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          chapter_id?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          pdf_url?: string | null
+          processed_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profile_question_responses: {
         Row: {
           answer_text: string | null
@@ -580,6 +622,16 @@ export type Database = {
         Args: { question_text: string }
         Returns: string
       }
+      get_pdf_jobs: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          enqueued_at: string
+          message: Json
+          msg_id: number
+          read_ct: number
+          vt: string
+        }[]
+      }
       is_question_duplicate: {
         Args: {
           p_book_id: string
@@ -588,6 +640,10 @@ export type Database = {
           p_user_id: string
         }
         Returns: boolean
+      }
+      pgmq_send: {
+        Args: { msg: Json; queue_name: string }
+        Returns: number
       }
     }
     Enums: {
