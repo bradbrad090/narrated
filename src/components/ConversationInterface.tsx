@@ -39,13 +39,6 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   const { toast } = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  console.log('ConversationInterface state:', { 
-    showSummary, 
-    summary: summary?.substring(0, 50) + '...', 
-    loadingSummary,
-    selectedMode 
-  });
-
   const {
     history: conversationHistory,
     context,
@@ -53,12 +46,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     loadConversationHistory,
     deleteConversation,
     deletingSessionIds,
-    endConversation,
-    submitConversation,
-    submitted,
-    startConversation,
-    sendMessage,
-    resetState
+    endConversation
   } = useConversationState({
     userId,
     bookId,
@@ -67,59 +55,19 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
 
   // Handle conversation end with summary fetch
   const handleEndConversation = useCallback(async () => {
-    console.log('🟣 handleEndConversation started', { loadingSummary, currentSession: !!currentSession });
     setLoadingSummary(true);
     try {
-      console.log('🟣 Calling endConversation...');
       const summaryResult = await endConversation();
-      console.log('🟣 endConversation result:', { summaryResult, length: summaryResult?.length });
-      
       if (summaryResult) {
-        const truncatedSummary = summaryResult.length > 300 ? `${summaryResult.slice(0, 300)}...` : summaryResult;
-        console.log('🟣 Setting summary and showSummary=true', { truncatedSummary });
-        setSummary(truncatedSummary);
+        setSummary(summaryResult.length > 300 ? `${summaryResult.slice(0, 300)}...` : summaryResult);
         setShowSummary(true);
-      } else {
-        console.log('🟣 No summary result - checking if there are conversation messages to generate summary from');
-        
-        // If no summary from endConversation but we have a current session with messages,
-        // try to generate summary directly
-        if (currentSession && currentSession.messages && currentSession.messages.length > 0) {
-          console.log('🟣 Found session with messages, generating summary directly...', { messagesCount: currentSession.messages.length });
-          
-          try {
-            const { data: summaryData, error: summaryError } = await supabase.functions.invoke('generate-summary', {
-              body: {
-                userId,
-                bookId,
-                chapterId,
-                conversationHistory: currentSession.messages
-              }
-            });
-            
-            console.log('🟣 Direct summary generation result:', { summaryData, summaryError });
-            
-            if (!summaryError && summaryData?.success && summaryData.summary) {
-              const truncatedSummary = summaryData.summary.length > 300 ? `${summaryData.summary.slice(0, 300)}...` : summaryData.summary;
-              setSummary(truncatedSummary);
-              setShowSummary(true);
-              console.log('🟣 Direct summary generation successful');
-            } else {
-              console.error('🔴 Direct summary generation failed:', summaryError || summaryData?.error);
-            }
-          } catch (directSummaryError) {
-            console.error('🔴 Direct summary generation error:', directSummaryError);
-          }
-        }
       }
     } catch (error) {
-      console.error('🔴 Error in handleEndConversation:', error);
       // Error already handled in endConversation
     } finally {
-      console.log('🟣 Setting loadingSummary=false');
       setLoadingSummary(false);
     }
-  }, [endConversation, currentSession, userId, bookId, chapterId]);
+  }, [endConversation]);
 
   // Save current conversation when chapter changes
   const saveCurrentConversation = useCallback(async () => {
@@ -173,44 +121,31 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   // Listen for save events from parent component
   useEffect(() => {
     const handleSaveEvent = () => {
-      console.log('🟡 handleSaveEvent triggered');
       saveCurrentConversation();
     };
 
     const handleSaveAndEndEvent = async () => {
-      console.log('🟢 handleSaveAndEndEvent triggered', { currentSession, hasMessages: currentSession?.messages?.length });
+      console.log('handleSaveAndEndEvent triggered', { currentSession });
       
       // First save the conversation
-      console.log('🟢 Starting saveCurrentConversation...');
       await saveCurrentConversation();
-      console.log('🟢 saveCurrentConversation completed');
       
       // Then end the conversation and generate summary
       // We need to call endConversation before clearing the session
-      console.log('🟢 Starting handleEndConversation...');
       await handleEndConversation();
-      console.log('🟢 handleEndConversation completed');
       
       // Reset to the default tab
-      console.log('🟢 Resetting to self mode');
       setSelectedMode('self');
     };
 
     const element = containerRef.current;
-    console.log('🔧 Setting up event listeners', { element, hasElement: !!element });
-    
     if (element) {
       element.addEventListener('saveCurrentConversation', handleSaveEvent);
       element.addEventListener('saveAndEndConversation', handleSaveAndEndEvent);
-      console.log('🔧 Event listeners added successfully');
-      
       return () => {
-        console.log('🔧 Cleaning up event listeners');
         element.removeEventListener('saveCurrentConversation', handleSaveEvent);
         element.removeEventListener('saveAndEndConversation', handleSaveAndEndEvent);
       };
-    } else {
-      console.error('🔴 No container element found for event listeners');
     }
   }, [saveCurrentConversation, handleEndConversation]);
 
@@ -290,11 +225,6 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                   chapterId={chapterId}
                   context={context}
                   onConversationSaved={loadConversationHistory}
-                  currentSession={currentSession}
-                  ui={{ isLoading: false, isTyping: false }}
-                  startConversation={startConversation}
-                  sendMessage={sendMessage}
-                  endConversation={endConversation}
                 />
               </ErrorBoundary>
             </TabsContent>
@@ -320,53 +250,12 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
         {showSummary && (
           <div className="p-4 bg-card rounded-lg border mt-6">
             <h2 className="text-lg font-semibold mb-2">Chapter Summary</h2>
-            <textarea 
-              value={summary} 
-              readOnly 
-              className="w-full h-32 p-3 text-sm text-muted-foreground bg-background border border-border rounded resize-none mb-2"
-            />
-            <p className="text-xs text-muted-foreground mb-2">
+            <p className="text-sm text-muted-foreground mb-2">{summary}</p>
+            <p className="text-xs text-muted-foreground">
               The AI has crafted your full chapter behind the scenes.
             </p>
-            
-            {/* Submission Controls */}
-            {!submitted ? (
-              <button 
-                onClick={() => {
-                  console.log('Submit button clicked!');
-                  submitConversation();
-                }}
-                disabled={loadingSummary}
-                className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded mt-2 disabled:opacity-50"
-              >
-                {loadingSummary ? "Processing..." : "Confirm & Submit"}
-              </button>
-            ) : (
-              <div className="mt-2 space-y-2">
-                <div className="text-green-600 font-medium">
-                  ✓ Submitted! PDF generating...
-                </div>
-                <button
-                  onClick={() => {
-                    console.log('🔄 Starting new conversation...');
-                    setShowSummary(false);
-                    setSummary('');
-                    resetState();
-                    setSelectedMode('text-assisted');
-                  }}
-                  className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-4 py-2 rounded text-sm"
-                >
-                  Start New Conversation
-                </button>
-              </div>
-            )}
           </div>
         )}
-        
-        {/* Debug info */}
-        <div className="mt-2 text-xs text-gray-500">
-          Debug: showSummary={String(showSummary)}, submitted={String(submitted)}, summary length={summary?.length || 0}
-        </div>
 
       </div>
     </ErrorBoundary>

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageCircle, Send, Loader2, CheckCircle, Sparkles, RotateCcw } from 'lucide-react';
+import { useConversationState } from '@/hooks/useConversationState';
 import { CONVERSATION_CONFIG } from '@/config/conversationConfig';
 
 interface TextAssistedModeProps {
@@ -13,12 +14,6 @@ interface TextAssistedModeProps {
   context?: any;
   className?: string;
   onConversationSaved?: () => void;
-  // Props passed from parent to avoid duplicate state
-  currentSession?: any;
-  ui?: { isLoading: boolean; isTyping: boolean };
-  startConversation?: (type: string) => void;
-  sendMessage?: (message: string) => void;
-  endConversation?: () => void;
 }
 
 export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
@@ -27,13 +22,7 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
   chapterId,
   context,
   className = "",
-  onConversationSaved,
-  // Use props from parent instead of separate state hook
-  currentSession,
-  ui = { isLoading: false, isTyping: false },
-  startConversation,
-  sendMessage,
-  endConversation
+  onConversationSaved
 }) => {
   const [currentMessage, setCurrentMessage] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(true);
@@ -41,16 +30,16 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Remove the duplicate useConversationState hook since we get the state from props
-  const { isLoading, isTyping } = ui;
-
-  // Debug session state
-  console.log('🔸 TextAssistedMode session state:', { 
-    hasSession: !!currentSession, 
-    sessionId: currentSession?.sessionId,
-    messageCount: currentSession?.messages?.length || 0,
-    isLoading,
-    isTyping 
+  const {
+    currentSession,
+    ui: { isLoading, isTyping },
+    startConversation,
+    sendMessage,
+    endConversation
+  } = useConversationState({
+    userId,
+    bookId,
+    chapterId
   });
 
   // Optimized scroll to bottom with proper cleanup
@@ -71,12 +60,8 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
   }, [currentSession?.messages?.length, isTyping]);
 
   const handleSendMessage = async () => {
-    if (!currentMessage.trim() || !currentSession || !sendMessage) {
-      console.log('🔷 Send message blocked:', { hasMessage: !!currentMessage.trim(), hasSession: !!currentSession, hasSendMessage: !!sendMessage });
-      return;
-    }
+    if (!currentMessage.trim() || !currentSession) return;
 
-    console.log('🔷 Sending message:', { message: currentMessage.trim(), sessionId: currentSession.sessionId });
     await sendMessage(currentMessage);
     setCurrentMessage('');
     textareaRef.current?.focus();
@@ -90,10 +75,7 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
   };
 
   const handleStartConversation = () => {
-    console.log('🔶 Starting text conversation...');
-    if (startConversation) {
-      startConversation('interview');
-    }
+    startConversation('interview');
   };
 
   // Resume functionality removed - users can only view and delete conversations
@@ -105,10 +87,10 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
     }
     
     return content.split('\n').map((line, index) => (
-      <span key={index}>
+      <React.Fragment key={index}>
         {line}
         {index < content.split('\n').length - 1 && <br />}
-      </span>
+      </React.Fragment>
     ));
   };
 
@@ -216,18 +198,12 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
                 </Button>
                 <Button
                   onClick={() => {
-                    console.log('🔵 Submit conversation button clicked');
+                    console.log('Submit conversation button clicked');
                     // Dispatch event to parent to handle save and summary generation
                     const event = new CustomEvent('saveAndEndConversation');
                     const container = document.querySelector('[data-conversation-interface]');
-                    console.log('🔵 Dispatching saveAndEndConversation event', { container, eventCreated: !!event });
-                    
-                    if (container) {
-                      container.dispatchEvent(event);
-                      console.log('🔵 Event dispatched successfully');
-                    } else {
-                      console.error('🔴 Container not found for event dispatch');
-                    }
+                    console.log('Dispatching saveAndEndConversation event', { container });
+                    container?.dispatchEvent(event);
                   }}
                   variant="outline"
                   size="icon"

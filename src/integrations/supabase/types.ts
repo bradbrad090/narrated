@@ -583,16 +583,6 @@ export type Database = {
         Args: { question_text: string }
         Returns: string
       }
-      get_pdf_jobs: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          enqueued_at: string
-          message: Json
-          msg_id: number
-          read_ct: number
-          vt: string
-        }[]
-      }
       is_question_duplicate: {
         Args: {
           p_book_id: string
@@ -601,10 +591,6 @@ export type Database = {
           p_user_id: string
         }
         Returns: boolean
-      }
-      pgmq_send: {
-        Args: { msg: Json; queue_name: string }
-        Returns: number
       }
     }
     Enums: {

@@ -377,38 +377,20 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
 
   // Submit conversation and enqueue PDF job
   const submitConversation = useCallback(async () => {
-    console.log('submitConversation called', { chapterId });
-    if (!chapterId) {
-      console.log('No chapterId, returning early');
-      return;
-    }
+    if (!chapterId) return;
     
     try {
-      console.log('Updating chapter status to submitted');
       // Update chapter status to submitted
-      const { data, error } = await supabase
+      await supabase
         .from('chapters')
         .update({ status: 'submitted' })
         .eq('id', chapterId);
       
-      console.log('Chapter update result:', { data, error });
-      
-      if (error) {
-        throw error;
-      }
-      
-      console.log('Enqueuing PDF job');
       // Enqueue PDF job (using SQL function as client doesn't have queue methods)
-      const { data: queueData, error: queueError } = await supabase.rpc('pgmq_send' as any, {
+      await supabase.rpc('pgmq_send', {
         queue_name: 'pdf_jobs',
         msg: { type: 'chapter', chapter_id: chapterId }
       });
-      
-      console.log('Queue result:', { queueData, queueError });
-      
-      if (queueError) {
-        throw queueError;
-      }
       
       setSubmitted(true);
       toast({
