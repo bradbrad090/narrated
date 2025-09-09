@@ -323,7 +323,39 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           )}
         </Tabs>
 
-        
+        {/* Auto-generated Summary Display */}
+        {(showSummary || autoShowSummary) && !submitted && (
+          <div className="p-4 bg-card rounded-lg border mt-6">
+            <h2 className="text-lg font-semibold mb-2">Chapter Summary</h2>
+            {loadingSummary ? (
+              <div className="flex items-center justify-center py-4">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                <span className="ml-2 text-sm text-muted-foreground">Generating summary...</span>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Looking at the code, this interface is the Chapter Summary section within the ConversationInterface component. Specifically, it's the section that renders when (showSummary || autoShowSummary) && !submitted is true.
+
+                  In the code, this section is labeled with the comment:
+
+                  {/* Auto-generated Summary Display */}
+                  It's part of the ConversationInterface component located in src/components/ConversationInterface.tsx, around lines 326-353. The component itself doesn't have a separate name - it's just a conditional JSX block within the main ConversationInterface component that displays the chapter summary and submit button.
+                </p>
+                <div className="flex justify-center">
+                  <Button 
+                    onClick={handleSubmit}
+                    disabled={submitting || submitted || loadingSummary}
+                    className="px-6 py-2"
+                  >
+                    {submitting ? 'Submitting...' : 'Confirm and Submit for PDF'}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
         {/* Submission Status */}
         {submitted && (
           <div className="p-4 bg-green-50 border border-green-200 rounded-lg mt-6 text-center">
