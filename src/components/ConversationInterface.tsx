@@ -320,7 +320,11 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
         {showSummary && (
           <div className="p-4 bg-card rounded-lg border mt-6">
             <h2 className="text-lg font-semibold mb-2">Chapter Summary</h2>
-            <p className="text-sm text-muted-foreground mb-2">{summary}</p>
+            <textarea 
+              value={summary} 
+              readOnly 
+              className="w-full h-48 p-3 text-sm text-muted-foreground bg-background border border-border rounded resize-none mb-2"
+            />
             <p className="text-xs text-muted-foreground mb-2">
               The AI has crafted your full chapter behind the scenes.
             </p>
