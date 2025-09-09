@@ -323,39 +323,6 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           )}
         </Tabs>
 
-        {/* Auto-generated Summary Display */}
-        {(showSummary || autoShowSummary) && !submitted && (
-          <div className="p-4 bg-card rounded-lg border mt-6">
-            <h2 className="text-lg font-semibold mb-2">Chapter Summary</h2>
-            {loadingSummary ? (
-              <div className="flex items-center justify-center py-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                <span className="ml-2 text-sm text-muted-foreground">Generating summary...</span>
-              </div>
-            ) : (
-              <>
-                <p className="text-sm text-muted-foreground mb-4">
-                  A brief summary of this chapter will appear here to help you understand the key themes and content.
-                </p>
-                <div className="text-sm text-muted-foreground mb-4 space-y-1">
-                  <p>- Chapter begins with focus on life before birth.</p>
-                  <p>- Conversation initiated by AI requesting childhood details.</p>
-                  <p>- AI inquires about a small object or item from user's childhood home.</p>
-                  <p>- AI suggests item could be something kept near the bed or on a shelf.</p>
-                </div>
-                <div className="flex justify-center">
-                  <Button 
-                    onClick={handleSubmit}
-                    disabled={submitting || submitted || loadingSummary}
-                    className="px-6 py-2"
-                  >
-                    {submitting ? 'Submitting...' : 'Confirm and Submit for PDF'}
-                  </Button>
-                </div>
-              </>
-            )}
-          </div>
-        )}
         
         {/* Submission Status */}
         {submitted && (
