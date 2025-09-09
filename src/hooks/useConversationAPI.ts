@@ -124,9 +124,9 @@ export const useConversationAPI = () => {
         .from('chat_histories')
         .insert({
           user_id: userId,
-          chapter_id: chapterId,
+          chapter_id: chapterId || null, // Handle empty chapterId properly
           session_id: sessionId,
-          conversation_type: 'self',
+          conversation_type: 'reflection', // Use allowed conversation type
           conversation_medium: 'text',
           messages: [{
             role: 'user',
