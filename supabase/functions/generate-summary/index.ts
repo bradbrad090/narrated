@@ -18,6 +18,10 @@ serve(async (req) => {
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
+    console.log('API Key present:', !!OPENAI_API_KEY);
+    console.log('Supabase URL present:', !!SUPABASE_URL);
+    console.log('Service role key present:', !!SUPABASE_SERVICE_ROLE_KEY);
+
     if (!OPENAI_API_KEY) {
       throw new Error('OpenAI API key not configured');
     }
@@ -26,7 +30,10 @@ serve(async (req) => {
       throw new Error('Supabase configuration not found');
     }
 
-    const { userId, bookId, chapterId, conversationHistory } = await req.json();
+    const requestBody = await req.json();
+    const { userId, bookId, chapterId, conversationHistory } = requestBody;
+
+    console.log('Request body received:', { userId: !!userId, bookId: !!bookId, chapterId: !!chapterId, conversationHistoryLength: conversationHistory?.length });
 
     if (!userId || !bookId || !chapterId) {
       return new Response(JSON.stringify({ error: 'Missing required parameters' }), {
