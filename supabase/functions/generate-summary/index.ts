@@ -43,60 +43,70 @@ serve(async (req) => {
     let summaryPrompt: string;
     let chapterTitle = '';
 
-    if (conversationHistory && Array.isArray(conversationHistory) && conversationHistory.length > 0) {
-      // Generate summary from conversation history
-      const { data: chapter } = await supabase
-        .from('chapters')
-        .select('title')
-        .eq('id', chapterId)
+    // Check if conversation history is provided
+    if (!conversationHistory || !Array.isArray(conversationHistory) || conversationHistory.length === 0) {
+      // If no conversation history, fetch saved conversations for this chapter
+      const { data: chatHistories, error: chatError } = await supabase
+        .from('chat_histories')
+        .select('messages')
         .eq('user_id', userId)
-        .single();
+        .eq('chapter_id', chapterId)
+        .order('created_at', { ascending: false });
 
-      chapterTitle = chapter?.title || 'Chapter';
-      
-      const conversationText = conversationHistory
-        .map(msg => `${msg.role === 'assistant' ? 'AI' : 'User'}: ${msg.content}`)
-        .join('\n');
+      if (chatError) {
+        console.error('Error fetching chat histories:', chatError);
+        return new Response(JSON.stringify({ error: 'Failed to fetch conversations' }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
 
-      summaryPrompt = `Create a bullet-point summary based on the following conversation about a life story chapter. Focus on the key life events, experiences, and stories shared by the user. Use concise bullet points that capture objective events and experiences in timeline format.
+      if (!chatHistories || chatHistories.length === 0) {
+        return new Response(JSON.stringify({ error: 'No conversations found for this chapter. Please have a conversation first before generating a summary.' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Combine all conversation messages from all chat histories
+      const allMessages = [];
+      for (const history of chatHistories) {
+        if (history.messages && Array.isArray(history.messages)) {
+          allMessages.push(...history.messages);
+        }
+      }
+
+      if (allMessages.length === 0) {
+        return new Response(JSON.stringify({ error: 'No conversation messages found for this chapter.' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      conversationHistory = allMessages;
+    }
+
+    // Get chapter title
+    const { data: chapter } = await supabase
+      .from('chapters')
+      .select('title')
+      .eq('id', chapterId)
+      .eq('user_id', userId)
+      .single();
+
+    chapterTitle = chapter?.title || 'Chapter';
+    
+    const conversationText = conversationHistory
+      .map(msg => `${msg.role === 'assistant' ? 'AI' : 'User'}: ${msg.content}`)
+      .join('\n');
+
+    summaryPrompt = `Create a bullet-point summary based on the following conversation about a life story chapter. Focus on the key life events, experiences, and stories shared by the user. Use concise bullet points that capture objective events and experiences in timeline format.
 
 Chapter Title: ${chapterTitle}
 Conversation:
 ${conversationText}
 
 Summary:`;
-    } else {
-      // Fallback: Fetch chapter content and generate summary from existing content
-      const { data: chapter, error: chapterError } = await supabase
-        .from('chapters')
-        .select('content, title')
-        .eq('id', chapterId)
-        .eq('user_id', userId)
-        .single();
-
-      if (chapterError || !chapter) {
-        console.error('Chapter fetch error:', chapterError);
-        return new Response(JSON.stringify({ error: 'Chapter not found or no conversation history provided' }), {
-          status: 404,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
-      if (!chapter.content || chapter.content.trim() === '') {
-        return new Response(JSON.stringify({ error: 'Chapter content is empty and no conversation history provided' }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
-      chapterTitle = chapter.title;
-      summaryPrompt = `Create a bullet-point summary of the following chapter content. Use concise bullet points that capture objective events and characters in timeline format.
-
-Chapter Title: ${chapter.title}
-Chapter Content: ${chapter.content}
-
-Summary:`;
-    }
 
     console.log('Generating summary for:', chapterTitle);
 
