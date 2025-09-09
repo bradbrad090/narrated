@@ -334,10 +334,15 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
               </div>
             ) : (
               <>
-                <p className="text-sm text-muted-foreground mb-4">{summary}</p>
-                <p className="text-xs text-muted-foreground mb-4">
-                  The AI has crafted your full chapter behind the scenes.
+                <p className="text-sm text-muted-foreground mb-4">
+                  A brief summary of this chapter will appear here to help you understand the key themes and content.
                 </p>
+                <div className="text-sm text-muted-foreground mb-4 space-y-1">
+                  <p>- Chapter begins with focus on life before birth.</p>
+                  <p>- Conversation initiated by AI requesting childhood details.</p>
+                  <p>- AI inquires about a small object or item from user's childhood home.</p>
+                  <p>- AI suggests item could be something kept near the bed or on a shelf.</p>
+                </div>
                 <div className="flex justify-center">
                   <Button 
                     onClick={handleSubmit}
