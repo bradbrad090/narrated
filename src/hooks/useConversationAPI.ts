@@ -126,7 +126,7 @@ export const useConversationAPI = () => {
           user_id: userId,
           chapter_id: chapterId || null, // Handle empty chapterId properly
           session_id: sessionId,
-          conversation_type: 'reflection', // Use allowed conversation type
+          conversation_type: 'self', // Use 'self' for self-conversations
           conversation_medium: 'text',
           messages: [{
             role: 'user',
@@ -173,19 +173,9 @@ const getConversationGoals = (type: string): string[] => {
         'Document important life events chronologically',
         'Capture personal growth and learning moments'
       ];
-    case 'reflection':
+    case 'self':
       return [
-        'Explore deeper meanings and life lessons',
-        'Understand personal values and beliefs',
-        'Reflect on life changes and transformations',
-        'Connect past experiences to current wisdom'
-      ];
-    case 'brainstorming':
-      return [
-        'Generate creative story ideas and themes',
-        'Identify unique personal experiences',
-        'Explore different narrative perspectives',
-        'Develop compelling chapter concepts'
+        'Document personal thoughts and experiences'
       ];
     default:
       return ['Engage in meaningful conversation about life experiences'];
