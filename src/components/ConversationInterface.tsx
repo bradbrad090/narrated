@@ -36,6 +36,8 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   const [showSummary, setShowSummary] = useState(false);
   const [summary, setSummary] = useState<string>('');
   const [loadingSummary, setLoadingSummary] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -46,7 +48,8 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     loadConversationHistory,
     deleteConversation,
     deletingSessionIds,
-    endConversation
+    endConversation,
+    submitConversation
   } = useConversationState({
     userId,
     bookId,
@@ -68,6 +71,30 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       setLoadingSummary(false);
     }
   }, [endConversation]);
+
+  // Handle submit for PDF generation
+  const handleSubmit = useCallback(async () => {
+    if (!chapterId || submitting || submitted) return;
+    
+    setSubmitting(true);
+    try {
+      await submitConversation();
+      setSubmitted(true);
+      setShowSummary(false); // Hide summary after submission
+      toast({
+        title: "Submitted for PDF generation",
+        description: "Your chapter is being processed...",
+      });
+    } catch (error) {
+      toast({
+        title: "Submission failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  }, [chapterId, submitting, submitted, submitConversation, toast]);
 
   // Save current conversation when chapter changes
   const saveCurrentConversation = useCallback(async () => {
@@ -247,12 +274,31 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
         </Tabs>
 
         {/* Auto-generated Summary Display */}
-        {showSummary && (
+        {showSummary && !submitted && (
           <div className="p-4 bg-card rounded-lg border mt-6">
             <h2 className="text-lg font-semibold mb-2">Chapter Summary</h2>
-            <p className="text-sm text-muted-foreground mb-2">{summary}</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground mb-4">{summary}</p>
+            <p className="text-xs text-muted-foreground mb-4">
               The AI has crafted your full chapter behind the scenes.
+            </p>
+            <div className="flex justify-center">
+              <Button 
+                onClick={handleSubmit}
+                disabled={submitting || submitted}
+                className="px-6 py-2"
+              >
+                {submitting ? 'Submitting...' : 'Confirm and Submit for PDF'}
+              </Button>
+            </div>
+          </div>
+        )}
+        
+        {/* Submission Status */}
+        {submitted && (
+          <div className="p-4 bg-green-50 border border-green-200 rounded-lg mt-6 text-center">
+            <p className="text-green-800 font-medium">PDF Generation in Progress</p>
+            <p className="text-sm text-green-600 mt-1">
+              Your chapter has been submitted and is being processed into a PDF.
             </p>
           </div>
         )}

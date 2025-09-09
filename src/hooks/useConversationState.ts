@@ -386,11 +386,14 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
         .update({ status: 'submitted' })
         .eq('id', chapterId);
       
-      // Enqueue PDF job (using SQL function as client doesn't have queue methods)
-      await supabase.rpc('pgmq_send', {
-        queue_name: 'pdf_jobs',
-        msg: { type: 'chapter', chapter_id: chapterId }
-      });
+      // Enqueue PDF job using the database function
+      const { error: queueError } = await supabase
+        .from('pdf_jobs')
+        .insert({
+          chapter_id: chapterId,
+          status: 'pending',
+          created_at: new Date().toISOString()
+        });
       
       setSubmitted(true);
       toast({
