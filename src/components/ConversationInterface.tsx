@@ -38,6 +38,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   const [loadingSummary, setLoadingSummary] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [autoShowSummary, setAutoShowSummary] = useState(false);
   const { toast } = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -72,6 +73,47 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     }
   }, [endConversation]);
 
+  // Generate summary from existing conversations
+  const generateSummaryFromHistory = useCallback(async () => {
+    if (!chapterId || conversationHistory.length === 0) return;
+    
+    setLoadingSummary(true);
+    try {
+      // Get the most recent conversation with messages
+      const recentConversation = conversationHistory.find(conv => conv.messages && conv.messages.length > 0);
+      
+      if (recentConversation) {
+        const { data: generationData, error: generationError } = await supabase.functions.invoke('generate-summary', {
+          body: {
+            userId,
+            bookId,
+            chapterId,
+            conversationHistory: recentConversation.messages
+          }
+        });
+
+        if (generationError) {
+          console.error('Summary generation error:', generationError);
+          setSummary("Based on your conversations, we'll generate a comprehensive chapter for your autobiography.");
+        } else if (generationData?.success && generationData?.summary) {
+          setSummary(generationData.summary.length > 300 ? `${generationData.summary.slice(0, 300)}...` : generationData.summary);
+        } else {
+          setSummary("Based on your conversations, we'll generate a comprehensive chapter for your autobiography.");
+        }
+      } else {
+        setSummary("Based on your conversations, we'll generate a comprehensive chapter for your autobiography.");
+      }
+      
+      setAutoShowSummary(true);
+    } catch (error) {
+      console.error('Failed to generate summary from history:', error);
+      setSummary("Based on your conversations, we'll generate a comprehensive chapter for your autobiography.");
+      setAutoShowSummary(true);
+    } finally {
+      setLoadingSummary(false);
+    }
+  }, [chapterId, conversationHistory, userId, bookId]);
+
   // Handle submit for PDF generation
   const handleSubmit = useCallback(async () => {
     if (!chapterId || submitting || submitted) return;
@@ -80,7 +122,8 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     try {
       await submitConversation();
       setSubmitted(true);
-      setShowSummary(false); // Hide summary after submission
+      setShowSummary(false);
+      setAutoShowSummary(false); // Hide auto summary after submission
       toast({
         title: "Submitted for PDF generation",
         description: "Your chapter is being processed...",
@@ -144,6 +187,13 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       }
     }
   }, [currentSession, userId, chapterId]);
+
+  // Auto-show submit button when conversations exist
+  useEffect(() => {
+    if (chapterId && conversationHistory.length > 0 && !submitted && !autoShowSummary && !showSummary) {
+      generateSummaryFromHistory();
+    }
+  }, [chapterId, conversationHistory.length, submitted, autoShowSummary, showSummary, generateSummaryFromHistory]);
 
   // Listen for save events from parent component
   useEffect(() => {
@@ -274,22 +324,31 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
         </Tabs>
 
         {/* Auto-generated Summary Display */}
-        {showSummary && !submitted && (
+        {(showSummary || autoShowSummary) && !submitted && (
           <div className="p-4 bg-card rounded-lg border mt-6">
             <h2 className="text-lg font-semibold mb-2">Chapter Summary</h2>
-            <p className="text-sm text-muted-foreground mb-4">{summary}</p>
-            <p className="text-xs text-muted-foreground mb-4">
-              The AI has crafted your full chapter behind the scenes.
-            </p>
-            <div className="flex justify-center">
-              <Button 
-                onClick={handleSubmit}
-                disabled={submitting || submitted}
-                className="px-6 py-2"
-              >
-                {submitting ? 'Submitting...' : 'Confirm and Submit for PDF'}
-              </Button>
-            </div>
+            {loadingSummary ? (
+              <div className="flex items-center justify-center py-4">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                <span className="ml-2 text-sm text-muted-foreground">Generating summary...</span>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground mb-4">{summary}</p>
+                <p className="text-xs text-muted-foreground mb-4">
+                  The AI has crafted your full chapter behind the scenes.
+                </p>
+                <div className="flex justify-center">
+                  <Button 
+                    onClick={handleSubmit}
+                    disabled={submitting || submitted || loadingSummary}
+                    className="px-6 py-2"
+                  >
+                    {submitting ? 'Submitting...' : 'Confirm and Submit for PDF'}
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         )}
         
