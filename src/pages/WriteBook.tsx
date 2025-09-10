@@ -23,6 +23,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { DndContext, closestCenter, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { updateChapterOrder } from '@/services/chapterService';
@@ -61,6 +62,7 @@ const WriteBook = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [activeChapterId, setActiveChapterId] = useState<string | null>(null);
+  const [showSubmitConfirmation, setShowSubmitConfirmation] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -1192,15 +1194,15 @@ const WriteBook = () => {
 
                         {/* Generate Chapter Button */}
                         <div className="flex justify-center gap-4 mb-4 mt-8">
-                        <Button
-                          variant="default"
-                          onClick={handleGenerateChapter}
-                          disabled={saving || !currentChapter || !user}
-                          size="lg"
-                          className="px-12 py-6 text-xl font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 rounded-xl border-2 border-primary/20 min-w-[400px]"
-                        >
-                          {saving ? "Generating..." : "Confirm & Submit"}
-                        </Button>
+                         <Button
+                           variant="default"
+                           onClick={() => setShowSubmitConfirmation(true)}
+                           disabled={saving || !currentChapter || !user}
+                           size="lg"
+                           className="px-12 py-6 text-xl font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 rounded-xl border-2 border-primary/20 min-w-[400px]"
+                         >
+                           {saving ? "Generating..." : "Confirm & Submit"}
+                         </Button>
                       </div>
 
                      {/* Toggle Button for Chapter Refinement Window */}
@@ -1267,6 +1269,24 @@ const WriteBook = () => {
         onConfirmDelete={confirmDeleteChapter}
         isDeleting={isDeleting}
       />
+
+      {/* Chapter Submission Confirmation Dialog */}
+      <AlertDialog open={showSubmitConfirmation} onOpenChange={setShowSubmitConfirmation}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Chapter Submission</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to submit this chapter? Once submitted for editing, you will no longer be able to modify your chapter.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>No, Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleGenerateChapter}>
+              Yes, Submit Chapter
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
     </div>
     </>
