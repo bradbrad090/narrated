@@ -121,6 +121,10 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
                 )}
                 {CONVERSATION_CONFIG.BUTTON_TEXT.START_CONVERSATION}
               </Button>
+              
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                Click to start a text conversation with AI. Type your thoughts and memories to develop your story.
+              </p>
             </div>
           </div>
         ) : (
