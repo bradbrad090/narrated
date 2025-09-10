@@ -1171,7 +1171,7 @@ const WriteBook = () => {
                         ) : (
                           <>
                             <Eye className="h-4 w-4 mr-2" />
-                            See my story so far
+                            Preview Chapter: TESTING: REMOVE LATER
                           </>
                         )}
                       </Button>
