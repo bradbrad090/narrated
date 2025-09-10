@@ -1151,8 +1151,7 @@ const WriteBook = () => {
                           size="lg"
                           className="px-12 py-6 text-xl font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 rounded-xl border-2 border-primary/20 min-w-[400px]"
                         >
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          {saving ? "Generating..." : "Confirm and submit chapter"}
+                          {saving ? "Generating..." : "Confirm & Submit"}
                         </Button>
                       </div>
 
