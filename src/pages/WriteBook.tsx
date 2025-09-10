@@ -55,6 +55,7 @@ const WriteBook = () => {
   const [showChapterRefinement, setShowChapterRefinement] = useState(false);
   const [bookProfile, setBookProfile] = useState<any>(null);
   const [isBookTierCollapsed, setIsBookTierCollapsed] = useState(true);
+  const [isSavedConversationsCollapsed, setIsSavedConversationsCollapsed] = useState(true);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [chapterToDelete, setChapterToDelete] = useState<Chapter | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -1126,19 +1127,36 @@ const WriteBook = () => {
                       {/* Saved Conversations Section */}
                       {isFeatureEnabled('conversationHistory') && user && book && (
                         <Card className="mt-6">
-                          <CardHeader>
-                            <CardTitle>Saved Conversations</CardTitle>
-                            <CardDescription>
-                              View and manage your previous conversations for this chapter.
-                            </CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <SavedConversations 
-                              conversations={conversationHistory}
-                              onDeleteConversation={deleteConversation}
-                              deletingSessionIds={deletingSessionIds}
-                            />
-                          </CardContent>
+                          <Collapsible open={!isSavedConversationsCollapsed} onOpenChange={(open) => setIsSavedConversationsCollapsed(!open)}>
+                            <CardHeader className={isSavedConversationsCollapsed ? "py-4" : "pb-3"}>
+                              <CollapsibleTrigger asChild>
+                                <Button variant="ghost" className="flex items-center justify-between p-0 h-auto w-full min-h-[2.5rem]">
+                                  <div className="text-left">
+                                    <CardTitle>Saved Conversations</CardTitle>
+                                    {!isSavedConversationsCollapsed && (
+                                      <CardDescription>
+                                        View and manage your previous conversations for this chapter.
+                                      </CardDescription>
+                                    )}
+                                  </div>
+                                  {isSavedConversationsCollapsed ? (
+                                    <ChevronDown className="h-4 w-4" />
+                                  ) : (
+                                    <ChevronUp className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </CollapsibleTrigger>
+                            </CardHeader>
+                            <CollapsibleContent>
+                              <CardContent>
+                                <SavedConversations 
+                                  conversations={conversationHistory}
+                                  onDeleteConversation={deleteConversation}
+                                  deletingSessionIds={deletingSessionIds}
+                                />
+                              </CardContent>
+                            </CollapsibleContent>
+                          </Collapsible>
                         </Card>
                       )}
 
