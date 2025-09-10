@@ -1133,11 +1133,9 @@ const WriteBook = () => {
                                 <Button variant="ghost" className="flex items-center justify-between p-0 h-auto w-full min-h-[2.5rem]">
                                   <div className="text-left">
                                     <CardTitle>Saved Conversations</CardTitle>
-                                    {!isSavedConversationsCollapsed && (
-                                      <CardDescription>
-                                        View and manage your previous conversations for this chapter.
-                                      </CardDescription>
-                                    )}
+                                    <CardDescription>
+                                      View and manage your previous conversations for this chapter.
+                                    </CardDescription>
                                   </div>
                                   {isSavedConversationsCollapsed ? (
                                     <ChevronDown className="h-4 w-4" />
