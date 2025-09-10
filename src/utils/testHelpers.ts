@@ -140,9 +140,8 @@ export const createMockConversations = (count: number): ConversationSession[] =>
   return Array.from({ length: count }, (_, index) => 
     createMockSession({
       sessionId: `mock-session-${index}`,
-      conversationType: ['interview', 'reflection', 'brainstorming'][index % 3] as ConversationType,
-      conversationMedium: ['text', 'voice', 'self'][index % 3] as ConversationMedium,
-      isSelfConversation: index % 3 === 2,
+      conversationType: 'interview' as ConversationType,
+      conversationMedium: ['text', 'voice'][index % 2] as ConversationMedium,
       createdAt: new Date(Date.now() - (count - index) * 24 * 60 * 60 * 1000).toISOString()
     })
   );
