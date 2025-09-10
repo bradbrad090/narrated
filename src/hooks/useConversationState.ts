@@ -37,12 +37,24 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
   const { startTextConversation, sendTextMessage } = useConversationAPI();
 
   const handleError = useCallback((error: unknown, context: string) => {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    let errorMessage: string;
+    
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    } else if (typeof error === 'string') {
+      errorMessage = error;
+    } else if (error && typeof error === 'object' && 'message' in error) {
+      errorMessage = String((error as any).message);
+    } else {
+      // Only show generic message if we truly don't know what the error is
+      console.warn('Unknown error type in conversation:', error, 'Context:', context);
+      errorMessage = 'An unexpected error occurred';
+    }
     
     const conversationError = {
       type: 'ai_service' as const,
       message: errorMessage,
-      details: { context },
+      details: { context, originalError: error },
       recoverable: true
     };
 
@@ -349,7 +361,13 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
         });
       }
     } else {
-      console.log('No session to end or generate summary for:', { chapterId, sessionToEnd: !!sessionToEnd, messagesLength: sessionToEnd?.messages?.length });
+      const messagesLength = sessionToEnd?.messages ? sessionToEnd.messages.length : 0;
+      console.log('No session to end or generate summary for:', { 
+        chapterId, 
+        sessionToEnd: !!sessionToEnd, 
+        messagesLength,
+        hasMessages: !!sessionToEnd?.messages 
+      });
       // Clear the session if there's one but no valid data
       dispatch(conversationActions.setCurrentSession(null));
     }
