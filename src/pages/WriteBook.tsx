@@ -1142,18 +1142,19 @@ const WriteBook = () => {
                         </Card>
                       )}
 
-                       {/* Generate Chapter Button */}
-                       <div className="flex justify-center gap-4 mb-4">
-                       <Button
-                         variant="default"
-                         onClick={handleGenerateChapter}
-                         disabled={saving || !currentChapter || !user}
-                         size="lg"
-                       >
-                         <Sparkles className="h-4 w-4 mr-2" />
-                         {saving ? "Generating..." : "Generate Chapter with AI"}
-                       </Button>
-                     </div>
+                        {/* Generate Chapter Button */}
+                        <div className="flex justify-center gap-4 mb-4">
+                        <Button
+                          variant="default"
+                          onClick={handleGenerateChapter}
+                          disabled={saving || !currentChapter || !user}
+                          size="lg"
+                          className="px-12 py-6 text-xl font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 rounded-xl border-2 border-primary/20 min-w-[400px]"
+                        >
+                          <Sparkles className="h-4 w-4 mr-2" />
+                          {saving ? "Generating..." : "Confirm and submit chapter"}
+                        </Button>
+                      </div>
 
                      {/* Toggle Button for Chapter Refinement Window */}
                     <div className="flex justify-center my-6">
