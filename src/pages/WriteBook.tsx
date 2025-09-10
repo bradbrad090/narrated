@@ -1088,11 +1088,24 @@ const WriteBook = () => {
                                }
                              }}
                            />
-                         </CardContent>
+                          </CardContent>
                     </Card>
-                    )}
+                     )}
 
-                      {/* Chapter Summary Section */}
+                      {/* Generate Summary Button */}
+                      <div className="flex justify-center mt-4 mb-6">
+                        <Button
+                          variant="default"
+                          onClick={handleGenerateSummary}
+                          disabled={saving || !currentChapter || !user || !currentChapter.content.trim()}
+                          size="lg"
+                        >
+                          <FileText className="h-4 w-4 mr-2" />
+                          {saving ? "Generating..." : "Generate Summary"}
+                        </Button>
+                      </div>
+
+                       {/* Chapter Summary Section */}
                       <Card className="mt-6">
                         <CardHeader>
                           <CardTitle>Chapter Summary</CardTitle>
@@ -1129,27 +1142,18 @@ const WriteBook = () => {
                         </Card>
                       )}
 
-                      {/* Generate Chapter Button */}
-                      <div className="flex justify-center gap-4 mb-4">
-                      <Button
-                        variant="default"
-                        onClick={handleGenerateChapter}
-                        disabled={saving || !currentChapter || !user}
-                        size="lg"
-                      >
-                        <Sparkles className="h-4 w-4 mr-2" />
-                        {saving ? "Generating..." : "Generate Chapter with AI"}
-                      </Button>
+                       {/* Generate Chapter Button */}
+                       <div className="flex justify-center gap-4 mb-4">
                        <Button
                          variant="default"
-                         onClick={handleGenerateSummary}
-                         disabled={saving || !currentChapter || !user || !currentChapter.content.trim()}
+                         onClick={handleGenerateChapter}
+                         disabled={saving || !currentChapter || !user}
                          size="lg"
                        >
-                         <FileText className="h-4 w-4 mr-2" />
-                         {saving ? "Generating..." : "Generate Summary"}
+                         <Sparkles className="h-4 w-4 mr-2" />
+                         {saving ? "Generating..." : "Generate Chapter with AI"}
                        </Button>
-                    </div>
+                     </div>
 
                      {/* Toggle Button for Chapter Refinement Window */}
                     <div className="flex justify-center my-6">
