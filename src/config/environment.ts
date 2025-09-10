@@ -33,7 +33,7 @@ export interface EnvironmentConfig {
 const developmentConfig: EnvironmentConfig = {
   features: {
     voiceConversations: true,
-    selfConversations: true,
+    selfConversations: false,
     textConversations: true,
     conversationHistory: true,
     contextCaching: true,
@@ -63,7 +63,7 @@ const developmentConfig: EnvironmentConfig = {
 const productionConfig: EnvironmentConfig = {
   features: {
     voiceConversations: true,
-    selfConversations: true,
+    selfConversations: false,
     textConversations: true,
     conversationHistory: true,
     contextCaching: true,
@@ -93,7 +93,7 @@ const productionConfig: EnvironmentConfig = {
 const testConfig: EnvironmentConfig = {
   features: {
     voiceConversations: false, // Disabled for testing
-    selfConversations: true,
+    selfConversations: false,
     textConversations: true,
     conversationHistory: true,
     contextCaching: false, // Disabled for predictable tests

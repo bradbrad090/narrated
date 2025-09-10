@@ -30,12 +30,10 @@ export function useOptimizedConversationList(
     if (filterType !== 'all') {
       filtered = filtered.filter(session => {
         switch (filterType) {
-          case 'self':
-            return session.isSelfConversation;
           case 'text':
-            return !session.isSelfConversation && session.conversationMedium === 'text';
+            return session.conversationMedium === 'text';
           case 'voice':
-            return !session.isSelfConversation && session.conversationMedium === 'voice';
+            return session.conversationMedium === 'voice';
           default:
             return true;
         }
@@ -56,7 +54,6 @@ export function useConversationStats(conversations: ConversationSession[]) {
   return useMemo(() => {
     const stats = {
       total: conversations.length,
-      self: 0,
       textChat: 0,
       voiceChat: 0,
       totalMessages: 0,
@@ -71,9 +68,7 @@ export function useConversationStats(conversations: ConversationSession[]) {
 
     // Calculate basic stats
     conversations.forEach(session => {
-      if (session.isSelfConversation) {
-        stats.self++;
-      } else if (session.conversationMedium === 'text') {
+      if (session.conversationMedium === 'text') {
         stats.textChat++;
       } else if (session.conversationMedium === 'voice') {
         stats.voiceChat++;

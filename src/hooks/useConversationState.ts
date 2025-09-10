@@ -34,7 +34,7 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
   const [state, dispatch] = useReducer(conversationReducer, initialConversationState);
   const [deletingSessionIds, setDeletingSessionIds] = useState<Set<string>>(new Set());
   const { toast } = useToast();
-  const { startTextConversation, sendTextMessage, startSelfConversation } = useConversationAPI();
+  const { startTextConversation, sendTextMessage } = useConversationAPI();
 
   const handleError = useCallback((error: unknown, context: string) => {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
@@ -154,7 +154,6 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
           conversationMedium: record.conversation_medium as ConversationMedium,
           messages: Array.isArray(record.messages) ? record.messages as unknown as ConversationMessage[] : [],
           goals: Array.isArray(record.conversation_goals) ? record.conversation_goals as string[] : [],
-          isSelfConversation: record.is_self_conversation || false,
           createdAt: record.created_at
         }));
 
@@ -218,7 +217,6 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
         ],
         context: conversationContext,
         goals: data.goals,
-        isSelfConversation: false,
         createdAt: new Date().toISOString()
       };
 
@@ -301,21 +299,6 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
       dispatch(conversationActions.setTyping(false));
     }
   }, [state.currentSession, state.ui.isTyping, state.context, userId, bookId, chapterId, handleError]);
-
-  // Start self conversation
-  const startSelfConversationMode = useCallback(async (message: string) => {
-    try {
-      dispatch(conversationActions.setLoading(true));
-      await startSelfConversation(userId, bookId, chapterId, message);
-      await loadConversationHistory();
-    } catch (error) {
-      handleError(error, 'starting self conversation');
-    } finally {
-      dispatch(conversationActions.setLoading(false));
-    }
-  }, [userId, bookId, chapterId, startSelfConversation, loadConversationHistory, handleError]);
-
-  // Resume conversation functionality removed - users can only view and delete conversations
 
   // End current conversation and generate summary
   const endConversation = useCallback(async () => {
@@ -473,7 +456,6 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
     loadConversationHistory,
     startConversation,
     sendMessage,
-    startSelfConversation: startSelfConversationMode,
     endConversation,
     deleteConversation,
     getDraft,

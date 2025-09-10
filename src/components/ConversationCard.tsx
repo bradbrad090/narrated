@@ -20,28 +20,14 @@ export const ConversationCard: React.FC<ConversationCardProps> = ({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const getConversationIcon = () => {
-    if (session.isSelfConversation) {
-      return <User className="h-4 w-4" />;
-    }
     return session.conversationMedium === 'voice' ? <Mic className="h-4 w-4" /> : <Bot className="h-4 w-4" />;
   };
 
   const getConversationTypeLabel = () => {
-    if (session.isSelfConversation) {
-      return 'Self Interview';
-    }
     return 'Interview Chat';
   };
 
   const getMediumBadge = () => {
-    if (session.isSelfConversation) {
-      return (
-        <Badge variant="secondary" className="text-xs">
-          {session.conversationMedium === 'voice' ? '🎤' : '💭'} Self
-        </Badge>
-      );
-    }
-    
     return (
       <Badge 
         variant={session.conversationMedium === 'voice' ? 'default' : 'secondary'}

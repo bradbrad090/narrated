@@ -18,7 +18,7 @@ export class ConversationRepository extends BaseRepository {
         session_id: session.sessionId,
         conversation_type: session.conversationType,
         conversation_medium: session.conversationMedium,
-        is_self_conversation: session.isSelfConversation || false,
+        is_self_conversation: false,
         messages: session.messages as any,
         context_snapshot: session.context as any || {},
         conversation_goals: session.goals as any || [],
@@ -113,14 +113,13 @@ export class ConversationRepository extends BaseRepository {
 
   async getConversationStats(userId: string): Promise<RepositoryResult<{
     totalConversations: number;
-    selfConversations: number;
     textConversations: number;
     voiceConversations: number;
     totalMessages: number;
   }>> {
     const { data: conversations, error } = await supabase
       .from('chat_histories')
-      .select('conversation_medium, is_self_conversation, messages')
+      .select('conversation_medium, messages')
       .eq('user_id', userId) as any;
 
     if (error) {
@@ -129,9 +128,8 @@ export class ConversationRepository extends BaseRepository {
 
     const stats = {
       totalConversations: conversations.length,
-      selfConversations: conversations.filter(c => c.is_self_conversation).length,
-      textConversations: conversations.filter(c => !c.is_self_conversation && c.conversation_medium === 'text').length,
-      voiceConversations: conversations.filter(c => !c.is_self_conversation && c.conversation_medium === 'voice').length,
+      textConversations: conversations.filter(c => c.conversation_medium === 'text').length,
+      voiceConversations: conversations.filter(c => c.conversation_medium === 'voice').length,
       totalMessages: conversations.reduce((sum, c) => sum + (Array.isArray(c.messages) ? c.messages.length : 0), 0)
     };
 
@@ -147,7 +145,6 @@ export class ConversationRepository extends BaseRepository {
       messages: Array.isArray(record.messages) ? record.messages : [],
       context: record.context_snapshot,
       goals: Array.isArray(record.conversation_goals) ? record.conversation_goals : [],
-      isSelfConversation: record.is_self_conversation,
       createdAt: record.created_at,
       updatedAt: record.updated_at
     };

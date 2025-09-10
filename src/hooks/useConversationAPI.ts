@@ -45,7 +45,6 @@ export const useConversationAPI = () => {
         conversationMedium: 'text',
         messages: [],
         goals: getConversationGoals(conversationType),
-        isSelfConversation: false,
         createdAt: new Date().toISOString()
       };
     } catch (error) {
@@ -111,55 +110,9 @@ export const useConversationAPI = () => {
     }
   }, [toast]);
 
-  const startSelfConversation = useCallback(async (
-    userId: string,
-    bookId: string,
-    chapterId: string | undefined,
-    message: string
-  ): Promise<void> => {
-    try {
-      const sessionId = `self_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-      const { data, error } = await supabase
-        .from('chat_histories')
-        .insert({
-          user_id: userId,
-          chapter_id: chapterId || null, // Handle empty chapterId properly
-          session_id: sessionId,
-          conversation_type: 'self', // Use 'self' for self-conversations
-          conversation_medium: 'text',
-          messages: [{
-            role: 'user',
-            content: message,
-            timestamp: new Date().toISOString()
-          }] as any,
-          context_snapshot: {} as any,
-          conversation_goals: ['Document personal thoughts and experiences'] as any,
-          is_self_conversation: true
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Self conversation saved successfully",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to save self conversation",
-        variant: "destructive",
-      });
-      throw error;
-    }
-  }, [toast]);
-
   return {
     startTextConversation,
-    sendTextMessage,
-    startSelfConversation
+    sendTextMessage
   };
 };
 

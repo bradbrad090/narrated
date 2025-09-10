@@ -30,9 +30,6 @@ export const DeleteConversationDialog: React.FC<DeleteConversationDialogProps> =
   if (!session) return null;
 
   const getConversationTypeLabel = () => {
-    if (session.isSelfConversation) {
-      return 'self-conversation';
-    }
     return `${session.conversationMedium} conversation`;
   };
 

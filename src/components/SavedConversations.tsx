@@ -92,14 +92,6 @@ export const SavedConversations: React.FC<SavedConversationsProps> = ({
             {conversationStats.total} Total
           </Badge>
           <Badge 
-            variant={selectedFilter === 'self' ? 'default' : 'outline'} 
-            className="flex items-center gap-1 cursor-pointer hover:bg-muted transition-colors"
-            onClick={() => setSelectedFilter('self')}
-          >
-            <User className="h-3 w-3" />
-            {conversationStats.self} Self
-          </Badge>
-          <Badge 
             variant={selectedFilter === 'text' ? 'default' : 'outline'} 
             className="flex items-center gap-1 cursor-pointer hover:bg-muted transition-colors"
             onClick={() => setSelectedFilter('text')}

@@ -3,7 +3,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { SavedConversations } from '@/components/SavedConversations';
-import { SelfConversationMode } from '@/components/conversation/SelfConversationMode';
 import { TextAssistedMode } from '@/components/conversation/TextAssistedMode';
 import { VoiceConversationMode } from '@/components/conversation/VoiceConversationMode';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
@@ -32,7 +31,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   className = "",
   onContentGenerated
 }) => {
-  const [selectedMode, setSelectedMode] = useState('self');
+  const [selectedMode, setSelectedMode] = useState('text-assisted');
   const [showSummary, setShowSummary] = useState(false);
   const [summary, setSummary] = useState<string>('');
   const [loadingSummary, setLoadingSummary] = useState(false);
@@ -86,7 +85,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
               conversation_type: currentSession.conversationType,
               conversation_medium: currentSession.conversationMedium || 'text',
               conversation_goals: (currentSession.goals || []) as any,
-              is_self_conversation: currentSession.isSelfConversation || false,
+              is_self_conversation: false,
               context_snapshot: (currentSession.context || {}) as any,
               updated_at: new Date().toISOString()
             })
@@ -104,7 +103,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
               conversation_type: currentSession.conversationType,
               conversation_medium: currentSession.conversationMedium || 'text',
               conversation_goals: (currentSession.goals || []) as any,
-              is_self_conversation: currentSession.isSelfConversation || false,
+              is_self_conversation: false,
               context_snapshot: (currentSession.context || {}) as any
             });
 
@@ -135,7 +134,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       await handleEndConversation();
       
       // Reset to the default tab
-      setSelectedMode('self');
+      setSelectedMode('text-assisted');
     };
 
     const element = containerRef.current;
@@ -150,17 +149,17 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   }, [saveCurrentConversation, handleEndConversation]);
 
   const getRecommendedMode = () => {
-    if (!conversationHistory.length) return 'self';
+    if (!conversationHistory.length) return 'text-assisted';
     
     const recentTextConversations = conversationHistory
-      .filter(s => s.conversationMedium === 'text' && !s.isSelfConversation)
+      .filter(s => s.conversationMedium === 'text')
       .slice(0, 3);
     
     if (recentTextConversations.length > 0) {
       return 'text-assisted'; // User has been using text conversations
     }
     
-    return 'self';
+    return 'text-assisted';
   };
 
   // Quick resume feature removed - users can only view and delete conversations
@@ -178,13 +177,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
         {/* Tabbed Interface for Starting Conversations */}
         <Tabs value={selectedMode} onValueChange={setSelectedMode} className="w-full">
           <div className="w-full border-b">
-            <TabsList className="grid w-full grid-cols-3">
-              {isFeatureEnabled('selfConversations') && (
-                <TabsTrigger value="self" className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  Self Conversation
-                </TabsTrigger>
-              )}
+            <TabsList className="grid w-full grid-cols-2">
               {isFeatureEnabled('textConversations') && (
                 <TabsTrigger value="text-assisted" className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4" />
@@ -199,21 +192,6 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
               )}
             </TabsList>
           </div>
-
-          {/* Self Conversation Mode */}
-          {isFeatureEnabled('selfConversations') && (
-            <TabsContent value="self" className="mt-6">
-              <ErrorBoundary>
-                <SelfConversationMode
-                  userId={userId}
-                  bookId={bookId}
-                  chapterId={chapterId}
-                  context={context}
-                  onConversationSaved={loadConversationHistory}
-                />
-              </ErrorBoundary>
-            </TabsContent>
-          )}
 
           {/* Text-Assisted Mode */}
           {isFeatureEnabled('textConversations') && (

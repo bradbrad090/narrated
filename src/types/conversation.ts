@@ -1,6 +1,6 @@
 // Comprehensive TypeScript interfaces for the conversation system
 
-export type ConversationType = 'interview' | 'self';
+export type ConversationType = 'interview';
 export type ConversationMedium = 'text' | 'voice';
 
 export interface ConversationMessage {
@@ -16,7 +16,6 @@ export interface ConversationSession {
   messages: ConversationMessage[];
   context?: ConversationContext;
   goals?: string[];
-  isSelfConversation?: boolean;
   styleInstructions?: string;
   createdAt: string;
   updatedAt?: string;
@@ -172,7 +171,6 @@ export interface ChatHistoryRecord {
   session_id: string;
   conversation_type: ConversationType;
   conversation_medium: ConversationMedium;
-  is_self_conversation: boolean;
   messages: any; // Using any for Json compatibility
   context_snapshot: any; // Using any for Json compatibility  
   conversation_goals: any; // Using any for Json compatibility
