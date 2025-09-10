@@ -1119,7 +1119,7 @@ const WriteBook = () => {
                            size="lg"
                            className="px-12 py-6 text-xl font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 rounded-xl border-2 border-primary/20 min-w-[400px]"
                          >
-                           {saving ? "Generating..." : "Generate my chapter overview"}
+                           {saving ? "Generating..." : "Review what I've shared so far"}
                          </Button>
                        </div>
 
