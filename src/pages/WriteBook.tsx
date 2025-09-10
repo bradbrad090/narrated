@@ -1093,38 +1093,39 @@ const WriteBook = () => {
                     </Card>
                      )}
 
-                       {/* Chapter Summary Section */}
-                      <Card className="mt-6">
-                        <CardHeader>
-                          <CardTitle>Chapter Summary</CardTitle>
-                          <CardDescription>
-                            A brief summary of this chapter will appear here to help you understand the key themes and content.
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <Textarea
-                            placeholder="Chapter summary will be generated here..."
-                            value={currentChapter.summary || ""}
-                            readOnly
-                            className="min-h-[120px] text-base leading-relaxed bg-muted/50"
-                          />
-                        </CardContent>
-                       </Card>
+                        {/* Chapter Summary Section */}
+                       <Card className="mt-6">
+                         <CardHeader>
+                           <div className="flex items-center justify-between">
+                             <div>
+                               <CardTitle>Chapter Summary</CardTitle>
+                               <CardDescription>
+                                 A brief summary of this chapter will appear here to help you understand the key themes and content.
+                               </CardDescription>
+                             </div>
+                             {/* Generate Summary Button */}
+                             <Button
+                               variant="default"
+                               onClick={handleGenerateSummary}
+                               disabled={saving || !currentChapter || !user || !currentChapter.content.trim()}
+                               size="sm"
+                               className="px-6 py-2 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 rounded-lg border border-primary/20"
+                             >
+                               {saving ? "Generating..." : "Review what I've shared so far"}
+                             </Button>
+                           </div>
+                         </CardHeader>
+                         <CardContent>
+                           <Textarea
+                             placeholder="Chapter summary will be generated here..."
+                             value={currentChapter.summary || ""}
+                             readOnly
+                             className="min-h-[120px] text-base leading-relaxed bg-muted/50"
+                           />
+                         </CardContent>
+                        </Card>
 
-                       {/* Generate Summary Button */}
-                       <div className="flex justify-center my-8">
-                         <Button
-                           variant="default"
-                           onClick={handleGenerateSummary}
-                           disabled={saving || !currentChapter || !user || !currentChapter.content.trim()}
-                           size="lg"
-                           className="px-12 py-6 text-xl font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 rounded-xl border-2 border-primary/20 min-w-[400px]"
-                         >
-                           {saving ? "Generating..." : "Review what I've shared so far"}
-                         </Button>
-                       </div>
-
-                      {/* Saved Conversations Section */}
+                       {/* Saved Conversations Section */}
                       {isFeatureEnabled('conversationHistory') && user && book && (
                         <Card className="mt-6">
                           <Collapsible open={!isSavedConversationsCollapsed} onOpenChange={(open) => setIsSavedConversationsCollapsed(!open)}>
