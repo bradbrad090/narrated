@@ -1092,20 +1092,6 @@ const WriteBook = () => {
                     </Card>
                      )}
 
-                       {/* Generate Summary Button */}
-                       <div className="flex justify-center my-8">
-                         <Button
-                           variant="default"
-                           onClick={handleGenerateSummary}
-                           disabled={saving || !currentChapter || !user || !currentChapter.content.trim()}
-                           size="lg"
-                           className="px-8 py-4 text-lg font-semibold shadow-lg"
-                         >
-                           <FileText className="h-5 w-5 mr-3" />
-                           {saving ? "Generating..." : "Generate Summary"}
-                         </Button>
-                       </div>
-
                        {/* Chapter Summary Section */}
                       <Card className="mt-6">
                         <CardHeader>
@@ -1122,7 +1108,21 @@ const WriteBook = () => {
                             className="min-h-[120px] text-base leading-relaxed bg-muted/50"
                           />
                         </CardContent>
-                      </Card>
+                       </Card>
+
+                       {/* Generate Summary Button */}
+                       <div className="flex justify-center my-8">
+                         <Button
+                           variant="default"
+                           onClick={handleGenerateSummary}
+                           disabled={saving || !currentChapter || !user || !currentChapter.content.trim()}
+                           size="lg"
+                           className="px-8 py-4 text-lg font-semibold shadow-lg"
+                         >
+                           <FileText className="h-5 w-5 mr-3" />
+                           {saving ? "Generating..." : "Generate Summary"}
+                         </Button>
+                       </div>
 
                       {/* Saved Conversations Section */}
                       {isFeatureEnabled('conversationHistory') && user && book && (
