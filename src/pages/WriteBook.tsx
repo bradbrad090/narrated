@@ -71,9 +71,9 @@ const WriteBook = () => {
     deleteConversation,
     deletingSessionIds,
   } = useConversationState({
-    userId: user?.id || '',
-    bookId: book?.id || '',
-    chapterId: currentChapter?.id
+    userId: user?.id || null,
+    bookId: book?.id || null,
+    chapterId: currentChapter?.id || null
   });
 
   useEffect(() => {

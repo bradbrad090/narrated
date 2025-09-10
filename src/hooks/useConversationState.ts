@@ -25,9 +25,9 @@ import {
 import { useConversationAPI } from './useConversationAPI';
 
 interface UseConversationStateProps {
-  userId: string;
-  bookId: string;
-  chapterId?: string;
+  userId: string | null;
+  bookId: string | null;
+  chapterId?: string | null;
 }
 
 export const useConversationState = ({ userId, bookId, chapterId }: UseConversationStateProps) => {
@@ -70,6 +70,12 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
   // Load conversation context
   const loadConversationContext = useCallback(async (): Promise<ConversationContext | null> => {
     if (state.context) return state.context;
+
+    // Don't load if we don't have valid userId and bookId
+    if (!userId || !bookId) {
+      dispatch(conversationActions.setLoading(false));
+      return null;
+    }
 
     try {
       dispatch(conversationActions.setLoading(true));
@@ -115,6 +121,12 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
 
   // Load conversation history with cleanup
   const loadConversationHistory = useCallback(async () => {
+    // Don't load if we don't have a valid userId
+    if (!userId) {
+      dispatch(conversationActions.setLoading(false));
+      return;
+    }
+
     try {
       dispatch(conversationActions.setLoading(true));
       
@@ -123,7 +135,7 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
         .select('*')
         .eq('user_id', userId);
       
-      // Filter by chapter if chapterId is provided
+      // Filter by chapter if chapterId is provided and valid
       if (chapterId) {
         query = query.eq('chapter_id', chapterId);
       }
