@@ -1117,10 +1117,9 @@ const WriteBook = () => {
                            onClick={handleGenerateSummary}
                            disabled={saving || !currentChapter || !user || !currentChapter.content.trim()}
                            size="lg"
-                           className="px-8 py-4 text-lg font-semibold shadow-lg"
+                           className="px-24 py-8 text-3xl font-bold shadow-lg min-w-[600px] h-20"
                          >
-                           <FileText className="h-5 w-5 mr-3" />
-                           {saving ? "Generating..." : "Generate Summary"}
+                           {saving ? "Generating..." : "Summarize what I've written"}
                          </Button>
                        </div>
 
