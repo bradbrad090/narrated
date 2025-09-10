@@ -244,11 +244,11 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
               </ErrorBoundary>
             </TabsContent>
           )}
-        </Tabs>
+         </Tabs>
 
         {/* Auto-generated Summary Display */}
         {showSummary && (
-          <div className="p-4 bg-card rounded-lg border mt-6">
+          <div className="p-4 bg-card rounded-lg border mt-4">
             <h2 className="text-lg font-semibold mb-2">Chapter Summary</h2>
             <p className="text-sm text-muted-foreground mb-2">{summary}</p>
             <p className="text-xs text-muted-foreground">
