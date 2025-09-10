@@ -1117,9 +1117,9 @@ const WriteBook = () => {
                            onClick={handleGenerateSummary}
                            disabled={saving || !currentChapter || !user || !currentChapter.content.trim()}
                            size="lg"
-                           className="px-24 py-8 text-3xl font-bold shadow-lg min-w-[600px] h-20"
+                           className="px-12 py-6 text-xl font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 rounded-xl border-2 border-primary/20 min-w-[400px]"
                          >
-                           {saving ? "Generating..." : "Summarize what I've written"}
+                           {saving ? "Generating..." : "Generate my chapter overview"}
                          </Button>
                        </div>
 
