@@ -1092,18 +1092,19 @@ const WriteBook = () => {
                     </Card>
                      )}
 
-                      {/* Generate Summary Button */}
-                      <div className="flex justify-center mt-4 mb-6">
-                        <Button
-                          variant="default"
-                          onClick={handleGenerateSummary}
-                          disabled={saving || !currentChapter || !user || !currentChapter.content.trim()}
-                          size="lg"
-                        >
-                          <FileText className="h-4 w-4 mr-2" />
-                          {saving ? "Generating..." : "Generate Summary"}
-                        </Button>
-                      </div>
+                       {/* Generate Summary Button */}
+                       <div className="flex justify-center my-8">
+                         <Button
+                           variant="default"
+                           onClick={handleGenerateSummary}
+                           disabled={saving || !currentChapter || !user || !currentChapter.content.trim()}
+                           size="lg"
+                           className="px-8 py-4 text-lg font-semibold shadow-lg"
+                         >
+                           <FileText className="h-5 w-5 mr-3" />
+                           {saving ? "Generating..." : "Generate Summary"}
+                         </Button>
+                       </div>
 
                        {/* Chapter Summary Section */}
                       <Card className="mt-6">
