@@ -1156,10 +1156,41 @@ const WriteBook = () => {
                             </CollapsibleContent>
                           </Collapsible>
                         </Card>
-                      )}
+                       )}
+
+                     {/* Chapter Refinement Window */}
+                    {showChapterRefinement && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>{currentChapter.title}</CardTitle>
+                          <CardDescription>
+                            Edit and refine your chapter content in the chapter refinement window below. You can manually edit the AI-generated text or write your own.
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <Textarea
+                            placeholder="Your chapter content will appear here. You can edit it directly or use the conversation assistant above to generate new content..."
+                            value={currentChapter.content}
+                            onChange={(e) => handleChapterContentChange(e.target.value)}
+                            className="min-h-[500px] text-base leading-relaxed"
+                          />
+                          <div className="mt-4 flex justify-center">
+                            <Button 
+                              onClick={saveCurrentChapter}
+                              disabled={saving || !currentChapter}
+                              size="lg"
+                              className="shadow-lg"
+                            >
+                              <Save className="h-4 w-4 mr-2" />
+                              {saving ? "Saving..." : "Save"}
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                     )}
 
                         {/* Generate Chapter Button */}
-                        <div className="flex justify-center gap-4 mb-4">
+                        <div className="flex justify-center gap-4 mb-4 mt-8">
                         <Button
                           variant="default"
                           onClick={handleGenerateChapter}
@@ -1192,37 +1223,6 @@ const WriteBook = () => {
                         )}
                       </Button>
                     </div>
-
-                    {/* Chapter Refinement Window */}
-                    {showChapterRefinement && (
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>{currentChapter.title}</CardTitle>
-                          <CardDescription>
-                            Edit and refine your chapter content in the chapter refinement window below. You can manually edit the AI-generated text or write your own.
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <Textarea
-                            placeholder="Your chapter content will appear here. You can edit it directly or use the conversation assistant above to generate new content..."
-                            value={currentChapter.content}
-                            onChange={(e) => handleChapterContentChange(e.target.value)}
-                            className="min-h-[500px] text-base leading-relaxed"
-                          />
-                          <div className="mt-4 flex justify-center">
-                            <Button 
-                              onClick={saveCurrentChapter}
-                              disabled={saving || !currentChapter}
-                              size="lg"
-                              className="shadow-lg"
-                            >
-                              <Save className="h-4 w-4 mr-2" />
-                              {saving ? "Saving..." : "Save"}
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )}
                   </div>
                 ) : (
                   <div className="flex items-center justify-center h-full">
