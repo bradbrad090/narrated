@@ -186,8 +186,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
               )}
               {isFeatureEnabled('voiceConversations') && (
                 <TabsTrigger value="voice-to-voice" className="flex items-center gap-2">
-                  <Bot className="h-4 w-4" />
-                  Voice-to-Voice AI
+                  Spoken Conversation
                 </TabsTrigger>
               )}
             </TabsList>
