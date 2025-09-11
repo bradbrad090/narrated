@@ -64,6 +64,7 @@ const WriteBook = () => {
   const [activeChapterId, setActiveChapterId] = useState<string | null>(null);
   const [showSubmitConfirmation, setShowSubmitConfirmation] = useState(false);
   const [completedChapters, setCompletedChapters] = useState<Set<string>>(new Set());
+  const [chapterConversations, setChapterConversations] = useState<Map<string, number>>(new Map());
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -79,6 +80,31 @@ const WriteBook = () => {
     chapterId: currentChapter?.id || null
   });
 
+  // Fetch conversation counts for all chapters
+  const fetchChapterConversations = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('chat_histories')
+        .select('chapter_id')
+        .eq('user_id', userId)
+        .not('chapter_id', 'is', null);
+
+      if (error) throw error;
+
+      const conversationCounts = new Map<string, number>();
+      data?.forEach(record => {
+        if (record.chapter_id) {
+          const count = conversationCounts.get(record.chapter_id) || 0;
+          conversationCounts.set(record.chapter_id, count + 1);
+        }
+      });
+
+      setChapterConversations(conversationCounts);
+    } catch (error) {
+      console.error('Error fetching chapter conversations:', error);
+    }
+  };
+
   useEffect(() => {
     // Check if user is logged in
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -88,6 +114,7 @@ const WriteBook = () => {
       }
       setUser(user);
       fetchBookAndChapters(user.id);
+      fetchChapterConversations(user.id);
     });
 
     // Listen for auth changes
@@ -98,6 +125,7 @@ const WriteBook = () => {
         } else {
           setUser(session.user);
           fetchBookAndChapters(session.user.id);
+          fetchChapterConversations(session.user.id);
         }
       }
     );
@@ -899,20 +927,26 @@ const WriteBook = () => {
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <ConversationInterface
-                          userId={user.id}
-                          bookId={book.id}
-                          chapterId={currentChapter?.id}
-                          isChapterComplete={currentChapter ? completedChapters.has(currentChapter.id) : false}
-                          onContentGenerated={(content) => {
-                            if (currentChapter) {
-                              const newContent = currentChapter.content ? currentChapter.content + "\n\n" + content : content;
-                              const updatedChapter = { ...currentChapter, content: newContent };
-                              setCurrentChapter(updatedChapter);
-                              setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
-                            }
-                          }}
-                        />
+                         <ConversationInterface
+                           userId={user.id}
+                           bookId={book.id}
+                           chapterId={currentChapter?.id}
+                           isChapterComplete={currentChapter ? completedChapters.has(currentChapter.id) : false}
+                           onContentGenerated={(content) => {
+                             if (currentChapter) {
+                               const newContent = currentChapter.content ? currentChapter.content + "\n\n" + content : content;
+                               const updatedChapter = { ...currentChapter, content: newContent };
+                               setCurrentChapter(updatedChapter);
+                               setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
+                             }
+                           }}
+                           onConversationUpdate={() => {
+                             // Refresh conversation counts when conversations change
+                             if (user) {
+                               fetchChapterConversations(user.id);
+                             }
+                           }}
+                         />
                       </CardContent>
                     </Card>
                   )}
@@ -1026,16 +1060,17 @@ const WriteBook = () => {
                        items={chapters.map(ch => ch.id)}
                        strategy={verticalListSortingStrategy}
                      >
-                       {chapters.map((chapter) => (
-                         <ChapterCard
-                           key={chapter.id}
-                           chapter={chapter}
-                           isActive={currentChapter?.id === chapter.id}
-                           onSelect={() => saveCurrentConversationAndSwitchChapter(chapter)}
-                           onDelete={() => handleDeleteChapter(chapter)}
-                           canDelete={chapters.length > 1}
-                         />
-                       ))}
+                        {chapters.map((chapter) => (
+                          <ChapterCard
+                            key={chapter.id}
+                            chapter={chapter}
+                            isActive={currentChapter?.id === chapter.id}
+                            onSelect={() => saveCurrentConversationAndSwitchChapter(chapter)}
+                            onDelete={() => handleDeleteChapter(chapter)}
+                            canDelete={chapters.length > 1}
+                            hasConversations={(chapterConversations.get(chapter.id) || 0) > 0}
+                          />
+                        ))}
                      </SortableContext>
                      
                      <DragOverlay>

@@ -11,9 +11,10 @@ interface Chapter {
 
 interface ChapterStatsProps {
   chapters: Chapter[];
+  chapterConversations?: Map<string, number>;
 }
 
-export const ChapterStats: React.FC<ChapterStatsProps> = ({ chapters }) => {
+export const ChapterStats: React.FC<ChapterStatsProps> = ({ chapters, chapterConversations }) => {
   const getStats = () => {
     const totalWords = chapters.reduce((sum, chapter) => {
       return sum + (chapter.content?.trim() ? chapter.content.trim().split(/\s+/).length : 0);
@@ -26,11 +27,13 @@ export const ChapterStats: React.FC<ChapterStatsProps> = ({ chapters }) => {
 
     const draftChapters = chapters.filter(chapter => {
       const words = chapter.content?.trim() ? chapter.content.trim().split(/\s+/).length : 0;
-      return words > 0 && words < 500;
+      const hasConversations = chapterConversations && (chapterConversations.get(chapter.id) || 0) > 0;
+      return (words > 0 && words < 500) || (words === 0 && hasConversations);
     }).length;
 
     const emptyChapters = chapters.filter(chapter => {
-      return !chapter.content?.trim();
+      const hasConversations = chapterConversations && (chapterConversations.get(chapter.id) || 0) > 0;
+      return !chapter.content?.trim() && !hasConversations;
     }).length;
 
     const totalPages = Math.ceil(totalWords / 300);

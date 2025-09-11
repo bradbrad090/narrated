@@ -39,6 +39,7 @@ interface ChapterCardProps {
   onSelect: () => void;
   onDelete: () => void;
   canDelete: boolean;
+  hasConversations?: boolean;
 }
 
 export const ChapterCard: React.FC<ChapterCardProps> = ({
@@ -46,7 +47,8 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
   isActive,
   onSelect,
   onDelete,
-  canDelete
+  canDelete,
+  hasConversations = false
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   
@@ -71,6 +73,9 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
 
   const getCompletionStatus = () => {
     const words = getWordCount();
+    
+    // If chapter has conversations but no content, it's a draft
+    if (words === 0 && hasConversations) return 'draft';
     if (words === 0) return 'empty';
     if (words < 100) return 'draft';
     if (words < 500) return 'in-progress';

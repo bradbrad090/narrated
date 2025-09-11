@@ -21,6 +21,7 @@ interface ConversationInterfaceProps {
   className?: string;
   isChapterComplete?: boolean;
   onContentGenerated?: (content: string) => void;
+  onConversationUpdate?: () => void;
 }
 
 
@@ -31,7 +32,8 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   chapterId,
   className = "",
   isChapterComplete = false,
-  onContentGenerated
+  onContentGenerated,
+  onConversationUpdate
 }) => {
   const [selectedMode, setSelectedMode] = useState('text-assisted');
   const [showSummary, setShowSummary] = useState(false);
@@ -74,6 +76,14 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       setLoadingSummary(false);
     }
   }, [endConversation]);
+
+  // Handle conversation updates (new conversations, deletions, etc.)
+  const handleConversationUpdate = useCallback(() => {
+    loadConversationHistory();
+    if (onConversationUpdate) {
+      onConversationUpdate();
+    }
+  }, [loadConversationHistory, onConversationUpdate]);
 
   // Save current conversation when chapter changes
   const saveCurrentConversation = useCallback(async () => {
@@ -233,7 +243,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                   chapterId={chapterId}
                   context={context}
                   isChapterComplete={isChapterComplete}
-                  onConversationSaved={loadConversationHistory}
+                  onConversationSaved={handleConversationUpdate}
                   // Pass conversation state from parent
                   currentSession={currentSession}
                   isLoading={stateIsLoading}
@@ -255,7 +265,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                   chapterId={chapterId}
                   context={context}
                   isChapterComplete={isChapterComplete}
-                  onConversationUpdate={loadConversationHistory}
+                  onConversationUpdate={handleConversationUpdate}
                   // Pass conversation state from parent
                   currentSession={currentSession}
                 />
