@@ -1122,7 +1122,8 @@ const WriteBook = () => {
                               placeholder="Chapter summary will be generated here..."
                               value={currentChapter.summary || ""}
                               readOnly
-                              className="min-h-[240px] text-base leading-relaxed bg-muted/50"
+                              className="min-h-[300px] text-base leading-relaxed bg-muted/50 resize-y"
+                              style={{ resize: 'vertical' }}
                             />
                          </CardContent>
                         </Card>
