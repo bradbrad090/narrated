@@ -89,10 +89,10 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
     }
     
     return content.split('\n').map((line, index) => (
-      <React.Fragment key={index}>
+      <span key={index}>
         {line}
         {index < content.split('\n').length - 1 && <br />}
-      </React.Fragment>
+      </span>
     ));
   };
 
@@ -205,6 +205,12 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
                 <Button
                   onClick={() => {
                     console.log('Submit conversation button clicked');
+                    // Prevent multiple clicks while processing
+                    if (isLoading || isTyping) {
+                      console.log('Blocking submit - operation in progress');
+                      return;
+                    }
+                    
                     // Dispatch event to parent to handle save and summary generation
                     const event = new CustomEvent('saveAndEndConversation');
                     const container = document.querySelector('[data-conversation-interface]');
@@ -214,6 +220,7 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
                   variant="outline"
                   size="icon"
                   title="Submit conversation"
+                  disabled={isLoading || isTyping || isChapterComplete}
                 >
                   <CheckCircle className="h-4 w-4" />
                 </Button>

@@ -128,15 +128,29 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     const handleSaveAndEndEvent = async () => {
       console.log('handleSaveAndEndEvent triggered', { currentSession });
       
-      // First save the conversation
-      await saveCurrentConversation();
-      
-      // Then end the conversation and generate summary
-      // We need to call endConversation before clearing the session
-      await handleEndConversation();
-      
-      // Reset to the default tab
-      setSelectedMode('text-assisted');
+      try {
+        // First save the conversation
+        await saveCurrentConversation();
+        
+        // Then end the conversation and generate summary
+        // We need to call endConversation before clearing the session
+        await handleEndConversation();
+        
+        // Reset to the default tab
+        setSelectedMode('text-assisted');
+        
+        toast({
+          title: "Success",
+          description: "Conversation submitted and saved successfully"
+        });
+      } catch (error) {
+        console.error('Error in handleSaveAndEndEvent:', error);
+        toast({
+          title: "Error",
+          description: "Failed to submit conversation. Please try again.",
+          variant: "destructive"
+        });
+      }
     };
 
     const element = containerRef.current;
