@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import VoiceInterface from '@/components/VoiceInterface';
 import { useConversationState } from '@/hooks/useConversationState';
-import { Bot } from 'lucide-react';
 import { CONVERSATION_CONFIG } from '@/config/conversationConfig';
 
 interface VoiceConversationModeProps {
@@ -44,8 +43,7 @@ export const VoiceConversationMode: React.FC<VoiceConversationModeProps> = ({
     <Card className={`w-full min-h-[320px] ${className}`}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Bot className="h-5 w-5" />
-          Voice-to-Voice AI Conversation
+          Spoken Conversation
           {isAISpeaking && (
             <div className="flex items-center gap-1 text-sm text-green-600">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
