@@ -85,7 +85,7 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
     if (!onStartConversation) return;
     
     setShowSuggestions(false);
-    const session = await onStartConversation('memoir_interview');
+    const session = await onStartConversation('interview');
     if (session && onConversationSaved) {
       onConversationSaved();
     }
