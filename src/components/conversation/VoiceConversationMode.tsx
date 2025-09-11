@@ -9,6 +9,7 @@ interface VoiceConversationModeProps {
   bookId: string;
   chapterId?: string;
   context?: any;
+  isChapterComplete?: boolean;
   onConversationUpdate?: () => void;
   className?: string;
 }
@@ -18,6 +19,7 @@ export const VoiceConversationMode: React.FC<VoiceConversationModeProps> = ({
   bookId,
   chapterId,
   context,
+  isChapterComplete = false,
   onConversationUpdate,
   className = ""
 }) => {
@@ -63,6 +65,7 @@ export const VoiceConversationMode: React.FC<VoiceConversationModeProps> = ({
           userId={userId}
           bookId={bookId}
           chapterId={chapterId}
+          isDisabled={isChapterComplete}
           onConversationUpdate={handleConversationUpdate}
         />
       </CardContent>

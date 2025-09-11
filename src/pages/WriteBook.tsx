@@ -63,6 +63,7 @@ const WriteBook = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [activeChapterId, setActiveChapterId] = useState<string | null>(null);
   const [showSubmitConfirmation, setShowSubmitConfirmation] = useState(false);
+  const [completedChapters, setCompletedChapters] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -589,9 +590,13 @@ const WriteBook = () => {
       setCurrentChapter(updatedChapter);
       setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
 
+      // Mark this chapter as completed
+      setCompletedChapters(prev => new Set(prev).add(currentChapter.id));
+      setShowSubmitConfirmation(false);
+
       toast({
-        title: "Chapter generated successfully!",
-        description: "Your autobiography chapter has been created using AI.",
+        title: "Chapter submitted successfully!",
+        description: "Your chapter has been finalized and can no longer be modified.",
       });
 
       // Show the chapter refinement section if it's hidden
@@ -898,6 +903,7 @@ const WriteBook = () => {
                           userId={user.id}
                           bookId={book.id}
                           chapterId={currentChapter?.id}
+                          isChapterComplete={currentChapter ? completedChapters.has(currentChapter.id) : false}
                           onContentGenerated={(content) => {
                             if (currentChapter) {
                               const newContent = currentChapter.content ? currentChapter.content + "\n\n" + content : content;
@@ -927,15 +933,15 @@ const WriteBook = () => {
                         className="min-h-[500px] text-base leading-relaxed"
                       />
                       <div className="mt-4 flex justify-center">
-                        <Button 
-                          onClick={saveCurrentChapter}
-                          disabled={saving || !currentChapter}
-                          size="lg"
-                          className="shadow-lg"
-                        >
-                          <Save className="h-4 w-4 mr-2" />
-                          {saving ? "Saving..." : "Save"}
-                        </Button>
+                         <Button 
+                           onClick={saveCurrentChapter}
+                           disabled={saving || !currentChapter || (currentChapter && completedChapters.has(currentChapter.id))}
+                           size="lg"
+                           className="shadow-lg"
+                         >
+                           <Save className="h-4 w-4 mr-2" />
+                           {saving ? "Saving..." : "Save"}
+                         </Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1078,19 +1084,20 @@ const WriteBook = () => {
                           </CardDescription>
                         </CardHeader>
                          <CardContent>
-                           <ConversationInterface
-                             userId={user.id}
-                             bookId={book.id}
-                             chapterId={currentChapter?.id}
-                             onContentGenerated={(content) => {
-                               if (currentChapter) {
-                                 const newContent = currentChapter.content ? currentChapter.content + "\n\n" + content : content;
-                                 const updatedChapter = { ...currentChapter, content: newContent };
-                                 setCurrentChapter(updatedChapter);
-                                 setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
-                               }
-                             }}
-                           />
+                          <ConversationInterface
+                            userId={user.id}
+                            bookId={book.id}
+                            chapterId={currentChapter?.id}
+                            isChapterComplete={currentChapter ? completedChapters.has(currentChapter.id) : false}
+                            onContentGenerated={(content) => {
+                              if (currentChapter) {
+                                const newContent = currentChapter.content ? currentChapter.content + "\n\n" + content : content;
+                                const updatedChapter = { ...currentChapter, content: newContent };
+                                setCurrentChapter(updatedChapter);
+                                setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
+                              }
+                            }}
+                          />
                           </CardContent>
                     </Card>
                      )}
@@ -1195,14 +1202,23 @@ const WriteBook = () => {
 
                         {/* Generate Chapter Button */}
                         <div className="flex justify-center gap-4 mb-4 mt-8">
-                         <Button
+                          <Button
                            variant="default"
                            onClick={() => setShowSubmitConfirmation(true)}
-                           disabled={saving || !currentChapter || !user}
+                           disabled={saving || !currentChapter || !user || (currentChapter && completedChapters.has(currentChapter.id))}
                            size="lg"
-                           className="px-12 py-6 text-xl font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 rounded-xl border-2 border-primary/20 min-w-[400px]"
+                           className={`px-12 py-6 text-xl font-semibold shadow-xl transition-all duration-300 rounded-xl border-2 min-w-[400px] ${
+                             currentChapter && completedChapters.has(currentChapter.id)
+                               ? 'opacity-50 cursor-not-allowed bg-muted text-muted-foreground border-muted'
+                               : 'hover:shadow-2xl bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 border-primary/20'
+                           }`}
                          >
-                           {saving ? "Generating..." : "Confirm & Submit"}
+                           {currentChapter && completedChapters.has(currentChapter.id)
+                             ? "Chapter Submitted"
+                             : saving 
+                               ? "Generating..." 
+                               : "Confirm & Submit"
+                           }
                          </Button>
                       </div>
 

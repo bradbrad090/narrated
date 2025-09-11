@@ -19,6 +19,7 @@ interface ConversationInterfaceProps {
   bookId: string;
   chapterId?: string;
   className?: string;
+  isChapterComplete?: boolean;
   onContentGenerated?: (content: string) => void;
 }
 
@@ -29,6 +30,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   bookId,
   chapterId,
   className = "",
+  isChapterComplete = false,
   onContentGenerated
 }) => {
   const [selectedMode, setSelectedMode] = useState('text-assisted');
@@ -200,6 +202,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                   bookId={bookId}
                   chapterId={chapterId}
                   context={context}
+                  isChapterComplete={isChapterComplete}
                   onConversationSaved={loadConversationHistory}
                 />
               </ErrorBoundary>
@@ -215,6 +218,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                   bookId={bookId}
                   chapterId={chapterId}
                   context={context}
+                  isChapterComplete={isChapterComplete}
                   onConversationUpdate={loadConversationHistory}
                 />
               </ErrorBoundary>

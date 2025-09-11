@@ -12,6 +12,7 @@ interface TextAssistedModeProps {
   bookId: string;
   chapterId?: string;
   context?: any;
+  isChapterComplete?: boolean;
   className?: string;
   onConversationSaved?: () => void;
 }
@@ -21,6 +22,7 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
   bookId,
   chapterId,
   context,
+  isChapterComplete = false,
   className = "",
   onConversationSaved
 }) => {
@@ -110,15 +112,16 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
             <div className="space-y-4">
               <Button
                 onClick={handleStartConversation}
-                disabled={isLoading}
+                disabled={isLoading || isChapterComplete}
                 size="lg"
+                className={isChapterComplete ? "opacity-50 cursor-not-allowed" : ""}
               >
                 {isLoading ? (
                   <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                 ) : (
                   <MessageCircle className="h-5 w-5 mr-2" />
                 )}
-                {CONVERSATION_CONFIG.BUTTON_TEXT.START_CONVERSATION}
+                {isChapterComplete ? "Chapter Submitted" : CONVERSATION_CONFIG.BUTTON_TEXT.START_CONVERSATION}
               </Button>
               
               <p className="text-sm text-muted-foreground max-w-md mx-auto">

@@ -12,6 +12,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   userId,
   bookId,
   chapterId,
+  isDisabled = false,
   onConversationUpdate
 }) => {
   const { toast } = useToast();
@@ -132,9 +133,9 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
         <div className="text-center py-8 space-y-4">
           <Button 
             onClick={startConversation}
-            disabled={isConnecting}
+            disabled={isConnecting || isDisabled}
             size="lg"
-            className="min-w-[200px]"
+            className={`min-w-[200px] ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             {isConnecting ? (
               <>
@@ -144,7 +145,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
             ) : (
               <>
                 <Phone className="h-5 w-5 mr-2" />
-                Start Voice Chat
+                {isDisabled ? "Chapter Submitted" : "Start Voice Chat"}
               </>
             )}
           </Button>

@@ -15,5 +15,6 @@ export interface VoiceInterfaceProps {
   userId: string;
   bookId: string;
   chapterId?: string;
+  isDisabled?: boolean;
   onConversationUpdate?: () => void;
 }
