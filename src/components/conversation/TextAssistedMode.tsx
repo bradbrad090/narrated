@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageCircle, Send, Loader2, CheckCircle, Sparkles, RotateCcw } from 'lucide-react';
+import { MessageCircle, Send, Loader2, CheckCircle, RotateCcw } from 'lucide-react';
 import { useConversationState } from '@/hooks/useConversationState';
 import { CONVERSATION_CONFIG } from '@/config/conversationConfig';
 
@@ -98,8 +98,7 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
     <Card className={`w-full min-h-[320px] ${className}`}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5" />
-          Text-Assisted Conversation
+          Text Conversation
         </CardTitle>
         <p className="text-sm text-muted-foreground">
           Have a text conversation with AI to develop your story

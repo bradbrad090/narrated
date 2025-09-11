@@ -180,8 +180,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
             <TabsList className="grid w-full grid-cols-2">
               {isFeatureEnabled('textConversations') && (
                 <TabsTrigger value="text-assisted" className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4" />
-                  Text-Assisted
+                  Text Conversation
                 </TabsTrigger>
               )}
               {isFeatureEnabled('voiceConversations') && (
