@@ -12,6 +12,7 @@ interface VoiceConversationModeProps {
   isChapterComplete?: boolean;
   onConversationUpdate?: () => void;
   className?: string;
+  currentSession?: any;
 }
 
 export const VoiceConversationMode: React.FC<VoiceConversationModeProps> = ({
@@ -21,7 +22,8 @@ export const VoiceConversationMode: React.FC<VoiceConversationModeProps> = ({
   context,
   isChapterComplete = false,
   onConversationUpdate,
-  className = ""
+  className = "",
+  currentSession
 }) => {
   const [isAISpeaking, setIsAISpeaking] = useState(false);
   

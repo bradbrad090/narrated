@@ -40,19 +40,24 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   const { toast } = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const {
-    history: conversationHistory,
-    context,
-    currentSession,
-    loadConversationHistory,
-    deleteConversation,
-    deletingSessionIds,
-    endConversation
-  } = useConversationState({
+  const conversationState = useConversationState({
     userId,
     bookId,
     chapterId
   });
+
+  const {
+    history: conversationHistory,
+    context,
+    currentSession,
+    ui: { isLoading: stateIsLoading, isTyping: stateIsTyping },
+    loadConversationHistory,
+    deleteConversation,
+    deletingSessionIds,
+    endConversation,
+    startConversation,
+    sendMessage
+  } = conversationState;
 
   // Handle conversation end with summary fetch
   const handleEndConversation = useCallback(async () => {
@@ -229,6 +234,12 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                   context={context}
                   isChapterComplete={isChapterComplete}
                   onConversationSaved={loadConversationHistory}
+                  // Pass conversation state from parent
+                  currentSession={currentSession}
+                  isLoading={stateIsLoading}
+                  isTyping={stateIsTyping}
+                  onStartConversation={startConversation}
+                  onSendMessage={sendMessage}
                 />
               </ErrorBoundary>
             </TabsContent>
@@ -245,6 +256,8 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                   context={context}
                   isChapterComplete={isChapterComplete}
                   onConversationUpdate={loadConversationHistory}
+                  // Pass conversation state from parent
+                  currentSession={currentSession}
                 />
               </ErrorBoundary>
             </TabsContent>

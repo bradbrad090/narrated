@@ -15,6 +15,12 @@ interface TextAssistedModeProps {
   isChapterComplete?: boolean;
   className?: string;
   onConversationSaved?: () => void;
+  // Conversation state from parent
+  currentSession?: any;
+  isLoading?: boolean;
+  isTyping?: boolean;
+  onStartConversation?: (type: any) => Promise<any>;
+  onSendMessage?: (message: string) => Promise<any>;
 }
 
 export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
@@ -24,25 +30,19 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
   context,
   isChapterComplete = false,
   className = "",
-  onConversationSaved
+  onConversationSaved,
+  // Conversation state from parent
+  currentSession,
+  isLoading = false,
+  isTyping = false,
+  onStartConversation,
+  onSendMessage
 }) => {
   const [currentMessage, setCurrentMessage] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  const {
-    currentSession,
-    ui: { isLoading, isTyping },
-    startConversation,
-    sendMessage,
-    endConversation
-  } = useConversationState({
-    userId,
-    bookId,
-    chapterId
-  });
 
   // Optimized scroll to bottom with proper cleanup
   useEffect(() => {
@@ -62,11 +62,16 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
   }, [currentSession?.messages?.length, isTyping]);
 
   const handleSendMessage = async () => {
-    if (!currentMessage.trim() || !currentSession) return;
-
-    await sendMessage(currentMessage);
+    if (!onSendMessage || !currentMessage.trim() || isLoading || isTyping) return;
+    
+    const message = currentMessage.trim();
     setCurrentMessage('');
-    textareaRef.current?.focus();
+    setShowSuggestions(false);
+    
+    const updatedSession = await onSendMessage(message);
+    if (updatedSession && onConversationSaved) {
+      onConversationSaved();
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -76,8 +81,14 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
     }
   };
 
-  const handleStartConversation = () => {
-    startConversation('interview');
+  const handleStartConversation = async () => {
+    if (!onStartConversation) return;
+    
+    setShowSuggestions(false);
+    const session = await onStartConversation('memoir_interview');
+    if (session && onConversationSaved) {
+      onConversationSaved();
+    }
   };
 
   // Resume functionality removed - users can only view and delete conversations
