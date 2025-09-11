@@ -126,7 +126,18 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     };
 
     const handleSaveAndEndEvent = async () => {
-      console.log('handleSaveAndEndEvent triggered', { currentSession });
+      console.log('handleSaveAndEndEvent triggered', { currentSession: currentSession?.sessionId, messageCount: currentSession?.messages?.length });
+      
+      // Early return if no session to save
+      if (!currentSession || !currentSession.messages || currentSession.messages.length === 0) {
+        console.log('No active conversation session to save');
+        toast({
+          title: "No Conversation",
+          description: "There is no active conversation to submit.",
+          variant: "destructive"
+        });
+        return;
+      }
       
       try {
         // First save the conversation

@@ -204,23 +204,40 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
                 </Button>
                 <Button
                   onClick={() => {
-                    console.log('Submit conversation button clicked');
+                    console.log('Submit conversation button clicked', { 
+                      currentSession: currentSession?.sessionId, 
+                      messageCount: currentSession?.messages?.length 
+                    });
+                    
                     // Prevent multiple clicks while processing
                     if (isLoading || isTyping) {
                       console.log('Blocking submit - operation in progress');
                       return;
                     }
                     
+                    // Validate session exists with messages
+                    if (!currentSession || !currentSession.messages || currentSession.messages.length === 0) {
+                      console.error('No active conversation session to submit', { currentSession });
+                      return;
+                    }
+                    
                     // Dispatch event to parent to handle save and summary generation
                     const event = new CustomEvent('saveAndEndConversation');
                     const container = document.querySelector('[data-conversation-interface]');
-                    console.log('Dispatching saveAndEndConversation event', { container });
+                    console.log('Dispatching saveAndEndConversation event', { container, sessionId: currentSession.sessionId });
                     container?.dispatchEvent(event);
                   }}
                   variant="outline"
                   size="icon"
-                  title="Submit conversation"
-                  disabled={isLoading || isTyping || isChapterComplete}
+                  title={
+                    !currentSession?.messages?.length 
+                      ? "No conversation to submit" 
+                      : isChapterComplete 
+                        ? "Chapter already submitted" 
+                        : "Submit conversation"
+                  }
+                  disabled={isLoading || isTyping || isChapterComplete || !currentSession?.messages?.length}
+                  className={!currentSession?.messages?.length ? "cursor-not-allowed opacity-50" : ""}
                 >
                   <CheckCircle className="h-4 w-4" />
                 </Button>
