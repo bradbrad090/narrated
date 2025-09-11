@@ -1118,12 +1118,12 @@ const WriteBook = () => {
                            </div>
                          </CardHeader>
                          <CardContent>
-                           <Textarea
-                             placeholder="Chapter summary will be generated here..."
-                             value={currentChapter.summary || ""}
-                             readOnly
-                             className="min-h-[120px] text-base leading-relaxed bg-muted/50"
-                           />
+                            <Textarea
+                              placeholder="Chapter summary will be generated here..."
+                              value={currentChapter.summary || ""}
+                              readOnly
+                              className="min-h-[240px] text-base leading-relaxed bg-muted/50"
+                            />
                          </CardContent>
                         </Card>
 
