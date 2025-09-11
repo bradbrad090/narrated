@@ -12,11 +12,9 @@ const Pricing = () => {
       price: "$49",
       description: "Perfect for capturing your key life moments",
       features: [
-        "3-4 conversation sessions",
         "50-80 page autobiography",
         "Professional editing",
         "Digital delivery (PDF)",
-        "Basic cover design"
       ]
     },
     {
@@ -24,7 +22,6 @@ const Pricing = () => {
       price: "$199",
       description: "Comprehensive life story documentation",
       features: [
-        "6-8 conversation sessions",
         "100-150 page autobiography",
         "Professional editing & formatting",
         "Premium hardcover book",
@@ -39,14 +36,12 @@ const Pricing = () => {
       price: "$399",
       description: "The ultimate legacy preservation experience",
       features: [
-        "10-12 conversation sessions",
         "150-200+ page autobiography",
-        "Professional editing & proofreading",
+        "Professional editing & formatting",
         "Luxury hardcover with dust jacket",
         "Custom photo integration",
         "Digital & physical delivery",
         "Family sharing copies (5)",
-        "Genealogy research assistance"
       ]
     }
   ];
