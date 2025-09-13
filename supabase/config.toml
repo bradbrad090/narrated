@@ -1,5 +1,8 @@
 project_id = "keadkwromhlyvoyxvcmi"
 
+[functions.send-chapter-email]
+verify_jwt = false
+
 [functions.openai-conversation]
 verify_jwt = false
 

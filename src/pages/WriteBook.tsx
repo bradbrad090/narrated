@@ -631,6 +631,21 @@ const WriteBook = () => {
       setCompletedChapters(prev => new Set(prev).add(currentChapter.id));
       setShowSubmitConfirmation(false);
 
+      // Send chapter submission email
+      try {
+        await supabase.functions.invoke('send-chapter-email', {
+          body: {
+            user_email: user.email,
+            user_name: user.user_metadata?.full_name || user.email,
+            chapter_title: currentChapter.title,
+            chapter_number: currentChapter.chapter_number,
+            is_first_submission: !completedChapters.has(currentChapter.id)
+          }
+        });
+      } catch (emailError) {
+        console.log('Email sending failed (non-critical):', emailError);
+      }
+
       toast({
         title: "Chapter submitted successfully!",
         description: "Your chapter has been finalized and can no longer be modified.",
