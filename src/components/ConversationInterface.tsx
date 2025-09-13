@@ -152,6 +152,9 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
         // We need to call endConversation before clearing the session
         await handleEndConversation();
         
+        // Update the conversations list to show the newly saved conversation
+        handleConversationUpdate();
+        
         // Reset to the default tab
         setSelectedMode('text-assisted');
         
