@@ -487,17 +487,8 @@ const WriteBook = () => {
 
   const saveCurrentConversationAndSwitchChapter = async (newChapter: Chapter) => {
     try {
-      // Get the current conversation session to save it before switching
-      const conversationElement = document.querySelector('[data-conversation-interface]');
-      if (conversationElement) {
-        // Trigger save and end current conversation
-        const saveAndEndEvent = new CustomEvent('saveAndEndConversation');
-        conversationElement.dispatchEvent(saveAndEndEvent);
-        
-        // Small delay to ensure conversation is saved before switching
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-      
+      // Only try to save conversation if there's an active one
+      // Just switch chapters directly - the ConversationInterface will handle saving if needed
       setCurrentChapter(newChapter);
       setSidebarOpen(false);
     } catch (error: any) {

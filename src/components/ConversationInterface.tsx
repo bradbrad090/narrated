@@ -136,11 +136,6 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       // Early return if no session to save
       if (!currentSession || !currentSession.messages || currentSession.messages.length === 0) {
         console.log('No active conversation session to save');
-        toast({
-          title: "No Conversation",
-          description: "There is no active conversation to submit.",
-          variant: "destructive"
-        });
         return;
       }
       
