@@ -36,9 +36,6 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   onConversationUpdate
 }) => {
   const [selectedMode, setSelectedMode] = useState('text-assisted');
-  const [showSummary, setShowSummary] = useState(false);
-  const [summary, setSummary] = useState<string>('');
-  const [loadingSummary, setLoadingSummary] = useState(false);
   const { toast } = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -61,19 +58,12 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     sendMessage
   } = conversationState;
 
-  // Handle conversation end with summary fetch
+  // Handle conversation end
   const handleEndConversation = useCallback(async () => {
-    setLoadingSummary(true);
     try {
-      const summaryResult = await endConversation();
-      if (summaryResult) {
-        setSummary(summaryResult.length > 300 ? `${summaryResult.slice(0, 300)}...` : summaryResult);
-        setShowSummary(true);
-      }
+      await endConversation();
     } catch (error) {
       // Error already handled in endConversation
-    } finally {
-      setLoadingSummary(false);
     }
   }, [endConversation]);
 
@@ -274,16 +264,6 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           )}
          </Tabs>
 
-        {/* Auto-generated Summary Display */}
-        {showSummary && (
-          <div className="p-4 bg-card rounded-lg border mt-4">
-            <h2 className="text-lg font-semibold mb-2">Chapter Summary</h2>
-            <p className="text-sm text-muted-foreground mb-2">{summary}</p>
-            <p className="text-xs text-muted-foreground">
-              The AI has crafted your full chapter behind the scenes.
-            </p>
-          </div>
-        )}
 
       </div>
     </ErrorBoundary>
