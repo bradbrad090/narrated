@@ -262,6 +262,39 @@ export type Database = {
           },
         ]
       }
+      chapter_email_logs: {
+        Row: {
+          chapter_id: string
+          created_at: string
+          email_status: string
+          email_type: string
+          error_message: string | null
+          id: string
+          sent_at: string
+          user_id: string
+        }
+        Insert: {
+          chapter_id: string
+          created_at?: string
+          email_status?: string
+          email_type: string
+          error_message?: string | null
+          id?: string
+          sent_at?: string
+          user_id: string
+        }
+        Update: {
+          chapter_id?: string
+          created_at?: string
+          email_status?: string
+          email_type?: string
+          error_message?: string | null
+          id?: string
+          sent_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       chapters: {
         Row: {
           book_id: string
