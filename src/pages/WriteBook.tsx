@@ -639,6 +639,7 @@ const WriteBook = () => {
             user_name: user.user_metadata?.full_name || user.email,
             chapter_title: currentChapter.title,
             chapter_number: currentChapter.chapter_number,
+            chapter_content: data.content,
             is_first_submission: !completedChapters.has(currentChapter.id)
           }
         });

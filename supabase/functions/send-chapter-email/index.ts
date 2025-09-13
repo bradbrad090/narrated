@@ -38,6 +38,7 @@ serve(async (req) => {
       user_name, 
       chapter_title, 
       chapter_number, 
+      chapter_content,
       is_first_submission 
     } = await req.json();
 
@@ -101,11 +102,12 @@ serve(async (req) => {
               </p>
               
               <div style="background-color: hsl(35, 15%, 96%); padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <p style="color: hsl(220, 15%, 45%); font-size: 14px; margin: 0; text-align: center;">
-                  <strong>Chapter Details:</strong><br>
-                  ${chapter_title}<br>
-                  Chapter ${chapter_number}
-                </p>
+                <h3 style="color: hsl(220, 25%, 15%); font-size: 18px; font-weight: 600; margin: 0 0 10px; text-align: center;">
+                  ${chapter_title} (Chapter ${chapter_number})
+                </h3>
+                <div style="color: hsl(220, 15%, 35%); font-size: 14px; line-height: 1.6; white-space: pre-wrap; max-height: 400px; overflow-y: auto; text-align: left;">
+                  ${chapter_content || 'No content available'}
+                </div>
               </div>
               
               <p style="color: hsl(220, 15%, 45%); font-size: 16px; line-height: 1.6; margin: 0;">
