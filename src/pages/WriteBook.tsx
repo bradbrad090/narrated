@@ -39,6 +39,7 @@ interface Chapter {
   summary?: string;
   created_at: string;
   updated_at: string;
+  is_submitted?: boolean;
 }
 
 const WriteBook = () => {
@@ -609,12 +610,29 @@ const WriteBook = () => {
         throw new Error(data.error || 'Failed to generate chapter');
       }
 
-      // Update the current chapter with the generated content
+      // Update the current chapter with the generated content and mark as submitted
       const updatedChapter = { 
         ...currentChapter, 
         content: data.content,
+        is_submitted: true,
         updated_at: new Date().toISOString()
       };
+      
+      // Update in database
+      const { error: updateError } = await supabase
+        .from('chapters')
+        .update({ 
+          content: data.content,
+          is_submitted: true,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', currentChapter.id)
+        .eq('user_id', user.id);
+
+      if (updateError) {
+        throw new Error(updateError.message);
+      }
+
       setCurrentChapter(updatedChapter);
       setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
 

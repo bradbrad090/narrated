@@ -269,6 +269,7 @@ export type Database = {
           content: string | null
           created_at: string
           id: string
+          is_submitted: boolean
           pdf_url: string | null
           status: string | null
           summary: string | null
@@ -282,6 +283,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
+          is_submitted?: boolean
           pdf_url?: string | null
           status?: string | null
           summary?: string | null
@@ -295,6 +297,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
+          is_submitted?: boolean
           pdf_url?: string | null
           status?: string | null
           summary?: string | null

@@ -31,6 +31,7 @@ interface Chapter {
   summary?: string;
   created_at: string;
   updated_at: string;
+  is_submitted?: boolean;
 }
 
 interface ChapterCardProps {
@@ -74,12 +75,14 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
   const getCompletionStatus = () => {
     const words = getWordCount();
     
-    // If chapter has conversations but no content, it's a draft
-    if (words === 0 && hasConversations) return 'draft';
-    if (words === 0) return 'empty';
-    if (words < 100) return 'draft';
-    if (words < 500) return 'in-progress';
-    return 'complete';
+    // Complete status is only when user has submitted the chapter
+    if (chapter.is_submitted) return 'complete';
+    
+    // If chapter has conversations or content but not submitted, it's a draft
+    if (words > 0 || hasConversations) return 'draft';
+    
+    // No content and no conversations = empty
+    return 'empty';
   };
 
   const getStatusIcon = () => {
@@ -87,8 +90,6 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
     switch (status) {
       case 'complete':
         return <CheckCircle2 className="h-3 w-3 text-green-500" />;
-      case 'in-progress':
-        return <Circle className="h-3 w-3 text-blue-500 fill-blue-100" />;
       case 'draft':
         return <Circle className="h-3 w-3 text-yellow-500 fill-yellow-100" />;
       default:
@@ -100,7 +101,6 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
     const status = getCompletionStatus();
     const statusConfig = {
       complete: { label: 'Complete', variant: 'default' as const, className: 'bg-green-100 text-green-700 hover:bg-green-100' },
-      'in-progress': { label: 'In Progress', variant: 'secondary' as const, className: 'bg-blue-100 text-blue-700 hover:bg-blue-100' },
       draft: { label: 'Draft', variant: 'outline' as const, className: 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100' },
       empty: { label: 'Empty', variant: 'outline' as const, className: 'bg-muted text-muted-foreground' }
     };
