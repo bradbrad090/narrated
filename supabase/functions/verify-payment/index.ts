@@ -72,12 +72,16 @@ serve(async (req) => {
       purchaseStatus = 'pending';
     }
 
-    // Update book status
+    // Get tier from Stripe session metadata
+    const tier = session.metadata?.tier || 'free';
+    
+    // Update book status and tier
     const { error: bookUpdateError } = await supabaseService
       .from("books")
       .update({
         purchase_status: purchaseStatus,
         stripe_purchase_id: sessionId,
+        tier: tier,
       })
       .eq("id", bookId)
       .eq("user_id", user.id);

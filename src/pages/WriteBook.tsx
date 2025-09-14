@@ -66,6 +66,7 @@ const WriteBook = () => {
   const [showSubmitConfirmation, setShowSubmitConfirmation] = useState(false);
   const [completedChapters, setCompletedChapters] = useState<Set<string>>(new Set());
   const [chapterConversations, setChapterConversations] = useState<Map<string, number>>(new Map());
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -367,6 +368,12 @@ const WriteBook = () => {
 
   const createNewChapter = async (userId: string, chapterNumber: number, title: string) => {
     try {
+      // Check tier limits for free accounts
+      if (book?.tier === 'free' && chapters.length >= 1) {
+        setShowUpgrade(true);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('chapters')
         .insert({
@@ -898,6 +905,11 @@ const WriteBook = () => {
                               Upgrade to unlock advanced features.
                             </CardDescription>
                           )}
+                          {isBookTierCollapsed && (
+                            <CardDescription>
+                              {book.tier === 'free' ? 'Free (1 chapter)' : book.tier === 'paid' ? 'Paid (Unlimited)' : 'Premium (Unlimited)'}
+                            </CardDescription>
+                          )}
                         </div>
                         {isBookTierCollapsed ? (
                           <ChevronDown className="h-4 w-4" />
@@ -1025,9 +1037,12 @@ const WriteBook = () => {
                          <CardHeader className="py-3">
                            <CollapsibleTrigger asChild>
                              <Button variant="ghost" className="flex items-center justify-between p-0 h-auto w-full">
-                               <div className="text-left">
-                                 <CardTitle className="text-sm">Book Tier</CardTitle>
-                               </div>
+                                <div className="text-left">
+                                  <CardTitle className="text-sm">Book Tier</CardTitle>
+                                  <CardDescription className="text-xs">
+                                    {book.tier === 'free' ? 'Free (1 chapter)' : book.tier === 'paid' ? 'Paid (Unlimited)' : 'Premium (Unlimited)'}
+                                  </CardDescription>
+                                </div>
                                {isBookTierCollapsed ? (
                                  <ChevronDown className="h-4 w-4" />
                                ) : (
@@ -1351,6 +1366,29 @@ const WriteBook = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Upgrade Dialog */}
+      <Dialog open={showUpgrade} onOpenChange={setShowUpgrade}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Upgrade Required</DialogTitle>
+            <DialogDescription>
+              You've reached the limit of 1 chapter for free accounts. Upgrade to add unlimited chapters to your book.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setShowUpgrade(false)}>
+              Maybe Later
+            </Button>
+            <Button onClick={() => {
+              setShowUpgrade(false);
+              setIsBookTierCollapsed(false);
+            }}>
+              View Upgrade Options
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
     </div>
     </>
