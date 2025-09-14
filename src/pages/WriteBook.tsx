@@ -300,20 +300,7 @@ const WriteBook = () => {
 
   const createDefaultChapters = async (userId: string) => {
     const defaultChapters = [
-      { title: "Chapter 1: Before My Birth", description: "" },
-      { title: "Chapter 2: Birth and Infancy", description: "" },
-      { title: "Chapter 3: Toddler Years", description: "" },
-      { title: "Chapter 4: Starting School", description: "" },
-      { title: "Chapter 5: Elementary School", description: "" },
-      { title: "Chapter 6: Junior High", description: "" },
-      { title: "Chapter 7: High School", description: "" },
-      { title: "Chapter 8: High School Graduation", description: "" },
-      { title: "Chapter 9: College Years", description: "" },
-      { title: "Chapter 10: Entering the Workforce", description: "" },
-      { title: "Chapter 11: Marriage and Family", description: "Meeting a partner, wedding milestones, starting a home, and the joys of parenthood." },
-      { title: "Chapter 12: Mid-Career Years", description: "Professional peaks, promotions, work-life balance struggles, and overcoming mid-career hurdles." },
-      { title: "Chapter 13: Empty Nest Phase", description: "Watching kids leave home, reevaluating relationships, and personal reinventions in later adulthood." },
-      { title: "Chapter 14: Approaching Retirement", description: "Winding down work, new hobbies, health reflections, and embracing post-career freedom amid global changes." }
+      { title: "Chapter 1", description: "" }
     ];
 
     try {
@@ -365,8 +352,8 @@ const WriteBook = () => {
       setCurrentChapter(newChapters[0]);
 
       toast({
-        title: "Template chapters created!",
-        description: "14 default chapters have been added to help you get started.",
+        title: "Chapter created!",
+        description: "Your first chapter has been created. Click 'Add Chapter' to create more.",
       });
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
