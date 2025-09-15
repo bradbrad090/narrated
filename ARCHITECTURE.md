@@ -178,12 +178,17 @@ erDiagram
     books ||--|| book_profiles : profiles
     chat_histories ||--o{ conversation_questions : tracks
     chapters ||--o{ ai_chapter_metadata : metadata
+    chapters ||--o{ chapter_email_logs : logs
+    chapters ||--o{ pdf_jobs : generates
     users ||--o{ orders : places
+    users ||--o{ profile_question_responses : answers
+    books ||--o{ conversation_context_cache : caches
 
     users {
         uuid id PK
         text email
         text full_name
+        integer age
         boolean completed_signup
         timestamp created_at
     }
@@ -193,8 +198,11 @@ erDiagram
         uuid user_id FK
         text title
         text status
-        jsonb usage_metrics
         text tier
+        text stripe_purchase_id
+        text purchase_status
+        jsonb usage_metrics
+        timestamp created_at
     }
 
     chapters {
@@ -205,6 +213,11 @@ erDiagram
         text title
         text content
         text summary
+        text status
+        boolean is_submitted
+        text pdf_url
+        timestamp created_at
+        timestamp updated_at
     }
 
     chat_histories {
@@ -213,8 +226,13 @@ erDiagram
         uuid chapter_id FK
         text session_id
         jsonb messages
+        jsonb context_snapshot
+        jsonb conversation_goals
         text conversation_type
         text conversation_medium
+        boolean is_self_conversation
+        timestamp created_at
+        timestamp updated_at
     }
 
     book_profiles {
@@ -223,12 +241,150 @@ erDiagram
         uuid user_id FK
         text full_name
         date birth_date
+        integer birth_year
+        text birthplace
+        text current_location
         text occupation
         text education
+        text family_background
+        text relationships_family
+        text parents_occupations
+        text marital_status
+        text first_job
+        integer siblings_count
+        integer children_count
+        text cultural_background
+        text values_beliefs
+        text life_philosophy
+        text writing_style_preference
         text[] personality_traits
         text[] key_life_events
+        text[] challenges_overcome
+        text[] hobbies_interests
+        text[] languages_spoken
+        text[] life_themes
+        text[] career_highlights
+        text[] memorable_quotes
+        text[] nicknames
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    conversation_questions {
+        uuid id PK
+        uuid user_id FK
+        uuid book_id FK
+        uuid chapter_id FK
+        text conversation_session_id
+        text conversation_type
+        text question_text
+        text question_hash
+        text[] semantic_keywords
+        integer response_quality
+        timestamp asked_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    conversation_context_cache {
+        uuid id PK
+        uuid user_id FK
+        uuid book_id FK
+        uuid chapter_id FK
+        jsonb context_data
+        timestamp created_at
+        timestamp expires_at
+    }
+
+    ai_chapter_metadata {
+        integer id PK
+        uuid chapter_id FK
+        uuid user_id FK
+        uuid book_id FK
+        uuid conversation_id FK
+        uuid profile_id FK
+        varchar model_used
+        varchar prompt_version
+        jsonb source_data
+        timestamp generated_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    profile_question_responses {
+        uuid id PK
+        uuid user_id FK
+        uuid book_id FK
+        integer question_index
+        text question_text
+        text answer_text
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    chapter_email_logs {
+        uuid id PK
+        uuid chapter_id FK
+        uuid user_id FK
+        text email_type
+        text email_status
+        text error_message
+        timestamp sent_at
+        timestamp created_at
+    }
+
+    pdf_jobs {
+        uuid id PK
+        uuid chapter_id FK
+        uuid user_id FK
+        text status
+        text pdf_url
+        text error_message
+        timestamp processed_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    orders {
+        uuid id PK
+        uuid user_id FK
+        uuid book_id FK
+        bigint quantity
+        numeric total_price
+        text pod_provider
+        text status
+        timestamp created_at
     }
 </lov-mermaid>
+
+#### Database Schema Details
+
+**Core Tables:**
+- **users**: User account information and profile data
+- **books**: Book projects with tier management and purchase tracking
+- **chapters**: Individual book chapters with submission and PDF generation status
+- **book_profiles**: Comprehensive user biographical data for personalized content generation
+
+**Conversation System:**
+- **chat_histories**: Complete conversation records with context and goals
+- **conversation_questions**: Question tracking with semantic analysis for duplicate detection
+- **conversation_context_cache**: Performance optimization for conversation context
+
+**Content Generation:**
+- **ai_chapter_metadata**: Tracking of AI-generated content with model and prompt versioning
+- **profile_question_responses**: Structured profile building questionnaire responses
+
+**Operations & Notifications:**
+- **chapter_email_logs**: Email notification tracking for chapter submissions
+- **pdf_jobs**: Asynchronous PDF generation job management
+- **orders**: Purchase order tracking for physical book printing
+
+**Key Features:**
+- All tables implement Row-Level Security (RLS) for user data isolation
+- Comprehensive audit trails with created_at/updated_at timestamps
+- JSON fields for flexible metadata storage (context, goals, usage metrics)
+- Tier-based access control for feature limitations
+- Integrated payment system with Stripe tracking
 
 ## Security Architecture
 
