@@ -63,7 +63,7 @@ export const VoiceConversationMode: React.FC<VoiceConversationModeProps> = ({
         <VoiceInterface 
           onSpeakingChange={setIsAISpeaking}
           context={context}
-          conversationType="interview"
+          
           userId={userId}
           bookId={bookId}
           chapterId={chapterId}

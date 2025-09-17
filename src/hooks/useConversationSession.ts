@@ -90,7 +90,7 @@ export const useConversationSession = ({
 
       const newSession: ConversationSession = {
         sessionId: data.sessionId,
-        conversationType,
+        conversationType: 'interview',
         conversationMedium: 'text',
         messages: [
           {
@@ -108,7 +108,7 @@ export const useConversationSession = ({
       
       toast({
         title: CONVERSATION_CONFIG.MESSAGES.CONVERSATION_STARTED,
-        description: `${conversationType.charAt(0).toUpperCase() + conversationType.slice(1)} conversation is ready!`,
+        description: "Interview conversation is ready!",
       });
 
       return newSession;

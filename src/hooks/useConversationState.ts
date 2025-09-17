@@ -200,7 +200,7 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
       return null;
     }
 
-    console.log('Starting conversation:', { conversationType, conversationMedium, userId, bookId, chapterId });
+    console.log('Starting conversation:', { conversationMedium, userId, bookId, chapterId });
 
     dispatch(conversationActions.setLoading(true));
     dispatch(conversationActions.setError(null));
@@ -218,7 +218,7 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
           userId,
           bookId,
           chapterId,
-          conversationType,
+          conversationType: 'interview',
           context: conversationContext,
           styleInstructions: 'Be warm, welcoming, and start with an engaging opening question that helps the person begin sharing their story.'
         }
@@ -230,7 +230,7 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
 
       const session: ConversationSession = {
         sessionId: data.sessionId,
-        conversationType,
+        conversationType: 'interview',
         conversationMedium,
         messages: [
           {

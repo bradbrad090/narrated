@@ -135,7 +135,7 @@ export const useConversationFlow = (userId: string, bookId: string, chapterId?: 
     } finally {
       setIsLoading(false);
     }
-  }, [userId, bookId, chapterId, currentSession?.conversationType, toast]);
+  }, [userId, bookId, chapterId, toast]);
 
   const startConversation = useCallback(async (
     conversationType: 'interview',
@@ -153,7 +153,7 @@ export const useConversationFlow = (userId: string, bookId: string, chapterId?: 
             userId,
             bookId,
             chapterId,
-            conversationType,
+            conversationType: 'interview',
             context,
             styleInstructions
           }
@@ -166,7 +166,7 @@ export const useConversationFlow = (userId: string, bookId: string, chapterId?: 
 
       const newSession: ConversationSession = {
         sessionId: data.sessionId,
-        conversationType,
+        conversationType: 'interview',
         messages: [
           {
             role: 'assistant',
@@ -186,7 +186,7 @@ export const useConversationFlow = (userId: string, bookId: string, chapterId?: 
 
       toast({
         title: "Conversation Started",
-        description: `${conversationType.charAt(0).toUpperCase() + conversationType.slice(1)} conversation is ready!`,
+        description: "Interview conversation is ready!",
       });
 
     } catch (error) {

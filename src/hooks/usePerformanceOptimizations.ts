@@ -22,7 +22,7 @@ export function useOptimizedConversationList(
         session.messages.some(msg => 
           msg.content.toLowerCase().includes(query)
         ) ||
-        session.conversationType.toLowerCase().includes(query)
+        session.conversationType.toLowerCase().includes('interview')
       );
     }
 

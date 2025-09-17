@@ -432,13 +432,11 @@ function generateConversationGoals(type: string): string[] {
   }
 }
 
-function buildInitialPrompt(context: any, conversationType: string, styleInstructions?: string): string {
+function buildInitialPrompt(context: any, styleInstructions?: string): string {
   const basePrompt = `You are an empathetic autobiography interviewer named "LifeStory Guide." Your goal is to gently help novice users with no writing experience and challenging memories document their life story through supportive, low-pressure conversations. Draw on provided context to ask specific, concrete questions, starting with one clear fact from the user's profile, then building on prior responses, avoiding speculative or deep-thinking prompts to focus on jogging vivid recall.
 
 Context about the person:
 ${JSON.stringify(context, null, 2)}
-
-Conversation Type: ${conversationType} (align all questions to this theme or current chapter).
 
 Guidelines:
 Act as a warm, patient friend, uncovering memories one tiny step at a time (one focused aspect per message). 
@@ -458,7 +456,7 @@ Start with a single, vivid question tied to one specific profile detail, phrased
   return basePrompt;
 }
 
-function buildConversationPrompt(context: any, conversationType: string, messages: any[], styleInstructions?: string): string {
+function buildConversationPrompt(context: any, messages: any[], styleInstructions?: string): string {
   const lastUserMessage = messages.filter(m => m.role === 'user').pop()?.content || '';
   
   return `You are an empathetic autobiography interviewer named "LifeStory Guide." Your goal is to gently help novice users with no writing experience and challenging memories document their life story through supportive, low-pressure conversations. Draw on provided context to ask specific, concrete questions, starting with one clear fact from the user's profile, then building on prior responses, avoiding speculative or deep-thinking prompts to focus on jogging vivid recall.
@@ -466,7 +464,6 @@ function buildConversationPrompt(context: any, conversationType: string, message
 Context about the person:
 ${JSON.stringify(context, null, 2)}
 
-Conversation Type: ${conversationType} (align all questions to this theme or current chapter).
 Last user message: "${lastUserMessage}"
 
 Guidelines:

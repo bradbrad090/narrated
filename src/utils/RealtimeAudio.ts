@@ -106,7 +106,7 @@ export class RealtimeChat {
   private userId: string;
   private bookId: string;
   private chapterId?: string;
-  private conversationType: string;
+  // conversationType is hardcoded to 'interview' since we only support one type
   private messages: Array<{role: string, content: string, timestamp: string}> = [];
   private currentTranscript = '';
   private isConnected = false;
@@ -136,7 +136,7 @@ export class RealtimeChat {
     this.userId = userId;
     this.bookId = bookId;
     this.chapterId = chapterId;
-    this.conversationType = 'interview';
+    // Using 'interview' type for all conversations
     
     // Bind cleanup methods for proper memory management
     this.handleBeforeUnload = this.handleBeforeUnload.bind(this);
@@ -147,18 +147,18 @@ export class RealtimeChat {
     this.disconnect();
   };
 
-  async init(context?: any, conversationType?: string) {
+  async init(context?: any) {
     if (this.isConnected) {
       throw new Error('Chat session is already connected');
     }
 
     this.retryCount = 0;
-    return this.initWithRetry(context, conversationType);
+    return this.initWithRetry(context);
   }
 
-  private async initWithRetry(context?: any, conversationType?: string): Promise<void> {
+  private async initWithRetry(context?: any): Promise<void> {
     try {
-      this.conversationType = conversationType || 'interview';
+      // All conversations use 'interview' type
       
       // Generate session ID for voice conversation
       this.sessionId = `voice_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -169,7 +169,7 @@ export class RealtimeChat {
       }, 30000);
 
       // Build instructions based on context
-      const instructions = await this.buildInstructions(context, conversationType);
+      const instructions = await this.buildInstructions(context);
 
       // Get ephemeral token from our Supabase Edge Function
       const { data, error } = await supabase.functions.invoke("realtime-token", {
@@ -316,7 +316,7 @@ export class RealtimeChat {
           (error.message.includes('timeout') || error.message.includes('network'))) {
         this.retryCount++;
         await new Promise(resolve => setTimeout(resolve, 1000 * this.retryCount));
-        return this.initWithRetry(context, conversationType);
+        return this.initWithRetry(context);
       }
       
       throw error;
@@ -381,7 +381,7 @@ export class RealtimeChat {
           user_id: this.userId,
           chapter_id: this.chapterId,
           session_id: this.sessionId,
-          conversation_type: this.conversationType,
+          conversation_type: 'interview',
           conversation_medium: 'voice',
           messages: [],
           context_snapshot: {},
@@ -417,34 +417,15 @@ export class RealtimeChat {
   }
 
   private generateConversationGoals(): string[] {
-    switch (this.conversationType) {
-      case 'interview':
-        return [
-          'Gather specific life stories and experiences',
-          'Explore key relationships and influences',
-          'Document important life events chronologically',
-          'Capture personal growth and learning moments'
-        ];
-      case 'reflection':
-        return [
-          'Explore deeper meanings and life lessons',
-          'Understand personal values and beliefs',
-          'Reflect on life changes and transformations',
-          'Connect past experiences to current wisdom'
-        ];
-      case 'brainstorming':
-        return [
-          'Generate creative story ideas and themes',
-          'Identify unique personal experiences',
-          'Explore different narrative perspectives',
-          'Develop compelling chapter concepts'
-        ];
-      default:
-        return ['Engage in meaningful conversation about life experiences'];
-    }
+    return [
+      'Gather specific life stories and experiences',
+      'Explore key relationships and influences',
+      'Document important life events chronologically',
+      'Capture personal growth and learning moments'
+    ];
   }
 
-  private async buildInstructions(context: any, conversationType: string): Promise<string> {
+  private async buildInstructions(context: any): Promise<string> {
     let baseInstructions = `You are a compassionate life coach and autobiography assistant helping someone document their life story. Your role is to engage in thoughtful conversation that draws out meaningful stories and experiences.
 
 Be warm, empathetic, and genuinely interested. Ask open-ended questions that encourage storytelling and help the person explore emotions and meanings behind events. Keep responses conversational and personal.`;
@@ -453,21 +434,7 @@ Be warm, empathetic, and genuinely interested. Ask open-ended questions that enc
       baseInstructions += `\n\nContext about the person:\n${JSON.stringify(context, null, 2)}`;
     }
 
-    if (conversationType) {
-      baseInstructions += `\n\nConversation Type: ${conversationType}`;
-      
-      switch (conversationType) {
-        case 'interview':
-          baseInstructions += `\nFocus on gathering specific life stories and experiences. Explore key relationships and influences. Document important life events chronologically.`;
-          break;
-        case 'reflection':
-          baseInstructions += `\nExplore deeper meanings and life lessons. Help understand personal values and beliefs. Reflect on life changes and transformations.`;
-          break;
-        case 'brainstorming':
-          baseInstructions += `\nGenerate creative story ideas and themes. Help identify unique personal experiences. Explore different narrative perspectives.`;
-          break;
-      }
-    }
+    baseInstructions += `\n\nFocus on gathering specific life stories and experiences. Explore key relationships and influences. Document important life events chronologically.`;
 
     // Get past opening questions to avoid duplicates
     try {
@@ -475,7 +442,7 @@ Be warm, empathetic, and genuinely interested. Ask open-ended questions that enc
         .from('chat_histories')
         .select('messages')
         .eq('user_id', this.userId)
-        .eq('conversation_type', conversationType)
+        .eq('conversation_type', 'interview')
         .eq('conversation_medium', 'voice')
         .neq('messages', '[]')
         .order('created_at', { ascending: false })

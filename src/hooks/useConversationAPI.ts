@@ -15,8 +15,7 @@ export const useConversationAPI = () => {
   const startTextConversation = useCallback(async (
     userId: string,
     bookId: string,
-    chapterId?: string,
-    conversationType: string = 'interview'
+    chapterId?: string
   ): Promise<DatabaseConversationSession> => {
     try {
       const sessionId = `text_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -27,11 +26,11 @@ export const useConversationAPI = () => {
           user_id: userId,
           chapter_id: chapterId,
           session_id: sessionId,
-          conversation_type: conversationType,
+          conversation_type: 'interview',
           conversation_medium: 'text',
           messages: [],
           context_snapshot: {} as any,
-          conversation_goals: getConversationGoals(conversationType) as any
+          conversation_goals: getConversationGoals() as any
         })
         .select()
         .single();
@@ -41,10 +40,10 @@ export const useConversationAPI = () => {
       return {
         id: data.id,
         sessionId,
-        conversationType: conversationType as any,
+        conversationType: 'interview' as any,
         conversationMedium: 'text',
         messages: [],
-        goals: getConversationGoals(conversationType),
+        goals: getConversationGoals(),
         createdAt: new Date().toISOString()
       };
     } catch (error) {
@@ -74,7 +73,7 @@ export const useConversationAPI = () => {
       // Get AI response
       const { data, error } = await supabase.functions.invoke('openai-conversation', {
         body: {
-          prompt: buildConversationPrompt(updatedMessages, session.conversationType)
+          prompt: buildConversationPrompt(updatedMessages)
         }
       });
 
@@ -117,33 +116,23 @@ export const useConversationAPI = () => {
 };
 
 // Helper functions
-const getConversationGoals = (type: string): string[] => {
-  switch (type) {
-    case 'interview':
-      return [
-        'Gather specific life stories and experiences',
-        'Explore key relationships and influences',
-        'Document important life events chronologically',
-        'Capture personal growth and learning moments'
-      ];
-    case 'self':
-      return [
-        'Document personal thoughts and experiences'
-      ];
-    default:
-      return ['Engage in meaningful conversation about life experiences'];
-  }
+const getConversationGoals = (): string[] => {
+  return [
+    'Gather specific life stories and experiences',
+    'Explore key relationships and influences', 
+    'Document important life events chronologically',
+    'Capture personal growth and learning moments'
+  ];
 };
 
 const buildConversationPrompt = (
-  messages: ConversationMessage[],
-  conversationType: string
+  messages: ConversationMessage[]
 ): string => {
   const lastUserMessage = messages.filter(m => m.role === 'user').pop()?.content || '';
   
   return `You are a compassionate life coach helping document life stories through interviews.
 
-Type: ${conversationType} - Focus on extracting specific stories and experiences
+Focus on extracting specific stories and experiences
 Last user message: "${lastUserMessage}"
 
 Respond naturally and ask engaging follow-up questions. Keep responses warm and conversational (2-3 sentences). Always end with a question that encourages more storytelling.`;

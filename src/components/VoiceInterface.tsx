@@ -74,7 +74,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       if (!mountedRef.current) return;
       
       chatRef.current = new RealtimeChat(handleMessage, userId, bookId, chapterId);
-      await chatRef.current.init(context, conversationType);
+      await chatRef.current.init(context);
       
       if (mountedRef.current) {
         setIsConnected(true);
