@@ -47,8 +47,7 @@ export const useConversationSession = ({
   }, [toast]);
 
   const startConversation = useCallback(async (
-    conversationType: ConversationType,
-    styleInstructions?: string
+    conversationType: ConversationType
   ) => {
     if (!userId || !bookId) {
       const error = createConversationError(
@@ -73,8 +72,7 @@ export const useConversationSession = ({
             bookId,
             chapterId,
             conversationType,
-            context,
-            styleInstructions
+            context
           }
         }
       );
@@ -100,8 +98,7 @@ export const useConversationSession = ({
           }
         ],
         context,
-        goals: data.goals,
-        styleInstructions
+        goals: data.goals
       };
 
       setCurrentSession(newSession);
@@ -172,8 +169,7 @@ export const useConversationSession = ({
             userId,
             bookId,
             context,
-            conversationType: currentSession.conversationType,
-            styleInstructions: currentSession.styleInstructions
+            conversationType: currentSession.conversationType
           }
         }
       );

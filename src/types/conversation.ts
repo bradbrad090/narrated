@@ -16,7 +16,6 @@ export interface ConversationSession {
   messages: ConversationMessage[];
   context?: ConversationContext;
   goals?: string[];
-  styleInstructions?: string;
   createdAt: string;
   updatedAt?: string;
 }
@@ -116,11 +115,10 @@ export type ConversationAction =
 export interface ConversationStrategy {
   type: ConversationType;
   generateGoals(): string[];
-  buildInitialPrompt(context: ConversationContext, styleInstructions?: string): string;
+  buildInitialPrompt(context: ConversationContext): string;
   buildConversationPrompt(
     context: ConversationContext, 
-    messages: ConversationMessage[], 
-    styleInstructions?: string
+    messages: ConversationMessage[]
   ): string;
 }
 
@@ -139,7 +137,6 @@ export interface StartConversationParams {
   chapterId?: string;
   conversationType: ConversationType;
   context: ConversationContext;
-  styleInstructions?: string;
 }
 
 export interface SendMessageParams {

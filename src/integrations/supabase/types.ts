@@ -128,7 +128,6 @@ export type Database = {
           updated_at: string
           user_id: string
           values_beliefs: string | null
-          writing_style_preference: string | null
         }
         Insert: {
           birth_date?: string | null
@@ -162,7 +161,6 @@ export type Database = {
           updated_at?: string
           user_id: string
           values_beliefs?: string | null
-          writing_style_preference?: string | null
         }
         Update: {
           birth_date?: string | null
@@ -196,7 +194,6 @@ export type Database = {
           updated_at?: string
           user_id?: string
           values_beliefs?: string | null
-          writing_style_preference?: string | null
         }
         Relationships: [
           {

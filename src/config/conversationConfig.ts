@@ -20,37 +20,6 @@ export const CONVERSATION_CONFIG = {
   CONVERSATION_HISTORY_LIMIT: 10,
   MESSAGE_CONTEXT_LIMIT: 10,
   
-  // Enhanced Style Instructions
-  STYLE_PROMPTS: {
-    CONCISE: "Respond only with short, direct questions or prompts to elicit more details or advance the story. Keep responses to 1-2 sentences maximum. Avoid all pleasantries, affirmations, summaries, or chit-chat—focus solely on prompting continuation. Probe deeper on vague responses with concise follow-ups.",
-    CONVERSATIONAL: "Respond naturally and ask engaging follow-up questions. Keep responses warm and conversational (2-3 sentences). Always end with a question that encourages more storytelling.",
-    DEEP_DIVE: "Ask thoughtful, emotionally-aware questions that help uncover deeper meanings, feelings, and connections. Focus on the 'why' and 'how' behind events. Help explore relationships, motivations, and personal growth moments.",
-    CHRONOLOGICAL: "Guide the conversation in chronological order, helping to build a clear timeline. Ask about what happened next, previous events, or specific time periods. Maintain narrative flow and continuity.",
-  },
-  
-  // Smart Continuation Prompts
-  CONTINUATION_PROMPTS: {
-    STORY_GAPS: [
-      "What happened right before that moment?",
-      "Can you tell me more about what led up to that?",
-      "What was going through your mind during that time?"
-    ],
-    EMOTIONAL_DEPTH: [
-      "How did that make you feel?",
-      "What was the most challenging part about that experience?",
-      "Looking back, what did that moment teach you?"
-    ],
-    RELATIONSHIP_FOCUS: [
-      "Who else was important during that time?",
-      "How did that affect your relationships?",
-      "What would you want them to know about that experience?"
-    ],
-    SENSORY_DETAILS: [
-      "What do you remember about how it looked/sounded/felt?",
-      "Can you paint me a picture of that scene?",
-      "What details stand out most vividly in your memory?"
-    ]
-  },
   
   // Button Text
   BUTTON_TEXT: {
@@ -74,14 +43,6 @@ export const CONVERSATION_CONFIG = {
     SMART_SUGGESTION: "Suggestion Available",
   },
   
-  // Smart Suggestions
-  SUGGESTIONS: {
-    CONTINUE_STORY: "Continue your story...",
-    ADD_DETAILS: "Add more details about this experience",
-    EXPLORE_FEELINGS: "Tell me how this made you feel",
-    CONNECT_EVENTS: "How did this connect to other parts of your life?",
-    DESCRIBE_PEOPLE: "Who were the important people in this story?",
-  }
 } as const;
 
 // Conversation Types

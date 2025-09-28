@@ -219,8 +219,7 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
           bookId,
           chapterId,
           conversationType: 'interview',
-          context: conversationContext,
-          styleInstructions: 'Be warm, welcoming, and start with an engaging opening question that helps the person begin sharing their story.'
+          context: conversationContext
         }
       });
 
@@ -297,8 +296,7 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
           chapterId,
           context: state.context,
           conversationType: state.currentSession.conversationType,
-          styleInstructions: 'Continue the interview naturally, asking follow-up questions that help the person share more details about their experiences.',
-          conversationHistory: updatedMessages // Pass the updated messages including the new user message
+          conversationHistory: updatedMessages
         }
       });
 

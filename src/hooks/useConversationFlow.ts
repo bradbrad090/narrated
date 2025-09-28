@@ -15,7 +15,6 @@ export interface ConversationSession {
   messages: ConversationMessage[];
   context?: any;
   goals?: string[];
-  styleInstructions?: string;
 }
 
 export interface ConversationContext {
@@ -138,8 +137,7 @@ export const useConversationFlow = (userId: string, bookId: string, chapterId?: 
   }, [userId, bookId, chapterId, toast]);
 
   const startConversation = useCallback(async (
-    conversationType: 'interview',
-    styleInstructions?: string
+    conversationType: 'interview'
   ) => {
     try {
       setIsLoading(true);
@@ -154,8 +152,7 @@ export const useConversationFlow = (userId: string, bookId: string, chapterId?: 
             bookId,
             chapterId,
             conversationType: 'interview',
-            context,
-            styleInstructions
+            context
           }
         }
       );
@@ -175,8 +172,7 @@ export const useConversationFlow = (userId: string, bookId: string, chapterId?: 
           }
         ],
         context,
-        goals: data.goals,
-        styleInstructions
+        goals: data.goals
       };
 
       setCurrentSession(newSession);
@@ -232,8 +228,7 @@ export const useConversationFlow = (userId: string, bookId: string, chapterId?: 
             userId,
             bookId,
             context,
-            conversationType: currentSession.conversationType,
-            styleInstructions: currentSession.styleInstructions
+            conversationType: currentSession.conversationType
           }
         }
       );

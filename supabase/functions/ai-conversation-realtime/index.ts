@@ -64,7 +64,6 @@ const handler = async (request: Request): Promise<Response> => {
       chapterId,
       conversationType = 'interview',
       context,
-      styleInstructions,
       conversationHistory
     } = requestBody;
     
@@ -76,8 +75,7 @@ const handler = async (request: Request): Promise<Response> => {
       bookId, 
       chapterId, 
       conversationType,
-      hasContext: !!context,
-      styleInstructions 
+      hasContext: !!context
     });
     
     if (!userId || !bookId) {
@@ -114,8 +112,7 @@ const handler = async (request: Request): Promise<Response> => {
         bookId,
         chapterId,
         conversationType,
-        context,
-        styleInstructions
+        context
       });
     } else if (action === 'send_message') {
       console.log('Sending message...');
@@ -131,8 +128,7 @@ const handler = async (request: Request): Promise<Response> => {
         message,
         userId,
         context,
-        conversationType,
-        styleInstructions
+        conversationType
       });
     } else if (action === 'continue_conversation') {
       console.log('Continuing conversation...');
@@ -149,7 +145,6 @@ const handler = async (request: Request): Promise<Response> => {
         userId,
         context,
         conversationType,
-        styleInstructions,
         isResumedConversation: true,
         fullConversationHistory: conversationHistory
       });
@@ -178,7 +173,7 @@ async function startConversationSession(supabaseClient: any, params: any) {
   console.log('=== Starting Conversation Session ===');
   console.log('Params:', JSON.stringify(params, null, 2));
   
-  const { userId, bookId, chapterId, conversationType, context, styleInstructions } = params;
+  const { userId, bookId, chapterId, conversationType, context } = params;
   
   try {
     // Generate a unique session ID
@@ -190,7 +185,7 @@ async function startConversationSession(supabaseClient: any, params: any) {
     console.log('Conversation goals:', conversationGoals);
     
     // Generate initial AI greeting FIRST - don't create database record until we know OpenAI works
-    const initialPrompt = buildInitialPrompt(context, conversationType, styleInstructions);
+    const initialPrompt = buildSystemPrompt(context, true);
     console.log('Generated initial prompt:', initialPrompt);
     
     const aiResponse = await callOpenAI(initialPrompt, []);
@@ -248,7 +243,7 @@ async function startConversationSession(supabaseClient: any, params: any) {
 }
 
 async function processConversationMessage(supabaseClient: any, params: any) {
-  const { sessionId, message, userId, context, conversationType, styleInstructions, isResumedConversation = false, fullConversationHistory = null } = params;
+  const { sessionId, message, userId, context, conversationType, isResumedConversation = false, fullConversationHistory = null } = params;
 
   // Fetch existing conversation
   const { data: chatHistory, error: fetchError } = await supabaseClient
@@ -276,7 +271,7 @@ async function processConversationMessage(supabaseClient: any, params: any) {
   // Generate AI response with retry logic
   // Use full conversation history provided from frontend for proper context
   const conversationHistory = fullConversationHistory || updatedMessages.slice(-10); // Use provided history or keep last 10 messages for context
-  const prompt = buildConversationPrompt(context, conversationType, conversationHistory, styleInstructions);
+  const prompt = buildSystemPrompt(context, false);
   
   let aiResponse;
   let attempts = 0;
@@ -432,7 +427,8 @@ function generateConversationGoals(type: string): string[] {
   }
 }
 
-function buildInitialPrompt(context: any, styleInstructions?: string): string {
+// Single system prompt builder
+function buildSystemPrompt(context: any, isInitial: boolean = true): string {
   const basePrompt = `You are an empathetic autobiography interviewer named "LifeStory Guide." Your goal is to gently help novice users with no writing experience and challenging memories document their life story through supportive, low-pressure conversations. Draw on provided context to ask specific, concrete questions, starting with one clear fact from the user's profile, then building on prior responses, avoiding speculative or deep-thinking prompts to focus on jogging vivid recall.
 
 Context about the person:
@@ -440,8 +436,11 @@ ${JSON.stringify(context, null, 2)}
 
 Guidelines:
 Act as a warm, patient friend, uncovering memories one small story at a time (one focused moment or anecdote per message). 
-Start with a specific question tied to a single, significant detail from the profile, such as an event, relationship, or milestone (e.g., instead of "What was your childhood like?" or trivial details like wall colors, ask "Your profile mentions your dad's trips to Ukraine—can you tell me about one memorable moment from when he returned home?"). 
-After the first exchange, allow slightly broader questions that build directly on the user's prior response, staying concrete and tied to the conversation flow (e.g., after mentioning a homecoming, ask "What happened next in that moment?"). 
+${isInitial 
+  ? 'Start with a specific question tied to a single, significant detail from the profile, such as an event, relationship, or milestone (e.g., instead of "What was your childhood like?" or trivial details like wall colors, ask "Your profile mentions your dad\'s trips to Ukraine—can you tell me about one memorable moment from when he returned home?").' 
+  : 'Continue building on the user\'s responses with specific, concrete questions that deepen understanding.'
+}
+${isInitial ? '' : 'After exchanges, allow slightly broader questions that build directly on the user\'s prior response, staying concrete and tied to the conversation flow (e.g., after mentioning a homecoming, ask "What happened next in that moment?").'}
 Check prior responses to avoid repeating or re-asking similar questions. 
 Acknowledge prior responses briefly only to set up the next question; never summarize or elaborate. 
 Probe for sensory details, feelings, or related anecdotes if they naturally flow from the prior response to enrich the story. 
@@ -449,38 +448,13 @@ For potentially fuzzy memories, add a gentle nudge like "even if it's fuzzy" onl
 Keep responses to 1 sentence: minimal empathetic setup + one easy question. Always end with that question, staying non-judgmental and encouraging through phrasing, without digressing or wrapping up.
 MOST IMPORTANT: All questions must relate to and support the chapter title theme - ensure every question connects to the specific chapter being worked on, guiding toward core memories and personal stories.
 
-
-${styleInstructions ? `RESPONSE STYLE OVERRIDE: ${styleInstructions}` : ''}
-
-Start with a single, vivid question tied to one specific profile detail, phrased warmly to invite a small, shareable moment (e.g., "Your profile mentions your dad's Ukraine trips—can you describe one special item he brought back, like its look or feel?").`;
+${isInitial 
+  ? 'Start with a single, vivid question tied to one specific profile detail, phrased warmly to invite a small, shareable moment (e.g., "Your profile mentions your dad\'s Ukraine trips—can you describe one special item he brought back, like its look or feel?").'
+  : 'Continue asking concrete, specific questions that help them dive deeper into their experiences and memories, building naturally on what they\'ve shared.'
+}`;
 
   return basePrompt;
 }
 
-function buildConversationPrompt(context: any, messages: any[], styleInstructions?: string): string {
-  const lastUserMessage = messages.filter(m => m.role === 'user').pop()?.content || '';
-  
-  return `You are an empathetic autobiography interviewer named "LifeStory Guide." Your goal is to gently help novice users with no writing experience and challenging memories document their life story through supportive, low-pressure conversations. Draw on provided context to ask specific, concrete questions, starting with one clear fact from the user's profile, then building on prior responses, avoiding speculative or deep-thinking prompts to focus on jogging vivid recall.
-
-Context about the person:
-${JSON.stringify(context, null, 2)}
-
-Last user message: "${lastUserMessage}"
-
-Guidelines:
-Act as a warm, patient friend, uncovering memories one small story at a time (one focused moment or anecdote per message). 
-Start with a specific question tied to a single, significant detail from the profile, such as an event, relationship, or milestone (e.g., instead of "What was your childhood like?" or trivial details like wall colors, ask "Your profile mentions your dad's trips to Ukraine—can you tell me about one memorable moment from when he returned home?"). 
-After the first exchange, allow slightly broader questions that build directly on the user's prior response, staying concrete and tied to the conversation flow (e.g., after mentioning a homecoming, ask "What happened next in that moment?"). 
-Check prior responses to avoid repeating or re-asking similar questions. 
-Acknowledge prior responses briefly only to set up the next question; never summarize or elaborate. 
-Probe for sensory details, feelings, or related anecdotes if they naturally flow from the prior response to enrich the story. 
-For potentially fuzzy memories, add a gentle nudge like "even if it's fuzzy" only if needed (e.g., "Even if it's fuzzy—..."). 
-Keep responses to 1 sentence: minimal empathetic setup + one easy question. Always end with that question, staying non-judgmental and encouraging through phrasing, without digressing or wrapping up.
-MOST IMPORTANT: All questions must relate to and support the chapter title theme - ensure every question connects to the specific chapter being worked on, guiding toward core memories and personal stories.
-
-${styleInstructions ? `RESPONSE STYLE OVERRIDE: ${styleInstructions}` : ''}
-
-Respond with exactly one sentence containing a single, specific question anchored to their last response or profile detail.`;
-}
 
 serve(handler);

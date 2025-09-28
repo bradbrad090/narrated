@@ -33,7 +33,6 @@ export interface ConversationStartRequest {
   chapterId?: string;
   conversationType: string;
   context?: any;
-  styleInstructions?: string;
 }
 
 export interface ConversationStartResponse {
@@ -50,7 +49,6 @@ export interface ConversationMessageRequest {
   bookId: string;
   context?: any;
   conversationType: string;
-  styleInstructions?: string;
 }
 
 export interface ConversationMessageResponse {
