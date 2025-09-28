@@ -158,10 +158,12 @@ const handler = async (request: Request): Promise<Response> => {
 
   } catch (error) {
     console.error('Error in ai-conversation-realtime function:', error);
-    console.error('Error stack:', error.stack);
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+    const errorStack = error instanceof Error ? error.stack : 'No stack trace available';
+    console.error('Error stack:', errorStack);
     return new Response(JSON.stringify({ 
-      error: error.message || 'Internal server error',
-      details: error.stack || 'No stack trace available'
+      error: errorMessage,
+      details: errorStack
     }), { 
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -231,10 +233,12 @@ async function startConversationSession(supabaseClient: any, params: any) {
     
   } catch (error) {
     console.error('Error in startConversationSession:', error);
-    console.error('Error stack:', error.stack);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to start conversation session';
+    const errorStack = error instanceof Error ? error.stack : 'No stack trace available';
+    console.error('Error stack:', errorStack);
     return new Response(JSON.stringify({ 
-      error: error.message || 'Failed to start conversation session',
-      details: error.stack || 'No stack trace available'
+      error: errorMessage,
+      details: errorStack
     }), { 
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -394,7 +398,8 @@ async function callOpenAI(prompt: string, conversationHistory: any[]): Promise<s
   } catch (error) {
     clearTimeout(timeoutId);
     console.error('Error in callOpenAI:', error);
-    console.error('Error stack:', error.stack);
+    const errorStack = error instanceof Error ? error.stack : 'No stack trace available';
+    console.error('Error stack:', errorStack);
     throw error;
   }
 }

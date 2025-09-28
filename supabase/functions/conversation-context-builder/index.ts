@@ -209,14 +209,15 @@ const handler = async (request: Request): Promise<Response> => {
 
   } catch (error) {
     console.error('Error in conversation-context-builder function:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Context building failed';
     return new Response(JSON.stringify({ 
-      error: error.message,
+      error: errorMessage,
       context: {},
       seeds: [],
       errors: ['Failed to build conversation context']
     }), { 
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      status: 500, 
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
     });
   }
 };

@@ -286,7 +286,7 @@ Return only the JSON object, no other text.`;
       JSON.stringify({ 
         success: false, 
         error: 'Internal server error',
-        details: error.message 
+        details: error instanceof Error ? error.message : 'Profile extraction failed' 
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

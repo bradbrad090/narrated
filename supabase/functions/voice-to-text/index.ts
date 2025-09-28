@@ -97,10 +97,11 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in voice-to-text function:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Voice to text conversion failed';
     return new Response(
       JSON.stringify({ 
         success: false,
-        error: error.message 
+        error: errorMessage 
       }),
       {
         status: 500,

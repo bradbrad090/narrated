@@ -105,7 +105,7 @@ serve(async (req) => {
     chapterTitle = chapter?.title || 'Chapter';
     
     const conversationText = finalConversationHistory
-      .map(msg => `${msg.role === 'assistant' ? 'AI' : 'User'}: ${msg.content}`)
+      .map((msg: any) => `${msg.role === 'assistant' ? 'AI' : 'User'}: ${msg.content}`)
       .join('\n');
 
     summaryPrompt = `Create a bullet-point summary based on the following conversation about a life story chapter. Focus on the key life events, experiences, and stories shared by the user. Use concise bullet points that capture objective events and experiences in timeline format.
@@ -179,7 +179,8 @@ Summary:`;
 
   } catch (error) {
     console.error('Error in generate-summary function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    const errorMessage = error instanceof Error ? error.message : 'Summary generation failed';
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
