@@ -30,8 +30,8 @@ const HowItWorksSection = () => {
               Share Your Story
             </h3>
             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-4 sm:mb-6">
-              <span className="hidden sm:inline">Have natural conversations with our AI about your life experiences, memories, and the moments that matter most to you.</span>
-              <span className="sm:hidden">Talk with our AI about your memories and experiences.</span>
+              <span className="hidden sm:inline">Have natural conversations about your life experiences, memories, and the moments that matter most to you.</span>
+              <span className="sm:hidden">Talk about your memories and experiences.</span>
             </p>
             <div className="rounded-lg overflow-hidden shadow-card hidden sm:block">
               <img 
@@ -56,8 +56,8 @@ const HowItWorksSection = () => {
               AI Crafts Your Book
             </h3>
             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-4 sm:mb-6">
-              <span className="hidden sm:inline">Our advanced AI transforms your conversations into a beautifully written, coherent autobiography that captures your unique voice.</span>
-              <span className="sm:hidden">AI transforms your stories into a beautiful autobiography.</span>
+              <span className="hidden sm:inline">We transform your conversations into a beautifully written autobiography that captures your unique story.</span>
+              <span className="sm:hidden">We transform your stories into a beautiful autobiography.</span>
             </p>
             <div className="bg-card rounded-lg p-4 sm:p-6 shadow-card border hidden sm:block">
               <div className="space-y-3">
@@ -86,7 +86,7 @@ const HowItWorksSection = () => {
               Receive Your Book
             </h3>
             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-4 sm:mb-6">
-              <span className="hidden sm:inline">Your autobiography is professionally printed on premium paper and delivered to your door as a beautiful hardcover book.</span>
+              <span className="hidden sm:inline">Your autobiography is professionally printed and delivered to your door as a beautiful hardcover book.</span>
               <span className="sm:hidden">Get your professionally printed hardcover book delivered.</span>
             </p>
             <div className="rounded-lg overflow-hidden shadow-card hidden sm:block">
