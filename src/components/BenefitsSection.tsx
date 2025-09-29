@@ -24,8 +24,8 @@ const BenefitsSection = () => {
             Why Choose Narrated?
           </h2>
           <p className="text-base sm:text-xl text-muted-foreground max-w-3xl mx-auto hidden sm:block">
-            Combining cutting-edge intelligent technology with the timeless art of storytelling 
-            to create something truly meaningful
+            Don't know how to write your life story? We'll do it for you. 
+            Our simple, guided conversations turn your memories into a treasured book for your family.
           </p>
         </div>
         
