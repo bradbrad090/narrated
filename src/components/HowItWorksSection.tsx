@@ -53,7 +53,7 @@ const HowItWorksSection = () => {
               </div>
             </div>
             <h3 className="text-lg sm:text-2xl font-semibold text-foreground mb-2 sm:mb-4">
-              AI Crafts Your Book
+              We build your story
             </h3>
             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-4 sm:mb-6">
               <span className="hidden sm:inline">We transform your conversations into a beautifully written autobiography that captures your unique story.</span>
