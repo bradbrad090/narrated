@@ -8,7 +8,6 @@ import { Mic, MicOff, Phone, PhoneOff } from 'lucide-react';
 const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   onSpeakingChange, 
   context, 
-  conversationType = 'interview',
   userId,
   bookId,
   chapterId,
