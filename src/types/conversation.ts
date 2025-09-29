@@ -170,7 +170,7 @@ export interface ChatHistoryRecord {
   conversation_medium: ConversationMedium;
   messages: any; // Using any for Json compatibility
   context_snapshot: any; // Using any for Json compatibility  
-  conversation_goals: any; // Using any for Json compatibility
+  
   created_at: string;
   updated_at?: string;
 }

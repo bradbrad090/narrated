@@ -73,13 +73,8 @@ export const useConversationFlow = (userId: string, bookId: string, chapterId?: 
           ) as ConversationMessage[];
         }
 
-        // Parse goals with type safety
+        // Goals are no longer stored in database
         let goals: string[] = [];
-        if (Array.isArray(chat.conversation_goals)) {
-          goals = (chat.conversation_goals as unknown[]).filter((goal: any) => 
-            typeof goal === 'string'
-          ) as string[];
-        }
 
         return {
           sessionId: chat.session_id,

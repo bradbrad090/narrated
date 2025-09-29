@@ -356,7 +356,6 @@ export type Database = {
         Row: {
           chapter_id: string | null
           context_snapshot: Json | null
-          conversation_goals: Json | null
           conversation_medium: string | null
           conversation_type: string | null
           created_at: string
@@ -370,7 +369,6 @@ export type Database = {
         Insert: {
           chapter_id?: string | null
           context_snapshot?: Json | null
-          conversation_goals?: Json | null
           conversation_medium?: string | null
           conversation_type?: string | null
           created_at?: string
@@ -384,7 +382,6 @@ export type Database = {
         Update: {
           chapter_id?: string | null
           context_snapshot?: Json | null
-          conversation_goals?: Json | null
           conversation_medium?: string | null
           conversation_type?: string | null
           created_at?: string

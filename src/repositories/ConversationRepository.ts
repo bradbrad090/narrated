@@ -21,7 +21,7 @@ export class ConversationRepository extends BaseRepository {
         is_self_conversation: false,
         messages: session.messages as any,
         context_snapshot: session.context as any || {},
-        conversation_goals: session.goals as any || [],
+        
       };
 
       const { data, error } = await supabase
@@ -144,7 +144,7 @@ export class ConversationRepository extends BaseRepository {
       conversationMedium: record.conversation_medium,
       messages: Array.isArray(record.messages) ? record.messages : [],
       context: record.context_snapshot,
-      goals: Array.isArray(record.conversation_goals) ? record.conversation_goals : [],
+      goals: [], // Goals no longer stored in database
       createdAt: record.created_at,
       updatedAt: record.updated_at
     };

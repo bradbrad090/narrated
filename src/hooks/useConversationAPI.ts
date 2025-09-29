@@ -29,8 +29,7 @@ export const useConversationAPI = () => {
           conversation_type: 'interview',
           conversation_medium: 'text',
           messages: [],
-          context_snapshot: {} as any,
-          conversation_goals: getConversationGoals() as any
+          context_snapshot: {} as any
         })
         .select()
         .single();
@@ -43,7 +42,6 @@ export const useConversationAPI = () => {
         conversationType: 'interview' as any,
         conversationMedium: 'text',
         messages: [],
-        goals: getConversationGoals(),
         createdAt: new Date().toISOString()
       };
     } catch (error) {
@@ -116,14 +114,6 @@ export const useConversationAPI = () => {
 };
 
 // Helper functions
-const getConversationGoals = (): string[] => {
-  return [
-    'Gather specific life stories and experiences',
-    'Explore key relationships and influences', 
-    'Document important life events chronologically',
-    'Capture personal growth and learning moments'
-  ];
-};
 
 const buildConversationPrompt = (
   messages: ConversationMessage[]

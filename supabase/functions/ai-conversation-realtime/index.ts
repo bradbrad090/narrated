@@ -182,10 +182,6 @@ async function startConversationSession(supabaseClient: any, params: any) {
     const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     console.log('Generated session ID:', sessionId);
     
-    // Create initial conversation goals based on type
-    const conversationGoals = generateConversationGoals(conversationType);
-    console.log('Conversation goals:', conversationGoals);
-    
     // Generate initial AI greeting FIRST - don't create database record until we know OpenAI works
     const initialPrompt = buildSystemPrompt(context, true);
     console.log('Generated initial prompt:', initialPrompt);
@@ -202,7 +198,6 @@ async function startConversationSession(supabaseClient: any, params: any) {
         session_id: sessionId,
         conversation_type: conversationType,
         context_snapshot: context || {},
-        conversation_goals: conversationGoals,
         chapter_id: chapterId,
         messages: [{
           role: 'assistant',
@@ -224,8 +219,7 @@ async function startConversationSession(supabaseClient: any, params: any) {
     return new Response(JSON.stringify({
       sessionId,
       response: aiResponse,
-      conversationType,
-      goals: conversationGoals
+      conversationType
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -404,33 +398,6 @@ async function callOpenAI(prompt: string, conversationHistory: any[]): Promise<s
   }
 }
 
-function generateConversationGoals(type: string): string[] {
-  switch (type) {
-    case 'interview':
-      return [
-        'Gather specific life stories and experiences',
-        'Explore key relationships and influences',
-        'Document important life events chronologically',
-        'Capture personal growth and learning moments'
-      ];
-    case 'reflection':
-      return [
-        'Explore deeper meanings and life lessons',
-        'Understand personal values and beliefs',
-        'Reflect on life changes and transformations',
-        'Connect past experiences to current wisdom'
-      ];
-    case 'brainstorming':
-      return [
-        'Generate creative story ideas and themes',
-        'Identify unique personal experiences',
-        'Explore different narrative perspectives',
-        'Develop compelling chapter concepts'
-      ];
-    default:
-      return ['Engage in meaningful conversation about life experiences'];
-  }
-}
 
 // Single system prompt builder
 function buildSystemPrompt(context: any, isInitial: boolean = true): string {

@@ -384,8 +384,7 @@ export class RealtimeChat {
           conversation_type: 'interview',
           conversation_medium: 'voice',
           messages: [],
-          context_snapshot: {},
-          conversation_goals: this.generateConversationGoals()
+          context_snapshot: {}
         });
 
       if (error) {
@@ -416,14 +415,6 @@ export class RealtimeChat {
     }
   }
 
-  private generateConversationGoals(): string[] {
-    return [
-      'Gather specific life stories and experiences',
-      'Explore key relationships and influences',
-      'Document important life events chronologically',
-      'Capture personal growth and learning moments'
-    ];
-  }
 
   private async buildInstructions(context: any): Promise<string> {
     let baseInstructions = `You are a compassionate life coach and autobiography assistant helping someone document their life story. Your role is to engage in thoughtful conversation that draws out meaningful stories and experiences.

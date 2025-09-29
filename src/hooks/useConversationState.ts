@@ -177,7 +177,7 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
           conversationType: record.conversation_type as ConversationType,
           conversationMedium: record.conversation_medium as ConversationMedium,
           messages: Array.isArray(record.messages) ? record.messages as unknown as ConversationMessage[] : [],
-          goals: Array.isArray(record.conversation_goals) ? record.conversation_goals as string[] : [],
+          goals: [], // Goals no longer stored in database
           createdAt: record.created_at
         }));
 
