@@ -67,7 +67,7 @@ const HowItWorksSection = () => {
                 <div className="h-2 bg-muted rounded w-5/6"></div>
               </div>
               <p className="text-sm text-muted-foreground mt-4 italic">
-                "Chapter 3: The summer I turned sixteen..."
+                "Chapter 3: My first day at school..."
               </p>
             </div>
           </div>
