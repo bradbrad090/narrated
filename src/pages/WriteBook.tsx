@@ -251,7 +251,9 @@ const WriteBook = () => {
   ];
 
   const createDefaultChapters = async (userId: string) => {
-    const defaultChapters = defaultChapterTitles.map((title) => ({ title, description: "" }));
+    // Only create 1 chapter for free tier, all for paid tiers
+    const chapterCount = book?.tier === 'free' ? 1 : defaultChapterTitles.length;
+    const defaultChapters = defaultChapterTitles.slice(0, chapterCount).map((title) => ({ title, description: "" }));
 
     try {
       // Double-check that chapters don't already exist to prevent duplicates
