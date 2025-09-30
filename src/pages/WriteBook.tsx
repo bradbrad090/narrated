@@ -516,14 +516,14 @@ const WriteBook = () => {
 
   const saveCurrentConversationAndSwitchChapter = async (newChapter: Chapter) => {
     try {
-      // Find the ConversationInterface element and trigger save
+      // Find the ConversationInterface element and trigger save and end
       const conversationInterface = document.querySelector('[data-conversation-interface]');
       if (conversationInterface) {
-        const event = new CustomEvent('saveCurrentConversation');
+        const event = new CustomEvent('saveAndEndConversation');
         conversationInterface.dispatchEvent(event);
         
-        // Give it a brief moment to save
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Give it time to save and close
+        await new Promise(resolve => setTimeout(resolve, 300));
       }
       
       // Now switch chapters
