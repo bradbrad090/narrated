@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { BookOpen, Menu, User, X } from "lucide-react";
+import { BookOpen, Menu, LogOut, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
+import { useToast } from "@/hooks/use-toast";
 import {
   Sheet,
   SheetContent,
@@ -17,6 +18,21 @@ const Header = () => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate("/");
+    } catch (error: any) {
+      toast({
+        title: "Error signing out",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   useEffect(() => {
     // Check current user
@@ -74,12 +90,12 @@ const Header = () => {
           <div className="flex items-center gap-4">
             {user ? (
               <Button 
-                variant="hero" 
+                variant="outline" 
                 className="hidden sm:inline-flex"
-                onClick={() => navigate('/dashboard')}
+                onClick={handleSignOut}
               >
-                <User className="w-4 h-4 mr-2" />
-                My Profile
+                <LogOut className="w-4 h-4 mr-2" />
+                Log Out
               </Button>
             ) : (
               <>
@@ -140,15 +156,15 @@ const Header = () => {
                   <div className="border-t pt-4 mt-4">
                     {user ? (
                       <Button 
-                        variant="hero" 
+                        variant="outline" 
                         className="w-full"
                         onClick={() => {
-                          navigate('/dashboard');
+                          handleSignOut();
                           setIsOpen(false);
                         }}
                       >
-                        <User className="w-4 h-4 mr-2" />
-                        My Profile
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Log Out
                       </Button>
                     ) : (
                       <div className="flex flex-col gap-3">
