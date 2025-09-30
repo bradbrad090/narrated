@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -16,7 +17,9 @@ import {
   Clock, 
   CheckCircle2, 
   Circle,
-  GripVertical 
+  GripVertical,
+  Check,
+  X
 } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -39,6 +42,7 @@ interface ChapterCardProps {
   isActive: boolean;
   onSelect: () => void;
   onDelete: () => void;
+  onRename: (newTitle: string) => void;
   canDelete: boolean;
   hasConversations?: boolean;
 }
@@ -48,10 +52,12 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
   isActive,
   onSelect,
   onDelete,
+  onRename,
   canDelete,
   hasConversations = false
 }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [editingTitle, setEditingTitle] = useState(chapter.title);
   
   const {
     attributes,
@@ -134,6 +140,28 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
   const wordCount = getWordCount();
   const pageCount = getPageCount();
 
+  const handleSaveRename = () => {
+    if (editingTitle.trim() && editingTitle !== chapter.title) {
+      onRename(editingTitle.trim());
+    }
+    setIsEditing(false);
+  };
+
+  const handleCancelRename = () => {
+    setEditingTitle(chapter.title);
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSaveRename();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      handleCancelRename();
+    }
+  };
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -143,12 +171,14 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`group relative p-4 rounded-lg border transition-all duration-200 cursor-pointer hover:shadow-md hover:border-primary/30 ${
+      className={`group relative p-4 rounded-lg border transition-all duration-200 ${
+        !isEditing && 'cursor-pointer hover:shadow-md hover:border-primary/30'
+      } ${
         isActive 
           ? 'bg-primary/5 border-primary shadow-sm' 
           : 'hover:bg-muted/50'
       } ${isDragging ? 'opacity-50 shadow-lg' : ''}`}
-      onClick={onSelect}
+      onClick={isEditing ? undefined : onSelect}
     >
       {/* Drag Handle */}
       <div 
@@ -163,46 +193,78 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
       <div className="pl-3">
         {/* Header */}
         <div className="flex items-start justify-between gap-2 mb-2">
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            {getStatusIcon()}
-            <h3 className="font-medium text-sm truncate">
-              {chapter.title}
-            </h3>
-          </div>
+          {isEditing ? (
+            <div className="flex items-center gap-2 flex-1 min-w-0" onClick={(e) => e.stopPropagation()}>
+              <Input
+                value={editingTitle}
+                onChange={(e) => setEditingTitle(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="h-8 text-sm"
+                autoFocus
+              />
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 w-8 p-0 hover:bg-green-100 hover:text-green-700"
+                onClick={handleSaveRename}
+              >
+                <Check className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 w-8 p-0 hover:bg-red-100 hover:text-red-700"
+                onClick={handleCancelRename}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                {getStatusIcon()}
+                <h3 className="font-medium text-sm truncate">
+                  {chapter.title}
+                </h3>
+              </div>
+            </>
+          )}
           
-          <div className="flex items-center gap-1">
-            {getStatusBadge()}
-            
-            {/* Actions Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0 hover:bg-yellow-100 hover:text-yellow-800 transition-colors"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <MoreVertical className="h-3 w-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-background border shadow-md z-50">
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setIsEditing(true); }}>
-                  <Edit2 className="h-4 w-4 mr-2" />
-                  Rename Chapter
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                {canDelete && (
-                  <DropdownMenuItem 
-                    onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                    className="text-destructive focus:text-destructive"
+          {!isEditing && (
+            <div className="flex items-center gap-1">
+              {getStatusBadge()}
+              
+              {/* Actions Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0 hover:bg-yellow-100 hover:text-yellow-800 transition-colors"
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete Chapter
+                    <MoreVertical className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-background border shadow-md z-50">
+                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setIsEditing(true); }}>
+                    <Edit2 className="h-4 w-4 mr-2" />
+                    Rename Chapter
                   </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+                  <DropdownMenuSeparator />
+                  {canDelete && (
+                    <DropdownMenuItem 
+                      onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Chapter
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
         </div>
 
         {/* Content Preview */}

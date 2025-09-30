@@ -465,6 +465,41 @@ const WriteBook = () => {
     }
   };
 
+  const handleRenameChapter = async (chapterId: string, newTitle: string) => {
+    if (!user || !newTitle.trim()) return;
+
+    try {
+      const { error } = await supabase
+        .from('chapters')
+        .update({ title: newTitle.trim() })
+        .eq('id', chapterId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setChapters(prev => 
+        prev.map(ch => ch.id === chapterId ? { ...ch, title: newTitle.trim() } : ch)
+      );
+
+      // Update current chapter if it's the one being renamed
+      if (currentChapter?.id === chapterId) {
+        setCurrentChapter(prev => prev ? { ...prev, title: newTitle.trim() } : null);
+      }
+
+      toast({
+        title: "Chapter renamed",
+        description: "The chapter title has been updated.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error renaming chapter",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleSignOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -1087,17 +1122,18 @@ const WriteBook = () => {
                        items={chapters.map(ch => ch.id)}
                        strategy={verticalListSortingStrategy}
                      >
-                        {chapters.map((chapter) => (
-                          <ChapterCard
-                            key={chapter.id}
-                            chapter={chapter}
-                            isActive={currentChapter?.id === chapter.id}
-                            onSelect={() => saveCurrentConversationAndSwitchChapter(chapter)}
-                            onDelete={() => handleDeleteChapter(chapter)}
-                            canDelete={chapters.length > 1}
-                            hasConversations={(chapterConversations.get(chapter.id) || 0) > 0}
-                          />
-                        ))}
+                         {chapters.map((chapter) => (
+                           <ChapterCard
+                             key={chapter.id}
+                             chapter={chapter}
+                             isActive={currentChapter?.id === chapter.id}
+                             onSelect={() => saveCurrentConversationAndSwitchChapter(chapter)}
+                             onDelete={() => handleDeleteChapter(chapter)}
+                             onRename={(newTitle) => handleRenameChapter(chapter.id, newTitle)}
+                             canDelete={chapters.length > 1}
+                             hasConversations={(chapterConversations.get(chapter.id) || 0) > 0}
+                           />
+                         ))}
                      </SortableContext>
                      
                      <DragOverlay>
