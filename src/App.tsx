@@ -40,7 +40,7 @@ const App = () => (
           <Route path="/reset-password" element={<ResetPassword />} />
           
           {/* Protected routes */}
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          
           <Route path="/write/:bookId" element={<ProtectedRoute><WriteBook /></ProtectedRoute>} />
           <Route path="/write-book" element={<ProtectedRoute><WriteBook /></ProtectedRoute>} />
           <Route path="/payment-flow" element={<ProtectedRoute><PaymentFlow /></ProtectedRoute>} />
