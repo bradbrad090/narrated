@@ -135,6 +135,8 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       // Early return if no session to save
       if (!currentSession || !currentSession.messages || currentSession.messages.length === 0) {
         console.log('No active conversation session to save');
+        // Dispatch completion event immediately if nothing to save
+        containerRef.current?.dispatchEvent(new CustomEvent('saveCompleted'));
         return;
       }
       
@@ -163,6 +165,9 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           description: "Failed to submit conversation. Please try again.",
           variant: "destructive"
         });
+      } finally {
+        // Always dispatch completion event, even if there was an error
+        containerRef.current?.dispatchEvent(new CustomEvent('saveCompleted'));
       }
     };
 

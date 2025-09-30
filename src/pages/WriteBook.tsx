@@ -521,11 +521,21 @@ const WriteBook = () => {
       // Find the ConversationInterface element and trigger save and end
       const conversationInterface = document.querySelector('[data-conversation-interface]');
       if (conversationInterface) {
-        const event = new CustomEvent('saveAndEndConversation');
-        conversationInterface.dispatchEvent(event);
+        // Create a promise that resolves when save is complete
+        const savePromise = new Promise<void>((resolve) => {
+          const handleSaveComplete = () => {
+            conversationInterface.removeEventListener('saveCompleted', handleSaveComplete);
+            resolve();
+          };
+          conversationInterface.addEventListener('saveCompleted', handleSaveComplete);
+          
+          // Dispatch the save event
+          const event = new CustomEvent('saveAndEndConversation');
+          conversationInterface.dispatchEvent(event);
+        });
         
-        // Give it time to save and close
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // Wait for the actual save to complete
+        await savePromise;
       }
       
       // Now switch chapters
