@@ -302,7 +302,21 @@ const WriteBook = () => {
 
   const createDefaultChapters = async (userId: string) => {
     const defaultChapters = [
-      { title: "Before my birth", description: "" }
+      { title: "Before my birth", description: "" },
+      { title: "Early childhood", description: "" },
+      { title: "Primary school years", description: "" },
+      { title: "Teenage years", description: "" },
+      { title: "Young adulthood", description: "" },
+      { title: "Starting my career", description: "" },
+      { title: "Love and relationships", description: "" },
+      { title: "Building a family", description: "" },
+      { title: "Career milestones", description: "" },
+      { title: "Life challenges", description: "" },
+      { title: "Personal growth", description: "" },
+      { title: "Major life events", description: "" },
+      { title: "Later years", description: "" },
+      { title: "Wisdom and reflections", description: "" },
+      { title: "Legacy and future", description: "" }
     ];
 
     try {
