@@ -302,7 +302,7 @@ const WriteBook = () => {
 
   const createDefaultChapters = async (userId: string) => {
     const defaultChapters = [
-      { title: "Chapter 1", description: "" }
+      { title: "Before my birth", description: "" }
     ];
 
     try {

@@ -95,11 +95,11 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
       if (error) throw error;
 
       const newContext: ConversationContext = {
-        userProfile: contextData?.userProfile,
-        bookProfile: contextData?.bookProfile,
-        currentChapter: contextData?.currentChapter,
-        recentChapters: contextData?.recentChapters || [],
-        lifeThemes: contextData?.lifeThemes || []
+        userProfile: contextData?.context?.userProfile,
+        bookProfile: contextData?.context?.bookProfile,
+        currentChapter: contextData?.context?.currentChapter,
+        recentChapters: contextData?.context?.recentChapters || [],
+        lifeThemes: contextData?.context?.lifeThemes || []
       };
 
       dispatch(conversationActions.setContext(newContext));
