@@ -300,24 +300,27 @@ const WriteBook = () => {
     }
   };
 
+  // Default chapter titles for new chapters
+  const defaultChapterTitles = [
+    "Before my birth",
+    "Early childhood",
+    "Primary school years",
+    "Teenage years",
+    "Young adulthood",
+    "Starting my career",
+    "Love and relationships",
+    "Building a family",
+    "Career milestones",
+    "Life challenges",
+    "Personal growth",
+    "Major life events",
+    "Later years",
+    "Wisdom and reflections",
+    "Legacy and future"
+  ];
+
   const createDefaultChapters = async (userId: string) => {
-    const defaultChapters = [
-      { title: "Before my birth", description: "" },
-      { title: "Early childhood", description: "" },
-      { title: "Primary school years", description: "" },
-      { title: "Teenage years", description: "" },
-      { title: "Young adulthood", description: "" },
-      { title: "Starting my career", description: "" },
-      { title: "Love and relationships", description: "" },
-      { title: "Building a family", description: "" },
-      { title: "Career milestones", description: "" },
-      { title: "Life challenges", description: "" },
-      { title: "Personal growth", description: "" },
-      { title: "Major life events", description: "" },
-      { title: "Later years", description: "" },
-      { title: "Wisdom and reflections", description: "" },
-      { title: "Legacy and future", description: "" }
-    ];
+    const defaultChapters = defaultChapterTitles.map((title) => ({ title, description: "" }));
 
     try {
       // Double-check that chapters don't already exist to prevent duplicates
@@ -426,7 +429,10 @@ const WriteBook = () => {
     // Find the highest chapter number and add 1 to avoid duplicates
     const maxChapterNumber = Math.max(...chapters.map(c => c.chapter_number), 0);
     const nextChapterNumber = maxChapterNumber + 1;
-    createNewChapter(user.id, nextChapterNumber, `Chapter ${nextChapterNumber}`);
+    
+    // Use default title if available, otherwise use generic title
+    const title = defaultChapterTitles[nextChapterNumber - 1] || `Chapter ${nextChapterNumber}`;
+    createNewChapter(user.id, nextChapterNumber, title);
   };
 
   const handleDeleteChapter = (chapter: Chapter) => {
