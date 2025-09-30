@@ -83,8 +83,7 @@ Analyze the following conversation and extract relevant personal information to 
   "key_life_events": ["array of strings or empty array"],
   "challenges_overcome": ["array of strings or empty array"],
   "career_highlights": ["array of strings or empty array"],
-  "memorable_quotes": ["array of strings or empty array"],
-  "writing_style_preference": "conversational, formal, or poetic"
+  "memorable_quotes": ["array of strings or empty array"]
 }
 
 Rules:
@@ -92,8 +91,7 @@ Rules:
 2. Use null for missing information, don't make assumptions
 3. Keep arrays empty if no relevant information is found
 4. For life_themes, extract 3-5 major themes that seem important to this person
-5. For writing_style_preference, infer from how they speak: casual = conversational, sophisticated = formal, creative = poetic
-6. Be accurate and avoid hallucinating information not present in the text
+5. Be accurate and avoid hallucinating information not present in the text
 
 Conversation to analyze:
 ${conversationTextForProcessing || conversationText}
