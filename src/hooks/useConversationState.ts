@@ -69,7 +69,18 @@ export const useConversationState = ({ userId, bookId, chapterId }: UseConversat
 
   // Load conversation context
   const loadConversationContext = useCallback(async (): Promise<ConversationContext | null> => {
-    if (state.context) return state.context;
+    // Clear stale context if chapter has changed
+    if (state.context && state.context.currentChapter?.id !== chapterId) {
+      dispatch(conversationActions.setContext(null));
+      if (state.currentSession) {
+        dispatch(conversationActions.setCurrentSession(null));
+      }
+    }
+    
+    // Return cached context only if it matches current chapter
+    if (state.context && state.context.currentChapter?.id === chapterId) {
+      return state.context;
+    }
 
     // Don't load if we don't have valid userId and bookId
     if (!userId || !bookId) {
