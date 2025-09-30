@@ -67,6 +67,7 @@ const WriteBook = () => {
   const [completedChapters, setCompletedChapters] = useState<Set<string>>(new Set());
   const [chapterConversations, setChapterConversations] = useState<Map<string, number>>(new Map());
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [isSwitchingChapter, setIsSwitchingChapter] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -515,6 +516,7 @@ const WriteBook = () => {
   };
 
   const saveCurrentConversationAndSwitchChapter = async (newChapter: Chapter) => {
+    setIsSwitchingChapter(true);
     try {
       // Find the ConversationInterface element and trigger save and end
       const conversationInterface = document.querySelector('[data-conversation-interface]');
@@ -534,6 +536,8 @@ const WriteBook = () => {
       // Still switch chapter even if save fails
       setCurrentChapter(newChapter);
       setSidebarOpen(false);
+    } finally {
+      setIsSwitchingChapter(false);
     }
   };
 
@@ -836,12 +840,12 @@ const WriteBook = () => {
                       {chapters.map((chapter) => (
                         <div
                           key={chapter.id}
-                          className={`p-3 rounded-lg border cursor-pointer transition-colors group ${
+                          className={`p-3 rounded-lg border transition-colors group ${
                             currentChapter?.id === chapter.id 
                               ? 'bg-primary/10 border-primary' 
                               : 'hover:bg-muted'
-                          }`}
-                          onClick={() => saveCurrentConversationAndSwitchChapter(chapter)}
+                          } ${isSwitchingChapter ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                          onClick={() => !isSwitchingChapter && saveCurrentConversationAndSwitchChapter(chapter)}
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-2 flex-1 min-w-0">
@@ -850,13 +854,14 @@ const WriteBook = () => {
                             </div>
                             {chapters.length > 1 && (
                               <Button
-                                variant="ghost"
-                                size="sm"
-                                className="hover:bg-yellow-100 hover:text-yellow-800 transition-colors"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteChapter(chapter);
-                                }}
+                                 variant="ghost"
+                                 size="sm"
+                                 className="hover:bg-yellow-100 hover:text-yellow-800 transition-colors"
+                                 disabled={isSwitchingChapter}
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   handleDeleteChapter(chapter);
+                                 }}
                               >
                                 <MoreVertical className="h-3 w-3" />
                               </Button>
@@ -876,6 +881,7 @@ const WriteBook = () => {
                         variant="outline"
                         className="w-full mt-4"
                         onClick={handleAddChapter}
+                        disabled={isSwitchingChapter}
                       >
                         <Plus className="h-4 w-4 mr-2" />
                         Add Chapter
@@ -902,13 +908,13 @@ const WriteBook = () => {
             <Button 
               variant="outline" 
               onClick={saveCurrentChapter}
-              disabled={saving || !currentChapter}
+              disabled={saving || !currentChapter || isSwitchingChapter}
               size="sm"
             >
               <Save className="h-4 w-4 mr-2" />
               {saving ? "Saving..." : "Save"}
             </Button>
-            <Button variant="outline" onClick={handleSignOut} size="sm">
+            <Button variant="outline" onClick={handleSignOut} size="sm" disabled={isSwitchingChapter}>
               <LogOut className="h-4 w-4 mr-2" />
               Sign Out
             </Button>
@@ -1131,17 +1137,18 @@ const WriteBook = () => {
                        items={chapters.map(ch => ch.id)}
                        strategy={verticalListSortingStrategy}
                      >
-                         {chapters.map((chapter) => (
-                           <ChapterCard
-                             key={chapter.id}
-                             chapter={chapter}
-                             isActive={currentChapter?.id === chapter.id}
-                             onSelect={() => saveCurrentConversationAndSwitchChapter(chapter)}
-                             onDelete={() => handleDeleteChapter(chapter)}
-                             onRename={(newTitle) => handleRenameChapter(chapter.id, newTitle)}
-                             canDelete={chapters.length > 1}
-                             hasConversations={(chapterConversations.get(chapter.id) || 0) > 0}
-                           />
+                          {chapters.map((chapter) => (
+                            <ChapterCard
+                              key={chapter.id}
+                              chapter={chapter}
+                              isActive={currentChapter?.id === chapter.id}
+                              onSelect={() => saveCurrentConversationAndSwitchChapter(chapter)}
+                              onDelete={() => handleDeleteChapter(chapter)}
+                              onRename={(newTitle) => handleRenameChapter(chapter.id, newTitle)}
+                              canDelete={chapters.length > 1}
+                              hasConversations={(chapterConversations.get(chapter.id) || 0) > 0}
+                              disabled={isSwitchingChapter}
+                            />
                          ))}
                      </SortableContext>
                      
@@ -1159,16 +1166,17 @@ const WriteBook = () => {
                      </DragOverlay>
                    </DndContext>
                   
-                   <div className="space-y-2 mt-4">
-                     <Button
-                       variant="outline"
-                       className="w-full hover:bg-primary/5 hover:border-primary/30 transition-colors"
-                       onClick={handleAddChapter}
-                     >
-                       <Plus className="h-4 w-4 mr-2" />
-                       Add New Chapter
-                     </Button>
-                   </div>
+                    <div className="space-y-2 mt-4">
+                      <Button
+                        variant="outline"
+                        className="w-full hover:bg-primary/5 hover:border-primary/30 transition-colors"
+                        onClick={handleAddChapter}
+                        disabled={isSwitchingChapter}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add New Chapter
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1434,6 +1442,18 @@ const WriteBook = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Loading Overlay for Chapter Switching */}
+      {isSwitchingChapter && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-background p-6 rounded-lg shadow-xl border">
+            <div className="flex items-center gap-3">
+              <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full" />
+              <p className="text-sm font-medium">Saving conversation...</p>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
     </>

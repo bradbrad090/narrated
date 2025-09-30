@@ -45,6 +45,7 @@ interface ChapterCardProps {
   onRename: (newTitle: string) => void;
   canDelete: boolean;
   hasConversations?: boolean;
+  disabled?: boolean;
 }
 
 export const ChapterCard: React.FC<ChapterCardProps> = ({
@@ -54,7 +55,8 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
   onDelete,
   onRename,
   canDelete,
-  hasConversations = false
+  hasConversations = false,
+  disabled = false
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editingTitle, setEditingTitle] = useState(chapter.title);
@@ -172,22 +174,24 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
       ref={setNodeRef}
       style={style}
       className={`group relative p-4 rounded-lg border transition-all duration-200 ${
-        !isEditing && 'cursor-pointer hover:shadow-md hover:border-primary/30'
+        !isEditing && !disabled && 'cursor-pointer hover:shadow-md hover:border-primary/30'
       } ${
         isActive 
           ? 'bg-primary/5 border-primary shadow-sm' 
           : 'hover:bg-muted/50'
-      } ${isDragging ? 'opacity-50 shadow-lg' : ''}`}
-      onClick={isEditing ? undefined : onSelect}
+      } ${isDragging ? 'opacity-50 shadow-lg' : ''} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+      onClick={isEditing || disabled ? undefined : onSelect}
     >
       {/* Drag Handle */}
-      <div 
-        className="absolute left-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
-        {...attributes}
-        {...listeners}
-      >
-        <GripVertical className="h-4 w-4 text-muted-foreground" />
-      </div>
+      {!disabled && (
+        <div 
+          className="absolute left-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical className="h-4 w-4 text-muted-foreground" />
+        </div>
+      )}
 
       {/* Main Content */}
       <div className="pl-3">
@@ -242,6 +246,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
                     size="sm"
                     className="h-6 w-6 p-0 hover:bg-yellow-100 hover:text-yellow-800 transition-colors"
                     onClick={(e) => e.stopPropagation()}
+                    disabled={disabled}
                   >
                     <MoreVertical className="h-3 w-3" />
                   </Button>
