@@ -83,6 +83,9 @@ const WriteBook = () => {
     chapterId: currentChapter?.id || null
   });
 
+  // Filter chapters based on tier - free tier sees only 1 chapter
+  const visibleChapters = book?.tier === 'free' ? chapters.slice(0, 1) : chapters;
+
   // Fetch conversation counts for all chapters
   const fetchChapterConversations = async (userId: string) => {
     try {
@@ -216,8 +219,8 @@ const WriteBook = () => {
         setChapters(chaptersData);
         setCurrentChapter(chaptersData[0]);
       } else {
-        // Create 14 default chapters if none exist
-        await createDefaultChapters(userId);
+        // Create default chapters if none exist (1 for free tier, all for paid)
+        await createDefaultChapters(userId, bookData.tier);
       }
     } catch (error: any) {
       toast({
@@ -250,9 +253,9 @@ const WriteBook = () => {
     "Legacy and future"
   ];
 
-  const createDefaultChapters = async (userId: string) => {
+  const createDefaultChapters = async (userId: string, tier: string) => {
     // Only create 1 chapter for free tier, all for paid tiers
-    const chapterCount = book?.tier === 'free' ? 1 : defaultChapterTitles.length;
+    const chapterCount = tier === 'free' ? 1 : defaultChapterTitles.length;
     const defaultChapters = defaultChapterTitles.slice(0, chapterCount).map((title) => ({ title, description: "" }));
 
     try {
@@ -800,7 +803,7 @@ const WriteBook = () => {
                     <div className="space-y-2">
                       <h2 className="text-lg font-semibold mb-4">Chapters</h2>
                       
-                      {chapters.map((chapter) => (
+                      {visibleChapters.map((chapter) => (
                         <div
                           key={chapter.id}
                           className={`p-3 rounded-lg border transition-colors group ${
@@ -844,10 +847,10 @@ const WriteBook = () => {
                         variant="outline"
                         className="w-full mt-4"
                         onClick={handleAddChapter}
-                        disabled={isSwitchingChapter}
+                        disabled={isSwitchingChapter || (book?.tier === 'free' && chapters.length >= 1)}
                       >
                         <Plus className="h-4 w-4 mr-2" />
-                        Add Chapter
+                        {book?.tier === 'free' && chapters.length >= 1 ? 'Upgrade to Add More' : 'Add Chapter'}
                       </Button>
                     </div>
                   </div>
@@ -1087,7 +1090,7 @@ const WriteBook = () => {
                      <div className="flex items-center justify-between">
                        <h2 className="text-lg font-semibold">Chapters</h2>
                        <div className="text-xs text-muted-foreground">
-                         {chapters.length} of 14 chapters
+                         {visibleChapters.length} of {book?.tier === 'free' ? '1' : '14'} chapters
                        </div>
                      </div>
                    
@@ -1097,10 +1100,10 @@ const WriteBook = () => {
                      onDragEnd={handleDragEnd}
                    >
                      <SortableContext 
-                       items={chapters.map(ch => ch.id)}
+                       items={visibleChapters.map(ch => ch.id)}
                        strategy={verticalListSortingStrategy}
                      >
-                          {chapters.map((chapter) => (
+                          {visibleChapters.map((chapter) => (
                             <ChapterCard
                               key={chapter.id}
                               chapter={chapter}
@@ -1115,18 +1118,18 @@ const WriteBook = () => {
                          ))}
                      </SortableContext>
                      
-                     <DragOverlay>
-                       {activeChapterId ? (
-                         <div className="p-4 rounded-lg border bg-background shadow-xl opacity-90">
-                           <div className="flex items-center gap-2">
-                             <div className="h-3 w-3 rounded-full bg-primary/20" />
-                             <h3 className="font-medium text-sm">
-                               {chapters.find(ch => ch.id === activeChapterId)?.title}
-                             </h3>
-                           </div>
-                         </div>
-                       ) : null}
-                     </DragOverlay>
+                      <DragOverlay>
+                        {activeChapterId ? (
+                          <div className="p-4 rounded-lg border bg-background shadow-xl opacity-90">
+                            <div className="flex items-center gap-2">
+                              <div className="h-3 w-3 rounded-full bg-primary/20" />
+                              <h3 className="font-medium text-sm">
+                                {visibleChapters.find(ch => ch.id === activeChapterId)?.title}
+                              </h3>
+                            </div>
+                          </div>
+                        ) : null}
+                      </DragOverlay>
                    </DndContext>
                   
                     <div className="space-y-2 mt-4">
@@ -1134,10 +1137,10 @@ const WriteBook = () => {
                         variant="outline"
                         className="w-full hover:bg-primary/5 hover:border-primary/30 transition-colors"
                         onClick={handleAddChapter}
-                        disabled={isSwitchingChapter}
+                        disabled={isSwitchingChapter || (book?.tier === 'free' && chapters.length >= 1)}
                       >
                         <Plus className="h-4 w-4 mr-2" />
-                        Add New Chapter
+                        {book?.tier === 'free' && chapters.length >= 1 ? 'Upgrade to Add More Chapters' : 'Add New Chapter'}
                       </Button>
                     </div>
                   </div>
