@@ -218,6 +218,12 @@ const WriteBook = () => {
       if (chaptersData && chaptersData.length > 0) {
         setChapters(chaptersData);
         setCurrentChapter(chaptersData[0]);
+        
+        // Sync completedChapters with database state
+        const submittedChapterIds = chaptersData
+          .filter(chapter => chapter.is_submitted)
+          .map(chapter => chapter.id);
+        setCompletedChapters(new Set(submittedChapterIds));
       } else {
         // Create default chapters if none exist (1 for free tier, all for paid)
         await createDefaultChapters(userId, bookData.tier);
@@ -1169,7 +1175,7 @@ const WriteBook = () => {
                             userId={user.id}
                             bookId={book.id}
                             chapterId={currentChapter?.id}
-                            isChapterComplete={currentChapter ? completedChapters.has(currentChapter.id) : false}
+                            isChapterComplete={currentChapter?.is_submitted || false}
                             onContentGenerated={(content) => {
                               if (currentChapter) {
                                 const newContent = currentChapter.content ? currentChapter.content + "\n\n" + content : content;
