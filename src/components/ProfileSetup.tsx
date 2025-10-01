@@ -232,12 +232,6 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                   <Badge variant="outline">
                     Question {currentQuestion + 1} of {PROFILE_QUESTIONS.length}
                   </Badge>
-                  <div className="flex items-center gap-2">
-                    <MessageCircle className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">
-                      {answeredCount} answered
-                    </span>
-                  </div>
                 </div>
 
                 <Card className="border-l-4 border-l-primary">
