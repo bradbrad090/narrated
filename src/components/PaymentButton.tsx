@@ -142,10 +142,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
         
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {freeTier.icon}
-              <CardTitle className="text-lg">{freeTier.name}</CardTitle>
-            </div>
+            <CardTitle className="text-lg">{freeTier.name}</CardTitle>
             <div className="text-2xl font-bold text-primary">{freeTier.price}</div>
           </div>
           <CardDescription className="text-sm">{freeTier.description}</CardDescription>
