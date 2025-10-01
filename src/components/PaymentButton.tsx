@@ -40,13 +40,13 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
       name: 'Basic',
       price: '$49',
       description: 'Digital format with unlimited chapters',
-      icon: <Medal className="h-5 w-5 text-amber-600" />,
+      icon: <Medal className="h-5 w-5 text-amber-700" />,
       features: ['Unlimited chapters', '20 recipes', '100 photos', 'Digital PDF'],
       buttonText: 'Upgrade to Basic',
       theme: {
-        border: 'border-amber-200/60',
-        background: 'bg-gradient-to-br from-amber-50/30 to-orange-50/20',
-        iconColor: 'text-amber-600'
+        border: 'border-amber-300',
+        background: 'bg-gradient-to-br from-amber-100/70 to-orange-100/50',
+        iconColor: 'text-amber-700'
       }
     },
     {
@@ -54,14 +54,14 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
       name: 'Standard',
       price: '$199',
       description: 'Printed book + digital format',
-      icon: <Crown className="h-5 w-5 text-slate-600" />,
+      icon: <Crown className="h-5 w-5 text-slate-700" />,
       features: ['Unlimited chapters', '20 recipes', '100 photos', 'Printed + PDF'],
       buttonText: 'Upgrade to Standard',
       featured: true,
       theme: {
-        border: 'border-slate-300/60',
-        background: 'bg-gradient-to-br from-slate-50/30 to-gray-50/20',
-        iconColor: 'text-slate-600'
+        border: 'border-slate-400',
+        background: 'bg-gradient-to-br from-slate-100/70 to-gray-100/50',
+        iconColor: 'text-slate-700'
       }
     },
     {
@@ -69,13 +69,13 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
       name: 'Premium',
       price: '$399',
       description: 'Premium book with multiple copies',
-      icon: <Gem className="h-5 w-5 text-yellow-600" />,
+      icon: <Gem className="h-5 w-5 text-yellow-700" />,
       features: ['Unlimited chapters', '20 recipes', '100 photos', 'Premium + PDF', '5 copies'],
       buttonText: 'Upgrade to Premium',
       theme: {
-        border: 'border-yellow-300/60',
-        background: 'bg-gradient-to-br from-yellow-50/30 to-amber-50/20',
-        iconColor: 'text-yellow-600'
+        border: 'border-yellow-400',
+        background: 'bg-gradient-to-br from-yellow-100/70 to-amber-100/50',
+        iconColor: 'text-yellow-700'
       }
     }
   ];
