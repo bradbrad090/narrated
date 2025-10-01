@@ -40,9 +40,9 @@ export const createMockContext = (
   },
   bookProfile: {
     id: 'test-book-id',
-    title: 'My Life Story',
-    fullName: 'Test User',
-    lifePhilosophy: 'Live life to the fullest'
+    question_1_answer: 'Test User',
+    question_2_answer: 'Born in 1994',
+    question_3_answer: 'Family, Career, Travel'
   },
   recentChapters: [],
   lifeThemes: ['Family', 'Career', 'Travel'],

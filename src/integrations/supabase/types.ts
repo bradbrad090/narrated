@@ -97,32 +97,9 @@ export type Database = {
       }
       book_profiles: {
         Row: {
-          birth_date: string | null
-          birth_year: number | null
-          birthplace: string | null
           book_id: string
-          career_highlights: string[] | null
-          challenges_overcome: string[] | null
-          children_count: number | null
           created_at: string
-          cultural_background: string | null
-          current_location: string | null
-          education: string | null
-          family_background: string | null
-          first_job: string | null
-          full_name: string | null
-          hobbies_interests: string[] | null
           id: string
-          key_life_events: string[] | null
-          languages_spoken: string[] | null
-          life_philosophy: string | null
-          life_themes: string[] | null
-          marital_status: string | null
-          memorable_quotes: string[] | null
-          nicknames: string[] | null
-          occupation: string | null
-          parents_occupations: string | null
-          personality_traits: string[] | null
           question_1_answer: string | null
           question_10_answer: string | null
           question_2_answer: string | null
@@ -133,39 +110,13 @@ export type Database = {
           question_7_answer: string | null
           question_8_answer: string | null
           question_9_answer: string | null
-          relationships_family: string | null
-          siblings_count: number | null
           updated_at: string
           user_id: string
-          values_beliefs: string | null
         }
         Insert: {
-          birth_date?: string | null
-          birth_year?: number | null
-          birthplace?: string | null
           book_id: string
-          career_highlights?: string[] | null
-          challenges_overcome?: string[] | null
-          children_count?: number | null
           created_at?: string
-          cultural_background?: string | null
-          current_location?: string | null
-          education?: string | null
-          family_background?: string | null
-          first_job?: string | null
-          full_name?: string | null
-          hobbies_interests?: string[] | null
           id?: string
-          key_life_events?: string[] | null
-          languages_spoken?: string[] | null
-          life_philosophy?: string | null
-          life_themes?: string[] | null
-          marital_status?: string | null
-          memorable_quotes?: string[] | null
-          nicknames?: string[] | null
-          occupation?: string | null
-          parents_occupations?: string | null
-          personality_traits?: string[] | null
           question_1_answer?: string | null
           question_10_answer?: string | null
           question_2_answer?: string | null
@@ -176,39 +127,13 @@ export type Database = {
           question_7_answer?: string | null
           question_8_answer?: string | null
           question_9_answer?: string | null
-          relationships_family?: string | null
-          siblings_count?: number | null
           updated_at?: string
           user_id: string
-          values_beliefs?: string | null
         }
         Update: {
-          birth_date?: string | null
-          birth_year?: number | null
-          birthplace?: string | null
           book_id?: string
-          career_highlights?: string[] | null
-          challenges_overcome?: string[] | null
-          children_count?: number | null
           created_at?: string
-          cultural_background?: string | null
-          current_location?: string | null
-          education?: string | null
-          family_background?: string | null
-          first_job?: string | null
-          full_name?: string | null
-          hobbies_interests?: string[] | null
           id?: string
-          key_life_events?: string[] | null
-          languages_spoken?: string[] | null
-          life_philosophy?: string | null
-          life_themes?: string[] | null
-          marital_status?: string | null
-          memorable_quotes?: string[] | null
-          nicknames?: string[] | null
-          occupation?: string | null
-          parents_occupations?: string | null
-          personality_traits?: string[] | null
           question_1_answer?: string | null
           question_10_answer?: string | null
           question_2_answer?: string | null
@@ -219,11 +144,8 @@ export type Database = {
           question_7_answer?: string | null
           question_8_answer?: string | null
           question_9_answer?: string | null
-          relationships_family?: string | null
-          siblings_count?: number | null
           updated_at?: string
           user_id?: string
-          values_beliefs?: string | null
         }
         Relationships: [
           {
