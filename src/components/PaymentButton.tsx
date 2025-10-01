@@ -221,7 +221,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
                   onClick={() => handlePayment(tier.id)}
                   disabled={isLoading || isPurchased(tier.id)}
                   className="w-full"
-                  variant={isPurchased(tier.id) ? "outline" : tier.featured ? "default" : "outline"}
+                  variant={isPurchased(tier.id) ? "outline" : "outline"}
                 >
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {isPurchased(tier.id) 
