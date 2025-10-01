@@ -8,40 +8,53 @@ import { Check } from "lucide-react";
 const Pricing = () => {
   const plans = [
     {
-      name: "Essential Story",
-      price: "$49",
-      description: "Perfect for capturing your key life moments",
+      name: "Free Tier",
+      price: "$0",
+      description: "Start your story with one free chapter",
       features: [
-        "50-80 page autobiography",
+        "One free chapter",
         "Professional editing",
+        "Emailed on completion",
+      ]
+    },
+    {
+      name: "Basic",
+      price: "$49",
+      description: "Unlimited story creation in digital format",
+      features: [
+        "Unlimited chapters and word count",
+        "Professional editing",
+        "20 recipes",
+        "100 photos",
         "Digital delivery (PDF)",
       ]
     },
     {
-      name: "Complete Legacy",
+      name: "Standard",
       price: "$199",
-      description: "Comprehensive life story documentation",
+      description: "Unlimited story as a printed book",
       features: [
-        "100-150 page autobiography",
-        "Professional editing & formatting",
-        "Premium hardcover book",
-        "Custom cover design",
-        "Digital & physical delivery",
-        "Family sharing copies (2)"
+        "Unlimited chapters and word count",
+        "Professional editing",
+        "20 recipes",
+        "100 photos",
+        "Printed book",
+        "Digital delivery (PDF)",
       ],
       featured: true
     },
     {
-      name: "Premium Heritage",
+      name: "Premium",
       price: "$399",
-      description: "The ultimate legacy preservation experience",
+      description: "Premium book with multiple copies",
       features: [
-        "150-200+ page autobiography",
-        "Professional editing & formatting",
-        "Luxury hardcover with dust jacket",
-        "Custom photo integration",
-        "Digital & physical delivery",
-        "Family sharing copies (5)",
+        "Unlimited chapters and word count",
+        "Professional editing",
+        "20 recipes",
+        "100 photos",
+        "Premium book",
+        "5 copies",
+        "Digital delivery (PDF)",
       ]
     }
   ];
@@ -49,8 +62,8 @@ const Pricing = () => {
   return (
     <>
       <Helmet>
-        <title>Autobiography Writing Pricing - Plans from $49 | Narrated</title>
-        <meta name="description" content="Clear pricing for AI-assisted autobiography writing. Essential Story $49, Complete Legacy $199, Premium Heritage $399. Professional editing and printing included." />
+        <title>Autobiography Writing Pricing - Plans from $0 | Narrated</title>
+        <meta name="description" content="Clear pricing for AI-assisted autobiography writing. Free Tier $0, Basic $49, Standard $199, Premium $399. Professional editing and printing included." />
         <meta name="keywords" content="autobiography pricing, life story cost, memoir writing price, AI writing service cost, book printing price" />
         <link rel="canonical" href="https://narrated.com/pricing" />
       </Helmet>
@@ -65,13 +78,13 @@ const Pricing = () => {
                 Simple, Transparent Pricing
               </h1>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                Choose the plan that best fits your story. All plans include intelligent conversations, 
+                All users start on the free tier, which includes one free chapter that is professionally edited and emailed to you upon completion. Choose the plan that best fits your story. All plans include intelligent conversations, 
                 professional writing, and editing. No hidden fees.
               </p>
             </div>
 
             {/* Pricing Cards */}
-            <div className="grid md:grid-cols-3 gap-8 mb-16 max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16 max-w-7xl mx-auto items-stretch">
               {plans.map((plan, index) => (
                 <Card key={index} className={`relative ${plan.featured ? 'border-primary shadow-elegant scale-105' : 'border-border/50'}`}>
                   {plan.featured && (
