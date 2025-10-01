@@ -184,22 +184,6 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
     }
   };
 
-  const handleSkipQuestion = async () => {
-    // Save empty response if skipped
-    await saveQuestionToProfile(currentQuestion, '');
-    
-    if (currentQuestion < PROFILE_QUESTIONS.length - 1) {
-      setCurrentQuestion(prev => prev + 1);
-      setCurrentResponse('');
-    } else {
-      // All questions processed
-      toast({
-        title: "Profile Setup Complete",
-        description: "You can update your answers anytime by expanding this section.",
-      });
-      setIsExpanded(false);
-    }
-  };
 
   const handlePreviousQuestion = () => {
     if (currentQuestion > 0) {
@@ -310,24 +294,10 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                   </Button>
                   
                   <div className="flex gap-2">
-                    {currentQuestion !== PROFILE_QUESTIONS.length - 1 && (
-                      <Button
-                        onClick={handleSkipQuestion}
-                        variant="outline"
-                      >
-                        Skip
-                      </Button>
-                    )}
-                    
                     {currentQuestion === PROFILE_QUESTIONS.length - 1 ? (
                       <Button
-                        onClick={async () => {
-                          if (currentResponse.trim()) {
-                            await handleNextQuestion();
-                          } else {
-                            await handleSkipQuestion();
-                          }
-                        }}
+                        onClick={handleNextQuestion}
+                        disabled={!currentResponse.trim()}
                         className="bg-green-600 hover:bg-green-700"
                       >
                         <CheckCircle className="h-4 w-4 mr-2" />
