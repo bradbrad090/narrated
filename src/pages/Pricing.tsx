@@ -1,11 +1,46 @@
 import { Helmet } from "react-helmet-async";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check, Medal, Crown, Gem } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Pricing = () => {
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    // Check authentication status
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsLoggedIn(!!session);
+      setCheckingAuth(false);
+    };
+
+    checkAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsLoggedIn(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleGetStarted = () => {
+    if (isLoggedIn) {
+      // If logged in, take them to dashboard to create/manage books
+      navigate('/dashboard');
+    } else {
+      // If logged out, take them to signup
+      navigate('/auth');
+    }
+  };
+
   const plans = [
     {
       name: "Free Tier",
@@ -147,9 +182,10 @@ const Pricing = () => {
                         <Button 
                           className={`w-full mt-auto ${plan.featured ? 'bg-primary hover:bg-primary/90' : ''}`}
                           variant={plan.featured ? "default" : "outline"}
-                          onClick={() => window.location.href = '/auth'}
+                          onClick={handleGetStarted}
+                          disabled={checkingAuth}
                         >
-                          Get Started
+                          {checkingAuth ? "Loading..." : isLoggedIn ? "Go to Dashboard" : "Get Started"}
                         </Button>
                       )}
                     </CardContent>
