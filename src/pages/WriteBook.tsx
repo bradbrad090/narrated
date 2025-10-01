@@ -867,6 +867,15 @@ const WriteBook = () => {
               </Sheet>
             )}
             <Button 
+              variant="outline" 
+              onClick={handleSignOut}
+              size="sm" 
+              disabled={isSwitchingChapter}
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
+            <Button 
               variant="ghost" 
               onClick={() => navigate("/")}
               className="flex items-center space-x-2"
@@ -880,19 +889,6 @@ const WriteBook = () => {
             </div>
           </div>
           <div className="flex items-center justify-end space-x-3">
-            <Button 
-              variant="outline" 
-              onClick={saveCurrentChapter}
-              disabled={saving || !currentChapter || isSwitchingChapter}
-              size="sm"
-            >
-              <Save className="h-4 w-4 mr-2" />
-              {saving ? "Saving..." : "Save"}
-            </Button>
-            <Button variant="outline" onClick={handleSignOut} size="sm" disabled={isSwitchingChapter}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
-            </Button>
           </div>
         </div>
       </header>
