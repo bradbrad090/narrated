@@ -26,13 +26,13 @@ interface ProfileSetupProps {
 }
 
 const PROFILE_QUESTIONS = [
-  "What is your full name and any nicknames?",
-  "Tell us about the place where you were born. What was it like?",
+  "What is your full name, and do you have any nicknames?",
+  "Where and when were you born?",
   "Describe your family when growing up. Who were the key people in your household?",
-  "Share some details about where you primarily grew up. What made that location or community stand out to you?",
+  "Share some details about where you grew up. What made that location or community stand out to you?",
   "Walk us through your experiences of school. What schools did you go to?",
   "What were some of your first jobs?",
-  "How would you describe your current daily life or routines—what keeps you busy, and what goals or interests are guiding you right now?",
+  "How would you describe your current daily life or routines? What keeps you busy, and what goals or interests are guiding you right now?",
   "Have you had any long-term relationships that have been significant in your life?",
   "What long-term relationships; romantic, friendships, family, or mentors have mattered most to you?",
   "What is your current occupation?"
