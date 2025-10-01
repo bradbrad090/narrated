@@ -91,11 +91,12 @@ const Header = () => {
             {user ? (
               <Button 
                 variant="outline" 
-                className="hidden sm:inline-flex"
+                className="hidden sm:inline-flex border-primary/50 hover:bg-primary/10 hover:border-primary text-primary"
                 onClick={handleSignOut}
+                size="sm"
               >
                 <LogOut className="w-4 h-4 mr-2" />
-                Log Out
+                Sign Out
               </Button>
             ) : (
               <>
@@ -157,14 +158,15 @@ const Header = () => {
                     {user ? (
                       <Button 
                         variant="outline" 
-                        className="w-full"
+                        className="w-full border-primary/50 hover:bg-primary/10 hover:border-primary text-primary"
                         onClick={() => {
                           handleSignOut();
                           setIsOpen(false);
                         }}
+                        size="sm"
                       >
                         <LogOut className="w-4 h-4 mr-2" />
-                        Log Out
+                        Sign Out
                       </Button>
                     ) : (
                       <div className="flex flex-col gap-3">
