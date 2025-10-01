@@ -226,13 +226,6 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
         <CollapsibleContent>
           <CardContent>
             <div className="space-y-6">
-              <div className="bg-muted/50 p-4 rounded-lg">
-                <p className="text-sm text-muted-foreground mb-2">
-                  Let's gather some basic information about you to personalize your autobiography. 
-                  You can type your answers or use voice recording. Your progress is saved automatically.
-                </p>
-              </div>
-
               {/* Current Question */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
