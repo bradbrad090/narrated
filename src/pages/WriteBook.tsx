@@ -867,29 +867,29 @@ const WriteBook = () => {
               </Sheet>
             )}
             <Button 
-              variant="ghost" 
+              variant="outline" 
               onClick={() => navigate("/")}
-              className="flex items-center space-x-2"
+              className="border-primary/50 hover:bg-primary/10 hover:border-primary text-primary"
+              size="sm"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-4 w-4 mr-2" />
               <span className={isMobile ? "sr-only" : ""}>Back to Dashboard</span>
             </Button>
-            <div className={`flex items-center space-x-2 ${isMobile ? "hidden" : ""}`}>
-              <Book className="h-6 w-6 text-primary" />
-              <h1 className="text-xl font-semibold">{book?.title || "My Autobiography"}</h1>
-            </div>
           </div>
-          <div className="flex items-center justify-end space-x-3">
-            <Button 
-              variant="outline" 
-              onClick={handleSignOut}
-              size="sm" 
-              disabled={isSwitchingChapter}
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
-            </Button>
+          <div className={`flex items-center space-x-2 ${isMobile ? "hidden" : ""}`}>
+            <Book className="h-6 w-6 text-primary" />
+            <h1 className="text-xl font-semibold">{book?.title || "My Autobiography"}</h1>
           </div>
+          <Button 
+            variant="outline" 
+            onClick={handleSignOut}
+            className="border-primary/50 hover:bg-primary/10 hover:border-primary text-primary"
+            size="sm" 
+            disabled={isSwitchingChapter}
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            <span className={isMobile ? "sr-only" : ""}>Sign Out</span>
+          </Button>
         </div>
       </header>
 
