@@ -1202,16 +1202,16 @@ const WriteBook = () => {
                                  A brief summary of this chapter will appear here to help you understand the key themes and content.
                                </CardDescription>
                              </div>
-                             {/* Generate Summary Button */}
-                             <Button
-                               variant="default"
-                               onClick={handleGenerateSummary}
-                               disabled={saving || !currentChapter || !user || !currentChapter.content.trim()}
-                               size="sm"
-                               className="px-6 py-2 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 rounded-lg border border-primary/20"
-                             >
-                               {saving ? "Generating..." : "Review what I've shared so far"}
-                             </Button>
+                              {/* Generate Summary Button */}
+                              <Button
+                                variant="default"
+                                onClick={handleGenerateSummary}
+                                disabled={saving || !currentChapter || !user || !currentChapter.content.trim() || (currentChapter && completedChapters.has(currentChapter.id))}
+                                size="sm"
+                                className="px-6 py-2 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 rounded-lg border border-primary/20"
+                              >
+                                {saving ? "Generating..." : "Review what I've shared so far"}
+                              </Button>
                            </div>
                          </CardHeader>
                          <CardContent>
