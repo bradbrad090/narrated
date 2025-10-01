@@ -22,6 +22,7 @@ interface ProfileSetupProps {
   bookId: string;
   bookProfile?: any;
   onProfileUpdate?: (profile: any) => void;
+  disableCollapse?: boolean;
 }
 
 const PROFILE_QUESTIONS = [
@@ -41,7 +42,8 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
   userId,
   bookId,
   bookProfile,
-  onProfileUpdate
+  onProfileUpdate,
+  disableCollapse = false
 }) => {
   const [isExpanded, setIsExpanded] = useState(!bookProfile?.question_1_answer);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -193,6 +195,104 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
     }
   };
 
+  if (disableCollapse) {
+    return (
+      <Card className="mb-6">
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-3">
+            <User className="h-5 w-5 text-primary" />
+            <div className="text-left">
+              <CardTitle className="text-lg">Personal Profile Setup</CardTitle>
+              <div className="flex items-center gap-2 mt-1">
+                <Progress value={progress} className="w-32 h-2" />
+                <span className="text-sm text-muted-foreground">
+                  {Math.round(progress)}% complete
+                </span>
+                {isComplete && (
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                )}
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+
+        <CardContent>
+          <div className="space-y-6">
+            <div className="space-y-5">
+              <div className="flex items-center gap-3">
+                <Badge variant="secondary" className="text-sm">
+                  Question {currentQuestion + 1} of {PROFILE_QUESTIONS.length}
+                </Badge>
+              </div>
+
+              <div className="border-l-4 border-primary pl-4 py-2">
+                <h3 className="text-lg font-medium text-foreground mb-4">
+                  {PROFILE_QUESTIONS[currentQuestion]}
+                </h3>
+              </div>
+              
+              <div className="space-y-3">
+                <Textarea
+                  value={currentResponse}
+                  onChange={(e) => setCurrentResponse(e.target.value)}
+                  placeholder="Type your answer here..."
+                  className="min-h-[120px] resize-none"
+                  rows={4}
+                />
+                
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={() => setIsVoiceMode(!isVoiceMode)}
+                    variant="outline"
+                    size="sm"
+                  >
+                    <Mic className="h-4 w-4 mr-2" />
+                    {isVoiceMode ? 'Stop Recording' : 'Voice Input'}
+                  </Button>
+                  
+                  {isVoiceMode && (
+                    <VoiceRecorder
+                      onTranscription={handleVoiceTranscription}
+                      disabled={false}
+                    />
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-between pt-2">
+                <Button
+                  onClick={handlePreviousQuestion}
+                  disabled={currentQuestion === 0}
+                  variant="outline"
+                >
+                  Previous
+                </Button>
+                
+                {currentQuestion === PROFILE_QUESTIONS.length - 1 ? (
+                  <Button
+                    onClick={handleNextQuestion}
+                    disabled={!currentResponse.trim()}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Complete Profile
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleNextQuestion}
+                    disabled={!currentResponse.trim()}
+                  >
+                    Next
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="mb-6">
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
@@ -226,7 +326,6 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
         <CollapsibleContent>
           <CardContent>
             <div className="space-y-6">
-              {/* Current Question */}
               <div className="space-y-5">
                 <div className="flex items-center gap-3">
                   <Badge variant="secondary" className="text-sm">
@@ -268,7 +367,6 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                   </div>
                 </div>
 
-                {/* Navigation Buttons */}
                 <div className="flex justify-between pt-2">
                   <Button
                     onClick={handlePreviousQuestion}

@@ -1363,6 +1363,7 @@ const WriteBook = () => {
               bookId={book.id}
               bookProfile={bookProfile}
               onProfileUpdate={handleProfileUpdate}
+              disableCollapse={true}
             />
           )}
         </DialogContent>
