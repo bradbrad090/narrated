@@ -33,8 +33,8 @@ const Pricing = () => {
 
   const handleGetStarted = () => {
     if (isLoggedIn) {
-      // If logged in, take them to dashboard to create/manage books
-      navigate('/dashboard');
+      // If logged in, take them to homepage to view their books
+      navigate('/');
     } else {
       // If logged out, take them to signup
       navigate('/auth');
