@@ -84,7 +84,7 @@ const Pricing = () => {
             {/* Pricing Cards */}
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16 max-w-7xl mx-auto items-stretch">
               {plans.map((plan, index) => (
-                <Card key={index} className={`relative ${plan.featured ? 'border-primary shadow-elegant scale-105' : 'border-border/50'}`}>
+                <Card key={index} className={`relative flex flex-col ${plan.featured ? 'border-primary shadow-elegant scale-105' : 'border-border/50'}`}>
                   {plan.featured && (
                     <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                       <span className="bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-semibold">
@@ -97,8 +97,8 @@ const Pricing = () => {
                     <div className="text-4xl font-bold text-primary mb-2">{plan.price}</div>
                     <CardDescription>{plan.description}</CardDescription>
                   </CardHeader>
-                  <CardContent className="flex flex-col h-full">
-                    <ul className="space-y-3 flex-grow">
+                  <CardContent className="flex flex-col flex-grow">
+                    <ul className="space-y-3 mb-6">
                       {plan.features.map((feature, featureIndex) => (
                         <li key={featureIndex} className="flex items-center gap-3">
                           <Check className="w-5 h-5 text-primary flex-shrink-0" />
@@ -107,7 +107,7 @@ const Pricing = () => {
                       ))}
                     </ul>
                     <Button 
-                      className={`w-full mt-auto ${plan.featured ? 'bg-primary hover:bg-primary/90' : ''}`}
+                      className={`w-full ${plan.featured ? 'bg-primary hover:bg-primary/90' : ''}`}
                       variant={plan.featured ? "default" : "outline"}
                       onClick={() => window.location.href = '/auth'}
                     >
