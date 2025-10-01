@@ -93,45 +93,69 @@ serve(async (req) => {
     let contextContent = '';
     
     if (profile) {
-      contextContent += `Profile Information:\n`;
-      if (profile.full_name) contextContent += `Name: ${profile.full_name}\n`;
-      if (profile.birthplace) contextContent += `Birthplace: ${profile.birthplace}\n`;
-      if (profile.birth_year) contextContent += `Birth Year: ${profile.birth_year}\n`;
-      if (profile.current_location) contextContent += `Current Location: ${profile.current_location}\n`;
-      if (profile.occupation) contextContent += `Occupation: ${profile.occupation}\n`;
-      if (profile.education) contextContent += `Education: ${profile.education}\n`;
-      if (profile.family_background) contextContent += `Family Background: ${profile.family_background}\n`;
-      if (profile.cultural_background) contextContent += `Cultural Background: ${profile.cultural_background}\n`;
-      if (profile.relationships_family) contextContent += `Relationships/Family: ${profile.relationships_family}\n`;
-      if (profile.values_beliefs) contextContent += `Values/Beliefs: ${profile.values_beliefs}\n`;
-      if (profile.life_philosophy) contextContent += `Life Philosophy: ${profile.life_philosophy}\n`;
+      // Check if using new raw answers mode (question_1_answer exists)
+      const hasRawAnswers = profile.question_1_answer;
       
-      if (profile.personality_traits?.length) {
-        contextContent += `Personality Traits: ${profile.personality_traits.join(', ')}\n`;
+      if (hasRawAnswers) {
+        // NEW MODE: Use raw profile question answers
+        contextContent += `Profile Information (from user's direct responses):\n\n`;
+        
+        if (profile.full_name) contextContent += `Name: ${profile.full_name}\n\n`;
+        
+        // Format all 10 questions and their answers
+        if (profile.question_1_answer) contextContent += `Background: ${profile.question_1_answer}\n\n`;
+        if (profile.question_2_answer) contextContent += `Family: ${profile.question_2_answer}\n\n`;
+        if (profile.question_3_answer) contextContent += `Hobbies & Interests: ${profile.question_3_answer}\n\n`;
+        if (profile.question_4_answer) contextContent += `Education & Career: ${profile.question_4_answer}\n\n`;
+        if (profile.question_5_answer) contextContent += `Major Life Events: ${profile.question_5_answer}\n\n`;
+        if (profile.question_6_answer) contextContent += `Relationships: ${profile.question_6_answer}\n\n`;
+        if (profile.question_7_answer) contextContent += `Challenges & Growth: ${profile.question_7_answer}\n\n`;
+        if (profile.question_8_answer) contextContent += `Values & Philosophy: ${profile.question_8_answer}\n\n`;
+        if (profile.question_9_answer) contextContent += `Cultural Identity: ${profile.question_9_answer}\n\n`;
+        if (profile.question_10_answer) contextContent += `Legacy & Impact: ${profile.question_10_answer}\n\n`;
+        
+      } else {
+        // LEGACY MODE: Use extracted profile fields
+        contextContent += `Profile Information:\n`;
+        if (profile.full_name) contextContent += `Name: ${profile.full_name}\n`;
+        if (profile.birthplace) contextContent += `Birthplace: ${profile.birthplace}\n`;
+        if (profile.birth_year) contextContent += `Birth Year: ${profile.birth_year}\n`;
+        if (profile.current_location) contextContent += `Current Location: ${profile.current_location}\n`;
+        if (profile.occupation) contextContent += `Occupation: ${profile.occupation}\n`;
+        if (profile.education) contextContent += `Education: ${profile.education}\n`;
+        if (profile.family_background) contextContent += `Family Background: ${profile.family_background}\n`;
+        if (profile.cultural_background) contextContent += `Cultural Background: ${profile.cultural_background}\n`;
+        if (profile.relationships_family) contextContent += `Relationships/Family: ${profile.relationships_family}\n`;
+        if (profile.values_beliefs) contextContent += `Values/Beliefs: ${profile.values_beliefs}\n`;
+        if (profile.life_philosophy) contextContent += `Life Philosophy: ${profile.life_philosophy}\n`;
+        
+        if (profile.personality_traits?.length) {
+          contextContent += `Personality Traits: ${profile.personality_traits.join(', ')}\n`;
+        }
+        if (profile.hobbies_interests?.length) {
+          contextContent += `Hobbies/Interests: ${profile.hobbies_interests.join(', ')}\n`;
+        }
+        if (profile.key_life_events?.length) {
+          contextContent += `Key Life Events: ${profile.key_life_events.join(', ')}\n`;
+        }
+        if (profile.career_highlights?.length) {
+          contextContent += `Career Highlights: ${profile.career_highlights.join(', ')}\n`;
+        }
+        if (profile.challenges_overcome?.length) {
+          contextContent += `Challenges Overcome: ${profile.challenges_overcome.join(', ')}\n`;
+        }
+        if (profile.life_themes?.length) {
+          contextContent += `Life Themes: ${profile.life_themes.join(', ')}\n`;
+        }
+        if (profile.memorable_quotes?.length) {
+          contextContent += `Memorable Quotes: ${profile.memorable_quotes.join(', ')}\n`;
+        }
+        if (profile.languages_spoken?.length) {
+          contextContent += `Languages Spoken: ${profile.languages_spoken.join(', ')}\n`;
+        }
+        
+        contextContent += '\n';
       }
-      if (profile.hobbies_interests?.length) {
-        contextContent += `Hobbies/Interests: ${profile.hobbies_interests.join(', ')}\n`;
-      }
-      if (profile.key_life_events?.length) {
-        contextContent += `Key Life Events: ${profile.key_life_events.join(', ')}\n`;
-      }
-      if (profile.career_highlights?.length) {
-        contextContent += `Career Highlights: ${profile.career_highlights.join(', ')}\n`;
-      }
-      if (profile.challenges_overcome?.length) {
-        contextContent += `Challenges Overcome: ${profile.challenges_overcome.join(', ')}\n`;
-      }
-      if (profile.life_themes?.length) {
-        contextContent += `Life Themes: ${profile.life_themes.join(', ')}\n`;
-      }
-      if (profile.memorable_quotes?.length) {
-        contextContent += `Memorable Quotes: ${profile.memorable_quotes.join(', ')}\n`;
-      }
-      if (profile.languages_spoken?.length) {
-        contextContent += `Languages Spoken: ${profile.languages_spoken.join(', ')}\n`;
-      }
-      
-      contextContent += '\n';
     }
 
     // Add conversation history (chapter-specific)
