@@ -230,7 +230,7 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
               <div className="space-y-5">
                 <div className="flex items-center gap-3">
                   <Badge variant="secondary" className="text-sm">
-                    {currentQuestion + 1} / {PROFILE_QUESTIONS.length}
+                    Question {currentQuestion + 1} of {PROFILE_QUESTIONS.length}
                   </Badge>
                 </div>
 
