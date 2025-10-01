@@ -42,7 +42,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
       description: 'Digital format with unlimited chapters',
       icon: <Medal className="h-5 w-5 text-amber-700" />,
       features: ['Unlimited chapters', '20 recipes', '100 photos', 'Digital PDF'],
-      buttonText: 'Upgrade to Basic',
+      buttonText: 'Upgrade',
       theme: {
         border: 'border-amber-300',
         background: 'bg-gradient-to-br from-amber-100/70 to-orange-100/50',
@@ -56,7 +56,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
       description: 'Printed book + digital format',
       icon: <Crown className="h-5 w-5 text-slate-700" />,
       features: ['Unlimited chapters', '20 recipes', '100 photos', 'Printed + PDF'],
-      buttonText: 'Upgrade to Standard',
+      buttonText: 'Upgrade',
       featured: true,
       theme: {
         border: 'border-slate-400',
@@ -71,7 +71,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
       description: 'Premium book with multiple copies',
       icon: <Gem className="h-5 w-5 text-yellow-700" />,
       features: ['Unlimited chapters', '20 recipes', '100 photos', 'Premium + PDF', '5 copies'],
-      buttonText: 'Upgrade to Premium',
+      buttonText: 'Upgrade',
       theme: {
         border: 'border-yellow-400',
         background: 'bg-gradient-to-br from-yellow-100/70 to-amber-100/50',
