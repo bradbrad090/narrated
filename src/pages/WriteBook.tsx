@@ -141,7 +141,7 @@ const WriteBook = () => {
 
   // Check for profile requirement on load
   useEffect(() => {
-    if (book && user && profileMode && !bookProfile?.question_1_answer) {
+    if (book && user && profileMode && !bookProfile?.question_10_answer) {
       setShowProfileModal(true);
     }
   }, [book, user, profileMode, bookProfile]);
@@ -157,7 +157,7 @@ const WriteBook = () => {
   const handleProfileUpdate = (profile: any) => {
     setBookProfile(profile);
     // Always close the modal when profile is processed, regardless of specific fields
-    if (profileMode && profile && profile.question_1_answer) {
+    if (profileMode && profile && profile.question_10_answer) {
       // Profile is complete, remove profile parameter and show success
       setSearchParams(new URLSearchParams());
       setShowProfileModal(false);
@@ -903,7 +903,7 @@ const WriteBook = () => {
         <div className="h-full pt-20 p-4 overflow-auto">
           
           {/* Profile Setup Section for Mobile */}
-          {user && book && !bookProfile?.question_1_answer && (
+          {user && book && !bookProfile?.question_10_answer && (
             <div className="max-w-4xl mx-auto mb-6">
               <ProfileSetup
                 userId={user.id}
@@ -1046,7 +1046,7 @@ const WriteBook = () => {
                 <div className="space-y-4">
                 
                    {/* Profile Setup Section - Only show if profile is incomplete */}
-                   {user && book && !bookProfile?.question_1_answer && (
+                   {user && book && !bookProfile?.question_10_answer && (
                      <ProfileSetup
                        userId={user.id}
                        bookId={book.id}
