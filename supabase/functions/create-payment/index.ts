@@ -9,7 +9,7 @@ const corsHeaders = {
 
 interface PaymentRequest {
   bookId: string;
-  tier: 'free' | 'paid' | 'premium';
+  tier: 'free' | 'basic' | 'standard' | 'premium';
 }
 
 serve(async (req) => {
@@ -134,10 +134,11 @@ serve(async (req) => {
     // Initialize Stripe
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
 
-    // Pricing
+    // Pricing (in cents)
     const pricing = {
-      paid: { amount: 2999, name: "Standard Book - $29.99" },
-      premium: { amount: 4999, name: "Premium Book - $49.99" },
+      basic: { amount: 4900, name: "Basic Tier - $49" },
+      standard: { amount: 19900, name: "Standard Tier - $199" },
+      premium: { amount: 39900, name: "Premium Tier - $399" },
     };
 
     const selectedPricing = pricing[tier as keyof typeof pricing];
