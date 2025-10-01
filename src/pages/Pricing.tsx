@@ -185,7 +185,7 @@ const Pricing = () => {
                           onClick={handleGetStarted}
                           disabled={checkingAuth}
                         >
-                          {checkingAuth ? "Loading..." : isLoggedIn ? "Go to Dashboard" : "Get Started"}
+                          {checkingAuth ? "Loading..." : isLoggedIn ? "View Your Books" : "Get Started"}
                         </Button>
                       )}
                     </CardContent>
