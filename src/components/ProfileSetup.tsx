@@ -227,51 +227,49 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
           <CardContent>
             <div className="space-y-6">
               {/* Current Question */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Badge variant="outline">
-                    Question {currentQuestion + 1} of {PROFILE_QUESTIONS.length}
+              <div className="space-y-5">
+                <div className="flex items-center gap-3">
+                  <Badge variant="secondary" className="text-sm">
+                    {currentQuestion + 1} / {PROFILE_QUESTIONS.length}
                   </Badge>
                 </div>
 
-                <Card className="border-l-4 border-l-primary">
-                  <CardContent className="pt-4">
-                    <h3 className="font-medium mb-3">
-                      {PROFILE_QUESTIONS[currentQuestion]}
-                    </h3>
+                <div className="border-l-4 border-primary pl-4 py-2">
+                  <h3 className="text-lg font-medium text-foreground mb-4">
+                    {PROFILE_QUESTIONS[currentQuestion]}
+                  </h3>
+                </div>
+                
+                <div className="space-y-3">
+                  <Textarea
+                    value={currentResponse}
+                    onChange={(e) => setCurrentResponse(e.target.value)}
+                    placeholder="Type your answer here..."
+                    className="min-h-[120px] resize-none"
+                    rows={4}
+                  />
+                  
+                  <div className="flex items-center gap-2">
+                    <Button
+                      onClick={() => setIsVoiceMode(!isVoiceMode)}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <Mic className="h-4 w-4 mr-2" />
+                      {isVoiceMode ? 'Stop Recording' : 'Voice Input'}
+                    </Button>
                     
-                    <div className="space-y-3">
-                      <Textarea
-                        value={currentResponse}
-                        onChange={(e) => setCurrentResponse(e.target.value)}
-                        placeholder="Share your story here... You can speak naturally as if talking to a friend."
-                        className="min-h-[120px]"
-                        rows={4}
+                    {isVoiceMode && (
+                      <VoiceRecorder
+                        onTranscription={handleVoiceTranscription}
+                        disabled={false}
                       />
-                      
-                      <div className="flex items-center gap-2">
-                        <Button
-                          onClick={() => setIsVoiceMode(!isVoiceMode)}
-                          variant="outline"
-                          size="sm"
-                        >
-                          <Mic className="h-4 w-4 mr-2" />
-                          {isVoiceMode ? 'Stop Recording' : 'Voice Input'}
-                        </Button>
-                        
-                        {isVoiceMode && (
-                          <VoiceRecorder
-                            onTranscription={handleVoiceTranscription}
-                            disabled={false}
-                          />
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    )}
+                  </div>
+                </div>
 
                 {/* Navigation Buttons */}
-                <div className="flex justify-between">
+                <div className="flex justify-between pt-2">
                   <Button
                     onClick={handlePreviousQuestion}
                     disabled={currentQuestion === 0}
@@ -280,25 +278,23 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                     Previous
                   </Button>
                   
-                  <div className="flex gap-2">
-                    {currentQuestion === PROFILE_QUESTIONS.length - 1 ? (
-                      <Button
-                        onClick={handleNextQuestion}
-                        disabled={!currentResponse.trim()}
-                        className="bg-green-600 hover:bg-green-700"
-                      >
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        Complete Profile
-                      </Button>
-                    ) : (
-                      <Button
-                        onClick={handleNextQuestion}
-                        disabled={!currentResponse.trim()}
-                      >
-                        Next
-                      </Button>
-                    )}
-                  </div>
+                  {currentQuestion === PROFILE_QUESTIONS.length - 1 ? (
+                    <Button
+                      onClick={handleNextQuestion}
+                      disabled={!currentResponse.trim()}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Complete Profile
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleNextQuestion}
+                      disabled={!currentResponse.trim()}
+                    >
+                      Next
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
