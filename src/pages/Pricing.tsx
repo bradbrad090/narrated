@@ -97,8 +97,8 @@ const Pricing = () => {
                     <div className="text-4xl font-bold text-primary mb-2">{plan.price}</div>
                     <CardDescription>{plan.description}</CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-3 mb-6">
+                  <CardContent className="flex flex-col h-full">
+                    <ul className="space-y-3 flex-grow">
                       {plan.features.map((feature, featureIndex) => (
                         <li key={featureIndex} className="flex items-center gap-3">
                           <Check className="w-5 h-5 text-primary flex-shrink-0" />
@@ -107,7 +107,7 @@ const Pricing = () => {
                       ))}
                     </ul>
                     <Button 
-                      className={`w-full ${plan.featured ? 'bg-primary hover:bg-primary/90' : ''}`}
+                      className={`w-full mt-auto ${plan.featured ? 'bg-primary hover:bg-primary/90' : ''}`}
                       variant={plan.featured ? "default" : "outline"}
                       onClick={() => window.location.href = '/auth'}
                     >
