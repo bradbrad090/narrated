@@ -407,62 +407,6 @@ export type Database = {
           },
         ]
       }
-      conversation_questions: {
-        Row: {
-          asked_at: string
-          book_id: string
-          chapter_id: string | null
-          conversation_session_id: string | null
-          conversation_type: string
-          created_at: string
-          id: string
-          question_hash: string
-          question_text: string
-          response_quality: number | null
-          semantic_keywords: string[] | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          asked_at?: string
-          book_id: string
-          chapter_id?: string | null
-          conversation_session_id?: string | null
-          conversation_type: string
-          created_at?: string
-          id?: string
-          question_hash: string
-          question_text: string
-          response_quality?: number | null
-          semantic_keywords?: string[] | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          asked_at?: string
-          book_id?: string
-          chapter_id?: string | null
-          conversation_session_id?: string | null
-          conversation_type?: string
-          created_at?: string
-          id?: string
-          question_hash?: string
-          question_text?: string
-          response_quality?: number | null
-          semantic_keywords?: string[] | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "conversation_questions_chapter_id_fkey"
-            columns: ["chapter_id"]
-            isOneToOne: false
-            referencedRelation: "chapters"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       orders: {
         Row: {
           book_id: string | null
