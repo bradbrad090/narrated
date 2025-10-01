@@ -3,36 +3,44 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
+import { Check, Medal, Crown, Gem } from "lucide-react";
 
 const Pricing = () => {
   const plans = [
     {
       name: "Free Tier",
-      price: "$0",
       description: "Start your story with one free chapter",
       features: [
         "One free chapter",
         "Professional editing",
         "Emailed on completion",
-      ]
+      ],
+      isFree: true
     },
     {
       name: "Basic",
       price: "$49",
       description: "Unlimited story creation in digital format",
+      icon: Medal,
+      iconColor: "text-amber-700",
       features: [
         "Unlimited chapters and word count",
         "Professional editing",
         "20 recipes",
         "100 photos",
         "Digital delivery (PDF)",
-      ]
+      ],
+      theme: {
+        border: "border-amber-300",
+        background: "bg-gradient-to-br from-amber-100/70 to-orange-100/50"
+      }
     },
     {
       name: "Standard",
       price: "$199",
       description: "Unlimited story as a printed book",
+      icon: Crown,
+      iconColor: "text-slate-700",
       features: [
         "Unlimited chapters and word count",
         "Professional editing",
@@ -40,12 +48,18 @@ const Pricing = () => {
         "100 photos",
         "Printed book + digital PDF",
       ],
-      featured: true
+      featured: true,
+      theme: {
+        border: "border-slate-400",
+        background: "bg-gradient-to-br from-slate-100/70 to-gray-100/50"
+      }
     },
     {
       name: "Premium",
       price: "$399",
       description: "Premium book with multiple copies",
+      icon: Gem,
+      iconColor: "text-yellow-700",
       features: [
         "Unlimited chapters and word count",
         "Professional editing",
@@ -53,7 +67,11 @@ const Pricing = () => {
         "100 photos",
         "Premium book + digital PDF",
         "5 copies",
-      ]
+      ],
+      theme: {
+        border: "border-yellow-400",
+        background: "bg-gradient-to-br from-yellow-100/70 to-amber-100/50"
+      }
     }
   ];
 
@@ -83,39 +101,61 @@ const Pricing = () => {
 
             {/* Pricing Cards */}
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16 max-w-7xl mx-auto items-stretch">
-              {plans.map((plan, index) => (
-                <Card key={index} className={`relative flex flex-col ${plan.featured ? 'border-primary shadow-elegant scale-105' : 'border-border/50'}`}>
-                  {plan.featured && (
-                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                      <span className="bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-semibold">
-                        Most Popular
-                      </span>
-                    </div>
-                  )}
-                  <CardHeader className="text-center">
-                    <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
-                    <div className="text-4xl font-bold text-primary mb-2">{plan.price}</div>
-                    <CardDescription>{plan.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex flex-col flex-grow">
-                    <ul className="space-y-3 mb-6 flex-grow">
-                      {plan.features.map((feature, featureIndex) => (
-                        <li key={featureIndex} className="flex items-center gap-3">
-                          <Check className="w-5 h-5 text-primary flex-shrink-0" />
-                          <span className="text-sm">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <Button 
-                      className={`w-full mt-auto ${plan.featured ? 'bg-primary hover:bg-primary/90' : ''}`}
-                      variant={plan.featured ? "default" : "outline"}
-                      onClick={() => window.location.href = '/auth'}
-                    >
-                      Get Started
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
+              {plans.map((plan, index) => {
+                const Icon = plan.icon;
+                
+                return (
+                  <Card 
+                    key={index} 
+                    className={`relative flex flex-col ${
+                      plan.isFree 
+                        ? 'border-border/50' 
+                        : `${plan.theme?.border} ${plan.theme?.background}`
+                    } ${
+                      plan.featured ? 'shadow-elegant scale-105' : ''
+                    }`}
+                  >
+                    {plan.featured && (
+                      <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                        <span className="bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-semibold">
+                          Most Popular
+                        </span>
+                      </div>
+                    )}
+                    <CardHeader className="text-center">
+                      {Icon && (
+                        <div className="flex justify-center mb-2">
+                          <Icon className={`w-6 h-6 ${plan.iconColor}`} />
+                        </div>
+                      )}
+                      <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
+                      {plan.price && (
+                        <div className="text-4xl font-bold text-primary mb-2">{plan.price}</div>
+                      )}
+                      <CardDescription>{plan.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex flex-col flex-grow">
+                      <ul className="space-y-3 mb-6 flex-grow">
+                        {plan.features.map((feature, featureIndex) => (
+                          <li key={featureIndex} className="flex items-center gap-3">
+                            <Check className="w-5 h-5 text-primary flex-shrink-0" />
+                            <span className="text-sm">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      {!plan.isFree && (
+                        <Button 
+                          className={`w-full mt-auto ${plan.featured ? 'bg-primary hover:bg-primary/90' : ''}`}
+                          variant={plan.featured ? "default" : "outline"}
+                          onClick={() => window.location.href = '/auth'}
+                        >
+                          Get Started
+                        </Button>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
 
             {/* Additional Info */}
