@@ -261,7 +261,7 @@ const Dashboard = () => {
       />
       <div className="min-h-screen bg-gradient-subtle">
       {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="border-b-2 border-primary/20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <a href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
             <Book className="h-6 w-6 text-primary" />
