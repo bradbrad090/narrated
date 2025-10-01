@@ -858,7 +858,7 @@ const WriteBook = () => {
                       
                       <Button
                         variant="outline"
-                        className="w-full mt-4"
+                        className={`w-full mt-4 ${book?.tier === 'free' && chapters.length >= 1 ? 'border-primary/50 bg-primary/5 hover:bg-primary/10 hover:border-primary text-primary font-semibold' : 'hover:bg-primary/5 hover:border-primary/30'}`}
                         onClick={handleAddChapter}
                         disabled={isSwitchingChapter || (book?.tier === 'free' && chapters.length >= 1)}
                       >
@@ -1148,7 +1148,7 @@ const WriteBook = () => {
                     <div className="space-y-2 mt-4">
                       <Button
                         variant="outline"
-                        className="w-full hover:bg-primary/5 hover:border-primary/30 transition-colors"
+                        className={`w-full transition-colors ${book?.tier === 'free' && chapters.length >= 1 ? 'border-primary/50 bg-primary/5 hover:bg-primary/10 hover:border-primary text-primary font-semibold' : 'hover:bg-primary/5 hover:border-primary/30'}`}
                         onClick={handleAddChapter}
                         disabled={isSwitchingChapter || (book?.tier === 'free' && chapters.length >= 1)}
                       >
