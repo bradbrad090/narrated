@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { Plus, Book, Trash2, Edit2, Check, X } from "lucide-react";
@@ -283,16 +284,21 @@ const UserDashboardSection = ({ user }: UserDashboardSectionProps) => {
                           </Button>
                         </div>
                       ) : (
-                        <div className="flex items-center justify-between">
-                          <CardTitle className="text-lg">{book.title}</CardTitle>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => startEditing(book.id, book.title)}
-                            className="bg-yellow-400/20 hover:bg-yellow-400/30"
-                          >
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <CardTitle className="text-lg">{book.title}</CardTitle>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => startEditing(book.id, book.title)}
+                              className="bg-yellow-400/20 hover:bg-yellow-400/30"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <Badge variant={book.tier as "free" | "basic" | "standard" | "premium"}>
+                            {book.tier.charAt(0).toUpperCase() + book.tier.slice(1)}
+                          </Badge>
                         </div>
                       )}
                       <div className="grid grid-cols-3 gap-4 mt-3">
