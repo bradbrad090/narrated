@@ -37,27 +37,16 @@ export interface UserProfile {
 
 export interface BookProfile {
   id: string;
-  title?: string;
-  lifePhilosophy?: string;
-  valuesBeliefs?: string;
-  occupation?: string;
-  relationshipsFamily?: string;
-  memorableQuotes?: string[];
-  birthYear?: number;
-  writingStylePreference?: string;
-  familyBackground?: string;
-  careerHighlights?: string[];
-  education?: string;
-  fullName?: string;
-  lifeThemes?: string[];
-  personalityTraits?: string[];
-  birthplace?: string;
-  currentLocation?: string;
-  languagesSpoken?: string[];
-  keyLifeEvents?: string[];
-  culturalBackground?: string;
-  hobbiesInterests?: string[];
-  challengesOvercome?: string[];
+  question_1_answer?: string;
+  question_2_answer?: string;
+  question_3_answer?: string;
+  question_4_answer?: string;
+  question_5_answer?: string;
+  question_6_answer?: string;
+  question_7_answer?: string;
+  question_8_answer?: string;
+  question_9_answer?: string;
+  question_10_answer?: string;
 }
 
 export interface Chapter {

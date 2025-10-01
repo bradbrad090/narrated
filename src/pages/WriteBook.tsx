@@ -141,7 +141,7 @@ const WriteBook = () => {
 
   // Check for profile requirement on load
   useEffect(() => {
-    if (book && user && profileMode && !bookProfile?.full_name) {
+    if (book && user && profileMode && !bookProfile?.question_1_answer) {
       setShowProfileModal(true);
     }
   }, [book, user, profileMode, bookProfile]);
@@ -157,7 +157,7 @@ const WriteBook = () => {
   const handleProfileUpdate = (profile: any) => {
     setBookProfile(profile);
     // Always close the modal when profile is processed, regardless of specific fields
-    if (profileMode && profile) {
+    if (profileMode && profile && profile.question_1_answer) {
       // Profile is complete, remove profile parameter and show success
       setSearchParams(new URLSearchParams());
       setShowProfileModal(false);
@@ -165,10 +165,6 @@ const WriteBook = () => {
         title: "Profile Complete!",
         description: "You can now start writing your autobiography.",
       });
-    }
-    // Force update to ensure profile setup is hidden
-    if (profile && (profile.full_name || profile.processed)) {
-      setBookProfile(prev => ({ ...prev, ...profile, full_name: profile.full_name || 'Completed' }));
     }
   };
 
@@ -907,7 +903,7 @@ const WriteBook = () => {
         <div className="h-full pt-20 p-4 overflow-auto">
           
           {/* Profile Setup Section for Mobile */}
-          {user && book && !bookProfile?.full_name && (
+          {user && book && !bookProfile?.question_1_answer && (
             <div className="max-w-4xl mx-auto mb-6">
               <ProfileSetup
                 userId={user.id}
@@ -1050,7 +1046,7 @@ const WriteBook = () => {
                 <div className="space-y-4">
                 
                    {/* Profile Setup Section - Only show if profile is incomplete */}
-                   {user && book && !bookProfile?.full_name && (
+                   {user && book && !bookProfile?.question_1_answer && (
                      <ProfileSetup
                        userId={user.id}
                        bookId={book.id}
