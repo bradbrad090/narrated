@@ -284,21 +284,16 @@ const UserDashboardSection = ({ user }: UserDashboardSectionProps) => {
                           </Button>
                         </div>
                       ) : (
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <CardTitle className="text-lg">{book.title}</CardTitle>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              onClick={() => startEditing(book.id, book.title)}
-                              className="bg-yellow-400/20 hover:bg-yellow-400/30"
-                            >
-                              <Edit2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                          <Badge variant={book.tier as "free" | "basic" | "standard" | "premium"}>
-                            {book.tier.charAt(0).toUpperCase() + book.tier.slice(1)}
-                          </Badge>
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-lg">{book.title}</CardTitle>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => startEditing(book.id, book.title)}
+                            className="bg-yellow-400/20 hover:bg-yellow-400/30"
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       )}
                       <div className="grid grid-cols-3 gap-4 mt-3">
@@ -318,7 +313,9 @@ const UserDashboardSection = ({ user }: UserDashboardSectionProps) => {
                     </CardHeader>
                     <CardContent>
                       <div className="flex justify-between items-center mb-4">
-                        <div></div>
+                        <Badge variant={book.tier as "free" | "basic" | "standard" | "premium"}>
+                          {book.tier.charAt(0).toUpperCase() + book.tier.slice(1)} Plan
+                        </Badge>
                         <p className="text-sm text-muted-foreground">
                           Created {new Date(book.created_at).toLocaleDateString()}
                         </p>
