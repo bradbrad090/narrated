@@ -30,7 +30,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     price: '$0',
     description: 'Start your story with one free chapter',
     icon: <Check className="h-5 w-5" />,
-    features: ['One chapter', 'Professional editing', 'Emailed on completion'],
+    features: ['Professional editing', 'Emailed on completion'],
     buttonText: 'Current Plan'
   };
 
