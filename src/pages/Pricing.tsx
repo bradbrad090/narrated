@@ -38,8 +38,7 @@ const Pricing = () => {
         "Professional editing",
         "20 recipes",
         "100 photos",
-        "Printed book",
-        "Digital delivery (PDF)",
+        "Printed book + digital PDF",
       ],
       featured: true
     },
@@ -52,9 +51,8 @@ const Pricing = () => {
         "Professional editing",
         "20 recipes",
         "100 photos",
-        "Premium book",
+        "Premium book + digital PDF",
         "5 copies",
-        "Digital delivery (PDF)",
       ]
     }
   ];
