@@ -952,7 +952,7 @@ const WriteBook = () => {
                     <CardContent>
                       <PaymentButton
                         bookId={book.id}
-                        currentTier={book.tier as 'free' | 'paid' | 'premium'}
+                        currentTier={book.tier as 'free' | 'basic' | 'standard' | 'premium'}
                         purchaseStatus={book.purchase_status}
                         onPaymentStart={() => {
                           toast({
@@ -1082,10 +1082,10 @@ const WriteBook = () => {
                          </CardHeader>
                          <CollapsibleContent>
                            <CardContent className="pt-0">
-                             <PaymentButton
-                               bookId={book.id}
-                               currentTier={book.tier as 'free' | 'paid' | 'premium'}
-                               purchaseStatus={book.purchase_status}
+                              <PaymentButton
+                                bookId={book.id}
+                                currentTier={book.tier as 'free' | 'basic' | 'standard' | 'premium'}
+                                purchaseStatus={book.purchase_status}
                                 onPaymentStart={() => {
                                   toast({
                                     title: "Processing payment...",
