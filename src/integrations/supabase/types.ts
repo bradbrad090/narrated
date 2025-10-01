@@ -558,24 +558,18 @@ export type Database = {
       }
       users: {
         Row: {
-          age: number | null
-          completed_signup: boolean | null
           created_at: string
           email: string | null
           full_name: string | null
           id: string
         }
         Insert: {
-          age?: number | null
-          completed_signup?: boolean | null
           created_at?: string
           email?: string | null
           full_name?: string | null
           id?: string
         }
         Update: {
-          age?: number | null
-          completed_signup?: boolean | null
           created_at?: string
           email?: string | null
           full_name?: string | null
