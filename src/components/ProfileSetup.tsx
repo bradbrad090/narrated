@@ -11,12 +11,9 @@ import {
   User, 
   MessageCircle, 
   Mic, 
-  Save, 
   ChevronDown, 
   ChevronUp, 
-  Sparkles,
   CheckCircle,
-  Loader2
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
@@ -46,24 +43,74 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
   bookProfile,
   onProfileUpdate
 }) => {
-  const [isExpanded, setIsExpanded] = useState(!bookProfile?.full_name);
+  const [isExpanded, setIsExpanded] = useState(!bookProfile?.question_1_answer);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [responses, setResponses] = useState<{[key: number]: string}>({});
   const [currentResponse, setCurrentResponse] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
-  const [extractedProfile, setExtractedProfile] = useState<any>(null);
   const { toast } = useToast();
 
+  // Load existing answers from bookProfile on mount
   useEffect(() => {
     if (bookProfile) {
-      setExtractedProfile(bookProfile);
+      const loadedResponses: {[key: number]: string} = {};
+      for (let i = 0; i < PROFILE_QUESTIONS.length; i++) {
+        const answerKey = `question_${i + 1}_answer` as keyof typeof bookProfile;
+        if (bookProfile[answerKey]) {
+          loadedResponses[i] = bookProfile[answerKey];
+        }
+      }
+      if (Object.keys(loadedResponses).length > 0) {
+        setResponses(loadedResponses);
+      }
     }
   }, [bookProfile]);
 
-  const saveQuestionResponse = async (questionIndex: number, answer: string) => {
+  const saveQuestionToProfile = async (questionIndex: number, answer: string) => {
     try {
-      const { error } = await supabase
+      // Build update object for book_profiles
+      const columnName = `question_${questionIndex + 1}_answer`;
+      const updateData: any = {
+        user_id: userId,
+        book_id: bookId,
+        [columnName]: answer,
+        updated_at: new Date().toISOString()
+      };
+
+      // First try to update existing profile
+      const { data: existingProfile } = await supabase
+        .from('book_profiles')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('book_id', bookId)
+        .single();
+
+      if (existingProfile) {
+        // Update existing profile
+        const { error } = await supabase
+          .from('book_profiles')
+          .update(updateData)
+          .eq('user_id', userId)
+          .eq('book_id', bookId);
+
+        if (error) {
+          console.error('Error updating profile:', error);
+          throw error;
+        }
+      } else {
+        // Insert new profile
+        const { error } = await supabase
+          .from('book_profiles')
+          .insert(updateData);
+
+        if (error) {
+          console.error('Error inserting profile:', error);
+          throw error;
+        }
+      }
+
+      // Also save to audit trail table
+      await supabase
         .from('profile_question_responses')
         .upsert({
           user_id: userId,
@@ -74,15 +121,33 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
           updated_at: new Date().toISOString()
         });
 
-      if (error) {
-        console.error('Error saving question response:', error);
+      // Notify parent component
+      if (onProfileUpdate) {
+        const { data: updatedProfile } = await supabase
+          .from('book_profiles')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('book_id', bookId)
+          .single();
+        
+        if (updatedProfile) {
+          onProfileUpdate(updatedProfile);
+        }
       }
+
     } catch (error) {
-      console.error('Error saving question response:', error);
+      console.error('Error saving question:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save your answer. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
-  const progress = ((currentQuestion + Object.keys(responses).length) / PROFILE_QUESTIONS.length) * 100;
+  const answeredCount = Object.keys(responses).filter(key => responses[parseInt(key)]?.trim()).length;
+  const progress = (answeredCount / PROFILE_QUESTIONS.length) * 100;
+  const isComplete = answeredCount === PROFILE_QUESTIONS.length;
 
   const handleVoiceTranscription = (text: string) => {
     setCurrentResponse(prev => prev + (prev ? ' ' : '') + text);
@@ -98,26 +163,41 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
       }));
       
       // Save the response to the database
-      await saveQuestionResponse(currentQuestion, response);
+      await saveQuestionToProfile(currentQuestion, response);
+      
+      toast({
+        title: "Answer Saved",
+        description: `Question ${currentQuestion + 1} saved successfully.`,
+      });
     }
     
     if (currentQuestion < PROFILE_QUESTIONS.length - 1) {
       setCurrentQuestion(prev => prev + 1);
       setCurrentResponse('');
     } else {
-      processConversation();
+      // All questions complete
+      toast({
+        title: "Profile Complete!",
+        description: "All questions have been answered. You can now start creating your chapters.",
+      });
+      setIsExpanded(false);
     }
   };
 
   const handleSkipQuestion = async () => {
     // Save empty response if skipped
-    await saveQuestionResponse(currentQuestion, '');
+    await saveQuestionToProfile(currentQuestion, '');
     
     if (currentQuestion < PROFILE_QUESTIONS.length - 1) {
       setCurrentQuestion(prev => prev + 1);
       setCurrentResponse('');
     } else {
-      processConversation();
+      // All questions processed
+      toast({
+        title: "Profile Setup Complete",
+        description: "You can update your answers anytime by expanding this section.",
+      });
+      setIsExpanded(false);
     }
   };
 
@@ -128,64 +208,6 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
       setCurrentResponse(previousResponse);
     }
   };
-
-  const processConversation = async () => {
-    setIsProcessing(true);
-    
-    try {
-      // Convert responses to conversation text for processing
-      const conversationText = Object.entries(responses)
-        .map(([index, response]) => `Q: ${PROFILE_QUESTIONS[parseInt(index)]}\nA: ${response}`)
-        .join('\n\n');
-
-      // Also prepare structured Q&A data for the new storage system
-      const structuredQA = Object.entries(responses).map(([index, response]) => ({
-        question: PROFILE_QUESTIONS[parseInt(index)],
-        answer: response
-      }));
-
-      const { data, error } = await supabase.functions.invoke('profile-extractor', {
-        body: {
-          conversationText: structuredQA, // Send structured data for new storage
-          conversationTextForProcessing: conversationText, // Keep original text for AI processing
-          userId,
-          bookId
-        }
-      });
-
-      if (error) {
-        console.error('Error processing profile:', error);
-        toast({
-          title: "Error",
-          description: "Failed to process your profile. Please try again.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (data && data.profile) {
-        setExtractedProfile(data.profile);
-        toast({
-          title: "Profile Processed",
-          description: "Your profile has been successfully extracted and saved.",
-        });
-        
-        // Call the callback to notify parent component
-        onProfileUpdate?.(data.profile);
-      }
-    } catch (error) {
-      console.error('Error processing profile:', error);
-      toast({
-        title: "Error",
-        description: "Failed to process your profile. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const completionPercentage = extractedProfile ? 100 : Math.min((Object.keys(responses).length / PROFILE_QUESTIONS.length) * 100, 95);
 
   return (
     <Card className="mb-6">
@@ -198,11 +220,11 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                 <div className="text-left">
                   <CardTitle className="text-lg">Personal Profile Setup</CardTitle>
                   <div className="flex items-center gap-2 mt-1">
-                    <Progress value={completionPercentage} className="w-32 h-2" />
+                    <Progress value={progress} className="w-32 h-2" />
                     <span className="text-sm text-muted-foreground">
-                      {Math.round(completionPercentage)}% complete
+                      {Math.round(progress)}% complete
                     </span>
-                    {extractedProfile?.full_name && (
+                    {isComplete && (
                       <CheckCircle className="h-4 w-4 text-green-500" />
                     )}
                   </div>
@@ -219,208 +241,110 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
 
         <CollapsibleContent>
           <CardContent>
-            {!extractedProfile?.full_name ? (
-              <div className="space-y-6">
-                <div className="bg-muted/50 p-4 rounded-lg">
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Let's gather some basic information about you to personalize your autobiography. 
-                    You can type your answers or use voice recording. Your progress is saved automatically.
-                  </p>
-                </div>
-
-                {/* Current Question */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <Badge variant="outline">
-                      Question {currentQuestion + 1} of {PROFILE_QUESTIONS.length}
-                    </Badge>
-                    <div className="flex items-center gap-2">
-                      <MessageCircle className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">
-                        {Object.keys(responses).length} answered
-                      </span>
-                    </div>
-                  </div>
-
-                  <Card className="border-l-4 border-l-primary">
-                    <CardContent className="pt-4">
-                      <h3 className="font-medium mb-3">
-                        {PROFILE_QUESTIONS[currentQuestion]}
-                      </h3>
-                      
-                      <div className="space-y-3">
-                        <Textarea
-                          value={currentResponse}
-                          onChange={(e) => setCurrentResponse(e.target.value)}
-                          placeholder="Share your story here... You can speak naturally as if talking to a friend."
-                          className="min-h-[120px]"
-                          rows={4}
-                        />
-                        
-                        <div className="flex items-center gap-2">
-                          <Button
-                            onClick={() => setIsVoiceMode(!isVoiceMode)}
-                            variant="outline"
-                            size="sm"
-                          >
-                            <Mic className="h-4 w-4 mr-2" />
-                            {isVoiceMode ? 'Stop Recording' : 'Voice Input'}
-                          </Button>
-                          
-                          {isVoiceMode && (
-                            <VoiceRecorder
-                              onTranscription={handleVoiceTranscription}
-                              disabled={false}
-                            />
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Navigation Buttons */}
-                  <div className="flex justify-between">
-                    <Button
-                      onClick={handlePreviousQuestion}
-                      disabled={currentQuestion === 0}
-                      variant="outline"
-                    >
-                      Previous
-                    </Button>
-                    
-                    <div className="flex gap-2">
-                      {currentQuestion !== PROFILE_QUESTIONS.length - 1 && (
-                        <Button
-                          onClick={handleSkipQuestion}
-                          variant="outline"
-                        >
-                          Skip
-                        </Button>
-                      )}
-                      
-                      {currentQuestion === PROFILE_QUESTIONS.length - 1 ? (
-                        <Button
-                          onClick={async () => {
-                            if (currentResponse.trim()) {
-                              await handleNextQuestion();
-                            } else {
-                              await handleSkipQuestion();
-                            }
-                          }}
-                          disabled={isProcessing}
-                          className="bg-green-600 hover:bg-green-700"
-                        >
-                          {isProcessing ? (
-                            <>
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              Processing...
-                            </>
-                          ) : (
-                            <>
-                              <Sparkles className="h-4 w-4 mr-2" />
-                              Finish & Process
-                            </>
-                          )}
-                        </Button>
-                      ) : (
-                        <Button
-                          onClick={handleNextQuestion}
-                          disabled={!currentResponse.trim()}
-                        >
-                          Next
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
+            <div className="space-y-6">
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <p className="text-sm text-muted-foreground mb-2">
+                  Let's gather some basic information about you to personalize your autobiography. 
+                  You can type your answers or use voice recording. Your progress is saved automatically.
+                </p>
               </div>
-            ) : (
-              /* Profile Summary */
+
+              {/* Current Question */}
               <div className="space-y-4">
-                <div className="flex items-center gap-2 text-green-600">
-                  <CheckCircle className="h-5 w-5" />
-                  <h3 className="font-medium">Profile Complete!</h3>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
-                  {extractedProfile.full_name && (
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Name:</span>
-                      <p className="text-sm">{extractedProfile.full_name}</p>
-                    </div>
-                  )}
-                  {extractedProfile.nicknames && extractedProfile.nicknames.length > 0 && (
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Nicknames:</span>
-                      <p className="text-sm">{extractedProfile.nicknames.join(', ')}</p>
-                    </div>
-                  )}
-                  {extractedProfile.birthplace && (
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Birthplace:</span>
-                      <p className="text-sm">{extractedProfile.birthplace}</p>
-                    </div>
-                  )}
-                  {extractedProfile.occupation && (
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Occupation:</span>
-                      <p className="text-sm">{extractedProfile.occupation}</p>
-                    </div>
-                  )}
-                  {extractedProfile.first_job && (
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">First Job:</span>
-                      <p className="text-sm">{extractedProfile.first_job}</p>
-                    </div>
-                  )}
-                  {extractedProfile.current_location && (
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Location:</span>
-                      <p className="text-sm">{extractedProfile.current_location}</p>
-                    </div>
-                  )}
-                  {extractedProfile.siblings_count !== null && (
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Siblings:</span>
-                      <p className="text-sm">{extractedProfile.siblings_count}</p>
-                    </div>
-                  )}
-                  {extractedProfile.marital_status && (
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Marital Status:</span>
-                      <p className="text-sm">{extractedProfile.marital_status}</p>
-                    </div>
-                  )}
-                </div>
-
-                {extractedProfile.life_themes && extractedProfile.life_themes.length > 0 && (
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground mb-2 block">Life Themes:</span>
-                    <div className="flex flex-wrap gap-2">
-                      {extractedProfile.life_themes.map((theme: string, index: number) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          {theme}
-                        </Badge>
-                      ))}
-                    </div>
+                <div className="flex items-center justify-between">
+                  <Badge variant="outline">
+                    Question {currentQuestion + 1} of {PROFILE_QUESTIONS.length}
+                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <MessageCircle className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">
+                      {answeredCount} answered
+                    </span>
                   </div>
-                )}
+                </div>
 
-                <Button
-                  onClick={() => {
-                    setExtractedProfile(null);
-                    setResponses({});
-                    setCurrentQuestion(0);
-                    setCurrentResponse('');
-                  }}
-                  variant="outline"
-                  size="sm"
-                >
-                  Update Profile
-                </Button>
+                <Card className="border-l-4 border-l-primary">
+                  <CardContent className="pt-4">
+                    <h3 className="font-medium mb-3">
+                      {PROFILE_QUESTIONS[currentQuestion]}
+                    </h3>
+                    
+                    <div className="space-y-3">
+                      <Textarea
+                        value={currentResponse}
+                        onChange={(e) => setCurrentResponse(e.target.value)}
+                        placeholder="Share your story here... You can speak naturally as if talking to a friend."
+                        className="min-h-[120px]"
+                        rows={4}
+                      />
+                      
+                      <div className="flex items-center gap-2">
+                        <Button
+                          onClick={() => setIsVoiceMode(!isVoiceMode)}
+                          variant="outline"
+                          size="sm"
+                        >
+                          <Mic className="h-4 w-4 mr-2" />
+                          {isVoiceMode ? 'Stop Recording' : 'Voice Input'}
+                        </Button>
+                        
+                        {isVoiceMode && (
+                          <VoiceRecorder
+                            onTranscription={handleVoiceTranscription}
+                            disabled={false}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Navigation Buttons */}
+                <div className="flex justify-between">
+                  <Button
+                    onClick={handlePreviousQuestion}
+                    disabled={currentQuestion === 0}
+                    variant="outline"
+                  >
+                    Previous
+                  </Button>
+                  
+                  <div className="flex gap-2">
+                    {currentQuestion !== PROFILE_QUESTIONS.length - 1 && (
+                      <Button
+                        onClick={handleSkipQuestion}
+                        variant="outline"
+                      >
+                        Skip
+                      </Button>
+                    )}
+                    
+                    {currentQuestion === PROFILE_QUESTIONS.length - 1 ? (
+                      <Button
+                        onClick={async () => {
+                          if (currentResponse.trim()) {
+                            await handleNextQuestion();
+                          } else {
+                            await handleSkipQuestion();
+                          }
+                        }}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Complete Profile
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={handleNextQuestion}
+                        disabled={!currentResponse.trim()}
+                      >
+                        Next
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </div>
-            )}
+            </div>
           </CardContent>
         </CollapsibleContent>
       </Collapsible>

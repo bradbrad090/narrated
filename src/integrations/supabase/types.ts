@@ -123,6 +123,16 @@ export type Database = {
           occupation: string | null
           parents_occupations: string | null
           personality_traits: string[] | null
+          question_1_answer: string | null
+          question_10_answer: string | null
+          question_2_answer: string | null
+          question_3_answer: string | null
+          question_4_answer: string | null
+          question_5_answer: string | null
+          question_6_answer: string | null
+          question_7_answer: string | null
+          question_8_answer: string | null
+          question_9_answer: string | null
           relationships_family: string | null
           siblings_count: number | null
           updated_at: string
@@ -156,6 +166,16 @@ export type Database = {
           occupation?: string | null
           parents_occupations?: string | null
           personality_traits?: string[] | null
+          question_1_answer?: string | null
+          question_10_answer?: string | null
+          question_2_answer?: string | null
+          question_3_answer?: string | null
+          question_4_answer?: string | null
+          question_5_answer?: string | null
+          question_6_answer?: string | null
+          question_7_answer?: string | null
+          question_8_answer?: string | null
+          question_9_answer?: string | null
           relationships_family?: string | null
           siblings_count?: number | null
           updated_at?: string
@@ -189,6 +209,16 @@ export type Database = {
           occupation?: string | null
           parents_occupations?: string | null
           personality_traits?: string[] | null
+          question_1_answer?: string | null
+          question_10_answer?: string | null
+          question_2_answer?: string | null
+          question_3_answer?: string | null
+          question_4_answer?: string | null
+          question_5_answer?: string | null
+          question_6_answer?: string | null
+          question_7_answer?: string | null
+          question_8_answer?: string | null
+          question_9_answer?: string | null
           relationships_family?: string | null
           siblings_count?: number | null
           updated_at?: string
