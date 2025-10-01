@@ -55,7 +55,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
       price: '$199',
       description: 'Printed book + digital format',
       icon: <Crown className="h-5 w-5 text-slate-700" />,
-      features: ['Unlimited chapters', '20 recipes', '100 photos', 'Printed + PDF'],
+      features: ['Unlimited chapters', '20 recipes', '100 photos', 'Digital Copy and Printed Book'],
       buttonText: 'Upgrade',
       featured: true,
       theme: {
