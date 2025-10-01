@@ -164,47 +164,21 @@ const Dashboard = () => {
     if (!user) return;
 
     try {
-      // Delete chapters (which will cascade delete related chat_histories)
-      const { error: chaptersError } = await supabase
-        .from('chapters')
-        .delete()
-        .eq('book_id', bookId)
-        .eq('user_id', user.id);
-
-      if (chaptersError) throw chaptersError;
-
-      // Delete book_profiles
-      const { error: profileError } = await supabase
-        .from('book_profiles')
-        .delete()
-        .eq('book_id', bookId)
-        .eq('user_id', user.id);
-
-      if (profileError) throw profileError;
-
-      // Delete any remaining chat_histories not tied to chapters
-      await supabase
-        .from('chat_histories')
-        .delete()
-        .eq('user_id', user.id)
-        .is('chapter_id', null);
-
-      // Finally delete the book
-      const { error: bookError } = await supabase
-        .from('books')
-        .delete()
-        .eq('id', bookId)
-        .eq('user_id', user.id);
-
-      if (bookError) throw bookError;
-
-      toast({
-        title: "Book deleted",
-        description: "Your book has been deleted.",
+      const { data, error } = await supabase.rpc('delete_book_and_related_data', {
+        target_book_id: bookId
       });
 
-      // Refresh books list
-      fetchBooks(user.id);
+      if (error) throw error;
+
+      if (data && data.length > 0 && data[0].success) {
+        toast({
+          title: "Book deleted",
+          description: "Your book and all related data have been deleted.",
+        });
+        fetchBooks(user.id);
+      } else {
+        throw new Error(data?.[0]?.message || "Failed to delete book");
+      }
     } catch (error: any) {
       toast({
         title: "Error deleting book",

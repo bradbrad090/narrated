@@ -586,6 +586,14 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      delete_book_and_related_data: {
+        Args: { target_book_id: string }
+        Returns: {
+          message: string
+          records_deleted: Json
+          success: boolean
+        }[]
+      }
       delete_my_account: {
         Args: Record<PropertyKey, never>
         Returns: {
