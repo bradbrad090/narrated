@@ -152,11 +152,11 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
         </CardHeader>
         
         <CardContent className="pt-0">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <ul className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <ul className="space-y-1.5 text-sm">
               {freeTier.features.map((feature, index) => (
-                <li key={index} className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                <li key={index} className="flex items-start gap-2">
+                  <Check className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
                   <span>{feature}</span>
                 </li>
               ))}
@@ -165,7 +165,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
             <Button
               onClick={() => handlePayment(freeTier.id)}
               disabled={true}
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto sm:min-w-[140px]"
               variant="outline"
             >
               {freeTier.buttonText}
