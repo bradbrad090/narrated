@@ -51,7 +51,7 @@ const Header = () => {
   }, []);
 
   return (
-    <header className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
+    <header className="fixed top-0 w-full z-50 bg-background/95 backdrop-blur-md border-b-4 border-foreground/45 shadow-md ring-1 ring-foreground/10">
       <div className="container mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
