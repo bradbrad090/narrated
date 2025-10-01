@@ -75,6 +75,16 @@ serve(async (req) => {
     // Get tier from Stripe session metadata
     const tier = session.metadata?.tier || 'free';
     
+    // Define pricing to store in orders
+    const pricing = {
+      basic: 49,
+      standard: 199,
+      premium: 399,
+      free: 0,
+    };
+    
+    const totalPrice = pricing[tier as keyof typeof pricing] || 0;
+    
     // Update book status and tier
     const { error: bookUpdateError } = await supabaseService
       .from("books")
@@ -91,14 +101,35 @@ serve(async (req) => {
       throw new Error("Failed to update book status");
     }
 
-    // Update order status
-    await supabaseService
+    // Check if order exists
+    const { data: existingOrder } = await supabaseService
       .from("orders")
-      .update({
-        status: purchaseStatus,
-      })
+      .select("id")
       .eq("book_id", bookId)
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (existingOrder) {
+      // Update existing order
+      await supabaseService
+        .from("orders")
+        .update({
+          status: purchaseStatus,
+          total_price: totalPrice,
+        })
+        .eq("id", existingOrder.id);
+    } else {
+      // Create new order
+      await supabaseService
+        .from("orders")
+        .insert({
+          user_id: user.id,
+          book_id: bookId,
+          status: purchaseStatus,
+          total_price: totalPrice,
+          quantity: 1,
+        });
+    }
 
     console.log("Database updated with payment status:", purchaseStatus);
 
