@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Check, Crown, Star } from 'lucide-react';
+import { Loader2, Check, Crown, Medal, Gem } from 'lucide-react';
 
 interface PaymentButtonProps {
   bookId: string;
@@ -40,28 +40,43 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
       name: 'Basic',
       price: '$49',
       description: 'Digital format with unlimited chapters',
-      icon: <Star className="h-5 w-5" />,
+      icon: <Medal className="h-5 w-5 text-amber-600" />,
       features: ['Unlimited chapters', '20 recipes', '100 photos', 'Digital PDF'],
-      buttonText: 'Upgrade to Basic'
+      buttonText: 'Upgrade to Basic',
+      theme: {
+        border: 'border-amber-200/60',
+        background: 'bg-gradient-to-br from-amber-50/30 to-orange-50/20',
+        iconColor: 'text-amber-600'
+      }
     },
     {
       id: 'standard' as const,
       name: 'Standard',
       price: '$199',
       description: 'Printed book + digital format',
-      icon: <Crown className="h-5 w-5" />,
+      icon: <Crown className="h-5 w-5 text-slate-600" />,
       features: ['Unlimited chapters', '20 recipes', '100 photos', 'Printed + PDF'],
       buttonText: 'Upgrade to Standard',
-      featured: true
+      featured: true,
+      theme: {
+        border: 'border-slate-300/60',
+        background: 'bg-gradient-to-br from-slate-50/30 to-gray-50/20',
+        iconColor: 'text-slate-600'
+      }
     },
     {
       id: 'premium' as const,
       name: 'Premium',
       price: '$399',
       description: 'Premium book with multiple copies',
-      icon: <Crown className="h-5 w-5" />,
+      icon: <Gem className="h-5 w-5 text-yellow-600" />,
       features: ['Unlimited chapters', '20 recipes', '100 photos', 'Premium + PDF', '5 copies'],
-      buttonText: 'Upgrade to Premium'
+      buttonText: 'Upgrade to Premium',
+      theme: {
+        border: 'border-yellow-300/60',
+        background: 'bg-gradient-to-br from-yellow-50/30 to-amber-50/20',
+        iconColor: 'text-yellow-600'
+      }
     }
   ];
 
@@ -165,10 +180,10 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
         {paidTiers.map((tier) => (
           <Card 
             key={tier.id} 
-            className={`relative flex flex-col ${
+            className={`relative flex flex-col ${tier.theme.border} ${tier.theme.background} ${
               isPurchased(tier.id) ? 'ring-2 ring-primary' : ''
             } ${
-              tier.featured ? 'border-primary shadow-elegant' : 'border-border/50'
+              tier.featured ? 'shadow-elegant' : ''
             }`}
           >
             {isPurchased(tier.id) && (
