@@ -146,6 +146,13 @@ const WriteBook = () => {
     }
   }, [book, user, profileMode, bookProfile]);
 
+  // Set book tier collapsed state based on tier (expanded for free, collapsed for paid)
+  useEffect(() => {
+    if (book) {
+      setIsBookTierCollapsed(book.tier !== 'free');
+    }
+  }, [book]);
+
   // Handle profile completion
   const handleProfileUpdate = (profile: any) => {
     setBookProfile(profile);
