@@ -66,7 +66,7 @@ const PaymentFlow = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="text-center">
-                <div className="text-3xl font-bold">$49.99</div>
+                <div className="text-3xl font-bold">$9</div>
                 <div className="text-sm text-muted-foreground">One-time payment per book</div>
               </div>
               
