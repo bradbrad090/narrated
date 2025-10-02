@@ -19,7 +19,9 @@ import {
   Circle,
   GripVertical,
   Check,
-  X
+  X,
+  Camera,
+  Utensils
 } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -272,10 +274,27 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
           )}
         </div>
 
-        {/* Content Preview */}
-        <p className="text-xs text-muted-foreground mb-3 line-clamp-2 leading-relaxed">
-          {getContentPreview()}
-        </p>
+        {/* Action Buttons */}
+        <div className="flex gap-2 mb-3">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1 h-8 text-xs"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Utensils className="h-3 w-3 mr-1" />
+            Add recipe
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1 h-8 text-xs"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Camera className="h-3 w-3 mr-1" />
+            Add photo
+          </Button>
+        </div>
 
         {/* Metadata */}
         <div className="flex items-center justify-between text-xs text-muted-foreground">
