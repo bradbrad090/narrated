@@ -293,9 +293,8 @@ const Dashboard = () => {
         <div className="mb-8 flex justify-center">
           <Card className="border-dashed border-2 hover:border-primary/50 transition-colors max-w-md w-full">
             <CardHeader className="text-center">
-              <CardTitle className="flex items-center justify-center space-x-2">
-                <Plus className="h-5 w-5" />
-                <span>Create New Book</span>
+              <CardTitle className="text-center">
+                Create New Book
               </CardTitle>
               <CardDescription>
                 Begin your autobiography journey with a new book
