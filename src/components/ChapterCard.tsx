@@ -277,13 +277,13 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
         {/* Action Buttons */}
         <div className="flex justify-end mb-3">
           <Button
-            variant="outline"
+            variant="default"
             size="sm"
             className="h-7 text-xs px-2"
             onClick={(e) => e.stopPropagation()}
           >
             <Camera className="h-3 w-3 mr-1" />
-            Add photo
+            Add Photos
           </Button>
         </div>
 
