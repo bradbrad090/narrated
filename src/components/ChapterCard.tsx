@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PhotoUploadModal } from './PhotoUploadModal';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -62,6 +64,9 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editingTitle, setEditingTitle] = useState(chapter.title);
+  const [photoModalOpen, setPhotoModalOpen] = useState(false);
+  const [photoCount, setPhotoCount] = useState(0);
+  const [bookTier, setBookTier] = useState<string>('free');
   
   const {
     attributes,
@@ -71,6 +76,28 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
     transition,
     isDragging,
   } = useSortable({ id: chapter.id });
+
+  // Fetch photo count and book tier
+  useEffect(() => {
+    const fetchPhotoData = async () => {
+      const { count } = await supabase
+        .from('chapter_photos')
+        .select('*', { count: 'exact', head: true })
+        .eq('chapter_id', chapter.id);
+      
+      setPhotoCount(count || 0);
+
+      const { data: bookData } = await supabase
+        .from('books')
+        .select('tier')
+        .eq('id', chapter.book_id)
+        .maybeSingle();
+      
+      if (bookData) setBookTier(bookData.tier);
+    };
+
+    fetchPhotoData();
+  }, [chapter.id, chapter.book_id, photoModalOpen]);
 
   const getWordCount = () => {
     if (!chapter.content?.trim()) return 0;
@@ -280,12 +307,25 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
             variant="default"
             size="sm"
             className="h-7 text-xs px-2"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              setPhotoModalOpen(true);
+            }}
           >
             <Camera className="h-3 w-3 mr-1" />
-            Add Photos
+            Add Photos {photoCount > 0 && `(${photoCount})`}
           </Button>
         </div>
+
+        <PhotoUploadModal
+          open={photoModalOpen}
+          onOpenChange={setPhotoModalOpen}
+          chapterId={chapter.id}
+          bookId={chapter.book_id}
+          userId={chapter.user_id}
+          bookTier={bookTier}
+          currentPhotoCount={photoCount}
+        />
 
         {/* Metadata */}
         <div className="flex items-center justify-between text-xs text-muted-foreground">

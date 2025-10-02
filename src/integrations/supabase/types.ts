@@ -166,7 +166,6 @@ export type Database = {
       }
       books: {
         Row: {
-          chapters: string | null
           created_at: string
           id: string
           purchase_status: string | null
@@ -178,7 +177,6 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          chapters?: string | null
           created_at?: string
           id?: string
           purchase_status?: string | null
@@ -190,7 +188,6 @@ export type Database = {
           user_id: string
         }
         Update: {
-          chapters?: string | null
           created_at?: string
           id?: string
           purchase_status?: string | null
@@ -251,6 +248,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      chapter_photos: {
+        Row: {
+          book_id: string
+          chapter_id: string
+          created_at: string
+          file_name: string
+          file_size: number
+          id: string
+          storage_path: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          book_id: string
+          chapter_id: string
+          created_at?: string
+          file_name: string
+          file_size: number
+          id?: string
+          storage_path: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          book_id?: string
+          chapter_id?: string
+          created_at?: string
+          file_name?: string
+          file_size?: number
+          id?: string
+          storage_path?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       chapters: {
         Row: {
@@ -320,7 +353,6 @@ export type Database = {
           conversation_type: string | null
           created_at: string
           id: string
-          is_self_conversation: boolean | null
           messages: Json | null
           session_id: string | null
           updated_at: string | null
@@ -333,7 +365,6 @@ export type Database = {
           conversation_type?: string | null
           created_at?: string
           id?: string
-          is_self_conversation?: boolean | null
           messages?: Json | null
           session_id?: string | null
           updated_at?: string | null
@@ -346,7 +377,6 @@ export type Database = {
           conversation_type?: string | null
           created_at?: string
           id?: string
-          is_self_conversation?: boolean | null
           messages?: Json | null
           session_id?: string | null
           updated_at?: string | null
