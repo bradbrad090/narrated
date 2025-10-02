@@ -928,7 +928,7 @@ const WriteBook = () => {
                           )}
                           {isBookTierCollapsed && (
                             <CardDescription>
-                              {book.tier === 'free' ? 'Free (1 chapter)' : book.tier === 'paid' ? 'Paid (Unlimited)' : 'Premium (Unlimited)'}
+                              {book.tier === 'free' ? 'Free' : book.tier === 'paid' ? 'Paid (Unlimited)' : 'Premium (Unlimited)'}
                             </CardDescription>
                           )}
                         </div>
@@ -1061,7 +1061,7 @@ const WriteBook = () => {
                                 <div className="text-left">
                                   <CardTitle className="text-sm">Book Tier</CardTitle>
                                   <CardDescription className="text-xs">
-                                    {book.tier === 'free' ? 'Free (1 chapter)' : book.tier === 'paid' ? 'Paid (Unlimited)' : 'Premium (Unlimited)'}
+                                    {book.tier === 'free' ? 'Free' : book.tier === 'paid' ? 'Paid (Unlimited)' : 'Premium (Unlimited)'}
                                   </CardDescription>
                                 </div>
                                {isBookTierCollapsed ? (
