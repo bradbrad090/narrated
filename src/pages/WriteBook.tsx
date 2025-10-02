@@ -1195,7 +1195,7 @@ const WriteBook = () => {
                              <div>
                                <CardTitle>Chapter Summary</CardTitle>
                                <CardDescription>
-                                 A brief summary of this chapter will appear here to help you understand the key themes and content.
+                                 Below is a summary of the key points discussed so far
                                </CardDescription>
                              </div>
                               {/* Generate Summary Button */}
