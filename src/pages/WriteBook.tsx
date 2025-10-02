@@ -966,7 +966,7 @@ const WriteBook = () => {
                   {user && book && (
                     <Card>
                       <CardHeader>
-                        <CardTitle>Conversation Assistant</CardTitle>
+                        <CardTitle>Begin Telling Your Story</CardTitle>
                         <CardDescription>
                           Have a natural conversation to explore your memories and generate content for your autobiography.
                         </CardDescription>
@@ -1164,7 +1164,7 @@ const WriteBook = () => {
                     {user && book && (
                       <Card className="mt-6">
                         <CardHeader>
-                          <CardTitle>Conversation Assistant</CardTitle>
+                          <CardTitle>Begin Telling Your Story</CardTitle>
                           <CardDescription>
                             Have a natural conversation to explore your memories and generate content for your autobiography.
                           </CardDescription>
@@ -1266,7 +1266,7 @@ const WriteBook = () => {
                         </CardHeader>
                         <CardContent>
                           <Textarea
-                            placeholder="Your chapter content will appear here. You can edit it directly or use the conversation assistant above to generate new content..."
+                            placeholder="Your chapter content will appear here. You can edit it directly or begin telling your story above to generate new content..."
                             value={currentChapter.content}
                             onChange={(e) => handleChapterContentChange(e.target.value)}
                             className="min-h-[500px] text-base leading-relaxed"
