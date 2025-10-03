@@ -6,7 +6,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
 import WriteBook from "./pages/WriteBook";
 import WhatWeDo from "./pages/WhatWeDo";
 import Pricing from "./pages/Pricing";
