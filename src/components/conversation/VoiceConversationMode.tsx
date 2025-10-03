@@ -47,7 +47,7 @@ export const VoiceConversationMode: React.FC<VoiceConversationModeProps> = ({
     <Card className={`w-full min-h-[320px] ${className}`}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          Spoken Conversation
+          Begin a Spoken Conversation
           {isAISpeaking && (
             <div className="flex items-center gap-1 text-sm text-green-600">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -56,7 +56,7 @@ export const VoiceConversationMode: React.FC<VoiceConversationModeProps> = ({
           )}
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Have a real-time voice conversation with the AI assistant
+          Have a real-time voice conversation to build your story. If you feel like you would like to change topics, simply ask for a different question or topic!
         </p>
       </CardHeader>
       <CardContent>
