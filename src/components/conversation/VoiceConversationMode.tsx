@@ -47,7 +47,7 @@ export const VoiceConversationMode: React.FC<VoiceConversationModeProps> = ({
     <Card className={`w-full min-h-[320px] ${className}`}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          Begin a Spoken Conversation
+          Have a Spoken Conversation
           {isAISpeaking && (
             <div className="flex items-center gap-1 text-sm text-green-600">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
