@@ -111,10 +111,10 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
     <Card className={`w-full min-h-[320px] ${className}`}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          Text Conversation
+          Begin a Text Conversation
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Have a text conversation with AI to develop your story
+          Have a text conversation to build your story. If you feel like you would like to change topics, simply ask for a different question or topic!
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
