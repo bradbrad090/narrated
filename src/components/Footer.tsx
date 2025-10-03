@@ -43,7 +43,9 @@ const Footer = () => {
             <h4 className="font-bold text-base mb-4 text-primary-foreground">Contact</h4>
             <div className="flex items-center gap-2 justify-center md:justify-start text-sm text-primary-foreground/80">
               <Mail className="w-4 h-4 flex-shrink-0" />
-              <span>hello@narrated.com.au</span>
+              <a href="/contact" className="hover:text-accent transition-colors">
+                hello@narrated.com.au
+              </a>
             </div>
           </div>
         </div>
