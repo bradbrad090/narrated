@@ -1,4 +1,6 @@
 import { Helmet } from "react-helmet-async";
+import { useState } from "react";
+import { z } from "zod";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,8 +8,83 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Mail } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+
+const contactFormSchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(100, "Name must be less than 100 characters"),
+  email: z.string().trim().email("Invalid email address").max(255, "Email must be less than 255 characters"),
+  subject: z.string().trim().min(1, "Subject is required").max(200, "Subject must be less than 200 characters"),
+  message: z.string().trim().min(1, "Message is required").max(2000, "Message must be less than 2000 characters")
+});
 
 const Contact = () => {
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: ""
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+    
+    // Validate form data
+    const validation = contactFormSchema.safeParse(formData);
+    if (!validation.success) {
+      const fieldErrors: Record<string, string> = {};
+      validation.error.errors.forEach((error) => {
+        if (error.path[0]) {
+          fieldErrors[error.path[0].toString()] = error.message;
+        }
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase.functions.invoke('send-chapter-email', {
+        body: {
+          email_type: 'contact_form',
+          contact_name: formData.name,
+          contact_email: formData.email,
+          contact_subject: formData.subject,
+          contact_message: formData.message
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Message sent!",
+        description: "Thank you for contacting us. We'll get back to you soon.",
+      });
+
+      // Clear form
+      setFormData({
+        name: "",
+        email: "",
+        subject: "",
+        message: ""
+      });
+    } catch (error) {
+      console.error('Error sending contact form:', error);
+      toast({
+        title: "Failed to send message",
+        description: "Please try again or email us directly at hello@narrated.com.au",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <>
       <Helmet>
@@ -31,20 +108,50 @@ const Contact = () => {
             <CardHeader>
               <CardTitle className="text-2xl text-center">Send us a message</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Input placeholder="Your Name" />
-              </div>
-              <div>
-                <Input type="email" placeholder="Your Email" />
-              </div>
-              <div>
-                <Input placeholder="Subject" />
-              </div>
-              <div>
-                <Textarea placeholder="Your Message" rows={6} />
-              </div>
-              <Button className="w-full">Send Message</Button>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <Input 
+                    placeholder="Your Name" 
+                    value={formData.name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    disabled={isSubmitting}
+                  />
+                  {errors.name && <p className="text-sm text-destructive mt-1">{errors.name}</p>}
+                </div>
+                <div>
+                  <Input 
+                    type="email" 
+                    placeholder="Your Email" 
+                    value={formData.email}
+                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                    disabled={isSubmitting}
+                  />
+                  {errors.email && <p className="text-sm text-destructive mt-1">{errors.email}</p>}
+                </div>
+                <div>
+                  <Input 
+                    placeholder="Subject" 
+                    value={formData.subject}
+                    onChange={(e) => setFormData(prev => ({ ...prev, subject: e.target.value }))}
+                    disabled={isSubmitting}
+                  />
+                  {errors.subject && <p className="text-sm text-destructive mt-1">{errors.subject}</p>}
+                </div>
+                <div>
+                  <Textarea 
+                    placeholder="Your Message" 
+                    rows={6} 
+                    value={formData.message}
+                    onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
+                    disabled={isSubmitting}
+                  />
+                  {errors.message && <p className="text-sm text-destructive mt-1">{errors.message}</p>}
+                </div>
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                  {isSubmitting ? "Sending..." : "Send Message"}
+                </Button>
+              </form>
             </CardContent>
           </Card>
 

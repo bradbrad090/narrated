@@ -34,17 +34,121 @@ serve(async (req) => {
 
     // Parse request body
     const { 
+      email_type,
       user_email, 
       user_name, 
       chapter_title, 
       chapter_number, 
       chapter_content,
-      is_first_submission 
+      is_first_submission,
+      contact_name,
+      contact_email,
+      contact_subject,
+      contact_message
     } = await req.json();
 
+    if (!email_type) {
+      return new Response(
+        JSON.stringify({ error: 'email_type is required' }),
+        { 
+          status: 400, 
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+        }
+      );
+    }
+
+    // Handle contact form emails
+    if (email_type === 'contact_form') {
+      if (!contact_name || !contact_email || !contact_subject || !contact_message) {
+        return new Response(
+          JSON.stringify({ error: 'All contact form fields are required' }),
+          { 
+            status: 400, 
+            headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+          }
+        );
+      }
+
+      console.log('Sending contact form email from:', contact_email);
+
+      // Send contact form email to Narrated
+      const { data, error } = await resend.emails.send({
+        from: 'Narrated Contact Form <noreply@narrated.com.au>',
+        to: ['hello@narrated.com.au'],
+        replyTo: contact_email,
+        subject: `Contact Form: ${contact_subject}`,
+        html: `
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Contact Form Submission - Narrated</title>
+          </head>
+          <body style="margin: 0; padding: 0; background: linear-gradient(180deg, hsl(35, 25%, 98%), hsl(35, 20%, 96%)); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: white; box-shadow: 0 8px 32px hsla(220, 25%, 15%, 0.08);">
+              <div style="background: linear-gradient(135deg, hsl(220, 50%, 25%), hsl(220, 60%, 35%)); padding: 40px 30px; text-align: center;">
+                <h1 style="color: hsl(35, 25%, 98%); margin: 0; font-size: 32px; font-weight: 600; letter-spacing: -0.5px;">Narrated</h1>
+                <p style="color: hsl(42, 85%, 65%); margin: 8px 0 0; font-size: 16px; opacity: 0.9;">New Contact Form Submission</p>
+              </div>
+              
+              <div style="padding: 40px 30px;">
+                <h2 style="color: hsl(220, 25%, 15%); font-size: 24px; font-weight: 600; margin: 0 0 20px; line-height: 1.3;">
+                  ${contact_subject}
+                </h2>
+                
+                <div style="background-color: hsl(35, 15%, 96%); padding: 20px; border-radius: 8px; margin: 20px 0;">
+                  <p style="color: hsl(220, 25%, 15%); font-size: 14px; margin: 0 0 8px;"><strong>From:</strong> ${contact_name}</p>
+                  <p style="color: hsl(220, 25%, 15%); font-size: 14px; margin: 0 0 8px;"><strong>Email:</strong> <a href="mailto:${contact_email}" style="color: hsl(220, 50%, 45%);">${contact_email}</a></p>
+                  <p style="color: hsl(220, 25%, 15%); font-size: 14px; margin: 0;"><strong>Sent:</strong> ${new Date().toLocaleString()}</p>
+                </div>
+                
+                <div style="background-color: hsl(220, 15%, 98%); padding: 20px; border-left: 4px solid hsl(220, 50%, 45%); border-radius: 4px; margin: 20px 0;">
+                  <p style="color: hsl(220, 15%, 35%); font-size: 16px; line-height: 1.6; margin: 0; white-space: pre-wrap;">${contact_message}</p>
+                </div>
+                
+                <p style="color: hsl(220, 15%, 45%); font-size: 14px; margin: 20px 0 0;">
+                  Reply directly to this email to respond to ${contact_name}.
+                </p>
+              </div>
+              
+              <div style="background-color: hsl(35, 15%, 92%); padding: 30px; text-align: center;">
+                <p style="color: hsl(220, 15%, 45%); font-size: 14px; margin: 0 0 10px;">
+                  © 2024 Narrated. Preserving life stories with AI assistance.
+                </p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `
+      });
+
+      if (error) {
+        console.error('Resend error:', error);
+        return new Response(
+          JSON.stringify({ error: 'Failed to send contact form email', details: error }),
+          { 
+            status: 500, 
+            headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+          }
+        );
+      }
+
+      console.log('Contact form email sent successfully:', data);
+      
+      return new Response(
+        JSON.stringify({ success: true, message: 'Contact form email sent', data }),
+        { 
+          status: 200, 
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+        }
+      );
+    }
+
+    // Handle chapter submission emails (existing functionality)
     if (!user_email) {
       return new Response(
-        JSON.stringify({ error: 'user_email is required' }),
+        JSON.stringify({ error: 'user_email is required for chapter submissions' }),
         { 
           status: 400, 
           headers: { 'Content-Type': 'application/json', ...corsHeaders } 
