@@ -77,7 +77,7 @@ const Contact = () => {
       console.error('Error sending contact form:', error);
       toast({
         title: "Failed to send message",
-        description: "Please try again or email us directly at hello@narrated.com.au",
+        description: "Please try again or email us directly at contact@narrated.com.au",
         variant: "destructive",
       });
     } finally {
@@ -171,10 +171,10 @@ const Contact = () => {
                 <h3 className="text-lg font-semibold">Contact us via email</h3>
               </div>
               <a 
-                href="mailto:hello@narrated.com.au" 
+                href="mailto:contact@narrated.com.au" 
                 className="text-primary hover:text-primary/80 transition-colors font-medium text-lg"
               >
-                hello@narrated.com.au
+                contact@narrated.com.au
               </a>
             </div>
           </div>

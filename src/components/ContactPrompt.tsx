@@ -14,10 +14,10 @@ const ContactPrompt = () => {
           </Link>
           {" "}or contact us at:{" "}
           <a 
-            href="mailto:hello@narrated.com.au"
+            href="mailto:contact@narrated.com.au"
             className="text-primary hover:text-primary/80 transition-colors"
           >
-            hello@narrated.com.au
+            contact@narrated.com.au
           </a>
         </p>
       </div>
