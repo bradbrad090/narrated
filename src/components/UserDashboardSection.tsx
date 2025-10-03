@@ -216,7 +216,7 @@ const UserDashboardSection = ({ user }: UserDashboardSectionProps) => {
           <Card className="border-dashed border-2 hover:border-primary/50 transition-colors max-w-md w-full">
             <CardHeader className="text-center">
               <CardTitle className="text-center">
-                Add a Book
+                Add Book
               </CardTitle>
               <CardDescription>
                 Begin your autobiography journey with a new book
