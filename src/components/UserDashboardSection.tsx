@@ -207,8 +207,8 @@ const UserDashboardSection = ({ user }: UserDashboardSectionProps) => {
         <div className="mb-8 text-center">
           <h2 className="text-3xl font-bold mb-2">Your Dashboard</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Easily manage multiple autobiographies within a single account.<br />
-            Start a new story for any person by completing a short profile-building quiz to capture key details, or seamlessly continue working on an existing story below:
+            Easily manage multiple books within a single account.<br />
+            Start a new story, or continue working on an existing story below:
           </p>
         </div>
 
