@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { getPhotoLimit } from '@/utils/photoLimits';
 
 interface Chapter {
   id: string;
@@ -170,6 +171,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
 
   const wordCount = getWordCount();
   const pageCount = getPageCount();
+  const photoLimit = getPhotoLimit(bookTier);
 
   const handleSaveRename = () => {
     if (editingTitle.trim() && editingTitle !== chapter.title) {
@@ -332,7 +334,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1">
               <Camera className="h-3 w-3" />
-              <span>{photoCount} photo{photoCount !== 1 ? 's' : ''}</span>
+              <span>{photoCount}/{photoLimit === Infinity ? '∞' : photoLimit} photos</span>
             </div>
             <div className="flex items-center gap-1">
               <FileText className="h-3 w-3" />
