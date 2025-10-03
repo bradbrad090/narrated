@@ -303,7 +303,7 @@ const Dashboard = () => {
             <CardContent className="text-center">
               <Button onClick={createNewBook} size="lg" variant="hero">
                 <Plus className="h-4 w-4 mr-2" />
-                Start Your Autobiography
+                Create New Book
               </Button>
             </CardContent>
           </Card>
