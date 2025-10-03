@@ -280,8 +280,8 @@ const Dashboard = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8 mt-[100px]">
+      <main className="container mx-auto px-4 pt-24 pb-8">
+        <div className="mb-8">
           <h2 className="text-3xl font-bold mb-2">Your Dashboard</h2>
           <p className="text-muted-foreground">
             Easily manage multiple autobiographies within a single account.<br />
