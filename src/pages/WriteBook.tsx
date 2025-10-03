@@ -27,6 +27,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { DndContext, closestCenter, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { updateChapterOrder } from '@/services/chapterService';
+import Footer from "@/components/Footer";
 
 
 interface Chapter {
@@ -1428,6 +1429,7 @@ const WriteBook = () => {
       )}
 
     </div>
+    <Footer />
     </>
   );
 };
