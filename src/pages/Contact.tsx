@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, MapPin } from "lucide-react";
+import { Mail } from "lucide-react";
 
 const Contact = () => {
   return (
@@ -27,48 +27,48 @@ const Contact = () => {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Send us a message</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Input placeholder="Your Name" />
-                </div>
-                <div>
-                  <Input type="email" placeholder="Your Email" />
-                </div>
-                <div>
-                  <Input placeholder="Subject" />
-                </div>
-                <div>
-                  <Textarea placeholder="Your Message" rows={6} />
-                </div>
-                <Button className="w-full">Send Message</Button>
-              </CardContent>
-            </Card>
-            
-            <div className="space-y-6">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Mail className="w-5 h-5 text-primary" />
-                    <h3 className="font-semibold">Email</h3>
-                  </div>
-                  <p className="text-muted-foreground">hello@aiautobiography.com</p>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <MapPin className="w-5 h-5 text-primary" />
-                    <h3 className="font-semibold">Location</h3>
-                  </div>
-                  <p className="text-muted-foreground">Perth, Western Australia</p>
-                </CardContent>
-              </Card>
+          <Card className="max-w-2xl mx-auto">
+            <CardHeader>
+              <CardTitle className="text-2xl text-center">Send us a message</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Input placeholder="Your Name" />
+              </div>
+              <div>
+                <Input type="email" placeholder="Your Email" />
+              </div>
+              <div>
+                <Input placeholder="Subject" />
+              </div>
+              <div>
+                <Textarea placeholder="Your Message" rows={6} />
+              </div>
+              <Button className="w-full">Send Message</Button>
+            </CardContent>
+          </Card>
+
+          <div className="max-w-2xl mx-auto mt-12">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-muted"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-background text-muted-foreground">or</span>
+              </div>
+            </div>
+
+            <div className="mt-8 text-center p-8 rounded-lg bg-muted/50 border border-muted">
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <Mail className="w-5 h-5 text-primary" />
+                <h3 className="text-lg font-semibold">Contact us via email</h3>
+              </div>
+              <a 
+                href="mailto:hello@narrated.com.au" 
+                className="text-primary hover:text-primary/80 transition-colors font-medium text-lg"
+              >
+                hello@narrated.com.au
+              </a>
             </div>
           </div>
         </div>
