@@ -313,7 +313,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
             }}
           >
             <Camera className="h-3 w-3 mr-1" />
-            Add Photos {photoCount > 0 && `(${photoCount})`}
+            Add Photos
           </Button>
         </div>
 
@@ -330,6 +330,10 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
         {/* Metadata */}
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
+              <Camera className="h-3 w-3" />
+              <span>{photoCount} photo{photoCount !== 1 ? 's' : ''}</span>
+            </div>
             <div className="flex items-center gap-1">
               <FileText className="h-3 w-3" />
               <span>{wordCount} words</span>
