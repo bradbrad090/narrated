@@ -205,10 +205,10 @@ const UserDashboardSection = ({ user }: UserDashboardSectionProps) => {
     <section className="relative min-h-screen bg-gradient-subtle py-16">
       <div className="container mx-auto px-4">
         <div className="mb-8 text-center">
-          <h2 className="text-3xl font-bold mb-2 mt-[50px]">Dashboard</h2>
+          <h2 className="text-3xl font-bold mb-2">Dashboard</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Easily manage multiple books within a single account.<br />
-            Start a new story, or continue working on an existing story below:
+            
           </p>
         </div>
 
@@ -219,7 +219,7 @@ const UserDashboardSection = ({ user }: UserDashboardSectionProps) => {
                 Add Book
               </CardTitle>
               <CardDescription>
-                Easily manage multiple books within a single account. Start a new story, or continue working on an existing story below:
+                Begin your autobiography journey with a new book
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">
