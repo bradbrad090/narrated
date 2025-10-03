@@ -219,7 +219,7 @@ const UserDashboardSection = ({ user }: UserDashboardSectionProps) => {
                 Add Book
               </CardTitle>
               <CardDescription>
-                Begin your autobiography journey with a new book
+                Start a new story, or continue working on an existing story below:
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">
