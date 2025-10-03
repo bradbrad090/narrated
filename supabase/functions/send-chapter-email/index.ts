@@ -74,7 +74,7 @@ serve(async (req) => {
       // Send contact form email to Narrated
       const { data, error } = await resend.emails.send({
         from: 'Narrated Contact Form <noreply@narrated.com.au>',
-        to: ['hello@narrated.com.au'],
+        to: ['brad@narrated.com.au'],
         replyTo: contact_email,
         subject: `Contact Form: ${contact_subject}`,
         html: `
