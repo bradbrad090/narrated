@@ -1039,7 +1039,7 @@ const WriteBook = () => {
                   )}
                   
                   {/* Chapter Content Editor */}
-                  <Card>
+                  <Card className="hidden sm:block">
                     <CardHeader className="py-3 px-4">
                       <CardTitle className="text-base">{currentChapter.title}</CardTitle>
                       <CardDescription className="text-xs">
