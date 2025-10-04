@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { Book, LogOut, Save, Sparkles, ArrowLeft, Plus, FileText, Trash2, Edit2, Type, Menu, Eye, EyeOff, ChevronDown, ChevronUp, Clock, CheckCircle2, Circle, MoreVertical, GripVertical, Award } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAnalyticsContext } from "@/components/AnalyticsProvider";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
 import { ConversationInterface } from "@/components/ConversationInterface";
@@ -805,30 +806,48 @@ const WriteBook = () => {
       <header className={`border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ${isMobile ? 'sticky top-0 z-50' : ''}`}>
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-4">
-            <Button
-              variant="outline" 
-              onClick={() => navigate("/")}
-              className="border-primary/50 hover:bg-primary/10 hover:border-primary text-primary"
-              size="sm"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              <span className={isMobile ? "sr-only" : ""}>Back to Dashboard</span>
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline" 
+                    onClick={() => navigate("/")}
+                    className="border-primary/50 hover:bg-primary/10 hover:border-primary text-primary"
+                    size="sm"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    <span className={isMobile ? "sr-only" : ""}>Back to Dashboard</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Return to your books and projects</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
           <div className={`flex items-center space-x-2 ${isMobile ? "hidden" : ""}`}>
             <Book className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-semibold">{book?.title || "My Autobiography"}</h1>
           </div>
-          <Button 
-            variant="outline" 
-            onClick={handleSignOut}
-            className="border-primary/50 hover:bg-primary/10 hover:border-primary text-primary"
-            size="sm" 
-            disabled={isSwitchingChapter}
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            <span className={isMobile ? "sr-only" : ""}>Sign Out</span>
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  onClick={handleSignOut}
+                  className="border-primary/50 hover:bg-primary/10 hover:border-primary text-primary"
+                  size="sm" 
+                  disabled={isSwitchingChapter}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  <span className={isMobile ? "sr-only" : ""}>Sign Out</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Log out of your account</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </header>
 
