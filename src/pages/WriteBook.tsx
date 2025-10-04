@@ -68,6 +68,7 @@ const WriteBook = () => {
   const [activeChapterId, setActiveChapterId] = useState<string | null>(null);
   const [showSubmitConfirmation, setShowSubmitConfirmation] = useState(false);
   const [completedChapters, setCompletedChapters] = useState<Set<string>>(new Set());
+  const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
   const [chapterConversations, setChapterConversations] = useState<Map<string, number>>(new Map());
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [isSwitchingChapter, setIsSwitchingChapter] = useState(false);
@@ -834,7 +835,7 @@ const WriteBook = () => {
               <TooltipTrigger asChild>
                 <Button 
                   variant="outline" 
-                  onClick={handleSignOut}
+                  onClick={() => setShowLogoutConfirmation(true)}
                   className="border-primary/50 hover:bg-primary/10 hover:border-primary text-primary"
                   size="sm" 
                   disabled={isSwitchingChapter}
@@ -850,6 +851,24 @@ const WriteBook = () => {
           </TooltipProvider>
         </div>
       </header>
+
+      {/* Logout Confirmation Dialog */}
+      <AlertDialog open={showLogoutConfirmation} onOpenChange={setShowLogoutConfirmation}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to sign out?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You'll need to log in again to access your books and continue writing.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSignOut}>
+              Sign Out
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Main Content */}
       <main className={isMobile ? "min-h-screen" : "h-[calc(100vh-80px)]"}>
