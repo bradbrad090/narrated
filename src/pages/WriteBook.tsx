@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Book, LogOut, Save, Sparkles, ArrowLeft, Plus, FileText, Trash2, Edit2, Type, Menu, Eye, EyeOff, ChevronDown, ChevronUp, Clock, CheckCircle2, Circle, MoreVertical, GripVertical } from "lucide-react";
+import { Book, LogOut, Save, Sparkles, ArrowLeft, Plus, FileText, Trash2, Edit2, Type, Menu, Eye, EyeOff, ChevronDown, ChevronUp, Clock, CheckCircle2, Circle, MoreVertical, GripVertical, Award } from "lucide-react";
 import { useAnalyticsContext } from "@/components/AnalyticsProvider";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
 import { ConversationInterface } from "@/components/ConversationInterface";
@@ -917,84 +917,103 @@ const WriteBook = () => {
             </div>
           )}
 
-          {/* Compact Chapter Selector for Mobile */}
-          {visibleChapters.length > 0 && (
-            <div className="max-w-4xl mx-auto mb-3">
-              <Card className="p-2">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <FileText className="h-4 w-4 text-primary flex-shrink-0" />
-                    <select
-                      value={currentChapter?.id || ''}
-                      onChange={(e) => {
-                        const chapter = chapters.find(ch => ch.id === e.target.value);
-                        if (chapter) saveCurrentConversationAndSwitchChapter(chapter);
-                      }}
-                      disabled={isSwitchingChapter}
-                      className="flex-1 bg-transparent border-none text-sm font-medium focus:outline-none focus:ring-0 truncate"
-                    >
-                      {visibleChapters.map((chapter) => (
-                        <option key={chapter.id} value={chapter.id}>
-                          {chapter.title}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleAddChapter}
-                    disabled={isSwitchingChapter || (book?.tier === 'free' && chapters.length >= 1)}
-                    className="flex-shrink-0 h-8 px-2"
+          {/* Compact Action Buttons for Mobile */}
+          <div className="max-w-4xl mx-auto mb-3 flex gap-2">
+            {/* Chapter Selector Button */}
+            {visibleChapters.length > 0 && (
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    className="flex-1 justify-between h-auto py-2.5 px-3"
+                    disabled={isSwitchingChapter}
                   >
-                    <Plus className="h-3 w-3" />
+                    <div className="flex items-center gap-2 min-w-0">
+                      <FileText className="h-4 w-4 flex-shrink-0" />
+                      <span className="text-sm font-medium truncate">
+                        {currentChapter?.title || 'Select Chapter'}
+                      </span>
+                    </div>
+                    <ChevronDown className="h-4 w-4 flex-shrink-0 ml-2" />
                   </Button>
-                </div>
-              </Card>
-            </div>
-          )}
-
-          {/* Compact Payment Section for Mobile */}
-          {user && book && (
-            <div className="max-w-4xl mx-auto mb-3">
-              <Card>
-                <Collapsible open={!isBookTierCollapsed} onOpenChange={(open) => setIsBookTierCollapsed(!open)}>
-                  <CardHeader className="py-2 px-3">
-                    <CollapsibleTrigger asChild>
-                      <Button variant="ghost" className="flex items-center justify-between p-0 h-auto w-full">
-                        <div className="text-left">
-                          <CardTitle className="text-sm">Book Tier</CardTitle>
-                          <CardDescription className="text-xs">
-                            {book.tier === 'free' ? 'Free' : book.tier === 'paid' ? 'Paid (Unlimited)' : 'Premium (Unlimited)'}
-                          </CardDescription>
-                        </div>
-                        {isBookTierCollapsed ? (
-                          <ChevronDown className="h-3 w-3" />
-                        ) : (
-                          <ChevronUp className="h-3 w-3" />
-                        )}
+                </SheetTrigger>
+                <SheetContent side="bottom" className="h-[60vh]">
+                  <div className="py-4">
+                    <h3 className="text-lg font-semibold mb-4">Select Chapter</h3>
+                    <div className="space-y-2">
+                      {visibleChapters.map((chapter) => (
+                        <Button
+                          key={chapter.id}
+                          variant={currentChapter?.id === chapter.id ? "secondary" : "ghost"}
+                          className="w-full justify-start text-left h-auto py-3"
+                          onClick={() => {
+                            saveCurrentConversationAndSwitchChapter(chapter);
+                            document.querySelector('[data-sheet-content] button[data-sheet-close]')?.dispatchEvent(new Event('click', { bubbles: true }));
+                          }}
+                          disabled={isSwitchingChapter}
+                        >
+                          <div className="flex flex-col items-start w-full">
+                            <span className="font-medium">{chapter.title}</span>
+                            <span className="text-xs text-muted-foreground">
+                              Chapter {chapter.chapter_number}
+                            </span>
+                          </div>
+                        </Button>
+                      ))}
+                      <Button
+                        variant="outline"
+                        className="w-full justify-center mt-4"
+                        onClick={handleAddChapter}
+                        disabled={isSwitchingChapter || (book?.tier === 'free' && chapters.length >= 1)}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add New Chapter
                       </Button>
-                    </CollapsibleTrigger>
-                  </CardHeader>
-                  <CollapsibleContent>
-                    <CardContent className="px-3 pb-3 pt-0">
-                      <PaymentButton
-                        bookId={book.id}
-                        currentTier={book.tier as 'free' | 'basic' | 'standard' | 'premium'}
-                        purchaseStatus={book.purchase_status}
-                        onPaymentStart={() => {
-                          toast({
-                            title: "Processing payment...",
-                            description: "You'll be redirected to complete your payment.",
-                          });
-                        }}
-                      />
-                    </CardContent>
-                  </CollapsibleContent>
-                </Collapsible>
-              </Card>
-            </div>
-          )}
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            )}
+
+            {/* Book Tier Button */}
+            {user && book && (
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    className="flex-1 justify-between h-auto py-2.5 px-3"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Award className="h-4 w-4 flex-shrink-0" />
+                      <span className="text-sm font-medium truncate">
+                        {book.tier === 'free' ? 'Free' : book.tier.charAt(0).toUpperCase() + book.tier.slice(1)}
+                      </span>
+                    </div>
+                    <ChevronDown className="h-4 w-4 flex-shrink-0 ml-2" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="bottom" className="h-[80vh] overflow-auto">
+                  <div className="py-4">
+                    <h3 className="text-lg font-semibold mb-2">Book Tier</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {book.tier === 'free' ? 'Upgrade to unlock more chapters' : 'Manage your subscription'}
+                    </p>
+                    <PaymentButton
+                      bookId={book.id}
+                      currentTier={book.tier as 'free' | 'basic' | 'standard' | 'premium'}
+                      purchaseStatus={book.purchase_status}
+                      onPaymentStart={() => {
+                        toast({
+                          title: "Processing payment...",
+                          description: "You'll be redirected to complete your payment.",
+                        });
+                      }}
+                    />
+                  </div>
+                </SheetContent>
+              </Sheet>
+            )}
+          </div>
           
           {currentChapter ? (
                 <div className="max-w-4xl mx-auto space-y-3">
