@@ -55,7 +55,7 @@ const WriteBook = () => {
   const [currentChapter, setCurrentChapter] = useState<Chapter | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  
   const [showChapterRefinement, setShowChapterRefinement] = useState(false);
   const [bookProfile, setBookProfile] = useState<any>(null);
   const [isBookTierCollapsed, setIsBookTierCollapsed] = useState(true);
@@ -512,12 +512,10 @@ const WriteBook = () => {
       
       // Now switch chapters
       setCurrentChapter(newChapter);
-      setSidebarOpen(false);
     } catch (error: any) {
       console.error('Error saving conversation before chapter switch:', error);
       // Still switch chapter even if save fails
       setCurrentChapter(newChapter);
-      setSidebarOpen(false);
     } finally {
       setIsSwitchingChapter(false);
     }
@@ -807,73 +805,7 @@ const WriteBook = () => {
       <header className={`border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ${isMobile ? 'sticky top-0 z-50' : ''}`}>
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-4">
-            {isMobile && (
-              <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <Menu className="h-4 w-4" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-80 p-0">
-                  <div className="h-full bg-background p-4">
-                    <div className="space-y-2">
-                      <h2 className="text-lg font-semibold mb-4">Chapters</h2>
-                      
-                      {visibleChapters.map((chapter) => (
-                        <div
-                          key={chapter.id}
-                          className={`p-3 rounded-lg border transition-colors group ${
-                            currentChapter?.id === chapter.id 
-                              ? 'bg-primary/10 border-primary' 
-                              : 'hover:bg-muted'
-                          } ${isSwitchingChapter ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                          onClick={() => !isSwitchingChapter && saveCurrentConversationAndSwitchChapter(chapter)}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2 flex-1 min-w-0">
-                              <FileText className="h-4 w-4 flex-shrink-0" />
-                              <span className="font-medium text-sm truncate">{chapter.title}</span>
-                            </div>
-                            {chapters.length > 1 && (
-                              <Button
-                                 variant="ghost"
-                                 size="sm"
-                                 className="hover:bg-yellow-100 hover:text-yellow-800 transition-colors"
-                                 disabled={isSwitchingChapter}
-                                 onClick={(e) => {
-                                   e.stopPropagation();
-                                   handleDeleteChapter(chapter);
-                                 }}
-                              >
-                                <MoreVertical className="h-3 w-3" />
-                              </Button>
-                            )}
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {(() => {
-                              const words = chapter.content.trim() ? chapter.content.split(/\s+/).length : 0;
-                              const pages = Math.ceil(words / 300);
-                              return `${words} words • ${pages} page${pages !== 1 ? 's' : ''}`;
-                            })()}
-                          </p>
-                        </div>
-                      ))}
-                      
-                      <Button
-                        variant="outline"
-                        className={`w-full mt-4 ${book?.tier === 'free' && chapters.length >= 1 ? 'border-primary/50 bg-primary/5 hover:bg-primary/10 hover:border-primary text-primary font-semibold' : 'hover:bg-primary/5 hover:border-primary/30'}`}
-                        onClick={handleAddChapter}
-                        disabled={isSwitchingChapter || (book?.tier === 'free' && chapters.length >= 1)}
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        {book?.tier === 'free' && chapters.length >= 1 ? 'Upgrade to Add More' : 'Add Chapter'}
-                      </Button>
-                    </div>
-                  </div>
-                </SheetContent>
-              </Sheet>
-            )}
-            <Button 
+            <Button
               variant="outline" 
               onClick={() => navigate("/")}
               className="border-primary/50 hover:bg-primary/10 hover:border-primary text-primary"
