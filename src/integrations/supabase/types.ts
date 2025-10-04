@@ -95,6 +95,69 @@ export type Database = {
           },
         ]
       }
+      analytics_page_views: {
+        Row: {
+          id: string
+          page_path: string
+          session_id: string
+          viewed_at: string
+        }
+        Insert: {
+          id?: string
+          page_path: string
+          session_id: string
+          viewed_at?: string
+        }
+        Update: {
+          id?: string
+          page_path?: string
+          session_id?: string
+          viewed_at?: string
+        }
+        Relationships: []
+      }
+      analytics_sessions: {
+        Row: {
+          country: string | null
+          created_book: boolean | null
+          first_seen_at: string
+          id: string
+          last_seen_at: string
+          referrer: string | null
+          session_id: string
+          signed_up: boolean | null
+          started_conversation: boolean | null
+          started_profile: boolean | null
+          user_id: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_book?: boolean | null
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          referrer?: string | null
+          session_id: string
+          signed_up?: boolean | null
+          started_conversation?: boolean | null
+          started_profile?: boolean | null
+          user_id?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_book?: boolean | null
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          referrer?: string | null
+          session_id?: string
+          signed_up?: boolean | null
+          started_conversation?: boolean | null
+          started_profile?: boolean | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       book_profiles: {
         Row: {
           book_id: string
@@ -589,6 +652,10 @@ export type Database = {
     }
     Functions: {
       cleanup_expired_context_cache: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      cleanup_old_analytics: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { Book, LogOut, Save, Sparkles, ArrowLeft, Plus, FileText, Trash2, Edit2, Type, Menu, Eye, EyeOff, ChevronDown, ChevronUp, Clock, CheckCircle2, Circle, MoreVertical, GripVertical } from "lucide-react";
+import { useAnalyticsContext } from "@/components/AnalyticsProvider";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
 import { ConversationInterface } from "@/components/ConversationInterface";
 import { SavedConversations } from "@/components/SavedConversations";
@@ -72,6 +73,8 @@ const WriteBook = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const { trackMilestone } = useAnalyticsContext();
+  const hasTrackedConversation = useRef(false);
 
   // Add conversation state for SavedConversations
   const {
@@ -159,6 +162,9 @@ const WriteBook = () => {
     setBookProfile(profile);
     // Always close the modal when profile is processed, regardless of specific fields
     if (profileMode && profile && profile.question_10_answer) {
+      // Track milestone
+      trackMilestone('startedProfile');
+      
       // Profile is complete, remove profile parameter and show success
       setSearchParams(new URLSearchParams());
       setShowProfileModal(false);
@@ -979,13 +985,19 @@ const WriteBook = () => {
                            chapterId={currentChapter?.id}
                            isChapterComplete={currentChapter ? completedChapters.has(currentChapter.id) : false}
                            onContentGenerated={(content) => {
-                             if (currentChapter) {
-                               const newContent = currentChapter.content ? currentChapter.content + "\n\n" + content : content;
-                               const updatedChapter = { ...currentChapter, content: newContent };
-                               setCurrentChapter(updatedChapter);
-                               setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
-                             }
-                           }}
+                              // Track first conversation milestone
+                              if (!hasTrackedConversation.current) {
+                                trackMilestone('startedConversation');
+                                hasTrackedConversation.current = true;
+                              }
+                              
+                              if (currentChapter) {
+                                const newContent = currentChapter.content ? currentChapter.content + "\n\n" + content : content;
+                                const updatedChapter = { ...currentChapter, content: newContent };
+                                setCurrentChapter(updatedChapter);
+                                setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
+                              }
+                            }}
                            onConversationUpdate={() => {
                              // Refresh conversation counts when conversations change
                              if (user) {
@@ -1177,6 +1189,12 @@ const WriteBook = () => {
                             chapterId={currentChapter?.id}
                             isChapterComplete={currentChapter?.is_submitted || false}
                             onContentGenerated={(content) => {
+                              // Track first conversation milestone
+                              if (!hasTrackedConversation.current) {
+                                trackMilestone('startedConversation');
+                                hasTrackedConversation.current = true;
+                              }
+                              
                               if (currentChapter) {
                                 const newContent = currentChapter.content ? currentChapter.content + "\n\n" + content : content;
                                 const updatedChapter = { ...currentChapter, content: newContent };

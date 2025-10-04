@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import Header from "@/components/Header";
+import { useAnalyticsContext } from "@/components/AnalyticsProvider";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -21,6 +22,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const { trackMilestone } = useAnalyticsContext();
 
   const getPageTitle = () => {
     if (isForgotPassword) return "Reset Password - Narrated";
@@ -59,6 +61,11 @@ const Auth = () => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        // Track sign-up milestone
+        if (event === 'SIGNED_IN' && session?.user) {
+          trackMilestone('signedUp');
+        }
+        
         // Don't auto-redirect during password recovery
         if (session?.user && !isOnResetPage && !isRecoveryFlow) {
           setUser(session.user);

@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { Plus, Book, LogOut, Trash2, Edit2, Check, X } from "lucide-react";
+import { useAnalyticsContext } from "@/components/AnalyticsProvider";
 
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -18,6 +19,7 @@ const Dashboard = () => {
   const [editingTitle, setEditingTitle] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { trackMilestone } = useAnalyticsContext();
 
   useEffect(() => {
     // Check if user is logged in
@@ -143,6 +145,9 @@ const Dashboard = () => {
         .single();
 
       if (error) throw error;
+
+      // Track milestone
+      trackMilestone('createdBook');
 
       toast({
         title: "Book created!",

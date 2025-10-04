@@ -32,3 +32,6 @@ verify_jwt = false
 
 [functions.verify-payment]
 verify_jwt = true
+
+[functions.analytics-tracker]
+verify_jwt = false
