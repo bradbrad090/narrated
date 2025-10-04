@@ -903,11 +903,11 @@ const WriteBook = () => {
       {/* Main Content */}
       <main className={isMobile ? "min-h-screen" : "h-[calc(100vh-80px)]"}>
         {isMobile ? (
-        <div className="h-full pt-20 p-4 overflow-auto">
+        <div className="h-full p-2 pb-4 overflow-auto">
           
           {/* Profile Setup Section for Mobile */}
           {user && book && !bookProfile?.question_10_answer && (
-            <div className="max-w-4xl mx-auto mb-6">
+            <div className="max-w-4xl mx-auto mb-3">
               <ProfileSetup
                 userId={user.id}
                 bookId={book.id}
@@ -917,38 +917,67 @@ const WriteBook = () => {
             </div>
           )}
 
-          {/* Payment Section for Mobile */}
+          {/* Compact Chapter Selector for Mobile */}
+          {visibleChapters.length > 0 && (
+            <div className="max-w-4xl mx-auto mb-3">
+              <Card className="p-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <FileText className="h-4 w-4 text-primary flex-shrink-0" />
+                    <select
+                      value={currentChapter?.id || ''}
+                      onChange={(e) => {
+                        const chapter = chapters.find(ch => ch.id === e.target.value);
+                        if (chapter) saveCurrentConversationAndSwitchChapter(chapter);
+                      }}
+                      disabled={isSwitchingChapter}
+                      className="flex-1 bg-transparent border-none text-sm font-medium focus:outline-none focus:ring-0 truncate"
+                    >
+                      {visibleChapters.map((chapter) => (
+                        <option key={chapter.id} value={chapter.id}>
+                          {chapter.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleAddChapter}
+                    disabled={isSwitchingChapter || (book?.tier === 'free' && chapters.length >= 1)}
+                    className="flex-shrink-0 h-8 px-2"
+                  >
+                    <Plus className="h-3 w-3" />
+                  </Button>
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* Compact Payment Section for Mobile */}
           {user && book && (
-            <div className="max-w-4xl mx-auto mb-6">
+            <div className="max-w-4xl mx-auto mb-3">
               <Card>
                 <Collapsible open={!isBookTierCollapsed} onOpenChange={(open) => setIsBookTierCollapsed(!open)}>
-                  <CardHeader className={isBookTierCollapsed ? "py-4" : "pb-3"}>
+                  <CardHeader className="py-2 px-3">
                     <CollapsibleTrigger asChild>
-                      <Button variant="ghost" className="flex items-center justify-between p-0 h-auto w-full min-h-[2.5rem]">
+                      <Button variant="ghost" className="flex items-center justify-between p-0 h-auto w-full">
                         <div className="text-left">
-                          <CardTitle>Book Tier</CardTitle>
-                          {!isBookTierCollapsed && (
-                            <CardDescription>
-                              Choose the tier that best fits your needs.<br />
-                              Upgrade to unlock advanced features.
-                            </CardDescription>
-                          )}
-                          {isBookTierCollapsed && (
-                            <CardDescription>
-                              {book.tier === 'free' ? 'Free' : book.tier === 'paid' ? 'Paid (Unlimited)' : 'Premium (Unlimited)'}
-                            </CardDescription>
-                          )}
+                          <CardTitle className="text-sm">Book Tier</CardTitle>
+                          <CardDescription className="text-xs">
+                            {book.tier === 'free' ? 'Free' : book.tier === 'paid' ? 'Paid (Unlimited)' : 'Premium (Unlimited)'}
+                          </CardDescription>
                         </div>
                         {isBookTierCollapsed ? (
-                          <ChevronDown className="h-4 w-4" />
+                          <ChevronDown className="h-3 w-3" />
                         ) : (
-                          <ChevronUp className="h-4 w-4" />
+                          <ChevronUp className="h-3 w-3" />
                         )}
                       </Button>
                     </CollapsibleTrigger>
                   </CardHeader>
                   <CollapsibleContent>
-                    <CardContent>
+                    <CardContent className="px-3 pb-3 pt-0">
                       <PaymentButton
                         bookId={book.id}
                         currentTier={book.tier as 'free' | 'basic' | 'standard' | 'premium'}
@@ -968,17 +997,17 @@ const WriteBook = () => {
           )}
           
           {currentChapter ? (
-                <div className="max-w-4xl mx-auto space-y-6">
+                <div className="max-w-4xl mx-auto space-y-3">
                   {/* Conversation Section - Mobile */}
                   {user && book && (
                     <Card>
-                      <CardHeader>
-                        <CardTitle>Begin Telling Your Story</CardTitle>
-                        <CardDescription>
-                          Have a natural conversation to explore your memories and generate content for your autobiography.
+                      <CardHeader className="py-3 px-4">
+                        <CardTitle className="text-base">Begin Telling Your Story</CardTitle>
+                        <CardDescription className="text-xs">
+                          Have a natural conversation to explore your memories and generate content.
                         </CardDescription>
                       </CardHeader>
-                      <CardContent>
+                      <CardContent className="px-4 pb-4">
                          <ConversationInterface
                            userId={user.id}
                            bookId={book.id}
@@ -1011,25 +1040,25 @@ const WriteBook = () => {
                   
                   {/* Chapter Content Editor */}
                   <Card>
-                    <CardHeader>
-                      <CardTitle>{currentChapter.title}</CardTitle>
-                      <CardDescription>
-                        Edit and refine your chapter content. You can manually edit the AI-generated text or write your own.
+                    <CardHeader className="py-3 px-4">
+                      <CardTitle className="text-base">{currentChapter.title}</CardTitle>
+                      <CardDescription className="text-xs">
+                        Edit and refine your chapter content.
                       </CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="px-4 pb-4">
                       <Textarea
-                        placeholder="Your chapter content will appear here. You can edit it directly or use the AI assistant above to generate new content..."
+                        placeholder="Your chapter content will appear here..."
                         value={currentChapter.content}
                         onChange={(e) => handleChapterContentChange(e.target.value)}
-                        className="min-h-[500px] text-base leading-relaxed"
+                        className="min-h-[400px] text-sm leading-relaxed"
                       />
-                      <div className="mt-4 flex justify-center">
+                      <div className="mt-3 flex justify-center">
                          <Button 
                            onClick={saveCurrentChapter}
                            disabled={saving || !currentChapter || (currentChapter && completedChapters.has(currentChapter.id))}
-                           size="lg"
-                           className="shadow-lg"
+                           size="default"
+                           className="w-full sm:w-auto"
                          >
                            <Save className="h-4 w-4 mr-2" />
                            {saving ? "Saving..." : "Save"}
