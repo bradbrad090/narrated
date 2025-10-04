@@ -155,9 +155,9 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
           </Badge>
         )}
         
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">{freeTier.name}</CardTitle>
-          <CardDescription className="text-sm">{freeTier.description}</CardDescription>
+        <CardHeader className="pb-2 sm:pb-3 space-y-1 sm:space-y-1.5">
+          <CardTitle className="text-base sm:text-lg">{freeTier.name}</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">{freeTier.description}</CardDescription>
         </CardHeader>
         
         <CardContent className="pt-0">
@@ -194,13 +194,13 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
               </Badge>
             )}
             
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
+            <CardHeader className="pb-2 sm:pb-3 space-y-1 sm:space-y-1.5">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 {tier.icon}
-                <CardTitle className="text-lg">{tier.name}</CardTitle>
+                <CardTitle className="text-base sm:text-lg">{tier.name}</CardTitle>
               </div>
-              <div className="text-2xl font-bold text-primary">{tier.price}</div>
-              <CardDescription className="text-sm min-h-[40px]">{tier.description}</CardDescription>
+              <div className="text-xl sm:text-2xl font-bold text-primary">{tier.price}</div>
+              <CardDescription className="text-xs sm:text-sm min-h-[32px] sm:min-h-[40px]">{tier.description}</CardDescription>
             </CardHeader>
             
             <CardContent className="flex flex-col flex-1 pt-0">
@@ -217,10 +217,10 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
                 <Button
                   onClick={() => handlePayment(tier.id)}
                   disabled={isLoading || isPurchased(tier.id)}
-                  className="w-full"
+                  className="w-full text-xs sm:text-sm py-1.5 sm:py-2 h-auto"
                   variant={isPurchased(tier.id) ? "outline" : "outline"}
                 >
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {isLoading && <Loader2 className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />}
                   {isPurchased(tier.id) 
                     ? "Current Plan" 
                     : isPending(tier.id)
