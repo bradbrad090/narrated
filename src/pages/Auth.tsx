@@ -298,9 +298,12 @@ const Auth = () => {
                 required
               />
               {isSignUp && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  6+ characters, one lowercase, one uppercase, one number
-                </p>
+                <ul className="text-xs text-muted-foreground mt-1 space-y-0.5">
+                  <li>• At least 6 characters</li>
+                  <li>• At least one lowercase letter</li>
+                  <li>• At least one uppercase letter</li>
+                  <li>• At least one number</li>
+                </ul>
               )}
             </div>
 
