@@ -322,7 +322,7 @@ const Dashboard = () => {
               <CardContent className="text-center py-8">
                 <Book className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground">
-                  You haven't created any books yet. Start your first autobiography above!
+                  You haven't created any books yet. Start your first autobiography today!
                 </p>
               </CardContent>
             </Card>
