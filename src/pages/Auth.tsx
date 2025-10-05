@@ -117,9 +117,14 @@ const Auth = () => {
         if (error) throw error;
       }
     } catch (error: any) {
+      // Check if it's a password validation error and provide clear requirements
+      const isPasswordError = error.message?.toLowerCase().includes('password');
+      
       toast({
         title: "Authentication Error",
-        description: error.message,
+        description: isPasswordError 
+          ? "Password must contain:\n• At least 6 characters\n• At least one lowercase letter\n• At least one uppercase letter\n• At least one number"
+          : error.message,
         variant: "destructive",
       });
     }
@@ -292,6 +297,11 @@ const Auth = () => {
                 className="min-h-[44px] text-base"
                 required
               />
+              {isSignUp && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  6+ characters, one lowercase, one uppercase, one number
+                </p>
+              )}
             </div>
 
             {isSignUp && (
