@@ -103,11 +103,6 @@ const Auth = () => {
         });
         
         if (error) throw error;
-        
-        toast({
-          title: "Check your email",
-          description: "We've sent you a confirmation link to complete your signup.",
-        });
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
