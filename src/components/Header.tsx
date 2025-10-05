@@ -111,9 +111,9 @@ const Header = () => {
                 <Button 
                   variant="hero" 
                   className="hidden sm:inline-flex"
-                  onClick={() => navigate('/auth')}
+                  onClick={() => navigate('/auth?signup=true')}
                 >
-                  Get Started
+                  Sign up
                 </Button>
               </>
             )}
@@ -184,11 +184,11 @@ const Header = () => {
                           variant="hero" 
                           className="w-full"
                           onClick={() => {
-                            navigate('/auth');
+                            navigate('/auth?signup=true');
                             setIsOpen(false);
                           }}
                         >
-                          Get Started
+                          Sign up
                         </Button>
                       </div>
                     )}
