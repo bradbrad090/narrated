@@ -29,13 +29,22 @@ const handler = async (request: Request): Promise<Response> => {
   }
 
   try {
+    // Validate JWT
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Missing authorization header" }), { 
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
     // Initialize Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       {
         global: {
-          headers: { Authorization: request.headers.get('Authorization')! },
+          headers: { Authorization: authHeader },
         },
       }
     );

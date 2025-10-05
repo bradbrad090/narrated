@@ -41,6 +41,16 @@ const handler = async (request: Request): Promise<Response> => {
 
   try {
     console.log('Parsing request body...');
+    
+    // Validate JWT
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Missing authorization header" }), { 
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
     const requestBody = await request.json();
     console.log('Request body:', JSON.stringify(requestBody, null, 2));
 

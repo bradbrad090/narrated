@@ -20,7 +20,16 @@ const handler = async (request: Request): Promise<Response> => {
   }
 
   try {
-    const { prompt } = await request.json();
+    // Validate JWT and extract user
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Missing authorization header" }), { 
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    const { prompt, userId } = await request.json();
     
     if (!prompt) {
       return new Response(JSON.stringify({ error: "Prompt is required" }), { 
