@@ -118,7 +118,6 @@ export type Database = {
       }
       analytics_sessions: {
         Row: {
-          country: string | null
           created_book: boolean | null
           first_seen_at: string
           id: string
@@ -131,7 +130,6 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
-          country?: string | null
           created_book?: boolean | null
           first_seen_at?: string
           id?: string
@@ -144,7 +142,6 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
-          country?: string | null
           created_book?: boolean | null
           first_seen_at?: string
           id?: string

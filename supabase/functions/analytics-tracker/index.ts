@@ -30,16 +30,11 @@ Deno.serve(async (req) => {
 
     const event: AnalyticsEvent = await req.json();
     
-    // Extract geographic data from request headers
-    const country = req.headers.get('cf-ipcountry') || 
-                    req.headers.get('x-vercel-ip-country') || 
-                    null;
     const referrer = req.headers.get('referer') || null;
 
     console.log('Analytics event received:', { 
       sessionId: event.sessionId, 
       userId: event.userId,
-      country,
       pageViewCount: event.pageViews?.length || 0
     });
 
@@ -50,7 +45,6 @@ Deno.serve(async (req) => {
         session_id: event.sessionId,
         user_id: event.userId || null,
         last_seen_at: new Date().toISOString(),
-        country,
         referrer,
         ...(event.milestones || {}),
       }, {
