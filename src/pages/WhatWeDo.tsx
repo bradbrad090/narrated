@@ -35,7 +35,7 @@ const WhatWeDo = () => {
           <div className="grid md:grid-cols-3 gap-8 mb-16">
             <Card className="group relative overflow-hidden border-2 hover:border-accent/50 transition-all duration-500 hover:shadow-glow animate-fade-in-up">
               <CardContent className="p-8">
-                <div className="w-16 h-16 bg-gradient-accent rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <div className="w-16 h-16 bg-gradient-accent rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform duration-300">
                   <MessageCircle className="w-8 h-8 text-accent-foreground" />
                 </div>
                 <h3 className="text-2xl font-bold mb-4 text-foreground">Natural Conversations</h3>
@@ -62,7 +62,7 @@ const WhatWeDo = () => {
 
             <Card className="group relative overflow-hidden border-2 hover:border-accent/50 transition-all duration-500 hover:shadow-glow animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
               <CardContent className="p-8">
-                <div className="w-16 h-16 bg-gradient-hero rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <div className="w-16 h-16 bg-gradient-hero rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform duration-300">
                   <Sparkles className="w-8 h-8 text-primary-foreground" />
                 </div>
                 <h3 className="text-2xl font-bold mb-4 text-foreground">AI-Crafted Narratives</h3>
@@ -89,7 +89,7 @@ const WhatWeDo = () => {
 
             <Card className="group relative overflow-hidden border-2 hover:border-accent/50 transition-all duration-500 hover:shadow-glow animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               <CardContent className="p-8">
-                <div className="w-16 h-16 bg-gradient-accent rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <div className="w-16 h-16 bg-gradient-accent rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform duration-300">
                   <Heart className="w-8 h-8 text-accent-foreground" />
                 </div>
                 <h3 className="text-2xl font-bold mb-4 text-foreground">Family Legacy</h3>
