@@ -8,44 +8,64 @@ import { Button } from "@/components/ui/button";
 const FAQ = () => {
   const faqs = [
     {
-      question: "How long does the process take?",
-      answer: "Most autobiographies are completed within 4-8 weeks, depending on the plan you choose and the number of conversation sessions required."
+      question: "What is Narrated and how does it work?",
+      answer: "Narrated uses AI-guided conversations to help you create your life story. Simply have a conversation with our AI assistant about your memories, and it will craft them into beautifully written chapters. Start with a free chapter, then upgrade to create your complete autobiography."
+    },
+    {
+      question: "Do I really get a free chapter?",
+      answer: "Yes! Everyone starts with our free tier - one professionally written chapter delivered via email. No credit card required. It's the perfect way to experience the magic of seeing your memories transformed into a written story."
     },
     {
       question: "What if I don't know where to start?",
-      answer: "Our AI assistant is designed to guide you through the process. It will ask thoughtful questions to help you recall and organize your memories naturally."
+      answer: "Our AI assistant guides you through the entire process. It asks thoughtful questions about different periods of your life - childhood, career, family, relationships - helping you recall and share memories naturally. Just pick any memory that comes to mind and start talking!"
     },
     {
-      question: "How many conversation sessions do I need?",
-      answer: "This varies by plan and personal preference. Most people find 6-8 sessions sufficient for a comprehensive autobiography, but you can always add more sessions if needed."
+      question: "Can I use voice or do I have to type?",
+      answer: "Both! You can type your responses or use voice recording - whatever feels most comfortable. Many users prefer voice input as it makes storytelling feel more natural and conversational."
     },
     {
-      question: "Can I review and edit my story before it's finalized?",
-      answer: "Absolutely! You'll receive drafts throughout the process and have multiple opportunities to review, provide feedback, and request revisions."
+      question: "What's the difference between the pricing tiers?",
+      answer: "Free tier includes 1 chapter via email. Basic ($9) gives you unlimited chapters and a digital PDF with up to 100 photos. Standard ($19) adds a professionally printed hardcover book. Premium ($39) includes an upgraded premium hardcover with 5 additional copies, perfect for sharing with family."
+    },
+    {
+      question: "How does purchasing and upgrading work?",
+      answer: "You can start for free and upgrade anytime. When you upgrade to a paid tier, you only pay the difference in price. For example, if you have Basic ($9) and want Standard ($19), you only pay $10 more. All your conversations and chapters are preserved when you upgrade."
+    },
+    {
+      question: "When do I get charged?",
+      answer: "Never for the free tier. For paid plans, you're charged a one-time payment when you select and confirm your tier. There are no subscriptions or recurring charges - just a single payment for your autobiography."
     },
     {
       question: "What format will my autobiography be in?",
-      answer: "All plans include a digital PDF version. Higher-tier plans also include professionally printed hardcover books with custom cover design."
+      answer: "Free tier delivers via email. Basic tier includes a digital PDF download. Standard and Premium tiers include both a digital PDF and a professionally printed hardcover book with custom cover design."
     },
     {
       question: "Is my personal information secure?",
-      answer: "Yes, we take privacy very seriously. All conversations and personal information are encrypted and stored securely. We never share your stories with third parties."
+      answer: "Absolutely. We use bank-level encryption and secure cloud storage for all your conversations and personal information. Your data is never shared with third parties or used to train AI models. You retain full ownership and copyright of your story."
     },
     {
       question: "Can I include photos in my autobiography?",
-      answer: "Yes! Our Premium Heritage plan includes photo integration. You can provide digital photos that will be professionally incorporated into your book."
+      answer: "Yes! Basic and Standard plans include up to 100 photos. Premium plan offers unlimited photo uploads. Simply upload digital photos (JPG, PNG, or HEIC) and they'll be professionally integrated into your chapters."
     },
     {
-      question: "What if I want to add more content later?",
-      answer: "You can always purchase additional conversation sessions to expand your autobiography. We'll seamlessly integrate new content with your existing story."
+      question: "Can I add more content later?",
+      answer: "Yes! You can continue having conversations and adding chapters anytime. Your autobiography is never truly finished - you can always add new memories, stories, and photos as you remember them."
     },
     {
       question: "Do you offer refunds?",
-      answer: "Yes, we offer a 30-day money-back guarantee. If you're not completely satisfied with your autobiography, we'll provide a full refund."
+      answer: "Yes, we offer a 30-day money-back guarantee on all paid plans. If you're not completely satisfied with your autobiography, we'll provide a full refund - no questions asked."
     },
     {
       question: "Can family members contribute to the story?",
-      answer: "Absolutely! Family members can participate in conversation sessions or provide additional memories and perspectives that will be woven into your narrative."
+      answer: "Absolutely! Family members can participate in your conversations, and doing interviews as a group can be especially beneficial. Multiple perspectives help create a more encompassing and complete story, capturing memories and details that one person alone might not remember."
+    },
+    {
+      question: "What devices can I use?",
+      answer: "Narrated works on any device with a web browser - desktop, laptop, tablet, or smartphone. No app download required. Your conversations and chapters sync across all your devices automatically."
+    },
+    {
+      question: "How long until I receive my physical book?",
+      answer: "For Standard and Premium plans with printed books, delivery takes 2-3 weeks after you finalize your content. Digital PDFs are available for instant download as soon as your chapters are complete."
     }
   ];
 
