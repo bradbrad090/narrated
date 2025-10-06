@@ -1,8 +1,9 @@
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Mic, Users, Gift } from "lucide-react";
+import { BookOpen, Mic, Users, Gift, Sparkles, MessageCircle, Heart, CheckCircle, ArrowRight } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { Card, CardContent } from "@/components/ui/card";
 
 const WhatWeDo = () => {
   return (
@@ -16,95 +17,213 @@ const WhatWeDo = () => {
       <div className="min-h-screen bg-gradient-subtle">
       <Header />
       
-      <main className="pt-24 pb-16">
-        <div className="container mx-auto px-6">
-          {/* Hero Section */}
-          <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
-              What We Do
+      <main className="pt-24 pb-16 overflow-hidden">
+        {/* Hero Section with Animated Elements */}
+        <div className="container mx-auto px-6 mb-24">
+          <div className="text-center mb-12 animate-fade-in">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 rounded-full mb-6 border border-accent/20">
+              <Sparkles className="w-4 h-4 text-accent" />
+              <span className="text-sm font-medium text-accent-foreground">AI-Powered Life Story Creation</span>
+            </div>
+            
+            <h1 className="text-5xl md:text-7xl font-bold text-foreground mb-6 leading-tight">
+              Preserve Your Legacy{" "}
+              <span className="text-transparent bg-gradient-accent bg-clip-text">
+                Through Conversation
+              </span>
             </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              We help you preserve your life story through AI-powered conversations, 
-              turning your spoken memories into beautiful written narratives.
+            
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
+              Transform spoken memories into a professionally crafted autobiography. 
+              No writing required—just share your stories.
             </p>
           </div>
 
-          {/* Services Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-            <div className="p-6 bg-background rounded-xl border border-border/50 shadow-elegant">
-              <div className="w-12 h-12 bg-gradient-accent rounded-lg flex items-center justify-center mb-4">
-                <Mic className="w-6 h-6 text-accent-foreground" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Conversational Writing</h3>
-              <p className="text-muted-foreground">
-                Simply talk to our AI assistant. It asks thoughtful questions and helps you 
-                recall important memories naturally through conversation.
-              </p>
+          {/* Feature Cards with Hover Effects */}
+          <div className="grid md:grid-cols-3 gap-8 mb-16">
+            <Card className="group relative overflow-hidden border-2 hover:border-accent/50 transition-all duration-500 hover:shadow-glow animate-fade-in-up">
+              <CardContent className="p-8">
+                <div className="w-16 h-16 bg-gradient-accent rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <MessageCircle className="w-8 h-8 text-accent-foreground" />
+                </div>
+                <h3 className="text-2xl font-bold mb-4 text-foreground">Natural Conversations</h3>
+                <p className="text-muted-foreground leading-relaxed mb-4">
+                  Our AI asks thoughtful questions that spark memories. Choose voice recording or typing—whatever feels natural.
+                </p>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-accent flex-shrink-0" />
+                    <span>Voice or text input</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-accent flex-shrink-0" />
+                    <span>Guided conversation flow</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-accent flex-shrink-0" />
+                    <span>At your own pace</span>
+                  </li>
+                </ul>
+              </CardContent>
+              <div className="absolute inset-0 bg-gradient-accent opacity-0 group-hover:opacity-5 transition-opacity duration-500" />
+            </Card>
+
+            <Card className="group relative overflow-hidden border-2 hover:border-accent/50 transition-all duration-500 hover:shadow-glow animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+              <CardContent className="p-8">
+                <div className="w-16 h-16 bg-gradient-hero rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <Sparkles className="w-8 h-8 text-primary-foreground" />
+                </div>
+                <h3 className="text-2xl font-bold mb-4 text-foreground">AI-Crafted Narratives</h3>
+                <p className="text-muted-foreground leading-relaxed mb-4">
+                  Your words become beautifully written chapters that sound authentically you—professionally polished yet personally meaningful.
+                </p>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-accent flex-shrink-0" />
+                    <span>Maintains your voice</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-accent flex-shrink-0" />
+                    <span>Professional quality</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-accent flex-shrink-0" />
+                    <span>Unlimited chapters</span>
+                  </li>
+                </ul>
+              </CardContent>
+              <div className="absolute inset-0 bg-gradient-hero opacity-0 group-hover:opacity-5 transition-opacity duration-500" />
+            </Card>
+
+            <Card className="group relative overflow-hidden border-2 hover:border-accent/50 transition-all duration-500 hover:shadow-glow animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+              <CardContent className="p-8">
+                <div className="w-16 h-16 bg-gradient-accent rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <Heart className="w-8 h-8 text-accent-foreground" />
+                </div>
+                <h3 className="text-2xl font-bold mb-4 text-foreground">Family Legacy</h3>
+                <p className="text-muted-foreground leading-relaxed mb-4">
+                  Create a treasured family heirloom. Multiple family members can contribute, ensuring a complete story.
+                </p>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-accent flex-shrink-0" />
+                    <span>Printed hardcover book</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-accent flex-shrink-0" />
+                    <span>Multiple perspectives</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-accent flex-shrink-0" />
+                    <span>Photo integration</span>
+                  </li>
+                </ul>
+              </CardContent>
+              <div className="absolute inset-0 bg-gradient-accent opacity-0 group-hover:opacity-5 transition-opacity duration-500" />
+            </Card>
+          </div>
+        </div>
+
+        {/* How It Works - Visual Timeline */}
+        <div className="bg-background py-20">
+          <div className="container mx-auto px-6">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+                Your Journey to a Published Autobiography
+              </h2>
+              <p className="text-xl text-muted-foreground">Simple, guided, and completely personalized</p>
             </div>
 
-            <div className="p-6 bg-background rounded-xl border border-border/50 shadow-elegant">
-              <div className="w-12 h-12 bg-gradient-accent rounded-lg flex items-center justify-center mb-4">
-                <BookOpen className="w-6 h-6 text-accent-foreground" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Professional Narratives</h3>
-              <p className="text-muted-foreground">
-                Your spoken words are transformed into beautifully written chapters, 
-                maintaining your voice while ensuring professional quality.
-              </p>
-            </div>
+            <div className="max-w-5xl mx-auto">
+              <div className="grid md:grid-cols-3 gap-12 relative">
+                {/* Connection Line */}
+                <div className="hidden md:block absolute top-24 left-0 right-0 h-0.5 bg-gradient-to-r from-accent via-primary to-accent opacity-20" />
+                
+                {/* Step 1 */}
+                <div className="relative animate-slide-in-right">
+                  <div className="flex flex-col items-center text-center">
+                    <div className="relative mb-6">
+                      <div className="w-24 h-24 bg-gradient-accent rounded-full flex items-center justify-center shadow-glow animate-glow-pulse">
+                        <span className="text-4xl font-bold text-accent-foreground">1</span>
+                      </div>
+                      <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                        <Mic className="w-4 h-4 text-primary-foreground" />
+                      </div>
+                    </div>
+                    <h3 className="text-2xl font-bold mb-3 text-foreground">Share Your Stories</h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Start a conversation about any memory. Our AI guides you with thoughtful questions, 
+                      making storytelling natural and enjoyable.
+                    </p>
+                  </div>
+                </div>
 
-            <div className="p-6 bg-background rounded-xl border border-border/50 shadow-elegant">
-              <div className="w-12 h-12 bg-gradient-accent rounded-lg flex items-center justify-center mb-4">
-                <Gift className="w-6 h-6 text-accent-foreground" />
+                {/* Step 2 */}
+                <div className="relative animate-slide-in-right" style={{ animationDelay: '0.2s' }}>
+                  <div className="flex flex-col items-center text-center">
+                    <div className="relative mb-6">
+                      <div className="w-24 h-24 bg-gradient-hero rounded-full flex items-center justify-center shadow-elegant">
+                        <span className="text-4xl font-bold text-primary-foreground">2</span>
+                      </div>
+                      <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-accent rounded-full flex items-center justify-center">
+                        <Sparkles className="w-4 h-4 text-accent-foreground" />
+                      </div>
+                    </div>
+                    <h3 className="text-2xl font-bold mb-3 text-foreground">AI Crafts Your Chapters</h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Advanced AI transforms your conversations into beautifully written chapters—
+                      professionally polished while staying true to your authentic voice.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step 3 */}
+                <div className="relative animate-slide-in-right" style={{ animationDelay: '0.4s' }}>
+                  <div className="flex flex-col items-center text-center">
+                    <div className="relative mb-6">
+                      <div className="w-24 h-24 bg-gradient-accent rounded-full flex items-center justify-center shadow-glow">
+                        <span className="text-4xl font-bold text-accent-foreground">3</span>
+                      </div>
+                      <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                        <BookOpen className="w-4 h-4 text-primary-foreground" />
+                      </div>
+                    </div>
+                    <h3 className="text-2xl font-bold mb-3 text-foreground">Receive Your Book</h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Get your autobiography delivered—digital instantly, printed hardcover in 2-3 weeks. 
+                      A lasting legacy for generations to treasure.
+                    </p>
+                  </div>
+                </div>
               </div>
-              <h3 className="text-xl font-semibold mb-3">Legacy Preservation</h3>
-              <p className="text-muted-foreground">
-                Create a lasting legacy for your family and future generations 
-                with stories that capture your unique perspective and experiences.
-              </p>
             </div>
           </div>
+        </div>
 
-          {/* Process Section */}
-          <div className="text-center">
-            <h2 className="text-3xl font-bold text-foreground mb-8">How It Works</h2>
-            <div className="grid md:grid-cols-3 gap-8 mb-12">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl font-bold text-primary">1</span>
-                </div>
-                <h3 className="text-lg font-semibold mb-2">Start Talking</h3>
-                <p className="text-muted-foreground">
-                  Begin with any memory or story. Our AI will guide you with thoughtful questions.
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl font-bold text-primary">2</span>
-                </div>
-                <h3 className="text-lg font-semibold mb-2">AI Crafts Your Story</h3>
-                <p className="text-muted-foreground">
-                  Your words are transformed into compelling narratives while preserving your voice.
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl font-bold text-primary">3</span>
-                </div>
-                <h3 className="text-lg font-semibold mb-2">Share Your Legacy</h3>
-                <p className="text-muted-foreground">
-                  Receive your completed autobiography to share with loved ones.
-                </p>
-              </div>
+        {/* CTA Section */}
+        <div className="container mx-auto px-6 py-20">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-hero p-12 md:p-16 shadow-elegant">
+            <div className="relative z-10 text-center max-w-3xl mx-auto">
+              <Gift className="w-16 h-16 text-accent mx-auto mb-6 animate-float" />
+              <h2 className="text-4xl md:text-5xl font-bold text-primary-foreground mb-6">
+                Start Your Free Chapter Today
+              </h2>
+              <p className="text-xl text-primary-foreground/90 mb-8 leading-relaxed">
+                No credit card required. Begin preserving your memories in minutes.
+              </p>
+              <Button 
+                size="lg" 
+                className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-12 py-6 text-lg rounded-full shadow-glow hover:scale-105 transition-transform duration-300"
+                onClick={() => window.location.href = '/auth'}
+              >
+                Begin Your Story
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
             </div>
-
-            <Button 
-              size="lg" 
-              className="bg-gradient-accent text-accent-foreground font-semibold px-8 py-3"
-              onClick={() => window.location.href = '/auth'}
-            >
-              Start Your Story Today
-            </Button>
+            
+            {/* Decorative elements */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary-glow/10 rounded-full blur-3xl" />
           </div>
         </div>
       </main>
