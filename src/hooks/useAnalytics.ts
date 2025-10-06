@@ -14,7 +14,7 @@ interface AnalyticsMilestones {
   startedConversation?: boolean;
 }
 
-const BATCH_INTERVAL = 30000; // 30 seconds
+const BATCH_INTERVAL = 10000; // 10 seconds
 const SESSION_ID_KEY = 'analytics_session_id';
 
 // Generate or retrieve session ID
@@ -45,24 +45,17 @@ export function useAnalytics() {
       milestones,
     };
 
-    // Use sendBeacon for reliability (works even during page unload)
-    const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-    const sent = navigator.sendBeacon(
-      `https://keadkwromhlyvoyxvcmi.supabase.co/functions/v1/analytics-tracker`,
-      blob
-    );
-
-    if (!sent) {
-      // Fallback to fetch if sendBeacon fails
-      try {
-        await fetch(`https://keadkwromhlyvoyxvcmi.supabase.co/functions/v1/analytics-tracker`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-      } catch (error) {
-        console.error('Analytics tracking failed:', error);
-      }
+    try {
+      await fetch(`https://keadkwromhlyvoyxvcmi.supabase.co/functions/v1/analytics-tracker`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlYWRrd3JvbWhseXZveXh2Y21pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM1MTYyODEsImV4cCI6MjA2OTA5MjI4MX0.o0sJaiKANQ5-wuvzFvAWo4C5bKElf6DwMgtfEY39hEQ',
+        },
+        body: JSON.stringify(payload),
+      });
+    } catch (error) {
+      console.error('Analytics tracking failed:', error);
     }
 
     // Clear batch
