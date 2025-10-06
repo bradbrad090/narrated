@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Progress } from '@/components/ui/progress';
 import { PhotoUploadModal } from './PhotoUploadModal';
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -328,6 +329,15 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
           bookTier={bookTier}
           currentPhotoCount={photoCount}
         />
+
+        {/* Progress Bar */}
+        <div className="mb-3">
+          <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
+            <span className="font-medium">Chapter Progress</span>
+            <span>{wordCount.toLocaleString()} / 2,500 words ({Math.min(Math.round((wordCount / 2500) * 100), 100)}%)</span>
+          </div>
+          <Progress value={Math.min((wordCount / 2500) * 100, 100)} className="h-2" />
+        </div>
 
         {/* Metadata */}
         <div className="flex items-center justify-between text-xs text-muted-foreground">
