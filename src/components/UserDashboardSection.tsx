@@ -202,7 +202,7 @@ const UserDashboardSection = ({ user }: UserDashboardSectionProps) => {
   }
 
   return (
-    <section className="relative min-h-screen bg-gradient-subtle py-16">
+    <section className="relative min-h-screen bg-gradient-subtle pt-28 md:pt-32 pb-16">
       <div className="container mx-auto px-4">
         <div className="mb-8 text-center">
           <h2 className="text-3xl font-bold mb-2">Dashboard</h2>
