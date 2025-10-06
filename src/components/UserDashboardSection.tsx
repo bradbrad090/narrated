@@ -231,128 +231,130 @@ const UserDashboardSection = ({ user }: UserDashboardSectionProps) => {
           </Card>
         </div>
 
-        <div>
-          <h3 className="text-xl font-semibold mb-4 text-center">Your Books</h3>
-          {books.length === 0 ? (
-            <Card>
-              <CardContent className="text-center py-8">
+        <Card className="max-w-6xl mx-auto">
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">Your Books</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {books.length === 0 ? (
+              <div className="text-center py-8">
                 <Book className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground">
                   You haven't created any books yet. Start your first autobiography today!
                 </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {books.map((book) => {
-                const wordCount = getWordCount(book);
-                const chapterCount = getChapterCount(book);
-                const estimatedPages = getEstimatedPages(wordCount);
-                
-                return (
-                  <Card key={book.id} className="hover:shadow-md transition-shadow">
-                    <CardHeader>
-                      {editingBookId === book.id ? (
-                        <div className="flex items-center gap-2">
-                          <Input
-                            value={editingTitle}
-                            onChange={(e) => setEditingTitle(e.target.value)}
-                            className="flex-1"
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                handleRenameBook(book.id, editingTitle);
-                              } else if (e.key === 'Escape') {
-                                cancelEditing();
-                              }
-                            }}
-                            autoFocus
-                          />
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            onClick={() => handleRenameBook(book.id, editingTitle)}
-                          >
-                            <Check className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            onClick={cancelEditing}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
+              </div>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {books.map((book) => {
+                  const wordCount = getWordCount(book);
+                  const chapterCount = getChapterCount(book);
+                  const estimatedPages = getEstimatedPages(wordCount);
+                  
+                  return (
+                    <Card key={book.id} className="hover:shadow-md transition-shadow">
+                      <CardHeader>
+                        {editingBookId === book.id ? (
+                          <div className="flex items-center gap-2">
+                            <Input
+                              value={editingTitle}
+                              onChange={(e) => setEditingTitle(e.target.value)}
+                              className="flex-1"
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  handleRenameBook(book.id, editingTitle);
+                                } else if (e.key === 'Escape') {
+                                  cancelEditing();
+                                }
+                              }}
+                              autoFocus
+                            />
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={() => handleRenameBook(book.id, editingTitle)}
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={cancelEditing}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between">
+                            <CardTitle className="text-lg">{book.title}</CardTitle>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => startEditing(book.id, book.title)}
+                              className="bg-yellow-400/20 hover:bg-yellow-400/30"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
+                        <div className="grid grid-cols-3 gap-4 mt-3">
+                          <div className="text-center">
+                            <p className="text-2xl font-semibold text-primary">{chapterCount}</p>
+                            <p className="text-xs text-muted-foreground">Chapters</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-2xl font-semibold text-primary">{wordCount.toLocaleString()}</p>
+                            <p className="text-xs text-muted-foreground">Words</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-2xl font-semibold text-primary">{estimatedPages}</p>
+                            <p className="text-xs text-muted-foreground">Est. Pages</p>
+                          </div>
                         </div>
-                      ) : (
-                        <div className="flex items-center justify-between">
-                          <CardTitle className="text-lg">{book.title}</CardTitle>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => startEditing(book.id, book.title)}
-                            className="bg-yellow-400/20 hover:bg-yellow-400/30"
-                          >
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex justify-between items-center mb-4">
+                          <Badge variant={book.tier as "free" | "basic" | "standard" | "premium"}>
+                            {book.tier.charAt(0).toUpperCase() + book.tier.slice(1)} Plan
+                          </Badge>
+                          <p className="text-sm text-muted-foreground">
+                            Created {new Date(book.created_at).toLocaleDateString()}
+                          </p>
                         </div>
-                      )}
-                      <div className="grid grid-cols-3 gap-4 mt-3">
-                        <div className="text-center">
-                          <p className="text-2xl font-semibold text-primary">{chapterCount}</p>
-                          <p className="text-xs text-muted-foreground">Chapters</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-2xl font-semibold text-primary">{wordCount.toLocaleString()}</p>
-                          <p className="text-xs text-muted-foreground">Words</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-2xl font-semibold text-primary">{estimatedPages}</p>
-                          <p className="text-xs text-muted-foreground">Est. Pages</p>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex justify-between items-center mb-4">
-                        <Badge variant={book.tier as "free" | "basic" | "standard" | "premium"}>
-                          {book.tier.charAt(0).toUpperCase() + book.tier.slice(1)} Plan
-                        </Badge>
-                        <p className="text-sm text-muted-foreground">
-                          Created {new Date(book.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        {book.book_profiles && book.book_profiles.length > 0 ? (
+                        <div className="flex gap-2">
+                          {book.book_profiles && book.book_profiles.length > 0 ? (
+                            <Button 
+                              variant="outline" 
+                              className="flex-1"
+                              onClick={() => navigate(`/write/${book.id}`)}
+                            >
+                              Continue Writing
+                            </Button>
+                          ) : (
+                            <Button 
+                              variant="hero" 
+                              className="flex-1"
+                              onClick={() => navigate(`/write/${book.id}?profile=true`)}
+                            >
+                              Build Your Profile
+                            </Button>
+                          )}
                           <Button 
                             variant="outline" 
-                            className="flex-1"
-                            onClick={() => navigate(`/write/${book.id}`)}
+                            size="icon"
+                            onClick={() => handleDeleteBook(book.id)}
+                            className="text-destructive hover:text-destructive"
                           >
-                            Continue Writing
+                            <Trash2 className="h-4 w-4" />
                           </Button>
-                        ) : (
-                          <Button 
-                            variant="hero" 
-                            className="flex-1"
-                            onClick={() => navigate(`/write/${book.id}?profile=true`)}
-                          >
-                            Build Your Profile
-                          </Button>
-                        )}
-                        <Button 
-                          variant="outline" 
-                          size="icon"
-                          onClick={() => handleDeleteBook(book.id)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
-        </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </section>
   );
