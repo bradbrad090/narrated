@@ -69,6 +69,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
   const [photoModalOpen, setPhotoModalOpen] = useState(false);
   const [photoCount, setPhotoCount] = useState(0);
   const [bookTier, setBookTier] = useState<string>('free');
+  const [conversationWordCount, setConversationWordCount] = useState(0);
   
   const {
     attributes,
@@ -79,9 +80,9 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
     isDragging,
   } = useSortable({ id: chapter.id });
 
-  // Fetch photo count and book tier
+  // Fetch photo count, book tier, and conversation word count
   useEffect(() => {
-    const fetchPhotoData = async () => {
+    const fetchChapterData = async () => {
       const { count } = await supabase
         .from('chapter_photos')
         .select('*', { count: 'exact', head: true })
@@ -96,14 +97,38 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
         .maybeSingle();
       
       if (bookData) setBookTier(bookData.tier);
+
+      // Fetch conversation word count
+      const { data: conversations } = await supabase
+        .from('chat_histories')
+        .select('messages')
+        .eq('chapter_id', chapter.id);
+
+      if (conversations && conversations.length > 0) {
+        let totalWords = 0;
+        conversations.forEach((conv) => {
+          const messages = conv.messages as Array<{ role: string; content: string }>;
+          if (messages && Array.isArray(messages)) {
+            messages
+              .filter((msg) => msg.role === 'user')
+              .forEach((msg) => {
+                if (msg.content?.trim()) {
+                  totalWords += msg.content.trim().split(/\s+/).length;
+                }
+              });
+          }
+        });
+        setConversationWordCount(totalWords);
+      } else {
+        setConversationWordCount(0);
+      }
     };
 
-    fetchPhotoData();
+    fetchChapterData();
   }, [chapter.id, chapter.book_id, photoModalOpen]);
 
   const getWordCount = () => {
-    if (!chapter.content?.trim()) return 0;
-    return chapter.content.trim().split(/\s+/).length;
+    return conversationWordCount;
   };
 
   const getPageCount = () => {
