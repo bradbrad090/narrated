@@ -27,7 +27,7 @@ const WhatWeDo = () => {
             
             <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
               Transform spoken memories into a professionally crafted autobiography. 
-              No writing required—just share your stories.
+              No writing required. Just share your stories.
             </p>
           </div>
 
@@ -40,7 +40,7 @@ const WhatWeDo = () => {
                 </div>
                 <h3 className="text-2xl font-bold mb-4 text-foreground">Natural Conversations</h3>
                 <p className="text-muted-foreground leading-relaxed mb-4">
-                  Our AI asks thoughtful questions that spark memories. Choose voice recording or typing—whatever feels natural.
+                  Answer thoughtful questions that spark memories, or simply talk about a story you wish to share. Choose voice recording or typing. Whatever feels natural.
                 </p>
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   <li className="flex items-center gap-2">
@@ -67,7 +67,7 @@ const WhatWeDo = () => {
                 </div>
                 <h3 className="text-2xl font-bold mb-4 text-foreground">AI-Crafted Narratives</h3>
                 <p className="text-muted-foreground leading-relaxed mb-4">
-                  Your words become beautifully written chapters that sound authentically you—professionally polished yet personally meaningful.
+                  Your words become beautifully written chapters that sound authentically you. Professionally polished yet personally meaningful.
                 </p>
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   <li className="flex items-center gap-2">
@@ -103,7 +103,7 @@ const WhatWeDo = () => {
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-accent flex-shrink-0" />
-                    <span>Multiple perspectives</span>
+                    <span>Add recipes</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-accent flex-shrink-0" />
@@ -144,7 +144,7 @@ const WhatWeDo = () => {
                     </div>
                     <h3 className="text-2xl font-bold mb-3 text-foreground">Share Your Stories</h3>
                     <p className="text-muted-foreground leading-relaxed">
-                      Start a conversation about any memory. Our AI guides you with thoughtful questions, 
+                      Start a conversation about any memory. We guide you with thoughtful questions, 
                       making storytelling natural and enjoyable.
                     </p>
                   </div>
@@ -163,7 +163,7 @@ const WhatWeDo = () => {
                     </div>
                     <h3 className="text-2xl font-bold mb-3 text-foreground">AI Crafts Your Chapters</h3>
                     <p className="text-muted-foreground leading-relaxed">
-                      Advanced AI transforms your conversations into beautifully written chapters—
+                      Our editing team transform your conversations into beautifully written chapters. 
                       professionally polished while staying true to your authentic voice.
                     </p>
                   </div>
@@ -182,7 +182,7 @@ const WhatWeDo = () => {
                     </div>
                     <h3 className="text-2xl font-bold mb-3 text-foreground">Receive Your Book</h3>
                     <p className="text-muted-foreground leading-relaxed">
-                      Get your autobiography delivered—digital instantly, printed hardcover in 2-3 weeks. 
+                      Get your autobiography delivered, digital within 3 business days, printed hardcover in 2-3 weeks. 
                       A lasting legacy for generations to treasure.
                     </p>
                   </div>
