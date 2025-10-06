@@ -69,15 +69,32 @@ const Dashboard = () => {
             .select('*', { count: 'exact', head: true })
             .eq('book_id', book.id);
 
-          const { data: wordCountData } = await supabase
+          // Get all chapters for this book
+          const { data: chaptersData } = await supabase
             .from('chapters')
-            .select('content')
+            .select('id')
             .eq('book_id', book.id);
 
-          const wordCount = (wordCountData || []).reduce((total, chapter) => {
-            const content = chapter.content || '';
-            return total + content.split(/\s+/).filter(word => word.length > 0).length;
-          }, 0);
+          const chapterIds = (chaptersData || []).map(ch => ch.id);
+
+          // Fetch all chat histories for this book's chapters
+          let wordCount = 0;
+          if (chapterIds.length > 0) {
+            const { data: chatData } = await supabase
+              .from('chat_histories')
+              .select('messages')
+              .in('chapter_id', chapterIds);
+
+            // Sum up words from all user messages in conversations
+            wordCount = (chatData || []).reduce((total, chat) => {
+              const messages = chat.messages as Array<{ role: string; content: string }>;
+              const userMessages = messages?.filter(msg => msg.role === 'user') || [];
+              const chatWordCount = userMessages.reduce((sum, msg) => {
+                return sum + (msg.content?.split(/\s+/).filter(word => word.length > 0).length || 0);
+              }, 0);
+              return total + chatWordCount;
+            }, 0);
+          }
 
           return {
             ...book,
