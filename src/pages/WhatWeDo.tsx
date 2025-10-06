@@ -203,14 +203,16 @@ const WhatWeDo = () => {
               <p className="text-xl text-primary-foreground/90 mb-8 leading-relaxed">
                 No credit card required. Begin preserving your memories in minutes.
               </p>
-              <Button 
-                size="lg" 
-                className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-12 py-6 text-lg rounded-full shadow-glow hover:scale-105 transition-transform duration-300"
-                onClick={() => window.location.href = '/auth'}
-              >
-                Begin Your Story
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
+              <div className="flex justify-center">
+                <Button 
+                  size="lg" 
+                  className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-12 py-6 text-lg rounded-full shadow-glow hover:scale-105 transition-transform duration-300 w-full sm:w-auto"
+                  onClick={() => window.location.href = '/auth'}
+                >
+                  Begin Your Story
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </div>
             </div>
             
             {/* Decorative elements */}
