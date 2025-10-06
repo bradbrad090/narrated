@@ -21,16 +21,8 @@ const WhatWeDo = () => {
         {/* Hero Section with Animated Elements */}
         <div className="container mx-auto px-6 mb-24">
           <div className="text-center mb-12 animate-fade-in">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 rounded-full mb-6 border border-accent/20">
-              <Sparkles className="w-4 h-4 text-accent" />
-              <span className="text-sm font-medium text-accent-foreground">AI-Powered Life Story Creation</span>
-            </div>
-            
             <h1 className="text-5xl md:text-7xl font-bold text-foreground mb-6 leading-tight">
-              Preserve Your Legacy{" "}
-              <span className="text-transparent bg-gradient-accent bg-clip-text">
-                Through Conversation
-              </span>
+              Preserve Your Legacy Through Conversation
             </h1>
             
             <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
