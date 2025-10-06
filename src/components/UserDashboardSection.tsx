@@ -205,7 +205,7 @@ const UserDashboardSection = ({ user }: UserDashboardSectionProps) => {
 
   const getWordCount = (book: any) => book.wordCount || 0;
   const getChapterCount = (book: any) => book.chapters?.length || 0;
-  const getEstimatedPages = (wordCount: number) => Math.ceil(wordCount / 250);
+  const getEstimatedPages = (wordCount: number) => Math.ceil((wordCount * 30) / 250);
 
   if (loading) {
     return (
