@@ -304,12 +304,19 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
           )}
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex justify-end mb-3">
+        {/* Progress Bar and Add Photos Button */}
+        <div className="flex items-center gap-3 mb-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+              <span className="font-medium">Progress</span>
+              <span className="text-[10px]">{wordCount.toLocaleString()} / 2,500 ({Math.min(Math.round((wordCount / 2500) * 100), 100)}%)</span>
+            </div>
+            <Progress value={Math.min((wordCount / 2500) * 100, 100)} className="h-2" />
+          </div>
           <Button
             variant="default"
             size="sm"
-            className="h-7 text-xs px-2"
+            className="h-8 text-xs px-3 shrink-0"
             onClick={(e) => {
               e.stopPropagation();
               setPhotoModalOpen(true);
@@ -329,15 +336,6 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
           bookTier={bookTier}
           currentPhotoCount={photoCount}
         />
-
-        {/* Progress Bar */}
-        <div className="mb-3">
-          <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
-            <span className="font-medium">Chapter Progress</span>
-            <span>{wordCount.toLocaleString()} / 2,500 words ({Math.min(Math.round((wordCount / 2500) * 100), 100)}%)</span>
-          </div>
-          <Progress value={Math.min((wordCount / 2500) * 100, 100)} className="h-2" />
-        </div>
 
         {/* Metadata */}
         <div className="flex items-center justify-between text-xs text-muted-foreground">
