@@ -26,7 +26,7 @@ const HeroSection = () => {
     navigate(`/auth?email=${encodeURIComponent(email.trim())}&signup=true`);
   };
   return (
-    <section className="relative min-h-[90vh] flex items-center justify-center bg-gradient-subtle overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center bg-gradient-subtle overflow-hidden">
       {/* Background image with overlay */}
       <div className="absolute inset-0">
         <img 
