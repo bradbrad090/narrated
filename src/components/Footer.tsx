@@ -42,15 +42,15 @@ const Footer = () => {
           <div className="text-center md:text-left">
             <h4 className="font-bold text-base mb-4 text-primary-foreground">Contact</h4>
             <ul className="space-y-2 text-sm text-primary-foreground/80">
+              <li>
+                <a href="/contact" className="hover:text-accent transition-colors">
+                  Send us a message
+                </a>
+              </li>
               <li className="flex items-center gap-2 justify-center md:justify-start">
                 <Mail className="w-4 h-4 flex-shrink-0" />
                 <a href="mailto:contact@narrated.com.au" className="hover:text-accent transition-colors">
                   contact@narrated.com.au
-                </a>
-              </li>
-              <li>
-                <a href="/contact" className="hover:text-accent transition-colors">
-                  Send us a message
                 </a>
               </li>
             </ul>
