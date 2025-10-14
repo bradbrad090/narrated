@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { ChevronDown } from "lucide-react";
 import heroImage from "@/assets/hero-family-portrait.jpg";
 
 const HeroSection = () => {
@@ -25,7 +26,7 @@ const HeroSection = () => {
     navigate(`/auth?email=${encodeURIComponent(email.trim())}&signup=true`);
   };
   return (
-    <section className="relative min-h-screen flex items-center justify-center bg-gradient-subtle overflow-hidden">
+    <section className="relative min-h-[90vh] flex items-center justify-center bg-gradient-subtle overflow-hidden">
       {/* Background image with overlay */}
       <div className="absolute inset-0">
         <img 
@@ -86,6 +87,11 @@ const HeroSection = () => {
             </div>
           </div>
         </div>
+      </div>
+      
+      {/* Scroll indicator */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+        <ChevronDown className="w-8 h-8 text-primary-foreground/70" />
       </div>
       
       {/* Subtle glow effect */}
