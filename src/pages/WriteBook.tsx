@@ -7,7 +7,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Book, LogOut, Save, Sparkles, ArrowLeft, Plus, FileText, Trash2, Edit2, Type, Menu, Eye, EyeOff, ChevronDown, ChevronUp, Clock, CheckCircle2, Circle, MoreVertical, GripVertical, Award } from "lucide-react";
+import {
+  Book,
+  LogOut,
+  Save,
+  Sparkles,
+  ArrowLeft,
+  Plus,
+  FileText,
+  Trash2,
+  Edit2,
+  Type,
+  Menu,
+  Eye,
+  EyeOff,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  CheckCircle2,
+  Circle,
+  MoreVertical,
+  GripVertical,
+  Award,
+} from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAnalyticsContext } from "@/components/AnalyticsProvider";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
@@ -25,12 +47,20 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { DndContext, closestCenter, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
-import { updateChapterOrder } from '@/services/chapterService';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { DndContext, closestCenter, DragEndEvent, DragStartEvent, DragOverlay } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
+import { updateChapterOrder } from "@/services/chapterService";
 import Footer from "@/components/Footer";
-
 
 interface Chapter {
   id: string;
@@ -48,15 +78,15 @@ interface Chapter {
 const WriteBook = () => {
   const { bookId: paramBookId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
-  const bookId = paramBookId || searchParams.get('book_id');
-  const profileMode = searchParams.get('profile') === 'true';
+  const bookId = paramBookId || searchParams.get("book_id");
+  const profileMode = searchParams.get("profile") === "true";
   const [user, setUser] = useState<User | null>(null);
   const [book, setBook] = useState<any>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [currentChapter, setCurrentChapter] = useState<Chapter | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  
+
   const [showChapterRefinement, setShowChapterRefinement] = useState(false);
   const [bookProfile, setBookProfile] = useState<any>(null);
   const [isBookTierCollapsed, setIsBookTierCollapsed] = useState(true);
@@ -86,25 +116,25 @@ const WriteBook = () => {
   } = useConversationState({
     userId: user?.id || null,
     bookId: book?.id || null,
-    chapterId: currentChapter?.id || null
+    chapterId: currentChapter?.id || null,
   });
 
   // Filter chapters based on tier - free tier sees only 1 chapter
-  const visibleChapters = book?.tier === 'free' ? chapters.slice(0, 1) : chapters;
+  const visibleChapters = book?.tier === "free" ? chapters.slice(0, 1) : chapters;
 
   // Fetch conversation counts for all chapters
   const fetchChapterConversations = async (userId: string) => {
     try {
       const { data, error } = await supabase
-        .from('chat_histories')
-        .select('chapter_id')
-        .eq('user_id', userId)
-        .not('chapter_id', 'is', null);
+        .from("chat_histories")
+        .select("chapter_id")
+        .eq("user_id", userId)
+        .not("chapter_id", "is", null);
 
       if (error) throw error;
 
       const conversationCounts = new Map<string, number>();
-      data?.forEach(record => {
+      data?.forEach((record) => {
         if (record.chapter_id) {
           const count = conversationCounts.get(record.chapter_id) || 0;
           conversationCounts.set(record.chapter_id, count + 1);
@@ -113,7 +143,7 @@ const WriteBook = () => {
 
       setChapterConversations(conversationCounts);
     } catch (error) {
-      console.error('Error fetching chapter conversations:', error);
+      console.error("Error fetching chapter conversations:", error);
     }
   };
 
@@ -130,17 +160,17 @@ const WriteBook = () => {
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (!session?.user) {
-          navigate("/auth");
-        } else {
-          setUser(session.user);
-          fetchBookAndChapters(session.user.id);
-          fetchChapterConversations(session.user.id);
-        }
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!session?.user) {
+        navigate("/auth");
+      } else {
+        setUser(session.user);
+        fetchBookAndChapters(session.user.id);
+        fetchChapterConversations(session.user.id);
       }
-    );
+    });
 
     return () => subscription.unsubscribe();
   }, [navigate, bookId]);
@@ -155,7 +185,7 @@ const WriteBook = () => {
   // Set book tier collapsed state based on tier (expanded for free, collapsed for paid)
   useEffect(() => {
     if (book) {
-      setIsBookTierCollapsed(book.tier !== 'free');
+      setIsBookTierCollapsed(book.tier !== "free");
     }
   }, [book]);
 
@@ -165,8 +195,8 @@ const WriteBook = () => {
     // Always close the modal when profile is processed, regardless of specific fields
     if (profileMode && profile && profile.question_10_answer) {
       // Track milestone
-      trackMilestone('startedProfile');
-      
+      trackMilestone("startedProfile");
+
       // Profile is complete, remove profile parameter and show success
       setSearchParams(new URLSearchParams());
       setShowProfileModal(false);
@@ -177,20 +207,18 @@ const WriteBook = () => {
     }
   };
 
-
-
   const fetchBookAndChapters = async (userId: string) => {
     try {
       // Fetch book
       const { data: bookData, error: bookError } = await supabase
-        .from('books')
-        .select('*')
-        .eq('id', bookId)
-        .eq('user_id', userId)
+        .from("books")
+        .select("*")
+        .eq("id", bookId)
+        .eq("user_id", userId)
         .maybeSingle();
 
       if (bookError) throw bookError;
-      
+
       if (!bookData) {
         toast({
           title: "Book not found",
@@ -200,18 +228,18 @@ const WriteBook = () => {
         navigate("/dashboard");
         return;
       }
-      
+
       setBook(bookData);
 
       // Fetch book profile
       const { data: profileData, error: profileError } = await supabase
-        .from('book_profiles')
-        .select('*')
-        .eq('book_id', bookId)
-        .eq('user_id', userId)
+        .from("book_profiles")
+        .select("*")
+        .eq("book_id", bookId)
+        .eq("user_id", userId)
         .maybeSingle();
 
-      if (profileError && profileError.code !== 'PGRST116') {
+      if (profileError && profileError.code !== "PGRST116") {
         // Error fetching book profile, continuing without it
       } else {
         setBookProfile(profileData);
@@ -219,22 +247,20 @@ const WriteBook = () => {
 
       // Fetch chapters
       const { data: chaptersData, error: chaptersError } = await supabase
-        .from('chapters')
-        .select('*')
-        .eq('book_id', bookId)
-        .eq('user_id', userId)
-        .order('chapter_number', { ascending: true });
+        .from("chapters")
+        .select("*")
+        .eq("book_id", bookId)
+        .eq("user_id", userId)
+        .order("chapter_number", { ascending: true });
 
       if (chaptersError) throw chaptersError;
 
       if (chaptersData && chaptersData.length > 0) {
         setChapters(chaptersData);
         setCurrentChapter(chaptersData[0]);
-        
+
         // Sync completedChapters with database state
-        const submittedChapterIds = chaptersData
-          .filter(chapter => chapter.is_submitted)
-          .map(chapter => chapter.id);
+        const submittedChapterIds = chaptersData.filter((chapter) => chapter.is_submitted).map((chapter) => chapter.id);
         setCompletedChapters(new Set(submittedChapterIds));
       } else {
         // Create default chapters if none exist (1 for free tier, all for paid)
@@ -268,21 +294,21 @@ const WriteBook = () => {
     "Major life events",
     "Later years",
     "Wisdom and reflections",
-    "Legacy and future"
+    "Legacy and future",
   ];
 
   const createDefaultChapters = async (userId: string, tier: string) => {
     // Only create 1 chapter for free tier, all for paid tiers
-    const chapterCount = tier === 'free' ? 1 : defaultChapterTitles.length;
+    const chapterCount = tier === "free" ? 1 : defaultChapterTitles.length;
     const defaultChapters = defaultChapterTitles.slice(0, chapterCount).map((title) => ({ title, description: "" }));
 
     try {
       // Double-check that chapters don't already exist to prevent duplicates
       const { data: existingChapters } = await supabase
-        .from('chapters')
-        .select('id')
-        .eq('book_id', bookId!)
-        .eq('user_id', userId);
+        .from("chapters")
+        .select("id")
+        .eq("book_id", bookId!)
+        .eq("user_id", userId);
 
       if (existingChapters && existingChapters.length > 0) {
         return;
@@ -293,24 +319,21 @@ const WriteBook = () => {
         user_id: userId,
         chapter_number: index + 1,
         title: chapter.title,
-        content: chapter.description
+        content: chapter.description,
       }));
 
-      const { data, error } = await supabase
-        .from('chapters')
-        .insert(chaptersToInsert)
-        .select();
+      const { data, error } = await supabase.from("chapters").insert(chaptersToInsert).select();
 
       if (error) {
         // If it's a duplicate key error, try to fetch existing chapters instead
-        if (error.message.includes('duplicate key')) {
+        if (error.message.includes("duplicate key")) {
           const { data: existingData } = await supabase
-            .from('chapters')
-            .select('*')
-            .eq('book_id', bookId!)
-            .eq('user_id', userId)
-            .order('chapter_number', { ascending: true });
-          
+            .from("chapters")
+            .select("*")
+            .eq("book_id", bookId!)
+            .eq("user_id", userId)
+            .order("chapter_number", { ascending: true });
+
           if (existingData && existingData.length > 0) {
             setChapters(existingData as Chapter[]);
             setCurrentChapter(existingData[0] as Chapter);
@@ -329,7 +352,7 @@ const WriteBook = () => {
         description: "Your first chapter has been created. Click 'Add Chapter' to create more.",
       });
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
       toast({
         title: "Error creating chapters",
         description: errorMessage,
@@ -341,19 +364,19 @@ const WriteBook = () => {
   const createNewChapter = async (userId: string, chapterNumber: number, title: string) => {
     try {
       // Check tier limits for free accounts
-      if (book?.tier === 'free' && chapters.length >= 1) {
+      if (book?.tier === "free" && chapters.length >= 1) {
         setShowUpgrade(true);
         return;
       }
 
       const { data, error } = await supabase
-        .from('chapters')
+        .from("chapters")
         .insert({
           book_id: bookId!,
           user_id: userId,
           chapter_number: chapterNumber,
           title: title,
-          content: ""
+          content: "",
         })
         .select()
         .single();
@@ -361,7 +384,7 @@ const WriteBook = () => {
       if (error) throw error;
 
       const newChapter = data as Chapter;
-      setChapters(prev => [...prev, newChapter].sort((a, b) => a.chapter_number - b.chapter_number));
+      setChapters((prev) => [...prev, newChapter].sort((a, b) => a.chapter_number - b.chapter_number));
       setCurrentChapter(newChapter);
 
       toast({
@@ -377,13 +400,12 @@ const WriteBook = () => {
     }
   };
 
-
   const handleAddChapter = () => {
     if (!user) return;
     // Find the highest chapter number and add 1 to avoid duplicates
-    const maxChapterNumber = Math.max(...chapters.map(c => c.chapter_number), 0);
+    const maxChapterNumber = Math.max(...chapters.map((c) => c.chapter_number), 0);
     const nextChapterNumber = maxChapterNumber + 1;
-    
+
     // Use default title if available, otherwise use generic title
     const title = defaultChapterTitles[nextChapterNumber - 1] || `Chapter ${nextChapterNumber}`;
     createNewChapter(user.id, nextChapterNumber, title);
@@ -405,18 +427,15 @@ const WriteBook = () => {
 
   const confirmDeleteChapter = async (chapterId: string) => {
     setIsDeleting(true);
-    
+
     try {
-      const { error } = await supabase
-        .from('chapters')
-        .delete()
-        .eq('id', chapterId);
+      const { error } = await supabase.from("chapters").delete().eq("id", chapterId);
 
       if (error) throw error;
 
-      const updatedChapters = chapters.filter(c => c.id !== chapterId);
+      const updatedChapters = chapters.filter((c) => c.id !== chapterId);
       setChapters(updatedChapters);
-      
+
       // Select a different chapter if current was deleted
       if (currentChapter?.id === chapterId) {
         setCurrentChapter(updatedChapters[0] || null);
@@ -426,7 +445,7 @@ const WriteBook = () => {
         title: "Chapter deleted",
         description: "The chapter has been removed from your book.",
       });
-      
+
       setShowDeleteDialog(false);
       setChapterToDelete(null);
     } catch (error: any) {
@@ -445,21 +464,19 @@ const WriteBook = () => {
 
     try {
       const { error } = await supabase
-        .from('chapters')
+        .from("chapters")
         .update({ title: newTitle.trim() })
-        .eq('id', chapterId)
-        .eq('user_id', user.id);
+        .eq("id", chapterId)
+        .eq("user_id", user.id);
 
       if (error) throw error;
 
       // Update local state
-      setChapters(prev => 
-        prev.map(ch => ch.id === chapterId ? { ...ch, title: newTitle.trim() } : ch)
-      );
+      setChapters((prev) => prev.map((ch) => (ch.id === chapterId ? { ...ch, title: newTitle.trim() } : ch)));
 
       // Update current chapter if it's the one being renamed
       if (currentChapter?.id === chapterId) {
-        setCurrentChapter(prev => prev ? { ...prev, title: newTitle.trim() } : null);
+        setCurrentChapter((prev) => (prev ? { ...prev, title: newTitle.trim() } : null));
       }
 
       toast({
@@ -493,29 +510,29 @@ const WriteBook = () => {
     setIsSwitchingChapter(true);
     try {
       // Find the ConversationInterface element and trigger save and end
-      const conversationInterface = document.querySelector('[data-conversation-interface]');
+      const conversationInterface = document.querySelector("[data-conversation-interface]");
       if (conversationInterface) {
         // Create a promise that resolves when save is complete
         const savePromise = new Promise<void>((resolve) => {
           const handleSaveComplete = () => {
-            conversationInterface.removeEventListener('saveCompleted', handleSaveComplete);
+            conversationInterface.removeEventListener("saveCompleted", handleSaveComplete);
             resolve();
           };
-          conversationInterface.addEventListener('saveCompleted', handleSaveComplete);
-          
+          conversationInterface.addEventListener("saveCompleted", handleSaveComplete);
+
           // Dispatch the save event
-          const event = new CustomEvent('saveAndEndConversation');
+          const event = new CustomEvent("saveAndEndConversation");
           conversationInterface.dispatchEvent(event);
         });
-        
+
         // Wait for the actual save to complete
         await savePromise;
       }
-      
+
       // Now switch chapters
       setCurrentChapter(newChapter);
     } catch (error: any) {
-      console.error('Error saving conversation before chapter switch:', error);
+      console.error("Error saving conversation before chapter switch:", error);
       // Still switch chapter even if save fails
       setCurrentChapter(newChapter);
     } finally {
@@ -523,20 +540,19 @@ const WriteBook = () => {
     }
   };
 
-
   const saveCurrentChapter = async () => {
     if (!user || !currentChapter) return;
 
     setSaving(true);
     try {
       const { error } = await supabase
-        .from('chapters')
+        .from("chapters")
         .update({
           content: currentChapter.content,
-          title: currentChapter.title
+          title: currentChapter.title,
         })
-        .eq('id', currentChapter.id)
-        .eq('user_id', user.id);
+        .eq("id", currentChapter.id)
+        .eq("user_id", user.id);
 
       if (error) throw error;
 
@@ -555,24 +571,23 @@ const WriteBook = () => {
     }
   };
 
-
   const handleContentTranscription = async (transcribedText: string) => {
     if (!currentChapter) return;
     const updatedContent = currentChapter.content ? currentChapter.content + " " + transcribedText : transcribedText;
     const updatedChapter = { ...currentChapter, content: updatedContent };
     setCurrentChapter(updatedChapter);
-    setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
-    
+    setChapters((prev) => prev.map((c) => (c.id === currentChapter.id ? updatedChapter : c)));
+
     // Auto-save after voice transcription
     try {
       const { error } = await supabase
-        .from('chapters')
+        .from("chapters")
         .update({
           content: updatedContent,
-          title: updatedChapter.title
+          title: updatedChapter.title,
         })
-        .eq('id', updatedChapter.id)
-        .eq('user_id', user?.id);
+        .eq("id", updatedChapter.id)
+        .eq("user_id", user?.id);
 
       if (error) throw error;
 
@@ -593,14 +608,14 @@ const WriteBook = () => {
     if (!currentChapter) return;
     const updatedChapter = { ...currentChapter, content: newContent };
     setCurrentChapter(updatedChapter);
-    setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
+    setChapters((prev) => prev.map((c) => (c.id === currentChapter.id ? updatedChapter : c)));
   };
 
   const handleChapterTitleChange = (newTitle: string) => {
     if (!currentChapter) return;
     const updatedChapter = { ...currentChapter, title: newTitle };
     setCurrentChapter(updatedChapter);
-    setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
+    setChapters((prev) => prev.map((c) => (c.id === currentChapter.id ? updatedChapter : c)));
   };
 
   const handleGenerateChapter = async () => {
@@ -608,67 +623,67 @@ const WriteBook = () => {
 
     setSaving(true);
     try {
-      const { data, error } = await supabase.functions.invoke('generate-chapter', {
+      const { data, error } = await supabase.functions.invoke("generate-chapter", {
         body: {
           userId: user.id,
           bookId: book.id,
-          chapterId: currentChapter.id
-        }
+          chapterId: currentChapter.id,
+        },
       });
 
       if (error) {
-        console.error('Edge function error:', error);
-        throw new Error(error.message || 'Failed to generate chapter');
+        console.error("Edge function error:", error);
+        throw new Error(error.message || "Failed to generate chapter");
       }
 
       if (!data.success) {
-        throw new Error(data.error || 'Failed to generate chapter');
+        throw new Error(data.error || "Failed to generate chapter");
       }
 
       // Update the current chapter with the generated content and mark as submitted
-      const updatedChapter = { 
-        ...currentChapter, 
+      const updatedChapter = {
+        ...currentChapter,
         content: data.content,
         is_submitted: true,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       };
-      
+
       // Update in database
       const { error: updateError } = await supabase
-        .from('chapters')
-        .update({ 
+        .from("chapters")
+        .update({
           content: data.content,
           is_submitted: true,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
-        .eq('id', currentChapter.id)
-        .eq('user_id', user.id);
+        .eq("id", currentChapter.id)
+        .eq("user_id", user.id);
 
       if (updateError) {
         throw new Error(updateError.message);
       }
 
       setCurrentChapter(updatedChapter);
-      setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
+      setChapters((prev) => prev.map((c) => (c.id === currentChapter.id ? updatedChapter : c)));
 
       // Mark this chapter as completed
-      setCompletedChapters(prev => new Set(prev).add(currentChapter.id));
+      setCompletedChapters((prev) => new Set(prev).add(currentChapter.id));
       setShowSubmitConfirmation(false);
 
       // Send chapter submission email
       try {
-        await supabase.functions.invoke('send-chapter-email', {
+        await supabase.functions.invoke("send-chapter-email", {
           body: {
             user_email: user.email,
             user_name: user.user_metadata?.full_name || user.email,
             chapter_title: currentChapter.title,
             chapter_number: currentChapter.chapter_number,
             chapter_content: data.content,
-            is_first_submission: !completedChapters.has(currentChapter.id)
-          }
+            is_first_submission: !completedChapters.has(currentChapter.id),
+          },
         });
       } catch (emailError) {
-        console.log('Email sending failed (non-critical):', emailError);
+        console.log("Email sending failed (non-critical):", emailError);
       }
 
       toast({
@@ -678,9 +693,8 @@ const WriteBook = () => {
 
       // Show the chapter refinement section if it's hidden
       setShowChapterRefinement(true);
-
     } catch (error: any) {
-      console.error('Generate chapter error:', error);
+      console.error("Generate chapter error:", error);
       toast({
         title: "Error generating chapter",
         description: error.message || "Failed to generate chapter content. Please try again.",
@@ -696,39 +710,38 @@ const WriteBook = () => {
 
     setSaving(true);
     try {
-      const { data, error } = await supabase.functions.invoke('generate-summary', {
+      const { data, error } = await supabase.functions.invoke("generate-summary", {
         body: {
           userId: user.id,
           bookId: book.id,
-          chapterId: currentChapter.id
-        }
+          chapterId: currentChapter.id,
+        },
       });
 
       if (error) {
-        console.error('Edge function error:', error);
-        throw new Error(error.message || 'Failed to generate summary');
+        console.error("Edge function error:", error);
+        throw new Error(error.message || "Failed to generate summary");
       }
 
       if (!data.success) {
-        throw new Error(data.error || 'Failed to generate summary');
+        throw new Error(data.error || "Failed to generate summary");
       }
 
       // Update the current chapter with the generated summary
-      const updatedChapter = { 
-        ...currentChapter, 
+      const updatedChapter = {
+        ...currentChapter,
         summary: data.summary,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       };
       setCurrentChapter(updatedChapter);
-      setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
+      setChapters((prev) => prev.map((c) => (c.id === currentChapter.id ? updatedChapter : c)));
 
       toast({
         title: "Summary generated successfully!",
         description: "A concise summary has been created for your chapter.",
       });
-
     } catch (error: any) {
-      console.error('Generate summary error:', error);
+      console.error("Generate summary error:", error);
       toast({
         title: "Error generating summary",
         description: error.message || "Failed to generate chapter summary. Please try again.",
@@ -745,32 +758,32 @@ const WriteBook = () => {
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
-    
+
     setActiveChapterId(null);
-    
+
     if (!over || active.id === over.id) return;
-    
-    const oldIndex = chapters.findIndex(chapter => chapter.id === active.id);
-    const newIndex = chapters.findIndex(chapter => chapter.id === over.id);
-    
+
+    const oldIndex = chapters.findIndex((chapter) => chapter.id === active.id);
+    const newIndex = chapters.findIndex((chapter) => chapter.id === over.id);
+
     if (oldIndex === -1 || newIndex === -1) return;
-    
+
     // Optimistically update the UI
     const reorderedChapters = arrayMove(chapters, oldIndex, newIndex);
     const updatedChapters = reorderedChapters.map((chapter, index) => ({
       ...chapter,
-      chapter_number: index + 1
+      chapter_number: index + 1,
     }));
-    
+
     setChapters(updatedChapters);
-    
+
     // Update database
     if (user) {
       const result = await updateChapterOrder(
-        updatedChapters.map(ch => ({ id: ch.id, chapter_number: ch.chapter_number })),
-        user.id
+        updatedChapters.map((ch) => ({ id: ch.id, chapter_number: ch.chapter_number })),
+        user.id,
       );
-      
+
       if (!result.success) {
         // Rollback on failure
         setChapters(chapters);
@@ -782,7 +795,6 @@ const WriteBook = () => {
       }
     }
   };
-
 
   if (loading) {
     return (
@@ -798,194 +810,193 @@ const WriteBook = () => {
   return (
     <>
       <Helmet>
-        <title>{book?.title ? `${book.title} - Write Your Book` : 'Write Your Autobiography'} | Narrated</title>
-        <meta name="description" content="Write and edit your autobiography with AI assistance. Voice recording, chapter management, and intelligent content generation." />
+        <title>{book?.title ? `${book.title} - Write Your Book` : "Write Your Autobiography"} | Narrated</title>
+        <meta
+          name="description"
+          content="Write and edit your autobiography with AI assistance. Voice recording, chapter management, and intelligent content generation."
+        />
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <div className="min-h-screen bg-gradient-subtle">
-      {/* Header - Fixed position on mobile for better accessibility */}
-      <header className={`border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ${isMobile ? 'sticky top-0 z-50' : ''}`}>
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-4">
+        {/* Header - Fixed position on mobile for better accessibility */}
+        <header
+          className={`border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ${isMobile ? "sticky top-0 z-50" : ""}`}
+        >
+          <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      onClick={() => navigate("/")}
+                      className="border-primary/50 hover:bg-primary/10 hover:border-primary text-primary"
+                      size="sm"
+                    >
+                      <ArrowLeft className="h-4 w-4 mr-2" />
+                      <span className={isMobile ? "sr-only" : ""}>Back to Dashboard</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Return to your books and projects</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <div className={`flex items-center space-x-2 ${isMobile ? "hidden" : ""}`}>
+              <Book className="h-6 w-6 text-primary" />
+              <h1 className="text-xl font-semibold">{book?.title || "My Autobiography"}</h1>
+            </div>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    variant="outline" 
-                    onClick={() => navigate("/")}
+                    variant="outline"
+                    onClick={() => setShowLogoutConfirmation(true)}
                     className="border-primary/50 hover:bg-primary/10 hover:border-primary text-primary"
                     size="sm"
+                    disabled={isSwitchingChapter}
                   >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    <span className={isMobile ? "sr-only" : ""}>Back to Dashboard</span>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    <span className={isMobile ? "sr-only" : ""}>Sign Out</span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Return to your books and projects</p>
+                  <p>Log out of your account</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
-          <div className={`flex items-center space-x-2 ${isMobile ? "hidden" : ""}`}>
-            <Book className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-semibold">{book?.title || "My Autobiography"}</h1>
-          </div>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowLogoutConfirmation(true)}
-                  className="border-primary/50 hover:bg-primary/10 hover:border-primary text-primary"
-                  size="sm" 
-                  disabled={isSwitchingChapter}
-                >
-                  <LogOut className="h-4 w-4 mr-2" />
-                  <span className={isMobile ? "sr-only" : ""}>Sign Out</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Log out of your account</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      </header>
+        </header>
 
-      {/* Logout Confirmation Dialog */}
-      <AlertDialog open={showLogoutConfirmation} onOpenChange={setShowLogoutConfirmation}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure you want to sign out?</AlertDialogTitle>
-            <AlertDialogDescription>
-              You'll need to log in again to access your books and continue writing.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleSignOut}>
-              Sign Out
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        {/* Logout Confirmation Dialog */}
+        <AlertDialog open={showLogoutConfirmation} onOpenChange={setShowLogoutConfirmation}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure you want to sign out?</AlertDialogTitle>
+              <AlertDialogDescription>
+                You'll need to log in again to access your books and continue writing.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleSignOut}>Sign Out</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
-      {/* Main Content */}
-      <main className={isMobile ? "min-h-screen" : "h-[calc(100vh-80px)]"}>
-        {isMobile ? (
-        <div className="h-full p-2 pb-4 overflow-auto">
-          
-          {/* Profile Setup Section for Mobile */}
-          {user && book && !bookProfile?.question_10_answer && (
-            <div className="max-w-4xl mx-auto mb-3">
-              <ProfileSetup
-                userId={user.id}
-                bookId={book.id}
-                bookProfile={bookProfile}
-                onProfileUpdate={handleProfileUpdate}
-              />
-            </div>
-          )}
+        {/* Main Content */}
+        <main className={isMobile ? "min-h-screen" : "h-[calc(100vh-80px)]"}>
+          {isMobile ? (
+            <div className="h-full p-2 pb-4 overflow-auto">
+              {/* Profile Setup Section for Mobile */}
+              {user && book && !bookProfile?.question_10_answer && (
+                <div className="max-w-4xl mx-auto mb-3">
+                  <ProfileSetup
+                    userId={user.id}
+                    bookId={book.id}
+                    bookProfile={bookProfile}
+                    onProfileUpdate={handleProfileUpdate}
+                  />
+                </div>
+              )}
 
-          {/* Compact Action Buttons for Mobile */}
-          <div className="max-w-4xl mx-auto mb-3 flex gap-2">
-            {/* Chapter Selector Button */}
-            {visibleChapters.length > 0 && (
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    className="flex-1 justify-between h-auto py-2.5 px-3"
-                    disabled={isSwitchingChapter}
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <FileText className="h-4 w-4 flex-shrink-0" />
-                      <span className="text-sm font-medium truncate">
-                        {currentChapter?.title || 'Select Chapter'}
-                      </span>
-                    </div>
-                    <ChevronDown className="h-4 w-4 flex-shrink-0 ml-2" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="bottom" className="h-[60vh]">
-                  <div className="py-4">
-                    <h3 className="text-lg font-semibold mb-4">Select Chapter</h3>
-                    <div className="space-y-2">
-                      {visibleChapters.map((chapter) => (
-                        <Button
-                          key={chapter.id}
-                          variant={currentChapter?.id === chapter.id ? "secondary" : "ghost"}
-                          className="w-full justify-start text-left h-auto py-3"
-                          onClick={() => {
-                            saveCurrentConversationAndSwitchChapter(chapter);
-                            document.querySelector('[data-sheet-content] button[data-sheet-close]')?.dispatchEvent(new Event('click', { bubbles: true }));
-                          }}
-                          disabled={isSwitchingChapter}
-                        >
-                          <div className="flex flex-col items-start w-full">
-                            <span className="font-medium">{chapter.title}</span>
-                            <span className="text-xs text-muted-foreground">
-                              Chapter {chapter.chapter_number}
-                            </span>
-                          </div>
-                        </Button>
-                      ))}
+              {/* Compact Action Buttons for Mobile */}
+              <div className="max-w-4xl mx-auto mb-3 flex gap-2">
+                {/* Chapter Selector Button */}
+                {visibleChapters.length > 0 && (
+                  <Sheet>
+                    <SheetTrigger asChild>
                       <Button
                         variant="outline"
-                        className="w-full justify-center mt-4"
-                        onClick={handleAddChapter}
-                        disabled={isSwitchingChapter || (book?.tier === 'free' && chapters.length >= 1)}
+                        className="flex-1 justify-between h-auto py-2.5 px-3"
+                        disabled={isSwitchingChapter}
                       >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add New Chapter
+                        <div className="flex items-center gap-2 min-w-0">
+                          <FileText className="h-4 w-4 flex-shrink-0" />
+                          <span className="text-sm font-medium truncate">
+                            {currentChapter?.title || "Select Chapter"}
+                          </span>
+                        </div>
+                        <ChevronDown className="h-4 w-4 flex-shrink-0 ml-2" />
                       </Button>
-                    </div>
-                  </div>
-                </SheetContent>
-              </Sheet>
-            )}
+                    </SheetTrigger>
+                    <SheetContent side="bottom" className="h-[60vh]">
+                      <div className="py-4">
+                        <h3 className="text-lg font-semibold mb-4">Select Chapter</h3>
+                        <div className="space-y-2">
+                          {visibleChapters.map((chapter) => (
+                            <Button
+                              key={chapter.id}
+                              variant={currentChapter?.id === chapter.id ? "secondary" : "ghost"}
+                              className="w-full justify-start text-left h-auto py-3"
+                              onClick={() => {
+                                saveCurrentConversationAndSwitchChapter(chapter);
+                                document
+                                  .querySelector("[data-sheet-content] button[data-sheet-close]")
+                                  ?.dispatchEvent(new Event("click", { bubbles: true }));
+                              }}
+                              disabled={isSwitchingChapter}
+                            >
+                              <div className="flex flex-col items-start w-full">
+                                <span className="font-medium">{chapter.title}</span>
+                                <span className="text-xs text-muted-foreground">Chapter {chapter.chapter_number}</span>
+                              </div>
+                            </Button>
+                          ))}
+                          <Button
+                            variant="outline"
+                            className="w-full justify-center mt-4"
+                            onClick={handleAddChapter}
+                            disabled={isSwitchingChapter || (book?.tier === "free" && chapters.length >= 1)}
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add New Chapter
+                          </Button>
+                        </div>
+                      </div>
+                    </SheetContent>
+                  </Sheet>
+                )}
 
-            {/* Book Tier Button */}
-            {user && book && (
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    className="flex-1 justify-between h-auto py-2.5 px-3"
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <Award className="h-4 w-4 flex-shrink-0" />
-                      <span className="text-sm font-medium truncate">
-                        {book.tier === 'free' ? 'Free' : book.tier.charAt(0).toUpperCase() + book.tier.slice(1)}
-                      </span>
-                    </div>
-                    <ChevronDown className="h-4 w-4 flex-shrink-0 ml-2" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="bottom" className="h-[80vh] overflow-auto">
-                  <div className="py-4">
-                    <h3 className="text-lg font-semibold mb-2">Book Tier</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      {book.tier === 'free' ? 'Upgrade to unlock more chapters' : 'Manage your subscription'}
-                    </p>
-                    <PaymentButton
-                      bookId={book.id}
-                      currentTier={book.tier as 'free' | 'basic' | 'standard' | 'premium'}
-                      purchaseStatus={book.purchase_status}
-                      onPaymentStart={() => {
-                        toast({
-                          title: "Processing payment...",
-                          description: "You'll be redirected to complete your payment.",
-                        });
-                      }}
-                    />
-                  </div>
-                </SheetContent>
-              </Sheet>
-            )}
-          </div>
-          
-          {currentChapter ? (
+                {/* Book Tier Button */}
+                {user && book && (
+                  <Sheet>
+                    <SheetTrigger asChild>
+                      <Button variant="outline" className="flex-1 justify-between h-auto py-2.5 px-3">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Award className="h-4 w-4 flex-shrink-0" />
+                          <span className="text-sm font-medium truncate">
+                            {book.tier === "free" ? "Free" : book.tier.charAt(0).toUpperCase() + book.tier.slice(1)}
+                          </span>
+                        </div>
+                        <ChevronDown className="h-4 w-4 flex-shrink-0 ml-2" />
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent side="bottom" className="h-[80vh] overflow-auto">
+                      <div className="py-4">
+                        <h3 className="text-lg font-semibold mb-2">Book Tier</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          {book.tier === "free" ? "Upgrade to unlock more chapters" : "Manage your subscription"}
+                        </p>
+                        <PaymentButton
+                          bookId={book.id}
+                          currentTier={book.tier as "free" | "basic" | "standard" | "premium"}
+                          purchaseStatus={book.purchase_status}
+                          onPaymentStart={() => {
+                            toast({
+                              title: "Processing payment...",
+                              description: "You'll be redirected to complete your payment.",
+                            });
+                          }}
+                        />
+                      </div>
+                    </SheetContent>
+                  </Sheet>
+                )}
+              </div>
+
+              {currentChapter ? (
                 <div className="max-w-4xl mx-auto space-y-3">
                   {/* Conversation Section - Mobile */}
                   {user && book && (
@@ -997,43 +1008,43 @@ const WriteBook = () => {
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="px-4 pb-4">
-                         <ConversationInterface
-                           userId={user.id}
-                           bookId={book.id}
-                           chapterId={currentChapter?.id}
-                           isChapterComplete={currentChapter ? completedChapters.has(currentChapter.id) : false}
-                           onContentGenerated={(content) => {
-                              // Track first conversation milestone
-                              if (!hasTrackedConversation.current) {
-                                trackMilestone('startedConversation');
-                                hasTrackedConversation.current = true;
-                              }
-                              
-                              if (currentChapter) {
-                                const newContent = currentChapter.content ? currentChapter.content + "\n\n" + content : content;
-                                const updatedChapter = { ...currentChapter, content: newContent };
-                                setCurrentChapter(updatedChapter);
-                                setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
-                              }
-                            }}
-                           onConversationUpdate={() => {
-                             // Refresh conversation counts when conversations change
-                             if (user) {
-                               fetchChapterConversations(user.id);
-                             }
-                           }}
-                         />
+                        <ConversationInterface
+                          userId={user.id}
+                          bookId={book.id}
+                          chapterId={currentChapter?.id}
+                          isChapterComplete={currentChapter ? completedChapters.has(currentChapter.id) : false}
+                          onContentGenerated={(content) => {
+                            // Track first conversation milestone
+                            if (!hasTrackedConversation.current) {
+                              trackMilestone("startedConversation");
+                              hasTrackedConversation.current = true;
+                            }
+
+                            if (currentChapter) {
+                              const newContent = currentChapter.content
+                                ? currentChapter.content + "\n\n" + content
+                                : content;
+                              const updatedChapter = { ...currentChapter, content: newContent };
+                              setCurrentChapter(updatedChapter);
+                              setChapters((prev) => prev.map((c) => (c.id === currentChapter.id ? updatedChapter : c)));
+                            }
+                          }}
+                          onConversationUpdate={() => {
+                            // Refresh conversation counts when conversations change
+                            if (user) {
+                              fetchChapterConversations(user.id);
+                            }
+                          }}
+                        />
                       </CardContent>
                     </Card>
                   )}
-                  
+
                   {/* Chapter Content Editor */}
                   <Card className="hidden sm:block">
                     <CardHeader className="py-3 px-4">
                       <CardTitle className="text-base">{currentChapter.title}</CardTitle>
-                      <CardDescription className="text-xs">
-                        Edit and refine your chapter content.
-                      </CardDescription>
+                      <CardDescription className="text-xs">Edit and refine your chapter content.</CardDescription>
                     </CardHeader>
                     <CardContent className="px-4 pb-4">
                       <Textarea
@@ -1043,71 +1054,76 @@ const WriteBook = () => {
                         className="min-h-[400px] text-sm leading-relaxed"
                       />
                       <div className="mt-3 flex justify-center">
-                         <Button 
-                           onClick={saveCurrentChapter}
-                           disabled={saving || !currentChapter || (currentChapter && completedChapters.has(currentChapter.id))}
-                           size="default"
-                           className="w-full sm:w-auto"
-                         >
-                           <Save className="h-4 w-4 mr-2" />
-                           {saving ? "Saving..." : "Save"}
-                         </Button>
+                        <Button
+                          onClick={saveCurrentChapter}
+                          disabled={
+                            saving || !currentChapter || (currentChapter && completedChapters.has(currentChapter.id))
+                          }
+                          size="default"
+                          className="w-full sm:w-auto"
+                        >
+                          <Save className="h-4 w-4 mr-2" />
+                          {saving ? "Saving..." : "Save"}
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
                 </div>
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center">
-                  <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">Select a chapter to start writing</p>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center">
+                    <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">Select a chapter to start writing</p>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          <ResizablePanelGroup direction="horizontal" className="w-full">
-            {/* Left Sidebar - Chapter List */}
-            <ResizablePanel defaultSize={45} minSize={20} maxSize={50}>
-              <div className="h-full bg-background border-r p-4 overflow-auto">
-                <div className="space-y-4">
-                
-                   {/* Profile Setup Section - Only show if profile is incomplete */}
-                   {user && book && !bookProfile?.question_10_answer && (
-                     <ProfileSetup
-                       userId={user.id}
-                       bookId={book.id}
-                       bookProfile={bookProfile}
-                       onProfileUpdate={handleProfileUpdate}
-                     />
-                   )}
+              )}
+            </div>
+          ) : (
+            <ResizablePanelGroup direction="horizontal" className="w-full">
+              {/* Left Sidebar - Chapter List */}
+              <ResizablePanel defaultSize={45} minSize={20} maxSize={50}>
+                <div className="h-full bg-background border-r p-4 overflow-auto">
+                  <div className="space-y-4">
+                    {/* Profile Setup Section - Only show if profile is incomplete */}
+                    {user && book && !bookProfile?.question_10_answer && (
+                      <ProfileSetup
+                        userId={user.id}
+                        bookId={book.id}
+                        bookProfile={bookProfile}
+                        onProfileUpdate={handleProfileUpdate}
+                      />
+                    )}
 
-                   {/* Payment Section - Collapsed by default to save space */}
-                   {user && book && (
-                     <Card className="mb-4">
-                       <Collapsible open={!isBookTierCollapsed} onOpenChange={(open) => setIsBookTierCollapsed(!open)}>
-                         <CardHeader className="py-3">
-                           <CollapsibleTrigger asChild>
-                             <Button variant="ghost" className="flex items-center justify-between p-0 h-auto w-full">
+                    {/* Payment Section - Collapsed by default to save space */}
+                    {user && book && (
+                      <Card className="mb-4">
+                        <Collapsible open={!isBookTierCollapsed} onOpenChange={(open) => setIsBookTierCollapsed(!open)}>
+                          <CardHeader className="py-3">
+                            <CollapsibleTrigger asChild>
+                              <Button variant="ghost" className="flex items-center justify-between p-0 h-auto w-full">
                                 <div className="text-left">
                                   <CardTitle className="text-sm">Book Tier</CardTitle>
                                   <CardDescription className="text-xs">
-                                    {book.tier === 'free' ? 'Free' : book.tier === 'paid' ? 'Paid (Unlimited)' : 'Premium (Unlimited)'}
+                                    {book.tier === "free"
+                                      ? "Free"
+                                      : book.tier === "paid"
+                                        ? "Paid (Unlimited)"
+                                        : "Premium (Unlimited)"}
                                   </CardDescription>
                                 </div>
-                               {isBookTierCollapsed ? (
-                                 <ChevronDown className="h-4 w-4" />
-                               ) : (
-                                 <ChevronUp className="h-4 w-4" />
-                               )}
-                             </Button>
-                           </CollapsibleTrigger>
-                         </CardHeader>
-                         <CollapsibleContent>
-                           <CardContent className="pt-0">
+                                {isBookTierCollapsed ? (
+                                  <ChevronDown className="h-4 w-4" />
+                                ) : (
+                                  <ChevronUp className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </CollapsibleTrigger>
+                          </CardHeader>
+                          <CollapsibleContent>
+                            <CardContent className="pt-0">
                               <PaymentButton
                                 bookId={book.id}
-                                currentTier={book.tier as 'free' | 'basic' | 'standard' | 'premium'}
+                                currentTier={book.tier as "free" | "basic" | "standard" | "premium"}
                                 purchaseStatus={book.purchase_status}
                                 onPaymentStart={() => {
                                   toast({
@@ -1121,24 +1137,24 @@ const WriteBook = () => {
                         </Collapsible>
                       </Card>
                     )}
-                  
-                   <div className="space-y-3">
-                     <div className="flex items-center justify-between">
-                       <h2 className="text-lg font-semibold">Chapters</h2>
-                       <div className="text-xs text-muted-foreground">
-                         {visibleChapters.length} of {book?.tier === 'free' ? '1' : '14'} chapters
-                       </div>
-                     </div>
-                   
-                   <DndContext 
-                     collisionDetection={closestCenter}
-                     onDragStart={handleDragStart}
-                     onDragEnd={handleDragEnd}
-                   >
-                     <SortableContext 
-                       items={visibleChapters.map(ch => ch.id)}
-                       strategy={verticalListSortingStrategy}
-                     >
+
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h2 className="text-lg font-semibold">Chapters</h2>
+                        <div className="text-xs text-muted-foreground">
+                          {visibleChapters.length} of {book?.tier === "free" ? "1" : "14"} chapters
+                        </div>
+                      </div>
+
+                      <DndContext
+                        collisionDetection={closestCenter}
+                        onDragStart={handleDragStart}
+                        onDragEnd={handleDragEnd}
+                      >
+                        <SortableContext
+                          items={visibleChapters.map((ch) => ch.id)}
+                          strategy={verticalListSortingStrategy}
+                        >
                           {visibleChapters.map((chapter) => (
                             <ChapterCard
                               key={chapter.id}
@@ -1151,120 +1167,137 @@ const WriteBook = () => {
                               hasConversations={(chapterConversations.get(chapter.id) || 0) > 0}
                               disabled={isSwitchingChapter}
                             />
-                         ))}
-                     </SortableContext>
-                     
-                      <DragOverlay>
-                        {activeChapterId ? (
-                          <div className="p-4 rounded-lg border bg-background shadow-xl opacity-90">
-                            <div className="flex items-center gap-2">
-                              <div className="h-3 w-3 rounded-full bg-primary/20" />
-                              <h3 className="font-medium text-sm">
-                                {visibleChapters.find(ch => ch.id === activeChapterId)?.title}
-                              </h3>
+                          ))}
+                        </SortableContext>
+
+                        <DragOverlay>
+                          {activeChapterId ? (
+                            <div className="p-4 rounded-lg border bg-background shadow-xl opacity-90">
+                              <div className="flex items-center gap-2">
+                                <div className="h-3 w-3 rounded-full bg-primary/20" />
+                                <h3 className="font-medium text-sm">
+                                  {visibleChapters.find((ch) => ch.id === activeChapterId)?.title}
+                                </h3>
+                              </div>
                             </div>
-                          </div>
-                        ) : null}
-                      </DragOverlay>
-                   </DndContext>
-                  
-                    <div className="space-y-2 mt-4">
-                      <Button
-                        variant="outline"
-                        className={`w-full transition-colors ${book?.tier === 'free' && chapters.length >= 1 ? 'border-primary/50 bg-primary/5 hover:bg-primary/10 hover:border-primary text-primary font-semibold' : 'hover:bg-primary/5 hover:border-primary/30'}`}
-                        onClick={handleAddChapter}
-                        disabled={isSwitchingChapter || (book?.tier === 'free' && chapters.length >= 1)}
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        {book?.tier === 'free' && chapters.length >= 1 ? 'Upgrade to Add More Chapters' : 'Add New Chapter'}
-                      </Button>
+                          ) : null}
+                        </DragOverlay>
+                      </DndContext>
+
+                      <div className="space-y-2 mt-4">
+                        <Button
+                          variant="outline"
+                          className={`w-full transition-colors ${book?.tier === "free" && chapters.length >= 1 ? "border-primary/50 bg-primary/5 hover:bg-primary/10 hover:border-primary text-primary font-semibold" : "hover:bg-primary/5 hover:border-primary/30"}`}
+                          onClick={handleAddChapter}
+                          disabled={isSwitchingChapter || (book?.tier === "free" && chapters.length >= 1)}
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          {book?.tier === "free" && chapters.length >= 1
+                            ? "Upgrade to Add More Chapters"
+                            : "Add New Chapter"}
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </ResizablePanel>
+              </ResizablePanel>
 
-            <ResizableHandle withHandle />
+              <ResizableHandle withHandle />
 
-            {/* Right Side - Content Editor */}
-            <ResizablePanel defaultSize={55}>
-              <div className="h-full p-6 overflow-auto">
-                {currentChapter ? (
-                  <div className="max-w-4xl mx-auto space-y-6">
-                    {/* Conversation Section */}
-                    {user && book && (
+              {/* Right Side - Content Editor */}
+              <ResizablePanel defaultSize={55}>
+                <div className="h-full p-6 overflow-auto">
+                  {currentChapter ? (
+                    <div className="max-w-4xl mx-auto space-y-6">
+                      {/* Conversation Section */}
+                      {user && book && (
+                        <Card className="mt-6">
+                          <CardHeader>
+                            <CardTitle>Begin Telling Your Story</CardTitle>
+                            <CardDescription>
+                              Have a natural conversation to explore your memories and generate content for your
+                              autobiography.
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <ConversationInterface
+                              userId={user.id}
+                              bookId={book.id}
+                              chapterId={currentChapter?.id}
+                              isChapterComplete={currentChapter?.is_submitted || false}
+                              onContentGenerated={(content) => {
+                                // Track first conversation milestone
+                                if (!hasTrackedConversation.current) {
+                                  trackMilestone("startedConversation");
+                                  hasTrackedConversation.current = true;
+                                }
+
+                                if (currentChapter) {
+                                  const newContent = currentChapter.content
+                                    ? currentChapter.content + "\n\n" + content
+                                    : content;
+                                  const updatedChapter = { ...currentChapter, content: newContent };
+                                  setCurrentChapter(updatedChapter);
+                                  setChapters((prev) =>
+                                    prev.map((c) => (c.id === currentChapter.id ? updatedChapter : c)),
+                                  );
+                                }
+                              }}
+                            />
+                          </CardContent>
+                        </Card>
+                      )}
+
+                      {/* Chapter Summary Section */}
                       <Card className="mt-6">
                         <CardHeader>
-                          <CardTitle>Begin Telling Your Story</CardTitle>
-                          <CardDescription>
-                            Have a natural conversation to explore your memories and generate content for your autobiography.
-                          </CardDescription>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <CardTitle>Chapter Summary</CardTitle>
+                              <CardDescription>Below is a summary of the key points discussed so far</CardDescription>
+                            </div>
+                            {/* Generate Summary Button */}
+                            <Button
+                              variant="default"
+                              onClick={handleGenerateSummary}
+                              disabled={
+                                saving ||
+                                !currentChapter ||
+                                !user ||
+                                !currentChapter.content.trim() ||
+                                (currentChapter && completedChapters.has(currentChapter.id))
+                              }
+                              size="sm"
+                              className="px-6 py-2 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 rounded-lg border border-primary/20"
+                            >
+                              {saving ? "Generating..." : "Review what I've shared so far"}
+                            </Button>
+                          </div>
                         </CardHeader>
-                         <CardContent>
-                          <ConversationInterface
-                            userId={user.id}
-                            bookId={book.id}
-                            chapterId={currentChapter?.id}
-                            isChapterComplete={currentChapter?.is_submitted || false}
-                            onContentGenerated={(content) => {
-                              // Track first conversation milestone
-                              if (!hasTrackedConversation.current) {
-                                trackMilestone('startedConversation');
-                                hasTrackedConversation.current = true;
-                              }
-                              
-                              if (currentChapter) {
-                                const newContent = currentChapter.content ? currentChapter.content + "\n\n" + content : content;
-                                const updatedChapter = { ...currentChapter, content: newContent };
-                                setCurrentChapter(updatedChapter);
-                                setChapters(prev => prev.map(c => c.id === currentChapter.id ? updatedChapter : c));
-                              }
-                            }}
+                        <CardContent>
+                          <Textarea
+                            placeholder="Chapter summary will be generated here..."
+                            value={currentChapter.summary || ""}
+                            readOnly
+                            className="min-h-[550px] text-base leading-relaxed bg-muted/50 resize-y"
+                            style={{ resize: "vertical" }}
                           />
-                          </CardContent>
-                    </Card>
-                     )}
+                        </CardContent>
+                      </Card>
 
-                        {/* Chapter Summary Section */}
-                       <Card className="mt-6">
-                         <CardHeader>
-                           <div className="flex items-center justify-between">
-                             <div>
-                               <CardTitle>Chapter Summary</CardTitle>
-                               <CardDescription>
-                                 Below is a summary of the key points discussed so far
-                               </CardDescription>
-                             </div>
-                              {/* Generate Summary Button */}
-                              <Button
-                                variant="default"
-                                onClick={handleGenerateSummary}
-                                disabled={saving || !currentChapter || !user || !currentChapter.content.trim() || (currentChapter && completedChapters.has(currentChapter.id))}
-                                size="sm"
-                                className="px-6 py-2 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 rounded-lg border border-primary/20"
-                              >
-                                {saving ? "Generating..." : "Review what I've shared so far"}
-                              </Button>
-                           </div>
-                         </CardHeader>
-                         <CardContent>
-                            <Textarea
-                              placeholder="Chapter summary will be generated here..."
-                              value={currentChapter.summary || ""}
-                              readOnly
-                              className="min-h-[550px] text-base leading-relaxed bg-muted/50 resize-y"
-                              style={{ resize: 'vertical' }}
-                            />
-                         </CardContent>
-                        </Card>
-
-                       {/* Saved Conversations Section */}
-                      {isFeatureEnabled('conversationHistory') && user && book && (
+                      {/* Saved Conversations Section */}
+                      {isFeatureEnabled("conversationHistory") && user && book && (
                         <Card className="mt-6">
-                          <Collapsible open={!isSavedConversationsCollapsed} onOpenChange={(open) => setIsSavedConversationsCollapsed(!open)}>
+                          <Collapsible
+                            open={!isSavedConversationsCollapsed}
+                            onOpenChange={(open) => setIsSavedConversationsCollapsed(!open)}
+                          >
                             <CardHeader className={isSavedConversationsCollapsed ? "py-4" : "pb-3"}>
                               <CollapsibleTrigger asChild>
-                                <Button variant="ghost" className="flex items-center justify-between p-0 h-auto w-full min-h-[2.5rem]">
+                                <Button
+                                  variant="ghost"
+                                  className="flex items-center justify-between p-0 h-auto w-full min-h-[2.5rem]"
+                                >
                                   <div className="text-left">
                                     <CardTitle>Saved Conversations</CardTitle>
                                     <CardDescription>
@@ -1281,7 +1314,7 @@ const WriteBook = () => {
                             </CardHeader>
                             <CollapsibleContent>
                               <CardContent>
-                                <SavedConversations 
+                                <SavedConversations
                                   conversations={conversationHistory}
                                   onDeleteConversation={deleteConversation}
                                   deletingSessionIds={deletingSessionIds}
@@ -1290,161 +1323,166 @@ const WriteBook = () => {
                             </CollapsibleContent>
                           </Collapsible>
                         </Card>
-                       )}
+                      )}
 
-                     {/* Chapter Refinement Window */}
-                    {showChapterRefinement && (
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>{currentChapter.title}</CardTitle>
-                          <CardDescription>
-                            Edit and refine your chapter content in the chapter refinement window below. You can manually edit the AI-generated text or write your own.
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <Textarea
-                            placeholder="Your chapter content will appear here. You can edit it directly or begin telling your story above to generate new content..."
-                            value={currentChapter.content}
-                            onChange={(e) => handleChapterContentChange(e.target.value)}
-                            className="min-h-[500px] text-base leading-relaxed"
-                          />
-                          <div className="mt-4 flex justify-center">
-                            <Button 
-                              onClick={saveCurrentChapter}
-                              disabled={saving || !currentChapter}
-                              size="lg"
-                              className="shadow-lg"
-                            >
-                              <Save className="h-4 w-4 mr-2" />
-                              {saving ? "Saving..." : "Save"}
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                     )}
+                      {/* Chapter Refinement Window */}
+                      {showChapterRefinement && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>{currentChapter.title}</CardTitle>
+                            <CardDescription>
+                              Edit and refine your chapter content in the chapter refinement window below. You can
+                              manually edit the AI-generated text or write your own.
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <Textarea
+                              placeholder="Your chapter content will appear here. You can edit it directly or begin telling your story above to generate new content..."
+                              value={currentChapter.content}
+                              onChange={(e) => handleChapterContentChange(e.target.value)}
+                              className="min-h-[500px] text-base leading-relaxed"
+                            />
+                            <div className="mt-4 flex justify-center">
+                              <Button
+                                onClick={saveCurrentChapter}
+                                disabled={saving || !currentChapter}
+                                size="lg"
+                                className="shadow-lg"
+                              >
+                                <Save className="h-4 w-4 mr-2" />
+                                {saving ? "Saving..." : "Save"}
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
 
-                        {/* Generate Chapter Button */}
-                        <div className="flex justify-center gap-4 mb-4 mt-8">
-                          <Button
-                           variant="default"
-                           onClick={() => setShowSubmitConfirmation(true)}
-                           disabled={saving || !currentChapter || !user || (currentChapter && completedChapters.has(currentChapter.id))}
-                           size="lg"
-                           className={`px-12 py-6 text-xl font-semibold shadow-xl transition-all duration-300 rounded-xl border-2 min-w-[400px] ${
-                             currentChapter && completedChapters.has(currentChapter.id)
-                               ? 'opacity-50 cursor-not-allowed bg-muted text-muted-foreground border-muted'
-                               : 'hover:shadow-2xl bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 border-primary/20'
-                           }`}
-                         >
-                           {currentChapter && completedChapters.has(currentChapter.id)
-                             ? "Chapter Submitted"
-                             : saving 
-                               ? "Generating..." 
-                               : "Confirm & Submit"
-                           }
-                         </Button>
+                      {/* Generate Chapter Button */}
+                      <div className="flex justify-center gap-4 mb-4 mt-8">
+                        <Button
+                          variant="default"
+                          onClick={() => setShowSubmitConfirmation(true)}
+                          disabled={
+                            saving ||
+                            !currentChapter ||
+                            !user ||
+                            (currentChapter && completedChapters.has(currentChapter.id))
+                          }
+                          size="lg"
+                          className={`px-12 py-6 text-xl font-semibold shadow-xl transition-all duration-300 rounded-xl border-2 min-w-[400px] ${
+                            currentChapter && completedChapters.has(currentChapter.id)
+                              ? "opacity-50 cursor-not-allowed bg-muted text-muted-foreground border-muted"
+                              : "hover:shadow-2xl bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 border-primary/20"
+                          }`}
+                        >
+                          {currentChapter && completedChapters.has(currentChapter.id)
+                            ? "Chapter Submitted"
+                            : saving
+                              ? "Generating..."
+                              : "Submit Chapter for Editing"}
+                        </Button>
                       </div>
-
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="text-center">
-                      <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <p className="text-muted-foreground">Select a chapter to start writing</p>
                     </div>
-                  </div>
-                )}
-              </div>
-            </ResizablePanel>
-          </ResizablePanelGroup>
-        )}
-      </main>
-
-      {/* Profile Setup Modal */}
-      <Dialog open={showProfileModal} onOpenChange={setShowProfileModal}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto">
-          <DialogHeader>
-            <DialogTitle>Complete Your Profile</DialogTitle>
-            <DialogDescription>
-              Before you can start writing your autobiography, please complete your personal profile. This helps us personalize your writing experience.
-            </DialogDescription>
-          </DialogHeader>
-          {user && book && (
-            <ProfileSetup
-              userId={user.id}
-              bookId={book.id}
-              bookProfile={bookProfile}
-              onProfileUpdate={handleProfileUpdate}
-              disableCollapse={true}
-            />
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-center">
+                        <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                        <p className="text-muted-foreground">Select a chapter to start writing</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </ResizablePanel>
+            </ResizablePanelGroup>
           )}
-        </DialogContent>
-      </Dialog>
+        </main>
 
-      {/* Delete Chapter Dialog */}
-      <DeleteChapterDialog
-        isOpen={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
-        chapter={chapterToDelete}
-        onConfirmDelete={confirmDeleteChapter}
-        isDeleting={isDeleting}
-      />
+        {/* Profile Setup Modal */}
+        <Dialog open={showProfileModal} onOpenChange={setShowProfileModal}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto">
+            <DialogHeader>
+              <DialogTitle>Complete Your Profile</DialogTitle>
+              <DialogDescription>
+                Before you can start writing your autobiography, please complete your personal profile. This helps us
+                personalize your writing experience.
+              </DialogDescription>
+            </DialogHeader>
+            {user && book && (
+              <ProfileSetup
+                userId={user.id}
+                bookId={book.id}
+                bookProfile={bookProfile}
+                onProfileUpdate={handleProfileUpdate}
+                disableCollapse={true}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
 
-      {/* Chapter Submission Confirmation Dialog */}
-      <AlertDialog open={showSubmitConfirmation} onOpenChange={setShowSubmitConfirmation}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Chapter Submission</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to submit this chapter? Once submitted for editing, you will no longer be able to modify your chapter.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>No, Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleGenerateChapter}>
-              Yes, Submit Chapter
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        {/* Delete Chapter Dialog */}
+        <DeleteChapterDialog
+          isOpen={showDeleteDialog}
+          onOpenChange={setShowDeleteDialog}
+          chapter={chapterToDelete}
+          onConfirmDelete={confirmDeleteChapter}
+          isDeleting={isDeleting}
+        />
 
-      {/* Upgrade Dialog */}
-      <Dialog open={showUpgrade} onOpenChange={setShowUpgrade}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Upgrade Required</DialogTitle>
-            <DialogDescription>
-              You've reached the limit of 1 chapter for free accounts. Upgrade to add unlimited chapters to your book.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setShowUpgrade(false)}>
-              Maybe Later
-            </Button>
-            <Button onClick={() => {
-              setShowUpgrade(false);
-              setIsBookTierCollapsed(false);
-            }}>
-              View Upgrade Options
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+        {/* Chapter Submission Confirmation Dialog */}
+        <AlertDialog open={showSubmitConfirmation} onOpenChange={setShowSubmitConfirmation}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirm Chapter Submission</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to submit this chapter? Once submitted for editing, you will no longer be able to
+                modify your chapter.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>No, Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleGenerateChapter}>Yes, Submit Chapter</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
-      {/* Loading Overlay for Chapter Switching */}
-      {isSwitchingChapter && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-background p-6 rounded-lg shadow-xl border">
-            <div className="flex items-center gap-3">
-              <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full" />
-              <p className="text-sm font-medium">Saving conversation...</p>
+        {/* Upgrade Dialog */}
+        <Dialog open={showUpgrade} onOpenChange={setShowUpgrade}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Upgrade Required</DialogTitle>
+              <DialogDescription>
+                You've reached the limit of 1 chapter for free accounts. Upgrade to add unlimited chapters to your book.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setShowUpgrade(false)}>
+                Maybe Later
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowUpgrade(false);
+                  setIsBookTierCollapsed(false);
+                }}
+              >
+                View Upgrade Options
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Loading Overlay for Chapter Switching */}
+        {isSwitchingChapter && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+            <div className="bg-background p-6 rounded-lg shadow-xl border">
+              <div className="flex items-center gap-3">
+                <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full" />
+                <p className="text-sm font-medium">Saving conversation...</p>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-
-    </div>
-    <Footer />
+        )}
+      </div>
+      <Footer />
     </>
   );
 };
