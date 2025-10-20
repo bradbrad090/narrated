@@ -4,13 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { VoiceRecorder } from '@/components/VoiceRecorder';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { 
   User, 
   MessageCircle, 
-  Mic, 
   ChevronDown, 
   ChevronUp, 
   CheckCircle,
@@ -49,7 +47,6 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [responses, setResponses] = useState<{[key: number]: string}>({});
   const [currentResponse, setCurrentResponse] = useState('');
-  const [isVoiceMode, setIsVoiceMode] = useState(false);
   const { toast } = useToast();
 
   // Load existing answers from bookProfile on mount
@@ -151,11 +148,6 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
   const progress = (answeredCount / PROFILE_QUESTIONS.length) * 100;
   const isComplete = answeredCount === PROFILE_QUESTIONS.length;
 
-  const handleVoiceTranscription = (text: string) => {
-    setCurrentResponse(prev => prev + (prev ? ' ' : '') + text);
-    setIsVoiceMode(false);
-  };
-
   const handleNextQuestion = async () => {
     if (currentResponse.trim()) {
       const response = currentResponse.trim();
@@ -239,24 +231,6 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                   className="min-h-[120px] resize-none"
                   rows={4}
                 />
-                
-                <div className="flex items-center gap-2">
-                  <Button
-                    onClick={() => setIsVoiceMode(!isVoiceMode)}
-                    variant="outline"
-                    size="sm"
-                  >
-                    <Mic className="h-4 w-4 mr-2" />
-                    {isVoiceMode ? 'Stop Recording' : 'Voice Input'}
-                  </Button>
-                  
-                  {isVoiceMode && (
-                    <VoiceRecorder
-                      onTranscription={handleVoiceTranscription}
-                      disabled={false}
-                    />
-                  )}
-                </div>
               </div>
 
               <div className="flex justify-between pt-2">
@@ -347,24 +321,6 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                     className="min-h-[120px] resize-none"
                     rows={4}
                   />
-                  
-                  <div className="flex items-center gap-2">
-                    <Button
-                      onClick={() => setIsVoiceMode(!isVoiceMode)}
-                      variant="outline"
-                      size="sm"
-                    >
-                      <Mic className="h-4 w-4 mr-2" />
-                      {isVoiceMode ? 'Stop Recording' : 'Voice Input'}
-                    </Button>
-                    
-                    {isVoiceMode && (
-                      <VoiceRecorder
-                        onTranscription={handleVoiceTranscription}
-                        disabled={false}
-                      />
-                    )}
-                  </div>
                 </div>
 
                 <div className="flex justify-between pt-2">
