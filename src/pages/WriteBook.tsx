@@ -1345,27 +1345,6 @@ const WriteBook = () => {
                          </Button>
                       </div>
 
-                     {/* Toggle Button for Chapter Refinement Window */}
-                    <div className="flex justify-center my-6">
-                      <Button
-                        onClick={() => setShowChapterRefinement(!showChapterRefinement)}
-                        variant={showChapterRefinement ? "secondary" : "default"}
-                        size="lg"
-                        className="shadow-lg"
-                      >
-                        {showChapterRefinement ? (
-                          <>
-                            <EyeOff className="h-4 w-4 mr-2" />
-                            Hide my story
-                          </>
-                        ) : (
-                          <>
-                            <Eye className="h-4 w-4 mr-2" />
-                            Preview Chapter: TESTING: REMOVE LATER
-                          </>
-                        )}
-                      </Button>
-                    </div>
                   </div>
                 ) : (
                   <div className="flex items-center justify-center h-full">
