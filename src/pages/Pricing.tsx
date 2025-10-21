@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, Medal, Crown, Gem } from "lucide-react";
+import { Check, Medal, Crown, Gem, Gift } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const Pricing = () => {
@@ -194,12 +194,31 @@ const Pricing = () => {
             </div>
 
             {/* Additional Info */}
-            <div className="text-center bg-card rounded-2xl p-8 shadow-elegant max-w-4xl mx-auto">
+            <div className="text-center bg-card rounded-2xl p-8 shadow-elegant max-w-4xl mx-auto mb-8">
               <h2 className="text-2xl font-semibold mb-4">Money-Back Guarantee</h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
                 We're confident you'll love your autobiography. If you're not completely satisfied within 30 days, we'll
                 refund your payment in full.
               </p>
+            </div>
+
+            {/* Gift Section */}
+            <div className="text-center bg-gradient-to-br from-accent/10 to-primary/10 rounded-2xl p-8 shadow-elegant max-w-4xl mx-auto border border-accent/20">
+              <div className="flex justify-center mb-4">
+                <Gift className="w-12 h-12 text-accent" />
+              </div>
+              <h2 className="text-2xl font-semibold mb-4">Gift an Autobiography</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
+                Give the gift of preserving memories. Purchase any tier as a gift and we'll send you a unique redemption code to share with your loved one.
+              </p>
+              <Button 
+                variant="hero" 
+                size="lg"
+                onClick={() => navigate('/gift')}
+              >
+                <Gift className="w-4 h-4 mr-2" />
+                Purchase a Gift
+              </Button>
             </div>
           </div>
         </main>

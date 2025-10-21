@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Gift } from "lucide-react";
 import heroImage from "@/assets/hero-family-portrait.jpg";
 
 const HeroSection = () => {
@@ -69,6 +69,18 @@ const HeroSection = () => {
               className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 font-semibold w-full sm:w-auto whitespace-nowrap min-h-[44px] touch-manipulation"
             >
               Get Started
+            </Button>
+          </div>
+          
+          <div className="mt-4 sm:mt-6">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate('/gift')}
+              className="bg-primary-foreground/10 backdrop-blur-sm border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/20 hover:border-primary-foreground/50"
+            >
+              <Gift className="w-4 h-4 mr-2" />
+              Give as a Gift
             </Button>
           </div>
           

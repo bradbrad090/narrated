@@ -1,4 +1,4 @@
-import { BookOpen, Mail } from "lucide-react";
+import { BookOpen, Mail, Gift } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -23,6 +23,12 @@ const Footer = () => {
               <li>
                 <a href="/faq" className="hover:text-accent transition-colors">
                   FAQ
+                </a>
+              </li>
+              <li>
+                <a href="/gift" className="hover:text-accent transition-colors flex items-center gap-2 justify-center md:justify-start">
+                  <Gift className="w-4 h-4" />
+                  Gift an Autobiography
                 </a>
               </li>
               <li>
