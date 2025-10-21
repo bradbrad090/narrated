@@ -41,3 +41,6 @@ verify_jwt = false
 
 [functions.create-gift-payment]
 verify_jwt = false
+
+[functions.redeem-gift-code]
+verify_jwt = true
