@@ -230,12 +230,13 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        message: `Gift code redeemed successfully! Your book has been ${bookAction}.`,
+        message: `Gift code redeemed successfully! Your book has been ${bookAction}.${isTestCode ? ' (Test Code)' : ''}`,
         bookId: bookId,
         tier: giftCode.tier,
         bookAction: bookAction,
         giftMessage: giftCode.gift_message,
         purchaserName: giftCode.purchaser_name,
+        isTestCode: isTestCode,
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
