@@ -505,6 +505,7 @@ export type Database = {
           expires_at: string
           gift_message: string | null
           id: string
+          is_test_code: boolean | null
           order_id: string | null
           purchaser_email: string
           purchaser_name: string | null
@@ -525,6 +526,7 @@ export type Database = {
           expires_at?: string
           gift_message?: string | null
           id?: string
+          is_test_code?: boolean | null
           order_id?: string | null
           purchaser_email: string
           purchaser_name?: string | null
@@ -545,6 +547,7 @@ export type Database = {
           expires_at?: string
           gift_message?: string | null
           id?: string
+          is_test_code?: boolean | null
           order_id?: string | null
           purchaser_email?: string
           purchaser_name?: string | null

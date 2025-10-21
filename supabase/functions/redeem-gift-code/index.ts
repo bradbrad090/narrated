@@ -70,8 +70,15 @@ serve(async (req) => {
       );
     }
 
-    // Validate gift code status
-    if (giftCode.redeemed) {
+    // Check if this is a test code (test codes can be reused and skip payment validation)
+    const isTestCode = giftCode.is_test_code === true;
+
+    if (isTestCode) {
+      console.log('Test code detected:', normalizedCode, '- allowing reuse and skipping payment validation');
+    }
+
+    // Validate gift code status (skip for test codes)
+    if (!isTestCode && giftCode.redeemed) {
       return new Response(
         JSON.stringify({ 
           error: 'Gift code already redeemed',
@@ -94,8 +101,8 @@ serve(async (req) => {
       );
     }
 
-    // Check payment status
-    if (giftCode.stripe_payment_status !== 'paid') {
+    // Check payment status (skip for test codes)
+    if (!isTestCode && giftCode.stripe_payment_status !== 'paid') {
       return new Response(
         JSON.stringify({ 
           error: 'Gift code payment not confirmed',
@@ -105,7 +112,7 @@ serve(async (req) => {
       );
     }
 
-    console.log('Gift code validated successfully. Tier:', giftCode.tier);
+    console.log('Gift code validated successfully. Tier:', giftCode.tier, 'IsTestCode:', isTestCode);
 
     // Check if user already has a book
     const { data: existingBooks, error: booksError } = await supabase
@@ -195,26 +202,30 @@ serve(async (req) => {
       // Don't fail the redemption if order creation fails, just log it
     }
 
-    // Mark gift code as redeemed
-    const { error: redeemError } = await supabase
-      .from('gift_codes')
-      .update({
-        redeemed: true,
-        redeemed_by: user.id,
-        redeemed_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq('code', normalizedCode);
+    // Mark gift code as redeemed (for test codes, we log usage but don't prevent reuse)
+    if (!isTestCode) {
+      const { error: redeemError } = await supabase
+        .from('gift_codes')
+        .update({
+          redeemed: true,
+          redeemed_by: user.id,
+          redeemed_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('code', normalizedCode);
 
-    if (redeemError) {
-      console.error('Error marking gift code as redeemed:', redeemError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to mark gift code as redeemed' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      if (redeemError) {
+        console.error('Error marking gift code as redeemed:', redeemError);
+        return new Response(
+          JSON.stringify({ error: 'Failed to mark gift code as redeemed' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    } else {
+      console.log('Test code used by:', user.id, '- not marking as redeemed to allow reuse');
     }
 
-    console.log('Gift code redeemed successfully');
+    console.log('Gift code redeemed successfully', isTestCode ? '(test code)' : '');
 
     return new Response(
       JSON.stringify({

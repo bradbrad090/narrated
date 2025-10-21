@@ -2,6 +2,48 @@
 
 This guide provides comprehensive testing procedures for the gift purchase and redemption feature.
 
+## Test Codes for Quick Testing
+
+For rapid testing without going through Stripe checkout, use these pre-seeded test codes:
+
+### Available Test Codes
+
+| Code | Tier | Description |
+|------|------|-------------|
+| `TEST-BSIC-0001` | Basic | Upgrades book to Basic tier |
+| `TEST-STND-0001` | Standard | Upgrades book to Standard tier |
+| `TEST-PREM-0001` | Premium | Upgrades book to Premium tier |
+
+### Test Code Features
+
+- ✅ **No payment required** - Bypass Stripe checkout completely
+- ✅ **Reusable** - Can be used by multiple users/accounts
+- ✅ **Never expire** - Valid for 10 years
+- ✅ **Instant redemption** - No webhook delays
+- ⚠️ **Development only** - Should not be used in production
+
+### How to Use Test Codes
+
+1. Log in to your account
+2. Navigate to `/redeem-gift` or `/redeem-gift?code=TEST-PREM-0001`
+3. Enter test code or confirm pre-filled code
+4. Click "Redeem Gift Code"
+5. Book will be upgraded immediately
+
+### Resetting Test Codes
+
+If you need to reset test codes to allow re-testing:
+
+```sql
+UPDATE gift_codes 
+SET redeemed = false, 
+    redeemed_by = NULL, 
+    redeemed_at = NULL 
+WHERE is_test_code = true;
+```
+
+---
+
 ## Prerequisites
 
 ### Required Accounts
