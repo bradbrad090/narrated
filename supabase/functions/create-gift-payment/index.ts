@@ -109,8 +109,8 @@ serve(async (req) => {
         },
       ],
       mode: 'payment',
-      success_url: `${req.headers.get('origin')}/gift-payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get('origin')}/pricing`,
+      success_url: `${req.headers.get('origin')}/gift-success?session_id={CHECKOUT_SESSION_ID}&recipient_email=${encodeURIComponent(recipient_email)}&purchaser_email=${encodeURIComponent(purchaser_email)}&tier=${tier}`,
+      cancel_url: `${req.headers.get('origin')}/gift`,
       metadata: {
         type: 'gift_purchase',
         gift_code: giftCode,
