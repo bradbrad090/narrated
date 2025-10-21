@@ -1,34 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Progress } from '@/components/ui/progress';
-import { PhotoUploadModal } from './PhotoUploadModal';
-import { supabase } from '@/integrations/supabase/client';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
+import React, { useState, useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
+import { PhotoUploadModal } from "./PhotoUploadModal";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator 
-} from '@/components/ui/dropdown-menu';
-import { 
-  FileText, 
-  Trash2, 
-  Edit2, 
-  MoreVertical, 
-  Clock, 
-  CheckCircle2, 
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
+  FileText,
+  Trash2,
+  Edit2,
+  MoreVertical,
+  Clock,
+  CheckCircle2,
   Circle,
   GripVertical,
   Check,
   X,
   Camera,
-  Utensils
-} from 'lucide-react';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { getPhotoLimit } from '@/utils/photoLimits';
+  Utensils,
+} from "lucide-react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { getPhotoLimit } from "@/utils/photoLimits";
 
 interface Chapter {
   id: string;
@@ -62,47 +62,36 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
   onRename,
   canDelete,
   hasConversations = false,
-  disabled = false
+  disabled = false,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editingTitle, setEditingTitle] = useState(chapter.title);
   const [photoModalOpen, setPhotoModalOpen] = useState(false);
   const [photoCount, setPhotoCount] = useState(0);
-  const [bookTier, setBookTier] = useState<string>('free');
+  const [bookTier, setBookTier] = useState<string>("free");
   const [conversationWordCount, setConversationWordCount] = useState(0);
-  
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: chapter.id });
+
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: chapter.id });
 
   // Fetch photo count, book tier, and conversation word count
   useEffect(() => {
     const fetchChapterData = async () => {
       const { count } = await supabase
-        .from('chapter_photos')
-        .select('*', { count: 'exact', head: true })
-        .eq('chapter_id', chapter.id);
-      
+        .from("chapter_photos")
+        .select("*", { count: "exact", head: true })
+        .eq("chapter_id", chapter.id);
+
       setPhotoCount(count || 0);
 
-      const { data: bookData } = await supabase
-        .from('books')
-        .select('tier')
-        .eq('id', chapter.book_id)
-        .maybeSingle();
-      
+      const { data: bookData } = await supabase.from("books").select("tier").eq("id", chapter.book_id).maybeSingle();
+
       if (bookData) setBookTier(bookData.tier);
 
       // Fetch conversation word count
       const { data: conversations } = await supabase
-        .from('chat_histories')
-        .select('messages')
-        .eq('chapter_id', chapter.id);
+        .from("chat_histories")
+        .select("messages")
+        .eq("chapter_id", chapter.id);
 
       if (conversations && conversations.length > 0) {
         let totalWords = 0;
@@ -110,7 +99,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
           const messages = conv.messages as Array<{ role: string; content: string }>;
           if (messages && Array.isArray(messages)) {
             messages
-              .filter((msg) => msg.role === 'user')
+              .filter((msg) => msg.role === "user")
               .forEach((msg) => {
                 if (msg.content?.trim()) {
                   totalWords += msg.content.trim().split(/\s+/).length;
@@ -133,28 +122,28 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
 
   const getPageCount = () => {
     const words = getWordCount();
-    return Math.ceil(words / 300);
+    return Math.ceil(words / 170);
   };
 
   const getCompletionStatus = () => {
     const words = getWordCount();
-    
+
     // Complete status is only when user has submitted the chapter
-    if (chapter.is_submitted) return 'complete';
-    
+    if (chapter.is_submitted) return "complete";
+
     // If chapter has conversations or content but not submitted, it's a draft
-    if (words > 0 || hasConversations) return 'draft';
-    
+    if (words > 0 || hasConversations) return "draft";
+
     // No content and no conversations = empty
-    return 'empty';
+    return "empty";
   };
 
   const getStatusIcon = () => {
     const status = getCompletionStatus();
     switch (status) {
-      case 'complete':
+      case "complete":
         return <CheckCircle2 className="h-3 w-3 text-green-500" />;
-      case 'draft':
+      case "draft":
         return <Circle className="h-3 w-3 text-yellow-500 fill-yellow-100" />;
       default:
         return <Circle className="h-3 w-3 text-muted-foreground" />;
@@ -164,9 +153,17 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
   const getStatusBadge = () => {
     const status = getCompletionStatus();
     const statusConfig = {
-      complete: { label: 'Complete', variant: 'default' as const, className: 'bg-green-100 text-green-700 hover:bg-green-100' },
-      draft: { label: 'Draft', variant: 'outline' as const, className: 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100' },
-      empty: { label: 'Empty', variant: 'outline' as const, className: 'bg-muted text-muted-foreground' }
+      complete: {
+        label: "Complete",
+        variant: "default" as const,
+        className: "bg-green-100 text-green-700 hover:bg-green-100",
+      },
+      draft: {
+        label: "Draft",
+        variant: "outline" as const,
+        className: "bg-yellow-100 text-yellow-700 hover:bg-yellow-100",
+      },
+      empty: { label: "Empty", variant: "outline" as const, className: "bg-muted text-muted-foreground" },
     };
 
     const config = statusConfig[status];
@@ -178,7 +175,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
   };
 
   const getContentPreview = () => {
-    if (!chapter.content?.trim()) return 'No content yet...';
+    if (!chapter.content?.trim()) return "No content yet...";
     const preview = chapter.content.substring(0, 80);
     return preview.length < chapter.content.length ? `${preview}...` : preview;
   };
@@ -188,8 +185,8 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 1) return 'Yesterday';
+
+    if (diffDays === 1) return "Yesterday";
     if (diffDays < 7) return `${diffDays} days ago`;
     if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
     return date.toLocaleDateString();
@@ -212,10 +209,10 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       handleSaveRename();
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       e.preventDefault();
       handleCancelRename();
     }
@@ -231,17 +228,15 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
       ref={setNodeRef}
       style={style}
       className={`group relative p-4 rounded-lg border transition-all duration-200 ${
-        !isEditing && !disabled && 'cursor-pointer hover:shadow-md hover:border-primary/30'
+        !isEditing && !disabled && "cursor-pointer hover:shadow-md hover:border-primary/30"
       } ${
-        isActive 
-          ? 'bg-primary/5 border-primary shadow-sm' 
-          : 'hover:bg-muted/50'
-      } ${isDragging ? 'opacity-50 shadow-lg' : ''} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+        isActive ? "bg-primary/5 border-primary shadow-sm" : "hover:bg-muted/50"
+      } ${isDragging ? "opacity-50 shadow-lg" : ""} ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
       onClick={isEditing || disabled ? undefined : onSelect}
     >
       {/* Drag Handle */}
       {!disabled && (
-        <div 
+        <div
           className="absolute left-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
           {...attributes}
           {...listeners}
@@ -284,17 +279,15 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
             <>
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 {getStatusIcon()}
-                <h3 className="font-medium text-sm truncate">
-                  {chapter.title}
-                </h3>
+                <h3 className="font-medium text-sm truncate">{chapter.title}</h3>
               </div>
             </>
           )}
-          
+
           {!isEditing && (
             <div className="flex items-center gap-1">
               {getStatusBadge()}
-              
+
               {/* Actions Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -309,14 +302,22 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-background border shadow-md z-50">
-                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setIsEditing(true); }}>
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsEditing(true);
+                    }}
+                  >
                     <Edit2 className="h-4 w-4 mr-2" />
                     Rename Chapter
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   {canDelete && (
-                    <DropdownMenuItem 
-                      onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete();
+                      }}
                       className="text-destructive focus:text-destructive"
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
@@ -334,7 +335,9 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
               <span className="font-medium">Progress</span>
-              <span className="text-[10px]">{wordCount.toLocaleString()} / 750 ({Math.min(Math.round((wordCount / 750) * 100), 100)}%)</span>
+              <span className="text-[10px]">
+                {wordCount.toLocaleString()} / 750 ({Math.min(Math.round((wordCount / 750) * 100), 100)}%)
+              </span>
             </div>
             <Progress value={Math.min((wordCount / 750) * 100, 100)} className="h-2" />
           </div>
@@ -367,17 +370,21 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1">
               <Camera className="h-3 w-3" />
-              <span>{photoCount}/{photoLimit === Infinity ? '∞' : photoLimit} photos</span>
+              <span>
+                {photoCount}/{photoLimit === Infinity ? "∞" : photoLimit} photos
+              </span>
             </div>
             <div className="flex items-center gap-1">
               <FileText className="h-3 w-3" />
               <span>{wordCount} words</span>
             </div>
             {pageCount > 0 && (
-              <span>• {pageCount} page{pageCount !== 1 ? 's' : ''}</span>
+              <span>
+                • {pageCount} page{pageCount !== 1 ? "s" : ""}
+              </span>
             )}
           </div>
-          
+
           <div className="flex items-center gap-1">
             <Clock className="h-3 w-3" />
             <span>{getLastModified()}</span>

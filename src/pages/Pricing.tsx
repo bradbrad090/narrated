@@ -16,7 +16,9 @@ const Pricing = () => {
   useEffect(() => {
     // Check authentication status
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       setIsLoggedIn(!!session);
       setCheckingAuth(false);
     };
@@ -24,7 +26,9 @@ const Pricing = () => {
     checkAuth();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setIsLoggedIn(!!session);
     });
 
@@ -34,10 +38,10 @@ const Pricing = () => {
   const handleGetStarted = () => {
     if (isLoggedIn) {
       // If logged in, take them to homepage to view their books
-      navigate('/');
+      navigate("/");
     } else {
       // If logged out, take them to signup
-      navigate('/auth');
+      navigate("/auth");
     }
   };
 
@@ -45,12 +49,8 @@ const Pricing = () => {
     {
       name: "Free Tier",
       description: "Start your story with one free chapter",
-      features: [
-        "One free chapter",
-        "Professional editing",
-        "Emailed on completion",
-      ],
-      isFree: true
+      features: ["One free chapter", "Professional editing", "Emailed on completion"],
+      isFree: true,
     },
     {
       name: "Basic",
@@ -67,8 +67,8 @@ const Pricing = () => {
       ],
       theme: {
         border: "border-amber-300",
-        background: "bg-gradient-to-br from-amber-100/70 to-orange-100/50"
-      }
+        background: "bg-gradient-to-br from-amber-100/70 to-orange-100/50",
+      },
     },
     {
       name: "Standard",
@@ -81,13 +81,13 @@ const Pricing = () => {
         "Professional editing",
         "20 recipes",
         "100 photos",
-        "Printed book + digital PDF",
+        "Printed book + Digital PDF",
       ],
       featured: true,
       theme: {
         border: "border-slate-400",
-        background: "bg-gradient-to-br from-slate-100/70 to-gray-100/50"
-      }
+        background: "bg-gradient-to-br from-slate-100/70 to-gray-100/50",
+      },
     },
     {
       name: "Premium",
@@ -100,37 +100,42 @@ const Pricing = () => {
         "Professional editing",
         "20 recipes",
         "100 photos",
-        "Premium book + digital PDF",
+        "Premium book + Digital PDF",
         "5 copies",
       ],
       theme: {
         border: "border-yellow-400",
-        background: "bg-gradient-to-br from-yellow-100/70 to-amber-100/50"
-      }
-    }
+        background: "bg-gradient-to-br from-yellow-100/70 to-amber-100/50",
+      },
+    },
   ];
 
   return (
     <>
       <Helmet>
         <title>Autobiography Writing Pricing - Plans from $0 | Narrated</title>
-        <meta name="description" content="Clear pricing for AI-assisted autobiography writing. Free Tier $0, Basic $9, Standard $19, Premium $39. Professional editing and printing included." />
-        <meta name="keywords" content="autobiography pricing, life story cost, memoir writing price, AI writing service cost, book printing price" />
+        <meta
+          name="description"
+          content="Clear pricing for AI-assisted autobiography writing. Free Tier $0, Basic $9, Standard $19, Premium $39. Professional editing and printing included."
+        />
+        <meta
+          name="keywords"
+          content="autobiography pricing, life story cost, memoir writing price, AI writing service cost, book printing price"
+        />
         <link rel="canonical" href="https://narrated.com/pricing" />
       </Helmet>
       <div className="min-h-screen bg-gradient-subtle">
         <Header />
-        
+
         <main className="pt-24 pb-16">
           <div className="container mx-auto px-6">
             {/* Hero Section */}
             <div className="text-center mb-16">
-              <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
-                Simple, Transparent Pricing
-              </h1>
+              <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">Simple, Transparent Pricing</h1>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                All users start on the free tier, which includes one free chapter that is professionally edited and emailed to you upon completion. Choose the plan that best fits your story. All plans include intelligent conversations, 
-                professional writing, and editing. No hidden fees.
+                All users start on the free tier, which includes one free chapter that is professionally edited and
+                emailed to you upon completion. Choose the plan that best fits your story. All plans include intelligent
+                conversations, professional writing, and editing. No hidden fees.
               </p>
             </div>
 
@@ -138,17 +143,13 @@ const Pricing = () => {
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16 max-w-7xl mx-auto items-stretch">
               {plans.map((plan, index) => {
                 const Icon = plan.icon;
-                
+
                 return (
-                  <Card 
-                    key={index} 
+                  <Card
+                    key={index}
                     className={`relative flex flex-col ${
-                      plan.isFree 
-                        ? 'border-border/50' 
-                        : `${plan.theme?.border} ${plan.theme?.background}`
-                    } ${
-                      plan.featured ? 'shadow-elegant scale-105' : ''
-                    }`}
+                      plan.isFree ? "border-border/50" : `${plan.theme?.border} ${plan.theme?.background}`
+                    } ${plan.featured ? "shadow-elegant scale-105" : ""}`}
                   >
                     {plan.featured && (
                       <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
@@ -164,9 +165,7 @@ const Pricing = () => {
                         </div>
                       )}
                       <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
-                      {plan.price && (
-                        <div className="text-4xl font-bold text-primary mb-2">{plan.price}</div>
-                      )}
+                      {plan.price && <div className="text-4xl font-bold text-primary mb-2">{plan.price}</div>}
                       <CardDescription>{plan.description}</CardDescription>
                     </CardHeader>
                     <CardContent className="flex flex-col flex-grow">
@@ -179,8 +178,8 @@ const Pricing = () => {
                         ))}
                       </ul>
                       {!plan.isFree && (
-                        <Button 
-                          className={`w-full mt-auto ${plan.featured ? 'bg-primary hover:bg-primary/90' : ''}`}
+                        <Button
+                          className={`w-full mt-auto ${plan.featured ? "bg-primary hover:bg-primary/90" : ""}`}
                           variant={plan.featured ? "default" : "outline"}
                           onClick={handleGetStarted}
                           disabled={checkingAuth}
@@ -198,8 +197,8 @@ const Pricing = () => {
             <div className="text-center bg-card rounded-2xl p-8 shadow-elegant max-w-4xl mx-auto">
               <h2 className="text-2xl font-semibold mb-4">Money-Back Guarantee</h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                We're confident you'll love your autobiography. If you're not completely satisfied 
-                within 30 days, we'll refund your payment in full.
+                We're confident you'll love your autobiography. If you're not completely satisfied within 30 days, we'll
+                refund your payment in full.
               </p>
             </div>
           </div>
