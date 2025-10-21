@@ -133,6 +133,30 @@ serve(async (req) => {
 
         console.log('Gift code payment confirmed:', giftCode);
 
+        // Send purchase confirmation email to purchaser
+        try {
+          const emailResponse = await supabase.functions.invoke('send-chapter-email', {
+            body: {
+              email_type: 'gift_purchase_confirmation',
+              gift_code: giftData.code,
+              tier: giftData.tier,
+              recipient_email: giftData.recipient_email,
+              purchaser_email: giftData.purchaser_email,
+              purchaser_name: giftData.purchaser_name || 'Gift Purchaser',
+              gift_message: giftData.gift_message,
+              amount_paid: giftData.amount_paid,
+            }
+          });
+
+          if (emailResponse.error) {
+            console.error('Error sending purchase confirmation email:', emailResponse.error);
+          } else {
+            console.log('Purchase confirmation email sent to:', giftData.purchaser_email);
+          }
+        } catch (emailError) {
+          console.error('Failed to send purchase confirmation email:', emailError);
+        }
+
       } else if (paymentType === 'book_tier_purchase') {
         // Handle regular book tier purchase (existing flow)
         const bookId = metadata.book_id;

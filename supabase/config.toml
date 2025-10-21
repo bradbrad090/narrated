@@ -40,4 +40,4 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.create-gift-payment]
-verify_jwt = true
+verify_jwt = false
