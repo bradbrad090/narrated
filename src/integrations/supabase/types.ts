@@ -497,11 +497,81 @@ export type Database = {
           },
         ]
       }
+      gift_codes: {
+        Row: {
+          amount_paid: number | null
+          code: string
+          created_at: string
+          expires_at: string
+          gift_message: string | null
+          id: string
+          order_id: string | null
+          purchaser_email: string
+          purchaser_name: string | null
+          recipient_email: string
+          redeemed: boolean | null
+          redeemed_at: string | null
+          redeemed_by: string | null
+          stripe_payment_status: string | null
+          stripe_session_id: string | null
+          tier: string
+          updated_at: string
+        }
+        Insert: {
+          amount_paid?: number | null
+          code: string
+          created_at?: string
+          expires_at?: string
+          gift_message?: string | null
+          id?: string
+          order_id?: string | null
+          purchaser_email: string
+          purchaser_name?: string | null
+          recipient_email: string
+          redeemed?: boolean | null
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          stripe_payment_status?: string | null
+          stripe_session_id?: string | null
+          tier: string
+          updated_at?: string
+        }
+        Update: {
+          amount_paid?: number | null
+          code?: string
+          created_at?: string
+          expires_at?: string
+          gift_message?: string | null
+          id?: string
+          order_id?: string | null
+          purchaser_email?: string
+          purchaser_name?: string | null
+          recipient_email?: string
+          redeemed?: boolean | null
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          stripe_payment_status?: string | null
+          stripe_session_id?: string | null
+          tier?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_gift_codes_order_id"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           book_id: string | null
           created_at: string
+          gift_code_id: string | null
           id: string
+          is_gift_redemption: boolean | null
           pod_provider: string | null
           quantity: number | null
           status: string | null
@@ -511,7 +581,9 @@ export type Database = {
         Insert: {
           book_id?: string | null
           created_at?: string
+          gift_code_id?: string | null
           id?: string
+          is_gift_redemption?: boolean | null
           pod_provider?: string | null
           quantity?: number | null
           status?: string | null
@@ -521,7 +593,9 @@ export type Database = {
         Update: {
           book_id?: string | null
           created_at?: string
+          gift_code_id?: string | null
           id?: string
+          is_gift_redemption?: boolean | null
           pod_provider?: string | null
           quantity?: number | null
           status?: string | null
@@ -534,6 +608,13 @@ export type Database = {
             columns: ["book_id"]
             isOneToOne: false
             referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_gift_code_id_fkey"
+            columns: ["gift_code_id"]
+            isOneToOne: false
+            referencedRelation: "gift_codes"
             referencedColumns: ["id"]
           },
           {
