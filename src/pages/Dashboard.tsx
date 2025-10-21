@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Plus, Book, LogOut, Trash2, Edit2, Check, X } from "lucide-react";
+import { Plus, Book, LogOut, Trash2, Edit2, Check, X, Gift } from "lucide-react";
 import { useAnalyticsContext } from "@/components/AnalyticsProvider";
 
 const Dashboard = () => {
@@ -293,6 +293,10 @@ const Dashboard = () => {
             <span className="hidden md:inline text-sm text-muted-foreground">
               Welcome, {user?.email}
             </span>
+            <Button variant="hero" onClick={() => navigate("/redeem-gift")}>
+              <Gift className="h-4 w-4 mr-2" />
+              Redeem Gift
+            </Button>
             <Button variant="outline" onClick={handleSignOut}>
               <LogOut className="h-4 w-4 mr-2" />
               Sign Out
