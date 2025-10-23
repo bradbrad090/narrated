@@ -3,13 +3,22 @@
 ## Database Schema (Implemented)
 
 ### Core Tables
-- **users**: `id, email, full_name, age, completed_signup, created_at`
-- **books**: `id, user_id, title, status, chapters, is_paid, trial_words_used, created_at`
-- **chapters**: `id, book_id, user_id, chapter_number, title, content, created_at, updated_at`
-- **book_profiles**: `id, book_id, user_id, full_name, birth_year, birthplace, current_location, occupation, education, family_background, cultural_background, languages_spoken, hobbies_interests, personality_traits, career_highlights, key_life_events, challenges_overcome, relationships_family, life_philosophy, values_beliefs, life_themes, memorable_quotes, writing_style_preference, created_at, updated_at`
-- **chat_histories**: `id, user_id, session_id, messages, context_snapshot, conversation_goals, chapter_id, is_self_conversation, conversation_type, conversation_medium, created_at, updated_at`
+- **users**: `id, email, full_name, created_at`
+- **books**: `id, user_id, title, status, tier, purchase_status, stripe_purchase_id, usage_metrics, created_at`
+- **chapters**: `id, book_id, user_id, chapter_number, title, content, summary, status, is_submitted, pdf_url, created_at, updated_at`
+- **book_profiles**: `id, book_id, user_id, question_1_answer...question_10_answer, created_at, updated_at`
+- **chat_histories**: `id, user_id, chapter_id, session_id, messages, context_snapshot, conversation_type, conversation_medium, created_at, updated_at`
 - **conversation_context_cache**: `id, user_id, book_id, chapter_id, context_data, expires_at, created_at`
-- **orders**: `id, user_id, book_id, status, total_price, quantity, pod_provider, created_at`
+- **conversation_questions**: `id, user_id, book_id, chapter_id, conversation_session_id, conversation_type, question_text, question_hash, semantic_keywords, response_quality, asked_at, created_at, updated_at`
+- **orders**: `id, user_id, book_id, status, total_price, quantity, pod_provider, is_gift_redemption, gift_code_id, created_at`
+- **gift_codes**: `id, code, tier, recipient_email, purchaser_email, purchaser_name, gift_message, amount_paid, stripe_payment_status, stripe_session_id, stripe_payment_intent_id, redeemed, redeemed_by, redeemed_at, expires_at, is_test_code, order_id, created_at, updated_at`
+- **chapter_photos**: `id, chapter_id, book_id, user_id, storage_path, file_name, file_size, created_at, updated_at`
+- **ai_chapter_metadata**: `id, chapter_id, user_id, book_id, conversation_id, profile_id, model_used, prompt_version, source_data, generated_at, created_at, updated_at`
+- **profile_question_responses**: `id, user_id, book_id, question_index, question_text, answer_text, created_at, updated_at`
+- **chapter_email_logs**: `id, chapter_id, user_id, email_type, email_status, error_message, sent_at, created_at`
+- **pdf_jobs**: `id, chapter_id, user_id, status, pdf_url, error_message, processed_at, created_at, updated_at`
+- **analytics_sessions**: `id, session_id, user_id, referrer, first_seen_at, last_seen_at, signed_up, created_book, started_profile, started_conversation`
+- **analytics_page_views**: `id, session_id, page_path, viewed_at`
 
 ## Edge Functions (Implemented)
 
@@ -29,6 +38,15 @@
 ### Payment Services
 - **create-payment**: Creates Stripe checkout sessions for book upgrades
 - **verify-payment**: Verifies payment status and updates book tier
+- **create-gift-payment**: Creates Stripe checkout for gift purchases
+- **redeem-gift-code**: Validates and redeems gift codes (supports test codes)
+- **stripe-webhook**: Handles Stripe webhook events
+
+### Email Services
+- **send-chapter-email**: Sends various email notifications via Resend
+
+### Analytics Services
+- **analytics-tracker**: Tracks user engagement and page views
 
 ## Authentication Flow
 - Supabase Auth with email/password

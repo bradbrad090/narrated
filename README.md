@@ -33,9 +33,17 @@ Purchase autobiography packages as gifts for loved ones:
 #### Gift Code Features
 - Valid for 1 year from purchase date
 - Can be applied to new or existing books
-- One-time use only
+- One-time use only (except test codes)
 - Secure validation and tracking
 - Personal message support
+
+#### Test Codes (Development Only)
+For rapid development testing without Stripe:
+- `TEST-BSIC-0001` - Basic tier test code
+- `TEST-STND-0001` - Standard tier test code
+- `TEST-PREM-0001` - Premium tier test code
+
+Test codes can be reused, skip payment validation, and are valid for 10 years.
 
 ## Tech Stack
 
@@ -128,19 +136,36 @@ npm run preview
 
 #### `books`
 - Stores user's autobiography projects
-- Fields: `tier`, `title`, `user_id`, `status`, `purchase_status`
+- Fields: `tier`, `title`, `user_id`, `status`, `purchase_status`, `usage_metrics`
 
 #### `chapters`
 - Individual chapters within books
-- Fields: `book_id`, `title`, `content`, `is_submitted`, `chapter_number`
+- Fields: `book_id`, `title`, `content`, `summary`, `is_submitted`, `chapter_number`, `status`, `pdf_url`
 
 #### `gift_codes`
 - Gift purchase and redemption tracking
-- Fields: `code`, `tier`, `recipient_email`, `purchaser_email`, `redeemed`, `expires_at`, `stripe_payment_status`
+- Fields: `code`, `tier`, `recipient_email`, `purchaser_email`, `redeemed`, `redeemed_by`, `expires_at`, `stripe_payment_status`, `is_test_code`
+- Test codes (`is_test_code = true`) can be reused for development testing
 
 #### `orders`
 - Transaction records for purchases
-- Fields: `user_id`, `book_id`, `total_price`, `status`, `is_gift_redemption`
+- Fields: `user_id`, `book_id`, `total_price`, `status`, `is_gift_redemption`, `gift_code_id`
+
+#### `book_profiles`
+- Comprehensive user biographical data
+- Fields: Question responses (1-10), timestamps
+
+#### `chat_histories`
+- Complete conversation records
+- Fields: `user_id`, `chapter_id`, `session_id`, `messages`, `context_snapshot`, `conversation_type`, `conversation_medium`
+
+#### `conversation_context_cache`
+- Performance optimization cache
+- Fields: `user_id`, `book_id`, `chapter_id`, `context_data`, `expires_at`
+
+#### `chapter_photos`
+- Photo storage references
+- Fields: `chapter_id`, `book_id`, `storage_path`, `file_name`, `file_size`
 
 ### Security
 
@@ -200,7 +225,39 @@ Use Stripe test cards for development:
 - Updates book tier or creates new book
 - Creates order record
 - Sends confirmation email
+- Supports test codes for development (reusable, no payment validation)
 - **Auth**: Required (JWT)
+
+#### `openai-conversation`
+- Handles text-based conversations
+- Processes conversation history
+- Integrates with user/book profiles
+- **Auth**: Required (JWT)
+
+#### `ai-conversation-realtime`
+- Real-time voice conversation sessions
+- WebSocket support
+- **Auth**: Required (JWT)
+
+#### `voice-to-text`
+- Transcribes audio using OpenAI Whisper
+- **Auth**: Required (JWT)
+
+#### `generate-chapter`
+- Converts conversations to chapter content
+- **Auth**: Required (JWT)
+
+#### `generate-summary`
+- Generates chapter summaries
+- **Auth**: Required (JWT)
+
+#### `conversation-context-builder`
+- Builds AI conversation context
+- **Auth**: Required (JWT)
+
+#### `analytics-tracker`
+- Tracks user engagement metrics
+- **Auth**: Not required (public)
 
 #### `stripe-webhook`
 - Handles Stripe payment events
@@ -232,15 +289,28 @@ Use Stripe test cards for development:
 
 See [GIFT_TESTING_GUIDE.md](./GIFT_TESTING_GUIDE.md) for comprehensive testing procedures.
 
-### Quick Test Checklist
+### Quick Test with Test Codes
+
+For rapid testing without Stripe payment:
+1. Log in to your account
+2. Navigate to `/redeem-gift`
+3. Enter one of the test codes:
+   - `TEST-BSIC-0001` for Basic tier
+   - `TEST-STND-0001` for Standard tier
+   - `TEST-PREM-0001` for Premium tier
+4. Verify book tier upgrade
+
+### Full Test Checklist
 
 - [ ] Gift purchase flow completes
 - [ ] Stripe checkout redirects properly
 - [ ] Payment webhook updates database
 - [ ] Emails are delivered
-- [ ] Gift code redemption works
+- [ ] Gift code redemption works (both regular and test codes)
 - [ ] Book tier updates correctly
 - [ ] Edge cases handled (expired, used codes)
+- [ ] Test codes can be reused
+- [ ] Test codes bypass payment validation
 
 ## Deployment
 
