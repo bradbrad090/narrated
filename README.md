@@ -2,6 +2,8 @@
 
 Narrated is a comprehensive autobiography creation platform that helps users transform their memories into beautifully crafted books through AI-assisted conversations.
 
+> 📘 **For detailed system information**, see [CURRENT_STATE.md](./CURRENT_STATE.md)
+
 ## Features
 
 ### Core Functionality
@@ -314,12 +316,25 @@ For rapid testing without Stripe payment:
 
 ## Deployment
 
-The application is designed for deployment on Lovable/Supabase infrastructure:
+### Current Deployment Platform: Lovable + Supabase
 
-1. **Frontend**: Deployed via Lovable's publish feature
-2. **Edge Functions**: Auto-deployed with code changes
-3. **Database**: Hosted on Supabase
-4. **Webhooks**: Configure in Stripe Dashboard with production URL
+1. **Frontend**: Click "Publish" button in Lovable → Automatic deployment
+   - No manual build commands needed
+   - Automatic CDN distribution
+   - Custom domain via Lovable project settings
+   
+2. **Edge Functions**: Auto-deploy on Git push to main branch
+   - Managed through Supabase integration
+   - Secrets configured in Supabase dashboard
+   
+3. **Database**: Migrations via Supabase CLI
+   - Test locally: `supabase start`
+   - Deploy: `supabase db push`
+   
+4. **Webhooks**: Configure in Stripe Dashboard with your Supabase function URL
+   - Format: `https://[project-ref].supabase.co/functions/v1/stripe-webhook`
+
+> ⚠️ **Note**: This project deploys via **Lovable**, not Vercel. Ignore any Vercel-specific instructions in old documentation.
 
 ## Troubleshooting
 
@@ -359,9 +374,19 @@ This is a private project. For questions or issues, contact the development team
 
 Proprietary - All rights reserved
 
+## Documentation
+
+- **[README.md](./README.md)** - This file, quick start guide
+- **[CURRENT_STATE.md](./CURRENT_STATE.md)** - Detailed system state and features
+- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Technical architecture and design
+- **[GIFT_TESTING_GUIDE.md](./GIFT_TESTING_GUIDE.md)** - Gift feature testing procedures
+- **[TROUBLESHOOTING_GIFT.md](./TROUBLESHOOTING_GIFT.md)** - Gift feature troubleshooting
+- **[Instructions.md](./Instructions.md)** - Business context and objectives
+- **[todo.md](./todo.md)** - Development roadmap
+
 ## Support
 
 For technical support:
-- Email: contact@narrated.com.au
-- Documentation: See project wiki
+- Email: hello@aiautobiography.com
 - Testing guides: GIFT_TESTING_GUIDE.md
+- Troubleshooting: TROUBLESHOOTING_GIFT.md

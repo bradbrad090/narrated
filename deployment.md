@@ -3,26 +3,30 @@
 ## Overview
 This manual provides step-by-step instructions for deploying the Narrated SaaS platform. Narrated transforms personal life stories into professionally written and printed autobiographies using conversation technology, with a React-based frontend, Supabase backend, and integrations for content generation.
 
-Deployment involves:
-- Pushing code to the main branch for automated frontend deployment.
-- Managing backend components (database, authentication, and edge functions) via Supabase.
-- Setting environment variables for secure integrations.
-- Handling any infrastructure quirks to ensure smooth scaling.
+## Current Deployment Platform: Lovable + Supabase
 
-The process assumes a cloud-based setup with automated scaling, using Vercel for frontend hosting (common for Vite-built React apps) and Supabase for backend services. No custom servers are required beyond these managed platforms.
+**Frontend**: Lovable (not Vercel)  
+**Backend**: Supabase (PostgreSQL, Auth, Edge Functions, Storage)
+
+Deployment involves:
+- Clicking "Publish" in Lovable for automated frontend deployment
+- Managing backend components (database, authentication, and edge functions) via Supabase
+- Setting environment variables for secure integrations
+- No custom servers required - fully managed platforms
 
 **Note:** This is a one-time setup for initial deployment, with subsequent updates handled via Git pushes or CLI commands. Always test changes in a staging environment before deploying to production.
 
 ## Prerequisites
 
-- **Git and GitHub Access**: Access to the project's GitHub repository (e.g., https://github.com/narrated/app). The repo contains the frontend code (React with TypeScript, Tailwind CSS, Vite) and Supabase configurations (e.g., migrations and edge functions).
-- **Vercel Account**: Linked to the GitHub repo for CI/CD. Sign up at vercel.com if needed.
-- **Supabase Account**: A Supabase project created at supabase.com. Note the project reference (e.g., your-project-ref.supabase.co).
-- **Supabase CLI**: Installed globally via npm (`npm install -g supabase`). Used for local development and deploying edge functions/database changes.
-- **API Keys**: Secure keys for content generation integrations (obtained from respective provider dashboards).
-- **Node.js and npm**: Version 18+ for building the frontend.
-- **Local Development Setup**: Clone the repo, run `npm install`, and use `supabase start` for local Supabase emulation.
-- **Optional Tools**: A printing service API key if integrated for physical book delivery (not specified in core stack; assume a third-party like Printful or similar is configured separately).
+- **Lovable Account**: Access to the Lovable project for frontend deployment
+- **Supabase Account**: A Supabase project created at supabase.com. Note the project reference (e.g., your-project-ref.supabase.co)
+- **Supabase CLI**: Installed globally via npm (`npm install -g supabase`). Used for local development and deploying edge functions/database changes
+- **API Keys**: 
+  - OpenAI API key for AI conversations
+  - Stripe keys for payment processing
+  - Resend API key for email delivery
+- **Node.js and npm**: Version 18+ for local development
+- **Local Development Setup**: Clone the repo, run `npm install`, and use `supabase start` for local Supabase emulation
 
 ## Repository and Branch
 
@@ -61,15 +65,21 @@ Deployment is semi-automated with CI/CD. Follow these steps for initial setup or
 - Build locally to test: `npm run build` (uses Vite).
 - Run tests: `npm test` (if unit/integration tests are set up).
 
-### 2. Deploy Frontend to Vercel
+### 2. Deploy Frontend via Lovable
 
-- Connect the GitHub repo to Vercel if not already done (Vercel Dashboard > Add New > Import Git Repository).
-- Push to main: `git push origin main`.
-- Vercel automatically detects the Vite config, builds the app, and deploys it.
-- **Custom Domain**: In Vercel, add `narrated.com` or `app.aiautobiography.com` under Domains. Update DNS records (A record to Vercel's IP or CNAME).
-- **Build Command**: Defaults to `vite build`; override if needed.
-- **Output Directory**: `dist`.
-- **Time**: ~1-2 minutes per deploy.
+**Deployment Process:**
+1. Open your project in Lovable
+2. Click the "Publish" button in the top right
+3. Lovable automatically builds and deploys your frontend
+4. Deployment typically completes in ~1-2 minutes
+
+**Custom Domain Setup:**
+1. In Lovable: Project Settings > Domains
+2. Add your custom domain (e.g., `app.narrated.com.au`)
+3. Follow DNS configuration instructions provided by Lovable
+4. Requires paid Lovable plan for custom domains
+
+**No manual build commands needed** - Lovable handles the entire build and deployment process.
 
 ### 3. Deploy Backend to Supabase
 Supabase handles database, auth, and edge functions. No full "deployment" like traditional servers—it's configuration-based.
@@ -110,16 +120,28 @@ Monitor: Use Vercel Analytics and Supabase Observability for logs/errors.
 
 ## Servers and Infrastructure
 
-- **Frontend Server**: Vercel (serverless, auto-scaling). Domain: `narrated.vercel.app` (preview) or custom domain. No manual server management—Vercel handles hosting, CDN, and SSL.
-- **Backend Server**: Supabase (managed PostgreSQL, auth, and edge functions). Endpoint: `https://your-project-ref.supabase.co`. Region: Set to closest to Perth (e.g., AWS ap-southeast-2 for Australia).
+### Frontend: Lovable
+- **Hosting**: Lovable managed hosting (serverless, auto-scaling)
+- **CDN**: Automatic global CDN distribution
+- **SSL**: Automatic HTTPS certificates
+- **Domain**: `[project-name].lovable.app` (default) or custom domain (paid plans)
+- **No manual server management**: Lovable handles everything
+
+### Backend: Supabase
+- **Database**: Managed PostgreSQL
+- **Auth**: Supabase Auth service
+- **Edge Functions**: Deno runtime for serverless functions
+- **Storage**: Supabase Storage for photos and files
+- **Endpoint**: `https://your-project-ref.supabase.co`
+- **Region**: Set to AWS ap-southeast-2 (Sydney) for Australia
 
 ### Infrastructure Details:
+- **Cloud Provider**: Lovable + Supabase (both AWS-backed)
+- **Scaling**: Fully automatic based on usage
+- **Backups**: Supabase auto-backups daily; enable point-in-time recovery for production
+- **Cost**: Usage-based pricing; monitor Lovable and Supabase dashboards
 
-- **Cloud Provider**: Vercel (built on AWS) and Supabase (also AWS-backed).
-- **Scaling**: Automatic; Supabase scales database/functions based on usage, Vercel handles traffic spikes.
-- **Backups**: Supabase auto-backups daily; enable point-in-time recovery if needed.
-
-**No On-Prem Servers**: Everything is cloud-based to support automated scaling.
+**No On-Prem Servers**: Everything is cloud-based for automatic scaling.
 
 ## Troubleshooting and Quirks ("Where the Bodies Are Buried")
 
@@ -138,7 +160,9 @@ Monitor: Use Vercel Analytics and Supabase Observability for logs/errors.
 - **Migrations Conflicts**: Always diff against the remote db to avoid overwriting production data.
 - **Cost Overruns**: Monitor Supabase usage (e.g., function invocations) and Vercel bandwidth.
 
-**Rollback**: Vercel supports rollbacks via dashboard. For Supabase, use migrations to revert schema changes.
+**Rollback**: 
+- Lovable: Use version history to revert to previous deployments
+- Supabase: Use migrations to revert schema changes (`supabase db reset`)
 
 **Contact for Help**: Email hello@aiautobiography.com or check repo issues for deployment logs.
 
