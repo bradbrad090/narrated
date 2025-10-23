@@ -5,7 +5,7 @@ Narrated is a comprehensive autobiography creation platform that helps users tra
 ## Features
 
 ### Core Functionality
-- **AI-Powered Conversations**: Intelligent interview system that guides users through their life story
+- **AI-Powered Conversations**: Intelligent interview system that guides users through documenting their life story
 - **Multiple Books**: Users can create and manage multiple autobiography projects
 - **Chapter Management**: Organize stories into chapters with rich content editing
 - **Photo Integration**: Upload and organize photos within chapters

@@ -236,52 +236,33 @@ function generateConversationSeeds(context: ContextSnapshot, type: string): stri
   // Check if using new raw answers mode (question_1_answer exists)
   const hasRawAnswers = bookProfile?.question_1_answer;
 
-  if (type === 'interview') {
-    if (hasRawAnswers) {
-      // New mode: use raw profile answers for more authentic seeds
-      seeds.push(
-        `Tell me about a typical day in your life when you were younger.`,
-        `What was the most important lesson you learned from your work or career?`,
-        `Describe a moment when you felt most proud of yourself.`
-      );
-      
-      if (bookProfile.question_3_answer) {
-        seeds.push(`You mentioned your hobbies earlier. Tell me more about how they've shaped your life.`);
-      }
-    } else {
-      // Legacy mode: use extracted profile fields
-      seeds.push(
-        `Tell me about a typical day in your life when you were ${userProfile.age || 'younger'}.`,
-        `What was the most important lesson you learned from your ${bookProfile.occupation || 'work'}?`,
-        `Describe a moment when you felt most proud of yourself.`
-      );
-      
-      if (lifeThemes && lifeThemes.length > 0) {
-        seeds.push(`I see that ${lifeThemes[0]} is important to you. Can you share a story about that?`);
-      }
-    }
-    
-    if (currentChapter && currentChapter.title) {
-      seeds.push(`Let's talk about ${currentChapter.title}. What memories come to mind?`);
-    }
-  } else if (type === 'reflection') {
+  // Only 'interview' type is supported
+  if (hasRawAnswers) {
+    // New mode: use raw profile answers for more authentic seeds
     seeds.push(
-      `Looking back, what would you tell your younger self?`,
-      `What values have guided you throughout your life?`,
-      `How have your perspectives changed over the years?`
+      `Tell me about a typical day in your life when you were younger.`,
+      `What was the most important lesson you learned from your work or career?`,
+      `Describe a moment when you felt most proud of yourself.`
     );
     
-    if (hasRawAnswers && bookProfile.question_8_answer) {
-      seeds.push(`Reflecting on what you shared about your life philosophy, how has it evolved over time?`);
-    } else if (bookProfile.challenges_overcome && bookProfile.challenges_overcome.length > 0) {
-      seeds.push(`You mentioned overcoming ${bookProfile.challenges_overcome[0]}. How did that experience shape you?`);
+    if (bookProfile.question_3_answer) {
+      seeds.push(`You mentioned your hobbies earlier. Tell me more about how they've shaped your life.`);
     }
-  } else if (type === 'brainstorming') {
+  } else {
+    // Legacy mode: use extracted profile fields
     seeds.push(
-      `What stories from your life do you think would surprise people?`,
-      `If you had to choose three words to describe your life journey, what would they be?`,
-      `What chapter of your life story feels most important to preserve?`
+      `Tell me about a typical day in your life when you were ${userProfile.age || 'younger'}.`,
+      `What was the most important lesson you learned from your ${bookProfile.occupation || 'work'}?`,
+      `Describe a moment when you felt most proud of yourself.`
     );
+    
+    if (lifeThemes && lifeThemes.length > 0) {
+      seeds.push(`I see that ${lifeThemes[0]} is important to you. Can you share a story about that?`);
+    }
+  }
+  
+  if (currentChapter && currentChapter.title) {
+    seeds.push(`Let's talk about ${currentChapter.title}. What memories come to mind?`);
   }
 
   return seeds.slice(0, 4); // Return max 4 seeds

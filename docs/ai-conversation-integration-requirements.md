@@ -142,9 +142,7 @@
 - **Natural Transitions**: Smoothly move between topics and chapters
 
 ### Conversation Types
-1. **Interview Mode**: Structured Q&A about specific life periods
-2. **Reflection Mode**: Deeper exploration of emotions, meanings
-3. **Brainstorming Mode**: Generate ideas for chapter content/themes
+Currently, only **Interview Mode** is supported: Structured Q&A about specific life periods to document life stories through supportive, low-pressure conversations.
 
 ## Technical Implementation Priorities
 
