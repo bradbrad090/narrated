@@ -16,9 +16,9 @@ interface GiftPaymentRequest {
 }
 
 const tierPrices = {
-  basic: 2999,
-  standard: 4999,
-  premium: 9999,
+  basic: 900,
+  standard: 1900,
+  premium: 3900,
 };
 
 const tierNames = {

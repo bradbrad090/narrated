@@ -169,9 +169,40 @@ serve(async (req) => {
       console.log('Sending gift notification email to:', recipient_email);
 
       const tierDetails = {
-        'basic': { name: 'Essential Story', sessions: '3-4', pages: '50-80 pages', price: '$49' },
-        'standard': { name: 'Complete Legacy', sessions: '6-8', pages: '100-150 pages', price: '$199' },
-        'premium': { name: 'Premium Heritage', sessions: '10-12', pages: '150-200+ pages', price: '$399' }
+        'basic': { 
+          name: 'Basic Package',
+          price: '$9',
+          features: [
+            'Unlimited chapters and word count',
+            'Professional editing',
+            '20 recipes',
+            '100 photos',
+            'Digital delivery (PDF)'
+          ]
+        },
+        'standard': { 
+          name: 'Standard Package',
+          price: '$19',
+          features: [
+            'Unlimited chapters and word count',
+            'Professional editing',
+            '20 recipes',
+            '100 photos',
+            'Printed book + Digital PDF'
+          ]
+        },
+        'premium': { 
+          name: 'Premium Package',
+          price: '$39',
+          features: [
+            'Unlimited chapters and word count',
+            'Professional editing',
+            'Unlimited recipes',
+            'Unlimited photos',
+            'Premium book + Digital PDF',
+            '5 copies'
+          ]
+        }
       };
       
       const tierInfo = tierDetails[tier as keyof typeof tierDetails] || tierDetails['basic'];
@@ -221,15 +252,10 @@ serve(async (req) => {
                 
                 <div style="background-color: hsl(35, 15%, 96%); padding: 24px; border-radius: 8px; margin: 20px 0;">
                   <h3 style="color: hsl(220, 25%, 15%); font-size: 18px; font-weight: 600; margin: 0 0 16px; text-align: center;">
-                    Your ${tierInfo.name} Package Includes:
+                    Your ${tierInfo.name} Includes:
                   </h3>
                   <ul style="color: hsl(220, 15%, 35%); font-size: 14px; line-height: 1.8; margin: 0; padding-left: 20px;">
-                    <li><strong>${tierInfo.sessions}</strong> guided conversation sessions</li>
-                    <li><strong>${tierInfo.pages}</strong> professionally edited autobiography</li>
-                    <li>AI-powered conversation assistant</li>
-                    <li>Custom formatting and design</li>
-                    ${tier === 'complete' || tier === 'premium' ? '<li>Premium hardcover book</li>' : ''}
-                    ${tier === 'premium' ? '<li>Photo integration and genealogy assistance</li>' : ''}
+                    ${tierInfo.features.map(feature => `<li>${feature}</li>`).join('\n                    ')}
                   </ul>
                   
                   <div style="background-color: hsl(220, 50%, 25%); padding: 16px; border-radius: 6px; margin: 20px 0 0; text-align: center;">
@@ -302,9 +328,9 @@ serve(async (req) => {
       console.log('Sending gift purchase confirmation email to:', purchaser_email);
 
       const tierDetails = {
-        'basic': { name: 'Essential Story', price: '$49' },
-        'standard': { name: 'Complete Legacy', price: '$199' },
-        'premium': { name: 'Premium Heritage', price: '$399' }
+        'basic': { name: 'Basic', price: '$9' },
+        'standard': { name: 'Standard', price: '$19' },
+        'premium': { name: 'Premium', price: '$39' }
       };
       
       const tierInfo = tierDetails[tier as keyof typeof tierDetails] || tierDetails['basic'];
@@ -312,7 +338,7 @@ serve(async (req) => {
       const { data, error } = await resend.emails.send({
         from: 'Narrated <noreply@narrated.com.au>',
         to: [purchaser_email],
-        subject: `Gift Purchase Confirmed - ${tierInfo.name}`,
+        subject: `Order Confirmation - Narrated Gift Package`,
         html: `
           <!DOCTYPE html>
           <html lang="en">
@@ -330,11 +356,11 @@ serve(async (req) => {
               
               <div style="padding: 40px 30px;">
                 <h2 style="color: hsl(220, 25%, 15%); font-size: 24px; font-weight: 600; margin: 0 0 20px; line-height: 1.3;">
-                  Thank you for your gift purchase!
+                  Order Confirmation
                 </h2>
                 
                 <p style="color: hsl(220, 15%, 45%); font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
-                  Hi ${purchaser_name || 'there'},
+                  Thank you for your purchase!
                 </p>
                 
                 <p style="color: hsl(220, 15%, 45%); font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
@@ -346,20 +372,20 @@ serve(async (req) => {
                   
                   <table style="width: 100%; border-collapse: collapse;">
                     <tr>
+                      <td style="color: hsl(220, 15%, 35%); font-size: 14px; padding: 8px 0; border-bottom: 1px solid hsl(220, 15%, 90%);">Order Date:</td>
+                      <td style="color: hsl(220, 25%, 15%); font-size: 14px; font-weight: 600; padding: 8px 0; border-bottom: 1px solid hsl(220, 15%, 90%); text-align: right;">${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
+                    </tr>
+                    <tr>
                       <td style="color: hsl(220, 15%, 35%); font-size: 14px; padding: 8px 0; border-bottom: 1px solid hsl(220, 15%, 90%);">Package:</td>
-                      <td style="color: hsl(220, 25%, 15%); font-size: 14px; font-weight: 600; padding: 8px 0; border-bottom: 1px solid hsl(220, 15%, 90%); text-align: right;">${tierInfo.name}</td>
+                      <td style="color: hsl(220, 25%, 15%); font-size: 14px; font-weight: 600; padding: 8px 0; border-bottom: 1px solid hsl(220, 15%, 90%); text-align: right;">${tierInfo.name} Package</td>
                     </tr>
                     <tr>
                       <td style="color: hsl(220, 15%, 35%); font-size: 14px; padding: 8px 0; border-bottom: 1px solid hsl(220, 15%, 90%);">Amount Paid:</td>
-                      <td style="color: hsl(220, 25%, 15%); font-size: 14px; font-weight: 600; padding: 8px 0; border-bottom: 1px solid hsl(220, 15%, 90%); text-align: right;">${tierInfo.price}</td>
+                      <td style="color: hsl(220, 25%, 15%); font-size: 14px; font-weight: 600; padding: 8px 0; border-bottom: 1px solid hsl(220, 15%, 90%); text-align: right;">${amount_paid ? '$' + amount_paid : tierInfo.price}</td>
                     </tr>
                     <tr>
-                      <td style="color: hsl(220, 15%, 35%); font-size: 14px; padding: 8px 0; border-bottom: 1px solid hsl(220, 15%, 90%);">Recipient:</td>
-                      <td style="color: hsl(220, 25%, 15%); font-size: 14px; font-weight: 600; padding: 8px 0; border-bottom: 1px solid hsl(220, 15%, 90%); text-align: right;">${recipient_email}</td>
-                    </tr>
-                    <tr>
-                      <td style="color: hsl(220, 15%, 35%); font-size: 14px; padding: 8px 0;">Gift Code:</td>
-                      <td style="color: hsl(42, 85%, 65%); font-size: 14px; font-weight: 700; padding: 8px 0; text-align: right; font-family: monospace; letter-spacing: 1px;">${gift_code}</td>
+                      <td style="color: hsl(220, 15%, 35%); font-size: 14px; padding: 8px 0;">Recipient Email:</td>
+                      <td style="color: hsl(220, 25%, 15%); font-size: 14px; font-weight: 600; padding: 8px 0; text-align: right;">${recipient_email}</td>
                     </tr>
                   </table>
                 </div>
@@ -367,7 +393,7 @@ serve(async (req) => {
                 <div style="background-color: hsl(220, 15%, 98%); padding: 20px; border-left: 4px solid hsl(220, 50%, 45%); border-radius: 4px; margin: 20px 0;">
                   <h4 style="color: hsl(220, 25%, 15%); font-size: 16px; font-weight: 600; margin: 0 0 10px;">What happens next?</h4>
                   <p style="color: hsl(220, 15%, 35%); font-size: 14px; line-height: 1.6; margin: 0;">
-                    We've sent a beautiful gift notification email to <strong>${recipient_email}</strong> with instructions on how to redeem their gift and start their autobiography journey. They can use the gift code <strong>${gift_code}</strong> to activate their account.
+                    We've sent an email to <strong>${recipient_email}</strong> with their gift code and instructions to redeem their package. They'll be able to start their autobiography journey right away.
                   </p>
                 </div>
                 
@@ -427,12 +453,40 @@ serve(async (req) => {
       console.log('Sending gift redemption confirmation email to:', user_email);
 
       const tierDetails = {
-        'essential': { name: 'Essential Story', sessions: '3-4', pages: '50-80 pages' },
-        'complete': { name: 'Complete Legacy', sessions: '6-8', pages: '100-150 pages' },
-        'premium': { name: 'Premium Heritage', sessions: '10-12', pages: '150-200+ pages' }
+        'basic': { 
+          name: 'Basic Package',
+          features: [
+            'Unlimited chapters and word count',
+            'Professional editing',
+            '20 recipes',
+            '100 photos',
+            'Digital delivery (PDF)'
+          ]
+        },
+        'standard': { 
+          name: 'Standard Package',
+          features: [
+            'Unlimited chapters and word count',
+            'Professional editing',
+            '20 recipes',
+            '100 photos',
+            'Printed book + Digital PDF'
+          ]
+        },
+        'premium': { 
+          name: 'Premium Package',
+          features: [
+            'Unlimited chapters and word count',
+            'Professional editing',
+            'Unlimited recipes',
+            'Unlimited photos',
+            'Premium book + Digital PDF',
+            '5 copies'
+          ]
+        }
       };
       
-      const tierInfo = tierDetails[tier as keyof typeof tierDetails] || tierDetails['essential'];
+      const tierInfo = tierDetails[tier as keyof typeof tierDetails] || tierDetails['basic'];
 
       const { data, error } = await resend.emails.send({
         from: 'Narrated <noreply@narrated.com.au>',
@@ -471,12 +525,7 @@ serve(async (req) => {
                     Your Active Package: ${tierInfo.name}
                   </h3>
                   <ul style="color: hsl(220, 15%, 35%); font-size: 14px; line-height: 1.8; margin: 0; padding-left: 20px;">
-                    <li><strong>${tierInfo.sessions}</strong> guided conversation sessions</li>
-                    <li><strong>${tierInfo.pages}</strong> professionally edited autobiography</li>
-                    <li>AI-powered conversation assistant</li>
-                    <li>Professional editing and formatting</li>
-                    ${tier === 'complete' || tier === 'premium' ? '<li>Premium hardcover book delivery</li>' : ''}
-                    ${tier === 'premium' ? '<li>Photo integration and genealogy assistance</li>' : ''}
+                    ${tierInfo.features.map(feature => `<li>${feature}</li>`).join('\n                    ')}
                   </ul>
                 </div>
                 
