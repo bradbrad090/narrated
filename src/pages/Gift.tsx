@@ -44,7 +44,7 @@ const Gift = () => {
       id: "basic" as const,
       name: "Basic",
       price: "$9",
-      description: "Digital format with unlimited chapters",
+      description: "One book with digital format",
       icon: <Medal className="h-6 w-6 text-amber-700" />,
       features: ["Unlimited chapters", "10 recipes", "50 photos", "Digital PDF"],
       theme: {
@@ -57,7 +57,7 @@ const Gift = () => {
       id: "standard" as const,
       name: "Standard",
       price: "$19",
-      description: "Digital and Printed Copy",
+      description: "One book with digital and printed copy",
       icon: <Crown className="h-6 w-6 text-slate-700" />,
       features: ["Unlimited chapters", "20 recipes", "100 photos", "Digital Copy & Printed Book"],
       featured: true,
@@ -71,7 +71,7 @@ const Gift = () => {
       id: "premium" as const,
       name: "Premium",
       price: "$39",
-      description: "Premium book with multiple copies",
+      description: "One premium book with multiple copies",
       icon: <Gem className="h-6 w-6 text-yellow-700" />,
       features: [
         "Unlimited chapters",
@@ -197,7 +197,7 @@ const Gift = () => {
               Give the Gift of Legacy
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Help someone special preserve their life story. Purchase a gift package and send them a unique code to start their autobiography journey.
+              Help someone special preserve their life story. Purchase a gift to unlock one autobiography book with premium features.
             </p>
             <div className="flex items-center justify-center gap-2 text-muted-foreground">
               <Heart className="h-5 w-5 text-primary fill-primary" />
@@ -285,8 +285,8 @@ const Gift = () => {
                 <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
                   <li>Complete your purchase below</li>
                   <li>Recipient receives an email with their unique gift code</li>
-                  <li>They sign up and redeem the code to activate their package</li>
-                  <li>They start creating their autobiography immediately</li>
+                  <li>They redeem the code to unlock one book with the gifted tier</li>
+                  <li>They start creating their book immediately</li>
                 </ol>
               </div>
             </CardContent>
@@ -348,7 +348,7 @@ const Gift = () => {
             <div className="bg-muted/30 p-6 rounded-lg">
               <h3 className="text-lg font-semibold mb-2">100% Satisfaction Guaranteed</h3>
               <p className="text-muted-foreground">
-                Gift codes are valid for 1 year from purchase date. Recipient can start their autobiography journey at any time.
+                Gift codes are valid for 1 year from purchase date. Recipient can create one book at any time.
               </p>
             </div>
           </div>

@@ -151,7 +151,7 @@ const RedeemGift = () => {
               
               <CardTitle className="text-2xl">Redeem Your Gift</CardTitle>
               <CardDescription>
-                Enter your gift code below to unlock your autobiography package
+                Enter your gift code below to create or upgrade one book with your gifted package
               </CardDescription>
             </CardHeader>
             
@@ -202,9 +202,9 @@ const RedeemGift = () => {
                   What happens after redemption:
                 </p>
                 <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside ml-6">
-                  <li>Your account will be upgraded to the gifted tier</li>
-                  <li>All tier features will be unlocked immediately</li>
-                  <li>You can start creating your autobiography right away</li>
+                  <li>One book will be created or upgraded with the gifted tier features</li>
+                  <li>The book will have all tier features (recipes, photos, printing) unlocked</li>
+                  <li>You can start writing that book right away</li>
                 </ul>
               </div>
 

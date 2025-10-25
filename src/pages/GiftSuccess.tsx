@@ -130,14 +130,14 @@ const GiftSuccess = () => {
                   <li className="text-sm">
                     <span className="font-medium">Redemption:</span>
                     <p className="text-muted-foreground mt-1">
-                      The recipient can redeem their gift code when they sign up or log in
+                      The recipient can redeem their code to unlock one book with the gifted tier features
                     </p>
                   </li>
                   
                   <li className="text-sm">
                     <span className="font-medium">Start Creating:</span>
                     <p className="text-muted-foreground mt-1">
-                      After redemption, they can immediately start creating their autobiography
+                      After redemption, they can immediately start creating their book with all tier features unlocked
                     </p>
                   </li>
                 </ol>

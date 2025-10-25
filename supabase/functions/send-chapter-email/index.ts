@@ -247,12 +247,12 @@ serve(async (req) => {
                 ` : ''}
                 
                 <p style="color: hsl(220, 15%, 45%); font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
-                  You've been gifted a <strong>${tierInfo.name}</strong> autobiography package (${tierInfo.price} value). This is your opportunity to preserve your life story with the help of AI-powered conversation and professional editing.
+                  You've been gifted a <strong>${tierInfo.name}</strong> autobiography book (${tierInfo.price} value). This gives you <strong>one book</strong> with all the features below to preserve your life story with AI-powered conversation and professional editing.
                 </p>
                 
                 <div style="background-color: hsl(35, 15%, 96%); padding: 24px; border-radius: 8px; margin: 20px 0;">
                   <h3 style="color: hsl(220, 25%, 15%); font-size: 18px; font-weight: 600; margin: 0 0 16px; text-align: center;">
-                    Your ${tierInfo.name} Includes:
+                    Your Book Includes:
                   </h3>
                   <ul style="color: hsl(220, 15%, 35%); font-size: 14px; line-height: 1.8; margin: 0; padding-left: 20px;">
                     ${tierInfo.features.map(feature => `<li>${feature}</li>`).join('\n                    ')}
@@ -268,7 +268,7 @@ serve(async (req) => {
                 
                 <div style="text-align: center; margin: 30px 0;">
                   <a href="${redemption_url || 'https://narrated.com.au'}" style="display: inline-block; background: linear-gradient(135deg, hsl(220, 50%, 45%), hsl(220, 60%, 55%)); color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 12px hsla(220, 50%, 45%, 0.3);">
-                    Redeem Your Gift & Start Your Story
+                    Redeem Your Gift & Create Your Book
                   </a>
                 </div>
                 
@@ -364,7 +364,7 @@ serve(async (req) => {
                 </p>
                 
                 <p style="color: hsl(220, 15%, 45%); font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
-                  Your gift purchase has been successfully processed. You've given someone special the opportunity to preserve their life story with Narrated.
+                  Your gift purchase has been successfully processed. You've given someone special one autobiography book to preserve their life story with Narrated.
                 </p>
                 
                 <div style="background-color: hsl(35, 15%, 96%); padding: 24px; border-radius: 8px; margin: 20px 0;">
@@ -377,7 +377,7 @@ serve(async (req) => {
                     </tr>
                     <tr>
                       <td style="color: hsl(220, 15%, 35%); font-size: 14px; padding: 8px 0; border-bottom: 1px solid hsl(220, 15%, 90%);">Package:</td>
-                      <td style="color: hsl(220, 25%, 15%); font-size: 14px; font-weight: 600; padding: 8px 0; border-bottom: 1px solid hsl(220, 15%, 90%); text-align: right;">${tierInfo.name} Package</td>
+                      <td style="color: hsl(220, 25%, 15%); font-size: 14px; font-weight: 600; padding: 8px 0; border-bottom: 1px solid hsl(220, 15%, 90%); text-align: right;">1x ${tierInfo.name} Autobiography Book</td>
                     </tr>
                     <tr>
                       <td style="color: hsl(220, 15%, 35%); font-size: 14px; padding: 8px 0; border-bottom: 1px solid hsl(220, 15%, 90%);">Amount Paid:</td>
@@ -393,7 +393,7 @@ serve(async (req) => {
                 <div style="background-color: hsl(220, 15%, 98%); padding: 20px; border-left: 4px solid hsl(220, 50%, 45%); border-radius: 4px; margin: 20px 0;">
                   <h4 style="color: hsl(220, 25%, 15%); font-size: 16px; font-weight: 600; margin: 0 0 10px;">What happens next?</h4>
                   <p style="color: hsl(220, 15%, 35%); font-size: 14px; line-height: 1.6; margin: 0;">
-                    We've sent an email to <strong>${recipient_email}</strong> with their gift code and instructions to redeem their package. They'll be able to start their autobiography journey right away.
+                    We've sent an email to <strong>${recipient_email}</strong> with their gift code and instructions to create one book with the gifted tier features. They'll be able to start creating their book right away.
                   </p>
                 </div>
                 
@@ -517,12 +517,12 @@ serve(async (req) => {
                 </p>
                 
                 <p style="color: hsl(220, 15%, 45%); font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
-                  Congratulations! You've successfully activated your <strong>${tierInfo.name}</strong> package. Your autobiography journey starts now, and we're excited to help you preserve your life story.
+                  Congratulations! You've redeemed your gift and can now create one book with <strong>${tierInfo.name}</strong> features. Your book journey starts now, and we're excited to help you preserve your life story.
                 </p>
                 
                 <div style="background-color: hsl(35, 15%, 96%); padding: 24px; border-radius: 8px; margin: 20px 0;">
                   <h3 style="color: hsl(220, 25%, 15%); font-size: 18px; font-weight: 600; margin: 0 0 16px; text-align: center;">
-                    Your Active Package: ${tierInfo.name}
+                    Your Book Features: ${tierInfo.name}
                   </h3>
                   <ul style="color: hsl(220, 15%, 35%); font-size: 14px; line-height: 1.8; margin: 0; padding-left: 20px;">
                     ${tierInfo.features.map(feature => `<li>${feature}</li>`).join('\n                    ')}
@@ -533,9 +533,9 @@ serve(async (req) => {
                   <h4 style="color: hsl(220, 25%, 15%); font-size: 16px; font-weight: 600; margin: 0 0 10px;">Next Steps:</h4>
                   <ol style="color: hsl(220, 15%, 35%); font-size: 14px; line-height: 1.8; margin: 0; padding-left: 20px;">
                     <li>Log in to your Narrated dashboard</li>
-                    <li>Create your first book project</li>
+                    <li>Create your book project (or upgrade an existing one)</li>
                     <li>Start your guided conversation session</li>
-                    <li>Watch as your story comes to life</li>
+                    <li>Watch as your book comes to life</li>
                   </ol>
                 </div>
                 
