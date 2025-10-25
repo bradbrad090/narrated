@@ -169,12 +169,12 @@ serve(async (req) => {
       console.log('Sending gift notification email to:', recipient_email);
 
       const tierDetails = {
-        'essential': { name: 'Essential Story', sessions: '3-4', pages: '50-80 pages', price: '$49' },
-        'complete': { name: 'Complete Legacy', sessions: '6-8', pages: '100-150 pages', price: '$199' },
+        'basic': { name: 'Essential Story', sessions: '3-4', pages: '50-80 pages', price: '$49' },
+        'standard': { name: 'Complete Legacy', sessions: '6-8', pages: '100-150 pages', price: '$199' },
         'premium': { name: 'Premium Heritage', sessions: '10-12', pages: '150-200+ pages', price: '$399' }
       };
       
-      const tierInfo = tierDetails[tier as keyof typeof tierDetails] || tierDetails['essential'];
+      const tierInfo = tierDetails[tier as keyof typeof tierDetails] || tierDetails['basic'];
 
       const { data, error } = await resend.emails.send({
         from: 'Narrated <noreply@narrated.com.au>',
@@ -302,12 +302,12 @@ serve(async (req) => {
       console.log('Sending gift purchase confirmation email to:', purchaser_email);
 
       const tierDetails = {
-        'essential': { name: 'Essential Story', price: '$49' },
-        'complete': { name: 'Complete Legacy', price: '$199' },
+        'basic': { name: 'Essential Story', price: '$49' },
+        'standard': { name: 'Complete Legacy', price: '$199' },
         'premium': { name: 'Premium Heritage', price: '$399' }
       };
       
-      const tierInfo = tierDetails[tier as keyof typeof tierDetails] || tierDetails['essential'];
+      const tierInfo = tierDetails[tier as keyof typeof tierDetails] || tierDetails['basic'];
 
       const { data, error } = await resend.emails.send({
         from: 'Narrated <noreply@narrated.com.au>',

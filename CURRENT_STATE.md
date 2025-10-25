@@ -50,16 +50,21 @@
 
 ### 🎁 Gift System
 - Gift code generation (XXXX-XXXX-XXXX format)
-- Gift purchase flow with Stripe
+- Gift purchase flow with Stripe checkout
+- Stripe webhook processing for payment confirmation
 - Gift redemption with tier upgrade
 - Email notifications via Resend:
   - Purchase confirmation to buyer
-  - Gift notification to recipient
+  - Gift code notification to recipient (with redemption link)
   - Redemption confirmation
 - Test codes for development (reusable, no payment):
   - `TEST-BSIC-0001` (Basic tier)
   - `TEST-STND-0001` (Standard tier)
   - `TEST-PREM-0001` (Premium tier)
+
+**⚠️ Setup Required**: Stripe webhook must be configured in Stripe dashboard:
+- Endpoint: `https://[project-id].supabase.co/functions/v1/stripe-webhook`
+- Events: `checkout.session.completed`, `payment_intent.payment_failed`
 
 ### 📊 Analytics
 - Page view tracking

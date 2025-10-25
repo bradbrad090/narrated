@@ -157,6 +157,30 @@ serve(async (req) => {
           console.error('Failed to send purchase confirmation email:', emailError);
         }
 
+        // Send gift notification email to recipient
+        try {
+          const recipientEmailResponse = await supabase.functions.invoke('send-chapter-email', {
+            body: {
+              email_type: 'gift_notification',
+              gift_code: giftData.code,
+              tier: giftData.tier,
+              recipient_email: giftData.recipient_email,
+              recipient_name: giftData.recipient_name,
+              purchaser_name: giftData.purchaser_name || 'A friend',
+              gift_message: giftData.gift_message,
+              redemption_url: `${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '')}/redeem-gift?code=${giftData.code}`
+            }
+          });
+
+          if (recipientEmailResponse.error) {
+            console.error('Error sending gift notification email:', recipientEmailResponse.error);
+          } else {
+            console.log('Gift notification email sent to:', giftData.recipient_email);
+          }
+        } catch (emailError) {
+          console.error('Failed to send gift notification email:', emailError);
+        }
+
       } else if (paymentType === 'book_tier_purchase') {
         // Handle regular book tier purchase (existing flow)
         const bookId = metadata.book_id;
