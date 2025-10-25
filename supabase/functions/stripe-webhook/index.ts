@@ -168,7 +168,7 @@ serve(async (req) => {
               recipient_name: giftData.recipient_name,
               purchaser_name: giftData.purchaser_name || 'A friend',
               gift_message: giftData.gift_message,
-              redemption_url: `${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '')}/redeem-gift?code=${giftData.code}`
+              redemption_url: `https://narrated.com.au/redeem-gift?code=${giftData.code}`
             }
           });
 
