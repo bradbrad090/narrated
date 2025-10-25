@@ -98,8 +98,8 @@ const Pricing = () => {
       features: [
         "Unlimited chapters and word count",
         "Professional editing",
-        "20 recipes",
-        "100 photos",
+        "Unlimited recipes",
+        "Unlimited photos",
         "Premium book + Digital PDF",
         "5 copies",
       ],
@@ -209,13 +209,10 @@ const Pricing = () => {
               </div>
               <h2 className="text-2xl font-semibold mb-4">Gift an Autobiography</h2>
               <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
-                Give the gift of preserving memories. Purchase any tier as a gift and we'll send you a unique redemption code to share with your loved one.
+                Give the gift of preserving memories. Purchase any tier as a gift and we'll send you a unique redemption
+                code to share with your loved one.
               </p>
-              <Button 
-                variant="hero" 
-                size="lg"
-                onClick={() => navigate('/gift')}
-              >
+              <Button variant="hero" size="lg" onClick={() => navigate("/gift")}>
                 <Gift className="w-4 h-4 mr-2" />
                 Purchase a Gift
               </Button>
