@@ -42,6 +42,7 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
 }) => {
   const [currentMessage, setCurrentMessage] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(true);
+  const [isStarting, setIsStarting] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -84,12 +85,17 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
   };
 
   const handleStartConversation = async () => {
-    if (!onStartConversation) return;
+    if (!onStartConversation || isStarting) return;
     
+    setIsStarting(true);
     setShowSuggestions(false);
-    const session = await onStartConversation('interview');
-    if (session && onConversationSaved) {
-      onConversationSaved();
+    try {
+      const session = await onStartConversation('interview');
+      if (session && onConversationSaved) {
+        onConversationSaved();
+      }
+    } finally {
+      setIsStarting(false);
     }
   };
 
@@ -125,11 +131,11 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
             <div className="space-y-4">
               <Button
                 onClick={handleStartConversation}
-                disabled={isLoading || isChapterComplete}
+                disabled={isLoading || isStarting || isChapterComplete}
                 size="lg"
                 className={isChapterComplete ? "opacity-50 cursor-not-allowed" : ""}
               >
-                {isLoading ? (
+                {isLoading || isStarting ? (
                   <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                 ) : (
                   <MessageCircle className="h-5 w-5 mr-2" />
