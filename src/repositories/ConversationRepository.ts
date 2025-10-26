@@ -18,7 +18,6 @@ export class ConversationRepository extends BaseRepository {
         session_id: session.sessionId,
         conversation_type: session.conversationType,
         conversation_medium: session.conversationMedium,
-        is_self_conversation: false,
         messages: session.messages as any,
         context_snapshot: session.context as any || {},
         

@@ -91,7 +91,6 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
               messages: currentSession.messages as any,
               conversation_type: currentSession.conversationType,
               conversation_medium: currentSession.conversationMedium || 'text',
-              is_self_conversation: false,
               context_snapshot: (currentSession.context || {}) as any,
               updated_at: new Date().toISOString()
             })
@@ -108,8 +107,6 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
               messages: currentSession.messages as any,
               conversation_type: currentSession.conversationType,
               conversation_medium: currentSession.conversationMedium || 'text',
-              
-              is_self_conversation: false,
               context_snapshot: (currentSession.context || {}) as any
             });
 
