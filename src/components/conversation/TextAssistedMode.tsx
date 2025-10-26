@@ -19,6 +19,7 @@ interface TextAssistedModeProps {
   currentSession?: any;
   isLoading?: boolean;
   isTyping?: boolean;
+  isSubmitting?: boolean;
   onStartConversation?: (type: any) => Promise<any>;
   onSendMessage?: (message: string) => Promise<any>;
 }
@@ -35,6 +36,7 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
   currentSession,
   isLoading = false,
   isTyping = false,
+  isSubmitting = false,
   onStartConversation,
   onSendMessage
 }) => {
@@ -202,12 +204,12 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
                 onKeyDown={handleKeyPress}
                 placeholder="Type your message..."
                 className={`flex-1 min-h-[${CONVERSATION_CONFIG.MESSAGE_INPUT_MIN_HEIGHT}] resize-none`}
-                disabled={isTyping}
+                disabled={isTyping || isSubmitting}
               />
               <div className="flex flex-col gap-2">
                 <Button
                   onClick={handleSendMessage}
-                  disabled={!currentMessage.trim() || isTyping}
+                  disabled={!currentMessage.trim() || isTyping || isSubmitting}
                   size="icon"
                   title="Send message"
                 >
@@ -221,7 +223,7 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
                     });
                     
                     // Prevent multiple clicks while processing
-                    if (isLoading || isTyping) {
+                    if (isLoading || isTyping || isSubmitting) {
                       console.log('Blocking submit - operation in progress');
                       return;
                     }
@@ -241,16 +243,22 @@ export const TextAssistedMode: React.FC<TextAssistedModeProps> = ({
                   variant="outline"
                   size="icon"
                   title={
-                    !currentSession?.messages?.length 
-                      ? "No conversation to submit" 
-                      : isChapterComplete 
-                        ? "Chapter already submitted" 
-                        : "Submit conversation"
+                    isSubmitting
+                      ? "Submitting conversation..."
+                      : !currentSession?.messages?.length 
+                        ? "No conversation to submit" 
+                        : isChapterComplete 
+                          ? "Chapter already submitted" 
+                          : "Submit conversation"
                   }
-                  disabled={isLoading || isTyping || isChapterComplete || !currentSession?.messages?.length}
+                  disabled={isLoading || isTyping || isSubmitting || isChapterComplete || !currentSession?.messages?.length}
                   className={!currentSession?.messages?.length ? "cursor-not-allowed opacity-50" : ""}
                 >
-                  <CheckCircle className="h-4 w-4" />
+                  {isSubmitting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <CheckCircle className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
             </div>

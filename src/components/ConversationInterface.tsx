@@ -36,6 +36,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   onConversationUpdate
 }) => {
   const [selectedMode, setSelectedMode] = useState('text-assisted');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -137,6 +138,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
         return;
       }
       
+      setIsSubmitting(true);
       try {
         // First save the conversation
         await saveCurrentConversation();
@@ -163,6 +165,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           variant: "destructive"
         });
       } finally {
+        setIsSubmitting(false);
         // Always dispatch completion event, even if there was an error
         containerRef.current?.dispatchEvent(new CustomEvent('saveCompleted'));
       }
@@ -237,6 +240,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                   currentSession={currentSession}
                   isLoading={stateIsLoading}
                   isTyping={stateIsTyping}
+                  isSubmitting={isSubmitting}
                   onStartConversation={startConversation}
                   onSendMessage={sendMessage}
                 />
