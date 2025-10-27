@@ -13,7 +13,6 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
-  FileText,
   Trash2,
   Edit2,
   MoreVertical,
@@ -24,7 +23,6 @@ import {
   Check,
   X,
   Camera,
-  Utensils,
 } from "lucide-react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -69,11 +67,10 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
   const [photoModalOpen, setPhotoModalOpen] = useState(false);
   const [photoCount, setPhotoCount] = useState(0);
   const [bookTier, setBookTier] = useState<string>("free");
-  const [conversationWordCount, setConversationWordCount] = useState(0);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: chapter.id });
 
-  // Fetch photo count, book tier, and conversation word count
+  // Fetch photo count and book tier
   useEffect(() => {
     const fetchChapterData = async () => {
       const { count } = await supabase
@@ -86,49 +83,18 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
       const { data: bookData } = await supabase.from("books").select("tier").eq("id", chapter.book_id).maybeSingle();
 
       if (bookData) setBookTier(bookData.tier);
-
-      // Fetch conversation word count
-      const { data: conversations } = await supabase
-        .from("chat_histories")
-        .select("messages")
-        .eq("chapter_id", chapter.id);
-
-      if (conversations && conversations.length > 0) {
-        let totalWords = 0;
-        conversations.forEach((conv) => {
-          const messages = conv.messages as Array<{ role: string; content: string }>;
-          if (messages && Array.isArray(messages)) {
-            messages
-              .filter((msg) => msg.role === "user")
-              .forEach((msg) => {
-                if (msg.content?.trim()) {
-                  totalWords += msg.content.trim().split(/\s+/).length;
-                }
-              });
-          }
-        });
-        setConversationWordCount(totalWords);
-      } else {
-        setConversationWordCount(0);
-      }
     };
 
     fetchChapterData();
   }, [chapter.id, chapter.book_id, photoModalOpen]);
 
-  const getWordCount = () => {
-    return conversationWordCount;
-  };
-
-
   const getCompletionStatus = () => {
-    const words = getWordCount();
 
     // Complete status is only when user has submitted the chapter
     if (chapter.is_submitted) return "complete";
 
     // If chapter has conversations or content but not submitted, it's a draft
-    if (words > 0 || hasConversations) return "draft";
+    if (hasConversations) return "draft";
 
     // No content and no conversations = empty
     return "empty";
@@ -188,7 +154,6 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
     return date.toLocaleDateString();
   };
 
-  const wordCount = getWordCount();
   const photoLimit = getPhotoLimit(bookTier);
 
   const handleSaveRename = () => {
@@ -330,11 +295,8 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
               <span className="font-medium">Estimated Progress</span>
-              <span className="text-[10px]">
-                {Math.min(Math.round((wordCount / 750) * 100), 100)}%
-              </span>
             </div>
-            <Progress value={Math.min((wordCount / 750) * 100, 100)} className="h-2" />
+            <Progress value={hasConversations ? 50 : 0} className="h-2" />
           </div>
           <Button
             variant="default"
@@ -362,17 +324,11 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
 
         {/* Metadata */}
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1">
-              <Camera className="h-3 w-3" />
-              <span>
-                {photoCount}/{photoLimit === Infinity ? "∞" : photoLimit} Photos 
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              <FileText className="h-3 w-3" />
-              <span>{wordCount} words</span>
-            </div>
+          <div className="flex items-center gap-1">
+            <Camera className="h-3 w-3" />
+            <span>
+              {photoCount}/{photoLimit === Infinity ? "∞" : photoLimit} Photos (Book Total)
+            </span>
           </div>
 
           <div className="flex items-center gap-1">
