@@ -91,6 +91,7 @@ const WriteBook = () => {
   const [bookProfile, setBookProfile] = useState<any>(null);
   const [isBookTierCollapsed, setIsBookTierCollapsed] = useState(true);
   const [isSavedConversationsCollapsed, setIsSavedConversationsCollapsed] = useState(true);
+  const [showProfileIntro, setShowProfileIntro] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [chapterToDelete, setChapterToDelete] = useState<Chapter | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -178,7 +179,7 @@ const WriteBook = () => {
   // Check for profile requirement on load
   useEffect(() => {
     if (book && user && profileMode && !bookProfile?.question_10_answer) {
-      setShowProfileModal(true);
+      setShowProfileIntro(true);
     }
   }, [book, user, profileMode, bookProfile]);
 
@@ -1397,14 +1398,47 @@ const WriteBook = () => {
           )}
         </main>
 
+        {/* Profile Introduction Dialog */}
+        <Dialog open={showProfileIntro} onOpenChange={setShowProfileIntro}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Build Your Personal Profile</DialogTitle>
+              <DialogDescription className="text-base pt-2">
+                Completing your profile will help us create a more in-depth and personalized autobiography. 
+                It only takes a few minutes and will greatly enhance your storytelling experience.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col gap-3 pt-4">
+              <Button 
+                onClick={() => {
+                  setShowProfileIntro(false);
+                  setShowProfileModal(true);
+                }}
+                className="w-full"
+              >
+                Begin Profile
+              </Button>
+              <Button 
+                onClick={() => {
+                  setShowProfileIntro(false);
+                  setSearchParams(new URLSearchParams());
+                }}
+                variant="outline"
+                className="w-full"
+              >
+                Complete Later
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {/* Profile Setup Modal */}
         <Dialog open={showProfileModal} onOpenChange={setShowProfileModal}>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto">
             <DialogHeader>
-              <DialogTitle>Complete Your Profile</DialogTitle>
+              <DialogTitle>Your Personal Profile</DialogTitle>
               <DialogDescription>
-                Before you can start writing your autobiography, please complete your personal profile. This helps us
-                personalize your writing experience.
+                Answer these questions to help create a rich, personalized autobiography.
               </DialogDescription>
             </DialogHeader>
             {user && book && (
