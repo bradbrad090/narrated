@@ -79,7 +79,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
       const { count } = await supabase
         .from("chapter_photos")
         .select("*", { count: "exact", head: true })
-        .eq("chapter_id", chapter.id);
+        .eq("book_id", chapter.book_id);
 
       setPhotoCount(count || 0);
 
@@ -371,7 +371,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
             <div className="flex items-center gap-1">
               <Camera className="h-3 w-3" />
               <span>
-                {photoCount}/{photoLimit === Infinity ? "∞" : photoLimit} photos
+                {photoCount}/{photoLimit === Infinity ? "∞" : photoLimit} Photos (Book Total)
               </span>
             </div>
             <div className="flex items-center gap-1">

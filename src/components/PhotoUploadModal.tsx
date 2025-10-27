@@ -133,7 +133,7 @@ export const PhotoUploadModal = ({
               <span className="block mt-1 text-primary font-medium">Unlimited uploads available</span>
             ) : (
               <span className="block mt-1">
-                {remainingPhotos} of {photoLimit} photos remaining
+                {remainingPhotos} of {photoLimit} photos remaining for this book
               </span>
             )}
           </DialogDescription>
