@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { BookOpen, Menu, LogOut, X, Gift } from "lucide-react";
+import { BookOpen, Menu, LogOut, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -86,10 +86,9 @@ const Header = () => {
             </a>
             <a 
               href="/gift" 
-              className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+              className="text-muted-foreground hover:text-foreground transition-colors"
             >
-              <Gift className="w-4 h-4" />
-              Gift
+              Gifting Options
             </a>
           </nav>
           
@@ -163,11 +162,10 @@ const Header = () => {
                   </a>
                   <a 
                     href="/gift" 
-                    className="text-lg font-medium text-foreground hover:text-primary transition-colors py-3 px-2 min-h-[44px] flex items-center gap-2 touch-manipulation"
+                    className="text-lg font-medium text-foreground hover:text-primary transition-colors py-3 px-2 min-h-[44px] flex items-center touch-manipulation"
                     onClick={() => setIsOpen(false)}
                   >
-                    <Gift className="w-5 h-5" />
-                    Gift
+                    Gifting Options
                   </a>
                   <div className="border-t pt-4 mt-4">
                     {user ? (
