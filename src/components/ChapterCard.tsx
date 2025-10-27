@@ -334,7 +334,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
         <div className="flex items-center gap-3 mb-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-              <span className="font-medium">Progress</span>
+              <span className="font-medium">Estimated Progress</span>
               <span className="text-[10px]">
                 {Math.min(Math.round((wordCount / 750) * 100), 100)}%
               </span>
