@@ -371,7 +371,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
             <div className="flex items-center gap-1">
               <Camera className="h-3 w-3" />
               <span>
-                {photoCount}/{photoLimit === Infinity ? "∞" : photoLimit} Photos (Book Total)
+                {photoCount}/{photoLimit === Infinity ? "∞" : photoLimit} Photos 
               </span>
             </div>
             <div className="flex items-center gap-1">
