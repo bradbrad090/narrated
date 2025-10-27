@@ -967,7 +967,9 @@ const WriteBook = () => {
                         <div className="flex items-center gap-2 min-w-0">
                           <Award className="h-4 w-4 flex-shrink-0" />
                           <span className="text-sm font-medium truncate">
-                            {book.tier === "free" ? "Free" : book.tier.charAt(0).toUpperCase() + book.tier.slice(1)}
+                            {book.tier === "free" 
+                              ? "Free" 
+                              : book.tier.charAt(0).toUpperCase() + book.tier.slice(1) + (book.tier === "premium" ? " (Unlimited)" : "")}
                           </span>
                         </div>
                         <ChevronDown className="h-4 w-4 flex-shrink-0 ml-2" />
@@ -1104,11 +1106,9 @@ const WriteBook = () => {
                                 <div className="text-left">
                                   <CardTitle className="text-sm">Book Tier</CardTitle>
                                   <CardDescription className="text-xs">
-                                    {book.tier === "free"
-                                      ? "Free"
-                                      : book.tier === "paid"
-                                        ? "Paid (Unlimited)"
-                                        : "Premium (Unlimited)"}
+                                    {book.tier === "free" 
+                                      ? "Free" 
+                                      : book.tier.charAt(0).toUpperCase() + book.tier.slice(1) + (book.tier === "premium" ? " (Unlimited)" : "")}
                                   </CardDescription>
                                 </div>
                                 {isBookTierCollapsed ? (
