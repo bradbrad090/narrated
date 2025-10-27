@@ -120,10 +120,6 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
     return conversationWordCount;
   };
 
-  const getPageCount = () => {
-    const words = getWordCount();
-    return Math.ceil(words / 170);
-  };
 
   const getCompletionStatus = () => {
     const words = getWordCount();
@@ -193,7 +189,6 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
   };
 
   const wordCount = getWordCount();
-  const pageCount = getPageCount();
   const photoLimit = getPhotoLimit(bookTier);
 
   const handleSaveRename = () => {
@@ -378,11 +373,6 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
               <FileText className="h-3 w-3" />
               <span>{wordCount} words</span>
             </div>
-            {pageCount > 0 && (
-              <span>
-                • {pageCount} page{pageCount !== 1 ? "s" : ""}
-              </span>
-            )}
           </div>
 
           <div className="flex items-center gap-1">
