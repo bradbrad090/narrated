@@ -72,18 +72,6 @@ const HeroSection = () => {
             </Button>
           </div>
           
-          <div className="mt-4 sm:mt-6">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => navigate('/gift')}
-              className="bg-primary-foreground/10 backdrop-blur-sm border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/20 hover:border-primary-foreground/50"
-            >
-              <Gift className="w-4 h-4 mr-2" />
-              Give as a Gift
-            </Button>
-          </div>
-          
           <div className="mt-6 sm:mt-12 hidden sm:flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center items-center text-primary-foreground/80 text-sm sm:text-base">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-accent rounded-full"></div>
