@@ -1,12 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { ChevronDown, ChevronRight, Copy, User, Book, FileText, LogOut } from 'lucide-react';
+import { ChevronDown, ChevronRight, Copy, LogOut, Search, Filter } from 'lucide-react';
 
 interface UserData {
   id: string;
@@ -41,8 +42,9 @@ export default function Admin() {
   const [books, setBooks] = useState<BookData[]>([]);
   const [chapters, setChapters] = useState<ChapterData[]>([]);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
-  const [selectedBook, setSelectedBook] = useState<string | null>(null);
   const [expandedBooks, setExpandedBooks] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterCompleted, setFilterCompleted] = useState(false);
 
   useEffect(() => {
     checkAdminAndLoadData();
@@ -92,6 +94,28 @@ export default function Admin() {
 
   const getUserBooks = (userId: string) => books.filter(b => b.user_id === userId);
   const getBookChapters = (bookId: string) => chapters.filter(c => c.book_id === bookId);
+
+  // Check if a user has any completed books (all chapters submitted)
+  const hasCompletedBook = (userId: string) => {
+    const userBooks = getUserBooks(userId);
+    return userBooks.some(book => {
+      const bookChapters = getBookChapters(book.id);
+      return bookChapters.length > 0 && bookChapters.every(c => c.is_submitted);
+    });
+  };
+
+  // Filter users based on search and completion filter
+  const filteredUsers = useMemo(() => {
+    return users.filter(user => {
+      const matchesSearch = !searchQuery || 
+        user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.full_name?.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesFilter = !filterCompleted || hasCompletedBook(user.id);
+      
+      return matchesSearch && matchesFilter;
+    });
+  }, [users, books, chapters, searchQuery, filterCompleted]);
 
   const toggleBook = (bookId: string) => {
     const newExpanded = new Set(expandedBooks);
@@ -159,47 +183,37 @@ export default function Admin() {
       </header>
 
       <div className="container mx-auto px-4 py-6">
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <Card>
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2">
-                <User className="h-5 w-5 text-muted-foreground" />
-                <span className="text-2xl font-bold">{users.length}</span>
-                <span className="text-muted-foreground">Users</span>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2">
-                <Book className="h-5 w-5 text-muted-foreground" />
-                <span className="text-2xl font-bold">{books.length}</span>
-                <span className="text-muted-foreground">Books</span>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-muted-foreground" />
-                <span className="text-2xl font-bold">{chapters.length}</span>
-                <span className="text-muted-foreground">Chapters</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Users Sidebar */}
           <Card className="lg:col-span-1">
-            <CardHeader>
+            <CardHeader className="pb-3">
               <CardTitle className="text-lg">Users</CardTitle>
+              <div className="space-y-2 mt-2">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search users..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-8"
+                  />
+                </div>
+                <Button
+                  variant={filterCompleted ? "default" : "outline"}
+                  size="sm"
+                  className="w-full"
+                  onClick={() => setFilterCompleted(!filterCompleted)}
+                >
+                  <Filter className="h-4 w-4 mr-2" />
+                  {filterCompleted ? 'Showing Completed' : 'Filter Completed'}
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="p-0">
-              <ScrollArea className="h-[600px]">
-                {users.map(user => (
+              <ScrollArea className="h-[500px]">
+                {filteredUsers.map(user => (
                   <button
                     key={user.id}
                     onClick={() => setSelectedUser(user.id)}
@@ -213,11 +227,19 @@ export default function Admin() {
                     <div className="text-xs text-muted-foreground truncate">
                       {user.email || 'No email'}
                     </div>
-                    <div className="text-xs text-muted-foreground mt-1">
+                    <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
                       {getUserBooks(user.id).length} book(s)
+                      {hasCompletedBook(user.id) && (
+                        <span className="text-green-600 font-medium">✓ Completed</span>
+                      )}
                     </div>
                   </button>
                 ))}
+                {filteredUsers.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No users found
+                  </p>
+                )}
               </ScrollArea>
             </CardContent>
           </Card>
