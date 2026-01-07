@@ -132,19 +132,9 @@ const PaymentSuccess = () => {
         
         <CardContent className="space-y-4">
           {!isVerifying && verificationStatus === 'success' && (
-            <div className="space-y-4">
-              <div className="p-4 bg-green-50 rounded-lg">
-                <p className="text-sm text-green-700">
-                  ✅ Payment confirmed<br />
-                  ✅ Book tier upgraded<br />
-                  ✅ All features unlocked
-                </p>
-              </div>
-              
-              <Button onClick={handleContinue} className="w-full">
-                Continue to Your Book
-              </Button>
-            </div>
+            <Button onClick={handleContinue} className="w-full">
+              Continue to Your Book
+            </Button>
           )}
           
           {!isVerifying && verificationStatus === 'failed' && (
