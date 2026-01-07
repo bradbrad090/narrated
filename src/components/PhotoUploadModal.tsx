@@ -73,10 +73,32 @@ export const PhotoUploadModal = ({
     }
   };
 
-  const getPhotoUrl = (storagePath: string) => {
-    const { data } = supabase.storage.from('photos').getPublicUrl(storagePath);
-    return data.publicUrl;
+  const [photoUrls, setPhotoUrls] = useState<Record<string, string>>({});
+
+  const getSignedUrl = async (storagePath: string): Promise<string> => {
+    const { data, error } = await supabase.storage
+      .from('photos')
+      .createSignedUrl(storagePath, 3600); // 1 hour expiry
+    if (error || !data?.signedUrl) {
+      console.error('Error getting signed URL:', error);
+      return '/placeholder.svg';
+    }
+    return data.signedUrl;
   };
+
+  // Load signed URLs for all photos when photos change
+  useEffect(() => {
+    const loadPhotoUrls = async () => {
+      const urls: Record<string, string> = {};
+      for (const photo of photos) {
+        urls[photo.id] = await getSignedUrl(photo.storage_path);
+      }
+      setPhotoUrls(urls);
+    };
+    if (photos.length > 0) {
+      loadPhotoUrls();
+    }
+  }, [photos]);
 
   const handleDeletePhoto = async (photo: Photo) => {
     setDeletingPhotoId(photo.id);
@@ -273,7 +295,7 @@ export const PhotoUploadModal = ({
                 {photos.map((photo) => (
                   <div key={photo.id} className="relative group">
                     <img
-                      src={getPhotoUrl(photo.storage_path)}
+                      src={photoUrls[photo.id] || '/placeholder.svg'}
                       alt={photo.file_name}
                       className="w-full aspect-square object-cover rounded-lg border"
                       onError={(e) => {

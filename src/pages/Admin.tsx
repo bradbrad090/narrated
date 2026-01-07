@@ -108,9 +108,29 @@ export default function Admin() {
   const getBookChapters = (bookId: string) => chapters.filter(c => c.book_id === bookId);
   const getBookPhotos = (bookId: string) => photos.filter(p => p.book_id === bookId);
 
-  const getPhotoUrl = (storagePath: string) => {
-    const { data } = supabase.storage.from('photos').getPublicUrl(storagePath);
-    return data.publicUrl;
+  const [photoUrls, setPhotoUrls] = useState<Record<string, string>>({});
+
+  // Load signed URLs for all photos when photos are loaded
+  useEffect(() => {
+    const loadPhotoUrls = async () => {
+      const urls: Record<string, string> = {};
+      for (const photo of photos) {
+        const { data, error } = await supabase.storage
+          .from('photos')
+          .createSignedUrl(photo.storage_path, 3600); // 1 hour expiry
+        if (!error && data?.signedUrl) {
+          urls[photo.id] = data.signedUrl;
+        }
+      }
+      setPhotoUrls(urls);
+    };
+    if (photos.length > 0) {
+      loadPhotoUrls();
+    }
+  }, [photos]);
+
+  const getPhotoUrl = (photoId: string) => {
+    return photoUrls[photoId] || '/placeholder.svg';
   };
 
   const downloadAllPhotos = async (bookId: string, bookTitle: string) => {
@@ -124,7 +144,11 @@ export default function Admin() {
     
     for (const photo of bookPhotos) {
       try {
-        const url = getPhotoUrl(photo.storage_path);
+        const url = getPhotoUrl(photo.id);
+        if (url === '/placeholder.svg') {
+          console.error('No signed URL available for:', photo.file_name);
+          continue;
+        }
         const response = await fetch(url);
         const blob = await response.blob();
         const link = document.createElement('a');
@@ -383,13 +407,13 @@ export default function Admin() {
                                       {getBookPhotos(book.id).map(photo => (
                                         <a
                                           key={photo.id}
-                                          href={getPhotoUrl(photo.storage_path)}
+                                          href={getPhotoUrl(photo.id)}
                                           target="_blank"
                                           rel="noopener noreferrer"
                                           className="aspect-square rounded-lg overflow-hidden bg-muted hover:opacity-80 transition-opacity"
                                         >
                                           <img
-                                            src={getPhotoUrl(photo.storage_path)}
+                                            src={getPhotoUrl(photo.id)}
                                             alt={photo.file_name}
                                             className="w-full h-full object-cover"
                                           />
