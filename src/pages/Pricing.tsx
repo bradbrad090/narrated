@@ -54,7 +54,7 @@ const Pricing = () => {
     },
     {
       name: "Basic",
-      price: "$9",
+      price: "$49",
       description: "Unlimited story creation in digital format",
       icon: Medal,
       iconColor: "text-amber-700",
@@ -72,7 +72,7 @@ const Pricing = () => {
     },
     {
       name: "Standard",
-      price: "$19",
+      price: "$199",
       description: "Unlimited story as a printed book",
       icon: Crown,
       iconColor: "text-slate-700",
@@ -91,7 +91,7 @@ const Pricing = () => {
     },
     {
       name: "Premium",
-      price: "$39",
+      price: "$399",
       description: "Premium book with multiple copies",
       icon: Gem,
       iconColor: "text-yellow-700",
@@ -116,7 +116,7 @@ const Pricing = () => {
         <title>Autobiography Writing Pricing - Plans from $0 | Narrated</title>
         <meta
           name="description"
-          content="Clear pricing for AI-assisted autobiography writing. Free Tier $0, Basic $9, Standard $19, Premium $39. Professional editing and printing included."
+          content="Clear pricing for AI-assisted autobiography writing. Free Tier $0, Basic $49, Standard $199, Premium $399. Professional editing and printing included."
         />
         <meta
           name="keywords"

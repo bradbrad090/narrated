@@ -43,7 +43,7 @@ const Gift = () => {
     {
       id: "basic" as const,
       name: "Basic",
-      price: "$9",
+      price: "$49",
       description: "One book with digital format",
       icon: <Medal className="h-6 w-6 text-amber-700" />,
       features: ["Unlimited chapters", "10 recipes", "50 photos", "Digital PDF"],
@@ -56,7 +56,7 @@ const Gift = () => {
     {
       id: "standard" as const,
       name: "Standard",
-      price: "$19",
+      price: "$199",
       description: "One book with digital and printed copy",
       icon: <Crown className="h-6 w-6 text-slate-700" />,
       features: ["Unlimited chapters", "20 recipes", "100 photos", "Digital Copy & Printed Book"],
@@ -70,7 +70,7 @@ const Gift = () => {
     {
       id: "premium" as const,
       name: "Premium",
-      price: "$39",
+      price: "$399",
       description: "One premium book with multiple copies",
       icon: <Gem className="h-6 w-6 text-yellow-700" />,
       features: [
