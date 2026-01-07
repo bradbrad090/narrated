@@ -4,18 +4,63 @@ import deliveryImage from "@/assets/family-book-delivery.jpg";
 
 const HowItWorksSection = () => {
   return (
-    <section className="py-12 sm:py-24 bg-background hidden sm:block">
-      <div className="container mx-auto px-6">
+    <section className="py-12 sm:py-24 bg-background">
+      <div className="container mx-auto px-4 sm:px-6">
         <div className="text-center mb-8 sm:mb-16">
           <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3 sm:mb-6">
             How It Works
           </h2>
-          <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto hidden sm:block">
+          <p className="text-sm sm:text-xl text-muted-foreground max-w-2xl mx-auto">
             From conversation to published autobiography in three simple steps
           </p>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-12 max-w-6xl mx-auto">
+        {/* Mobile: Compact vertical timeline */}
+        <div className="sm:hidden max-w-sm mx-auto space-y-6">
+          {/* Step 1 Mobile */}
+          <div className="flex gap-4">
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 bg-gradient-accent rounded-full flex items-center justify-center shadow-glow flex-shrink-0">
+                <MessageCircle className="w-6 h-6 text-accent-foreground" />
+              </div>
+              <div className="w-0.5 flex-1 bg-border mt-2"></div>
+            </div>
+            <div className="pb-4">
+              <h3 className="text-lg font-semibold text-foreground mb-1">Share Your Story</h3>
+              <p className="text-sm text-muted-foreground">Talk about your memories and experiences.</p>
+            </div>
+          </div>
+          
+          {/* Step 2 Mobile */}
+          <div className="flex gap-4">
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 bg-gradient-accent rounded-full flex items-center justify-center shadow-glow flex-shrink-0">
+                <PenTool className="w-6 h-6 text-accent-foreground" />
+              </div>
+              <div className="w-0.5 flex-1 bg-border mt-2"></div>
+            </div>
+            <div className="pb-4">
+              <h3 className="text-lg font-semibold text-foreground mb-1">We Write Your Story</h3>
+              <p className="text-sm text-muted-foreground">We transform your stories into a beautiful autobiography.</p>
+            </div>
+          </div>
+          
+          {/* Step 3 Mobile */}
+          <div className="flex gap-4">
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 bg-gradient-accent rounded-full flex items-center justify-center shadow-glow flex-shrink-0">
+                <Truck className="w-6 h-6 text-accent-foreground" />
+              </div>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-foreground mb-1">Receive Your Book</h3>
+              <p className="text-sm text-muted-foreground">Get your professionally printed hardcover book delivered.</p>
+            </div>
+          </div>
+        </div>
+        
+        {/* Desktop: Full grid layout */}
+        <div className="hidden sm:grid grid-cols-3 gap-6 sm:gap-12 max-w-6xl mx-auto">
           {/* Step 1 */}
           <div className="text-center group">
             <div className="relative mb-4 sm:mb-8">

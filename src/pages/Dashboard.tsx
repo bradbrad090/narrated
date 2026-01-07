@@ -284,34 +284,46 @@ const Dashboard = () => {
       <div className="min-h-screen bg-gradient-subtle">
       {/* Header */}
       <header className="border-b border-foreground/60 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <a href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-            <Book className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-semibold">Narrated</h1>
-          </a>
-          <div className="flex items-center space-x-4">
-            <span className="hidden md:inline text-sm text-muted-foreground">
-              Welcome, {user?.email}
-            </span>
-            <Button variant="hero" onClick={() => navigate("/redeem-gift")}>
-              <Gift className="h-4 w-4 mr-2" />
-              Redeem Gift
-            </Button>
-            <Button variant="outline" onClick={handleSignOut}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
-            </Button>
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex justify-between items-center">
+            <a href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+              <Book className="h-6 w-6 text-primary" />
+              <h1 className="text-xl font-semibold">Narrated</h1>
+            </a>
+            <div className="hidden sm:flex items-center space-x-4">
+              <span className="hidden lg:inline text-sm text-muted-foreground">
+                Welcome, {user?.email}
+              </span>
+              <Button variant="hero" onClick={() => navigate("/redeem-gift")} className="min-h-[44px]">
+                <Gift className="h-4 w-4 mr-2" />
+                Redeem Gift
+              </Button>
+              <Button variant="outline" onClick={handleSignOut} className="min-h-[44px]">
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </Button>
+            </div>
+            {/* Mobile: Compact actions */}
+            <div className="flex sm:hidden items-center gap-2">
+              <Button variant="hero" size="sm" onClick={() => navigate("/redeem-gift")} className="min-h-[44px] px-3">
+                <Gift className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleSignOut} className="min-h-[44px] px-3">
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8 mt-4">
-          <h2 className="text-3xl font-bold mb-2">Your Dashboard</h2>
-          <p className="text-muted-foreground text-center">
-            Easily manage multiple autobiographies within a single account.<br />
-            Start a new story for any person by completing a short profile-building quiz to capture key details, or seamlessly continue working on an existing story below:
+      <main className="container mx-auto px-4 py-6 sm:py-8">
+        <div className="mb-6 sm:mb-8 mt-2 sm:mt-4">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-2 text-center">Your Dashboard</h2>
+          <p className="text-muted-foreground text-center text-sm sm:text-base px-2">
+            <span className="hidden sm:inline">Easily manage multiple autobiographies within a single account.<br />
+            Start a new story for any person by completing a short profile-building quiz to capture key details, or seamlessly continue working on an existing story below:</span>
+            <span className="sm:hidden">Manage your autobiographies. Create new stories or continue existing ones.</span>
           </p>
         </div>
 
@@ -348,7 +360,7 @@ const Dashboard = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {books.map((book) => {
                 const wordCount = getWordCount(book);
                 const chapterCount = getChapterCount(book);

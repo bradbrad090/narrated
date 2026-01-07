@@ -163,60 +163,59 @@ const Gift = () => {
       <div className="min-h-screen flex flex-col bg-gradient-subtle">
         <Header />
 
-        <main className="flex-1 container mx-auto px-4 py-8 sm:py-12">
+        <main className="flex-1 container mx-auto px-4 py-6 sm:py-12 pt-20 sm:pt-24">
           {/* Back Button */}
-          <Button variant="ghost" onClick={() => navigate(-1)} className="mb-6 group">
+          <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4 sm:mb-6 group min-h-[44px]">
             <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
             Back
           </Button>
 
           {/* Hero Section */}
-          <div className="text-center mb-12 space-y-4">
-            <div className="flex justify-center mb-4">
-              <div className="p-4 bg-primary/10 rounded-full">
-                <GiftIcon className="h-12 w-12 text-primary" />
+          <div className="text-center mb-8 sm:mb-12 space-y-3 sm:space-y-4">
+            <div className="flex justify-center mb-3 sm:mb-4">
+              <div className="p-3 sm:p-4 bg-primary/10 rounded-full">
+                <GiftIcon className="h-10 w-10 sm:h-12 sm:w-12 text-primary" />
               </div>
             </div>
-            <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3 sm:mb-4">
               Give the Gift of Legacy
             </h1>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-2">
               Help someone special preserve their life story. Purchase a gift to unlock one autobiography book with premium features.
             </p>
-            <div className="flex items-center justify-center gap-2 text-muted-foreground">
-              
-              <span className="text-sm">The perfect gift for parents, grandparents, or anyone with a story to tell</span>
+            <div className="flex items-center justify-center gap-2 text-muted-foreground px-4">
+              <span className="text-xs sm:text-sm text-center">The perfect gift for parents, grandparents, or anyone with a story to tell</span>
             </div>
           </div>
 
           {/* Gift Details Form */}
-          <Card className="max-w-2xl mx-auto mb-12 shadow-lg">
+          <Card className="max-w-2xl mx-auto mb-8 sm:mb-12 shadow-lg">
             <CardHeader>
               <CardTitle className="text-2xl">Gift Details</CardTitle>
               <CardDescription>Enter the recipient and your information</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid gap-4 sm:grid-cols-2">
+            <CardContent className="space-y-4 sm:space-y-6 p-4 sm:p-6">
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="recipientEmail">
+                  <Label htmlFor="recipientEmail" className="text-sm">
                     Recipient Email <span className="text-destructive">*</span>
                   </Label>
-                  <Input id="recipientEmail" type="email" placeholder="recipient@example.com" value={formData.recipientEmail} onChange={e => handleInputChange("recipientEmail", e.target.value)} className={errors.recipientEmail ? "border-destructive" : ""} />
+                  <Input id="recipientEmail" type="email" placeholder="recipient@example.com" value={formData.recipientEmail} onChange={e => handleInputChange("recipientEmail", e.target.value)} className={`min-h-[44px] ${errors.recipientEmail ? "border-destructive" : ""}`} />
                   {errors.recipientEmail && <p className="text-sm text-destructive">{errors.recipientEmail}</p>}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="purchaserEmail">
+                  <Label htmlFor="purchaserEmail" className="text-sm">
                     Your Email <span className="text-destructive">*</span>
                   </Label>
-                  <Input id="purchaserEmail" type="email" placeholder="your@example.com" value={formData.purchaserEmail} onChange={e => handleInputChange("purchaserEmail", e.target.value)} className={errors.purchaserEmail ? "border-destructive" : ""} />
+                  <Input id="purchaserEmail" type="email" placeholder="your@example.com" value={formData.purchaserEmail} onChange={e => handleInputChange("purchaserEmail", e.target.value)} className={`min-h-[44px] ${errors.purchaserEmail ? "border-destructive" : ""}`} />
                   {errors.purchaserEmail && <p className="text-sm text-destructive">{errors.purchaserEmail}</p>}
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="purchaserName">Your Name (Optional)</Label>
-                <Input id="purchaserName" type="text" placeholder="John Doe" value={formData.purchaserName} onChange={e => handleInputChange("purchaserName", e.target.value)} />
+                <Label htmlFor="purchaserName" className="text-sm">Your Name (Optional)</Label>
+                <Input id="purchaserName" type="text" placeholder="John Doe" value={formData.purchaserName} onChange={e => handleInputChange("purchaserName", e.target.value)} className="min-h-[44px]" />
               </div>
 
               <div className="space-y-2">
