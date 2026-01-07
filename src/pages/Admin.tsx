@@ -109,7 +109,7 @@ export default function Admin() {
   const getBookPhotos = (bookId: string) => photos.filter(p => p.book_id === bookId);
 
   const getPhotoUrl = (storagePath: string) => {
-    const { data } = supabase.storage.from('chapter-photos').getPublicUrl(storagePath);
+    const { data } = supabase.storage.from('photos').getPublicUrl(storagePath);
     return data.publicUrl;
   };
 
