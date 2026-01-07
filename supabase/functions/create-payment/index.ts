@@ -136,9 +136,9 @@ serve(async (req) => {
 
     // Pricing (in cents)
     const pricing = {
-      basic: { amount: 4900, name: "Basic Tier - $49" },
-      standard: { amount: 19900, name: "Standard Tier - $199" },
-      premium: { amount: 39900, name: "Premium Tier - $399" },
+      basic: { amount: 900, name: "Basic Tier - $9" },
+      standard: { amount: 1900, name: "Standard Tier - $19" },
+      premium: { amount: 3900, name: "Premium Tier - $39" },
     };
 
     const selectedPricing = pricing[tier as keyof typeof pricing];

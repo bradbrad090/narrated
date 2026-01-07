@@ -25,11 +25,11 @@ const FAQ = () => {
     },
     {
       question: "What's the difference between the pricing tiers?",
-      answer: "Free tier includes 1 chapter via email. Basic ($49) gives you unlimited chapters and a digital PDF with up to 100 photos. Standard ($199) adds a professionally printed hardcover book. Premium ($399) includes an upgraded premium hardcover with 5 additional copies, perfect for sharing with family."
+      answer: "Free tier includes 1 chapter via email. Basic ($9) gives you unlimited chapters and a digital PDF with up to 100 photos. Standard ($19) adds a professionally printed hardcover book. Premium ($39) includes an upgraded premium hardcover with 5 additional copies, perfect for sharing with family."
     },
     {
       question: "How does purchasing and upgrading work?",
-      answer: "You can start for free and upgrade anytime. When you upgrade to a paid tier, you only pay the difference in price. For example, if you have Basic ($49) and want Standard ($199), you only pay $150 more. All your conversations and chapters are preserved when you upgrade."
+      answer: "You can start for free and upgrade anytime. When you upgrade to a paid tier, you only pay the difference in price. For example, if you have Basic ($9) and want Standard ($19), you only pay $10 more. All your conversations and chapters are preserved when you upgrade."
     },
     {
       question: "When do I get charged?",
