@@ -38,7 +38,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     {
       id: "basic" as const,
       name: "Basic",
-      price: "$9",
+      price: "$49",
       description: "Digital format with unlimited chapters",
       icon: <Medal className="h-5 w-5 text-amber-700" />,
       features: ["Unlimited chapters", "10 recipes", "50 photos", "Digital PDF"],
@@ -52,7 +52,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     {
       id: "standard" as const,
       name: "Standard",
-      price: "$19",
+      price: "$199",
       description: "Digital and Printed Copy",
       icon: <Crown className="h-5 w-5 text-slate-700" />,
       features: ["Unlimited chapters", "20 recipes", "100 photos", "Digital Copy & Printed Book"],
@@ -67,7 +67,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     {
       id: "premium" as const,
       name: "Premium",
-      price: "$39",
+      price: "$399",
       description: "Premium book with multiple copies",
       icon: <Gem className="h-5 w-5 text-yellow-700" />,
       features: [
