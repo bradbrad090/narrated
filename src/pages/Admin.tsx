@@ -7,7 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { ChevronDown, ChevronRight, Copy, LogOut, Search, Filter, Home } from 'lucide-react';
+import { ChevronDown, ChevronRight, Copy, LogOut, Search, Filter, Home, Image, Download } from 'lucide-react';
 
 interface UserData {
   id: string;
@@ -34,6 +34,14 @@ interface ChapterData {
   is_submitted: boolean;
 }
 
+interface PhotoData {
+  id: string;
+  book_id: string;
+  chapter_id: string;
+  storage_path: string;
+  file_name: string;
+}
+
 export default function Admin() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -45,6 +53,7 @@ export default function Admin() {
   const [expandedBooks, setExpandedBooks] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCompleted, setFilterCompleted] = useState(false);
+  const [photos, setPhotos] = useState<PhotoData[]>([]);
 
   useEffect(() => {
     checkAdminAndLoadData();
@@ -80,21 +89,56 @@ export default function Admin() {
   };
 
   const loadAllData = async () => {
-    // Load all users, books, and chapters in parallel
-    const [usersResult, booksResult, chaptersResult] = await Promise.all([
+    // Load all users, books, chapters, and photos in parallel
+    const [usersResult, booksResult, chaptersResult, photosResult] = await Promise.all([
       supabase.from('users').select('id, email, full_name').order('created_at', { ascending: false }),
       supabase.from('books').select('id, title, user_id, tier, status, created_at').order('created_at', { ascending: false }),
-      supabase.from('chapters').select('id, book_id, title, chapter_number, content, status, is_submitted').order('chapter_number', { ascending: true })
+      supabase.from('chapters').select('id, book_id, title, chapter_number, content, status, is_submitted').order('chapter_number', { ascending: true }),
+      supabase.from('chapter_photos').select('id, book_id, chapter_id, storage_path, file_name')
     ]);
 
     if (usersResult.data) setUsers(usersResult.data);
     if (booksResult.data) setBooks(booksResult.data);
     if (chaptersResult.data) setChapters(chaptersResult.data);
+    if (photosResult.data) setPhotos(photosResult.data);
   };
 
   // Filter out free tier books - they shouldn't be submitted for delivery
   const getUserBooks = (userId: string) => books.filter(b => b.user_id === userId && b.tier !== 'free');
   const getBookChapters = (bookId: string) => chapters.filter(c => c.book_id === bookId);
+  const getBookPhotos = (bookId: string) => photos.filter(p => p.book_id === bookId);
+
+  const getPhotoUrl = (storagePath: string) => {
+    const { data } = supabase.storage.from('chapter-photos').getPublicUrl(storagePath);
+    return data.publicUrl;
+  };
+
+  const downloadAllPhotos = async (bookId: string, bookTitle: string) => {
+    const bookPhotos = getBookPhotos(bookId);
+    if (bookPhotos.length === 0) {
+      toast.error('No photos to download');
+      return;
+    }
+
+    toast.info(`Downloading ${bookPhotos.length} photo(s)...`);
+    
+    for (const photo of bookPhotos) {
+      try {
+        const url = getPhotoUrl(photo.storage_path);
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = photo.file_name;
+        link.click();
+        URL.revokeObjectURL(link.href);
+      } catch (error) {
+        console.error('Failed to download:', photo.file_name, error);
+      }
+    }
+    
+    toast.success(`Downloaded ${bookPhotos.length} photo(s) from "${bookTitle || 'Untitled Book'}"`);
+  };
 
   // Check if a user has any completed books (all chapters submitted)
   const hasCompletedBook = (userId: string) => {
@@ -302,7 +346,20 @@ export default function Admin() {
                             </CollapsibleTrigger>
                             <CollapsibleContent>
                               <CardContent className="pt-0">
-                                <div className="flex justify-end mb-3">
+                                <div className="flex justify-end gap-2 mb-3">
+                                  {getBookPhotos(book.id).length > 0 && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        downloadAllPhotos(book.id, book.title || 'Untitled Book');
+                                      }}
+                                    >
+                                      <Download className="h-3 w-3 mr-1" />
+                                      Download Photos ({getBookPhotos(book.id).length})
+                                    </Button>
+                                  )}
                                   <Button
                                     size="sm"
                                     variant="outline"
@@ -315,6 +372,32 @@ export default function Admin() {
                                     Copy All Chapters
                                   </Button>
                                 </div>
+                                {/* Photos Grid */}
+                                {getBookPhotos(book.id).length > 0 && (
+                                  <div className="mb-4">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <Image className="h-4 w-4 text-muted-foreground" />
+                                      <span className="text-sm font-medium">Photos</span>
+                                    </div>
+                                    <div className="grid grid-cols-4 gap-2">
+                                      {getBookPhotos(book.id).map(photo => (
+                                        <a
+                                          key={photo.id}
+                                          href={getPhotoUrl(photo.storage_path)}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="aspect-square rounded-lg overflow-hidden bg-muted hover:opacity-80 transition-opacity"
+                                        >
+                                          <img
+                                            src={getPhotoUrl(photo.storage_path)}
+                                            alt={photo.file_name}
+                                            className="w-full h-full object-cover"
+                                          />
+                                        </a>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
                                 <div className="space-y-2">
                                   {getBookChapters(book.id).map(chapter => (
                                     <div
