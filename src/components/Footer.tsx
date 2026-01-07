@@ -1,8 +1,6 @@
 import { BookOpen, Mail, Gift } from "lucide-react";
-
 const Footer = () => {
-  return (
-    <footer className="bg-primary text-primary-foreground py-8 sm:py-12">
+  return <footer className="bg-primary text-primary-foreground py-8 sm:py-12">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
           {/* Brand */}
@@ -11,9 +9,7 @@ const Footer = () => {
               <BookOpen className="w-6 h-6 text-accent" />
               <span className="text-lg font-bold">Narrated</span>
             </div>
-            <p className="text-sm text-primary-foreground/70">
-              Transform your memories into a beautiful autobiography with AI assistance.
-            </p>
+            
           </div>
           
           {/* Links */}
@@ -65,11 +61,10 @@ const Footer = () => {
         
         <div className="border-t border-primary-foreground/20 mt-6 sm:mt-8 pt-4 sm:pt-6 text-center">
           <p className="text-primary-foreground/60 text-xs sm:text-sm">
-            © 2024 Narrated. All rights reserved.
+            © 2025 Narrated. All rights reserved.
           </p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
 export default Footer;
