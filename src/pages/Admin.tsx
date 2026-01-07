@@ -105,9 +105,13 @@ export default function Admin() {
     });
   };
 
-  // Filter users based on search and completion filter
+  // Filter users based on search, completion filter, and having books
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
+      // Hide users with no paid books
+      const userBooks = getUserBooks(user.id);
+      if (userBooks.length === 0) return false;
+      
       const matchesSearch = !searchQuery || 
         user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.full_name?.toLowerCase().includes(searchQuery.toLowerCase());
