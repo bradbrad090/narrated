@@ -735,14 +735,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      cleanup_expired_context_cache: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      cleanup_old_analytics: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      cleanup_expired_context_cache: { Args: never; Returns: undefined }
+      cleanup_old_analytics: { Args: never; Returns: undefined }
       delete_book_and_related_data: {
         Args: { target_book_id: string }
         Returns: {
@@ -752,7 +746,7 @@ export type Database = {
         }[]
       }
       delete_my_account: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           message: string
           records_deleted: Json
@@ -780,7 +774,7 @@ export type Database = {
         Returns: string
       }
       get_pdf_jobs: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           enqueued_at: string
           message: Json
@@ -798,10 +792,7 @@ export type Database = {
         }
         Returns: boolean
       }
-      pgmq_send: {
-        Args: { msg: Json; queue_name: string }
-        Returns: number
-      }
+      pgmq_send: { Args: { msg: Json; queue_name: string }; Returns: number }
     }
     Enums: {
       [_ in never]: never
