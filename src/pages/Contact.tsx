@@ -95,20 +95,20 @@ const Contact = () => {
       </Helmet>
       <div className="min-h-screen">
       <Header />
-      <div className="pt-20 pb-16">
-        <div className="container mx-auto px-6 max-w-4xl">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
-            <p className="text-xl text-muted-foreground">
+      <div className="pt-20 sm:pt-24 pb-16 px-4 sm:px-6">
+        <div className="container mx-auto max-w-4xl">
+          <div className="text-center mb-8 sm:mb-12">
+            <h1 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4">Contact Us</h1>
+            <p className="text-base sm:text-xl text-muted-foreground px-2">
               We'd love to hear from you. Send us a message and we'll respond as soon as possible.
             </p>
           </div>
           
           <Card className="max-w-2xl mx-auto">
-            <CardHeader>
-              <CardTitle className="text-2xl text-center">Send us a message</CardTitle>
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-xl sm:text-2xl text-center">Send us a message</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 sm:p-6 pt-0">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <Input 
@@ -116,6 +116,7 @@ const Contact = () => {
                     value={formData.name}
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                     disabled={isSubmitting}
+                    className="min-h-[44px]"
                   />
                   {errors.name && <p className="text-sm text-destructive mt-1">{errors.name}</p>}
                 </div>
@@ -126,6 +127,7 @@ const Contact = () => {
                     value={formData.email}
                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                     disabled={isSubmitting}
+                    className="min-h-[44px]"
                   />
                   {errors.email && <p className="text-sm text-destructive mt-1">{errors.email}</p>}
                 </div>
@@ -135,6 +137,7 @@ const Contact = () => {
                     value={formData.subject}
                     onChange={(e) => setFormData(prev => ({ ...prev, subject: e.target.value }))}
                     disabled={isSubmitting}
+                    className="min-h-[44px]"
                   />
                   {errors.subject && <p className="text-sm text-destructive mt-1">{errors.subject}</p>}
                 </div>
@@ -145,10 +148,11 @@ const Contact = () => {
                     value={formData.message}
                     onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
                     disabled={isSubmitting}
+                    className="min-h-[120px]"
                   />
                   {errors.message && <p className="text-sm text-destructive mt-1">{errors.message}</p>}
                 </div>
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                <Button type="submit" className="w-full min-h-[44px]" disabled={isSubmitting}>
                   {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>
               </form>

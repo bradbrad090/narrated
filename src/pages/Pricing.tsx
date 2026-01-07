@@ -127,20 +127,21 @@ const Pricing = () => {
       <div className="min-h-screen bg-gradient-subtle">
         <Header />
 
-        <main className="pt-24 pb-16">
-          <div className="container mx-auto px-6">
+        <main className="pt-20 sm:pt-24 pb-16 px-4 sm:px-6">
+          <div className="container mx-auto">
             {/* Hero Section */}
-            <div className="text-center mb-16">
-              <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">Simple, Transparent Pricing</h1>
-              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                All users start on the free tier, which includes one free chapter that is professionally edited and
+            <div className="text-center mb-10 sm:mb-16">
+              <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-foreground mb-4 sm:mb-6">Simple, Transparent Pricing</h1>
+              <p className="text-base sm:text-xl text-muted-foreground max-w-3xl mx-auto px-2">
+                <span className="hidden sm:inline">All users start on the free tier, which includes one free chapter that is professionally edited and
                 emailed to you upon completion. Choose the plan that best fits your story. All plans include intelligent
-                conversations, professional writing, and editing. No hidden fees.
+                conversations, professional writing, and editing. No hidden fees.</span>
+                <span className="sm:hidden">Start free with one chapter. Upgrade anytime for unlimited chapters and printing.</span>
               </p>
             </div>
 
             {/* Pricing Cards */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16 max-w-7xl mx-auto items-stretch">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-16 max-w-7xl mx-auto items-stretch">
               {plans.map((plan, index) => {
                 const Icon = plan.icon;
 
@@ -149,7 +150,7 @@ const Pricing = () => {
                     key={index}
                     className={`relative flex flex-col ${
                       plan.isFree ? "border-border/50" : `${plan.theme?.border} ${plan.theme?.background}`
-                    } ${plan.featured ? "shadow-elegant scale-105" : ""}`}
+                    } ${plan.featured ? "shadow-elegant sm:scale-105" : ""}`}
                   >
                     {plan.featured && (
                       <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
@@ -168,12 +169,12 @@ const Pricing = () => {
                       {plan.price && <div className="text-4xl font-bold text-primary mb-2">{plan.price}</div>}
                       <CardDescription>{plan.description}</CardDescription>
                     </CardHeader>
-                    <CardContent className="flex flex-col flex-grow">
-                      <ul className="space-y-3 mb-6 flex-grow">
+                    <CardContent className="flex flex-col flex-grow p-4 sm:p-6">
+                      <ul className="space-y-2 sm:space-y-3 mb-4 sm:mb-6 flex-grow">
                         {plan.features.map((feature, featureIndex) => (
-                          <li key={featureIndex} className="flex items-center gap-3">
-                            <Check className="w-5 h-5 text-primary flex-shrink-0" />
-                            <span className="text-sm">{feature}</span>
+                          <li key={featureIndex} className="flex items-start gap-2 sm:gap-3">
+                            <Check className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0 mt-0.5" />
+                            <span className="text-xs sm:text-sm">{feature}</span>
                           </li>
                         ))}
                       </ul>

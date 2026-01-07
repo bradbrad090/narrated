@@ -80,28 +80,28 @@ const FAQ = () => {
       <div className="min-h-screen bg-gradient-subtle">
         <Header />
         
-        <main className="pt-24 pb-16">
-          <div className="container mx-auto px-6 max-w-4xl">
+        <main className="pt-20 sm:pt-24 pb-16 px-4 sm:px-6">
+          <div className="container mx-auto max-w-4xl">
             {/* Hero Section */}
-            <div className="text-center mb-16">
-              <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
+            <div className="text-center mb-10 sm:mb-16">
+              <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-foreground mb-4 sm:mb-6">
                 Frequently Asked Questions
               </h1>
-              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              <p className="text-base sm:text-xl text-muted-foreground max-w-3xl mx-auto px-2">
                 Everything you need to know about preserving your life story with Narrated.
               </p>
             </div>
 
             {/* FAQ Accordion */}
-            <Card className="mb-12">
-              <CardContent className="p-6">
+            <Card className="mb-8 sm:mb-12">
+              <CardContent className="p-4 sm:p-6">
                 <Accordion type="single" collapsible className="w-full">
                   {faqs.map((faq, index) => (
                     <AccordionItem key={index} value={`item-${index}`}>
-                      <AccordionTrigger className="text-left">
+                      <AccordionTrigger className="text-left text-sm sm:text-base py-4 min-h-[56px] hover:no-underline">
                         {faq.question}
                       </AccordionTrigger>
-                      <AccordionContent>
+                      <AccordionContent className="text-sm sm:text-base pb-4">
                         {faq.answer}
                       </AccordionContent>
                     </AccordionItem>
@@ -111,14 +111,14 @@ const FAQ = () => {
             </Card>
 
             {/* Call to Action */}
-            <div className="text-center bg-card rounded-2xl p-8 shadow-elegant">
-              <h2 className="text-2xl font-semibold mb-4">Still Have Questions?</h2>
-              <p className="text-muted-foreground mb-6">
+            <div className="text-center bg-card rounded-2xl p-6 sm:p-8 shadow-elegant">
+              <h2 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4">Still Have Questions?</h2>
+              <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 px-2">
                 Can't find the answer you're looking for? We're here to help you get started on your autobiography journey.
               </p>
               <Button 
                 size="lg" 
-                className="bg-gradient-accent text-accent-foreground font-semibold px-8 py-3"
+                className="bg-gradient-accent text-accent-foreground font-semibold px-6 sm:px-8 py-3 min-h-[44px]"
                 onClick={() => window.location.href = '/contact'}
               >
                 Contact Us
