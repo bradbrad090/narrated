@@ -73,15 +73,18 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: chapter.id });
 
+  const fetchPhotoCount = async () => {
+    const { count } = await supabase
+      .from("chapter_photos")
+      .select("*", { count: "exact", head: true })
+      .eq("book_id", chapter.book_id);
+    setPhotoCount(count || 0);
+  };
+
   // Fetch photo count, book tier, and conversation word count
   useEffect(() => {
     const fetchChapterData = async () => {
-      const { count } = await supabase
-        .from("chapter_photos")
-        .select("*", { count: "exact", head: true })
-        .eq("book_id", chapter.book_id);
-
-      setPhotoCount(count || 0);
+      await fetchPhotoCount();
 
       const { data: bookData } = await supabase.from("books").select("tier").eq("id", chapter.book_id).maybeSingle();
 
@@ -114,7 +117,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
     };
 
     fetchChapterData();
-  }, [chapter.id, chapter.book_id, photoModalOpen]);
+  }, [chapter.id, chapter.book_id]);
 
   const getWordCount = () => {
     return conversationWordCount;
@@ -399,6 +402,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
           userId={chapter.user_id}
           bookTier={bookTier}
           currentPhotoCount={photoCount}
+          onPhotoCountChange={fetchPhotoCount}
         />
       </div>
     </div>
