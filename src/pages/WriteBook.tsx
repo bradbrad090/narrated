@@ -1197,6 +1197,19 @@ const WriteBook = () => {
                             ? "Upgrade to Add More Chapters"
                             : "Add New Chapter"}
                         </Button>
+                        <Button
+                          variant="default"
+                          className="w-full"
+                          onClick={() => {
+                            toast({
+                              title: "Coming Soon",
+                              description: "Book printing submission will be available soon!",
+                            });
+                          }}
+                        >
+                          <Book className="h-4 w-4 mr-2" />
+                          Submit Book for Printing
+                        </Button>
                       </div>
                     </div>
                   </div>
