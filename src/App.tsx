@@ -21,6 +21,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Gift from "./pages/Gift";
 import GiftSuccess from "./pages/GiftSuccess";
 import RedeemGift from "./pages/RedeemGift";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -51,6 +52,7 @@ const App = () => (
           <Route path="/write/:bookId" element={<ProtectedRoute><WriteBook /></ProtectedRoute>} />
           <Route path="/write-book" element={<ProtectedRoute><WriteBook /></ProtectedRoute>} />
           <Route path="/redeem-gift" element={<ProtectedRoute><RedeemGift /></ProtectedRoute>} />
+          <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
           
           <Route path="/payment-success" element={<ProtectedRoute><PaymentSuccess /></ProtectedRoute>} />
           
