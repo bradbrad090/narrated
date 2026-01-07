@@ -38,6 +38,13 @@ Deno.serve(async (req) => {
       pageViewCount: event.pageViews?.length || 0
     });
 
+    // Build milestone data with snake_case column names
+    const milestoneData: Record<string, boolean> = {};
+    if (event.milestones?.signedUp !== undefined) milestoneData.signed_up = event.milestones.signedUp;
+    if (event.milestones?.createdBook !== undefined) milestoneData.created_book = event.milestones.createdBook;
+    if (event.milestones?.startedProfile !== undefined) milestoneData.started_profile = event.milestones.startedProfile;
+    if (event.milestones?.startedConversation !== undefined) milestoneData.started_conversation = event.milestones.startedConversation;
+
     // Upsert session data
     const { error: sessionError } = await supabase
       .from('analytics_sessions')
@@ -46,7 +53,7 @@ Deno.serve(async (req) => {
         user_id: event.userId || null,
         last_seen_at: new Date().toISOString(),
         referrer,
-        ...(event.milestones || {}),
+        ...milestoneData,
       }, {
         onConflict: 'session_id',
         ignoreDuplicates: false,
