@@ -160,7 +160,7 @@ const Gift = () => {
         <meta name="keywords" content="gift card, autobiography gift, life story gift, memoir gift, legacy gift" />
       </Helmet>
 
-      <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/20">
+      <div className="min-h-screen flex flex-col bg-gradient-subtle">
         <Header />
 
         <main className="flex-1 container mx-auto px-4 py-8 sm:py-12">
