@@ -31,8 +31,25 @@ const handler = async (request: Request): Promise<Response> => {
 
     const { prompt, userId } = await request.json();
     
-    if (!prompt) {
+    // Validate prompt - must be a non-empty string under 10,000 characters
+    if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
       return new Response(JSON.stringify({ error: "Prompt is required" }), { 
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+    
+    if (prompt.length > 10000) {
+      return new Response(JSON.stringify({ error: "Prompt must be under 10,000 characters" }), { 
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+    
+    // Validate userId format if provided (must be valid UUID)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (userId && !uuidRegex.test(userId)) {
+      return new Response(JSON.stringify({ error: "Invalid userId format" }), { 
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
