@@ -119,9 +119,9 @@ const FAQ = () => {
               <Button 
                 size="lg" 
                 className="bg-gradient-accent text-accent-foreground font-semibold px-8 py-3"
-                onClick={() => window.location.href = '/auth'}
+                onClick={() => window.location.href = '/contact'}
               >
-                Get Started Today
+                Contact Us
               </Button>
             </div>
           </div>
