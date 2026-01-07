@@ -92,7 +92,8 @@ export default function Admin() {
     if (chaptersResult.data) setChapters(chaptersResult.data);
   };
 
-  const getUserBooks = (userId: string) => books.filter(b => b.user_id === userId);
+  // Filter out free tier books - they shouldn't be submitted for delivery
+  const getUserBooks = (userId: string) => books.filter(b => b.user_id === userId && b.tier !== 'free');
   const getBookChapters = (bookId: string) => chapters.filter(c => c.book_id === bookId);
 
   // Check if a user has any completed books (all chapters submitted)

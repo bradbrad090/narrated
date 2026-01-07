@@ -1466,15 +1466,33 @@ const WriteBook = () => {
         <AlertDialog open={showSubmitConfirmation} onOpenChange={setShowSubmitConfirmation}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Confirm Chapter Submission</AlertDialogTitle>
+              <AlertDialogTitle>
+                {book?.tier === 'free' ? 'Upgrade Required to Receive Your Book' : 'Confirm Chapter Submission'}
+              </AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to submit this chapter? Once submitted for editing, you will no longer be able to
-                modify your chapter.
+                {book?.tier === 'free' ? (
+                  <>
+                    You're currently on the <strong>free tier</strong>. To receive your completed autobiography as a professionally edited book, you'll need to upgrade to a paid plan.
+                    <br /><br />
+                    Upgrading unlocks more chapters, professional editing, and book delivery.
+                  </>
+                ) : (
+                  'Are you sure you want to submit this chapter? Once submitted for editing, you will no longer be able to modify your chapter.'
+                )}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>No, Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleGenerateChapter}>Yes, Submit Chapter</AlertDialogAction>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              {book?.tier === 'free' ? (
+                <AlertDialogAction onClick={() => {
+                  setShowSubmitConfirmation(false);
+                  setIsBookTierCollapsed(false);
+                }}>
+                  View Upgrade Options
+                </AlertDialogAction>
+              ) : (
+                <AlertDialogAction onClick={handleGenerateChapter}>Yes, Submit Chapter</AlertDialogAction>
+              )}
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
