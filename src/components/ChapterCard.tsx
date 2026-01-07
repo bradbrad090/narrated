@@ -325,30 +325,71 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
           )}
         </div>
 
-        {/* Progress Bar and Add Photos Button */}
-        <div className="flex items-center gap-3 mb-3">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-              <span className="font-medium">Estimated Progress</span>
-              <span className="text-[10px]">
-                {Math.min(Math.round((wordCount / 750) * 100), 100)}%
-              </span>
-            </div>
-            <Progress value={Math.min((wordCount / 750) * 100, 100)} className="h-2" />
+        {/* For submitted chapters: simplified view with just Add Photos button */}
+        {chapter.is_submitted ? (
+          <div className="mt-2">
+            <Button
+              variant="default"
+              size="sm"
+              className="h-8 text-xs px-3"
+              onClick={(e) => {
+                e.stopPropagation();
+                setPhotoModalOpen(true);
+              }}
+            >
+              <Camera className="h-3 w-3 mr-1" />
+              Add Photos
+            </Button>
           </div>
-          <Button
-            variant="default"
-            size="sm"
-            className="h-8 text-xs px-3 shrink-0"
-            onClick={(e) => {
-              e.stopPropagation();
-              setPhotoModalOpen(true);
-            }}
-          >
-            <Camera className="h-3 w-3 mr-1" />
-            Add Photos
-          </Button>
-        </div>
+        ) : (
+          <>
+            {/* Progress Bar and Add Photos Button */}
+            <div className="flex items-center gap-3 mb-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                  <span className="font-medium">Estimated Progress</span>
+                  <span className="text-[10px]">
+                    {Math.min(Math.round((wordCount / 750) * 100), 100)}%
+                  </span>
+                </div>
+                <Progress value={Math.min((wordCount / 750) * 100, 100)} className="h-2" />
+              </div>
+              <Button
+                variant="default"
+                size="sm"
+                className="h-8 text-xs px-3 shrink-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setPhotoModalOpen(true);
+                }}
+              >
+                <Camera className="h-3 w-3 mr-1" />
+                Add Photos
+              </Button>
+            </div>
+
+            {/* Metadata */}
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1">
+                  <Camera className="h-3 w-3" />
+                  <span>
+                    {photoCount}/{photoLimit === Infinity ? "∞" : photoLimit} Photos 
+                  </span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <FileText className="h-3 w-3" />
+                  <span>{wordCount} words</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                <span>{getLastModified()}</span>
+              </div>
+            </div>
+          </>
+        )}
 
         <PhotoUploadModal
           open={photoModalOpen}
@@ -359,27 +400,6 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
           bookTier={bookTier}
           currentPhotoCount={photoCount}
         />
-
-        {/* Metadata */}
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1">
-              <Camera className="h-3 w-3" />
-              <span>
-                {photoCount}/{photoLimit === Infinity ? "∞" : photoLimit} Photos 
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              <FileText className="h-3 w-3" />
-              <span>{wordCount} words</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            <span>{getLastModified()}</span>
-          </div>
-        </div>
       </div>
     </div>
   );
