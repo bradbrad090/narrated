@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
 const corsHeaders = {
@@ -22,14 +23,34 @@ const handler = async (request: Request): Promise<Response> => {
   try {
     // Validate JWT and extract user
     const authHeader = request.headers.get('Authorization');
-    if (!authHeader) {
+    if (!authHeader?.startsWith('Bearer ')) {
       return new Response(JSON.stringify({ error: "Missing authorization header" }), { 
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
-    const { prompt, userId } = await request.json();
+    // Validate JWT token with Supabase
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !data?.user) {
+      console.warn('Invalid token attempt');
+      return new Response(JSON.stringify({ error: "Invalid authentication" }), { 
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    console.log('Authenticated user:', data.user.id);
+
+    const { prompt } = await request.json();
     
     // Validate prompt - must be a non-empty string under 10,000 characters
     if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
@@ -45,26 +66,18 @@ const handler = async (request: Request): Promise<Response> => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
-    
-    // Validate userId format if provided (must be valid UUID)
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (userId && !uuidRegex.test(userId)) {
-      return new Response(JSON.stringify({ error: "Invalid userId format" }), { 
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
 
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
     
     if (!OPENAI_API_KEY) {
-      return new Response(JSON.stringify({ error: "OpenAI API key not configured" }), { 
+      console.error('OpenAI API key not configured');
+      return new Response(JSON.stringify({ error: "Service configuration error" }), { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
-    console.log('Making OpenAI request with prompt:', prompt);
+    console.log('Making OpenAI request for user:', data.user.id);
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -82,24 +95,23 @@ const handler = async (request: Request): Promise<Response> => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('OpenAI API error:', errorText);
-      return new Response(JSON.stringify({ error: `OpenAI API error: ${errorText}` }), { 
-        status: response.status,
+      return new Response(JSON.stringify({ error: "Unable to process request" }), { 
+        status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
-    const data = await response.json();
+    const responseData = await response.json();
     console.log('OpenAI response received successfully');
 
-    return new Response(JSON.stringify(data), { 
+    return new Response(JSON.stringify(responseData), { 
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 
   } catch (error) {
     console.error('Error in openai-conversation function:', error);
-    const errorMessage = error instanceof Error ? error.message : 'OpenAI conversation failed';
-    return new Response(JSON.stringify({ error: errorMessage }), { 
+    return new Response(JSON.stringify({ error: "Unable to process request" }), { 
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });

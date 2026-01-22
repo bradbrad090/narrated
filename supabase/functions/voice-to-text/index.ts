@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -42,18 +43,54 @@ serve(async (req) => {
   }
 
   try {
+    // Validate JWT
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ success: false, error: "Missing authorization header" }), { 
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Validate JWT token with Supabase
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !data?.user) {
+      console.warn('Invalid token attempt');
+      return new Response(JSON.stringify({ success: false, error: "Invalid authentication" }), { 
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    console.log('Authenticated user:', data.user.id);
+
     const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
     if (!OPENAI_API_KEY) {
-      throw new Error('OpenAI API key not configured');
+      console.error('OpenAI API key not configured');
+      return new Response(JSON.stringify({ success: false, error: "Service configuration error" }), { 
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     const { audio } = await req.json();
     
     if (!audio) {
-      throw new Error('No audio data provided');
+      return new Response(JSON.stringify({ success: false, error: "No audio data provided" }), { 
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
-    console.log('Processing audio transcription...');
+    console.log('Processing audio transcription for user:', data.user.id);
 
     // Process audio in chunks to handle large files
     const binaryAudio = processBase64Chunks(audio);
@@ -64,7 +101,7 @@ serve(async (req) => {
     const blob = new Blob([binaryAudio], { type: 'audio/webm' });
     formData.append('file', blob, 'audio.webm');
     formData.append('model', 'whisper-1');
-    formData.append('language', 'en'); // Can be made configurable
+    formData.append('language', 'en');
     formData.append('response_format', 'json');
 
     console.log('Sending to OpenAI Whisper API...');
@@ -81,7 +118,10 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('OpenAI API error:', errorText);
-      throw new Error(`OpenAI API error: ${response.status} ${errorText}`);
+      return new Response(JSON.stringify({ success: false, error: "Unable to process audio" }), { 
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     const result = await response.json();
@@ -97,11 +137,10 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in voice-to-text function:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Voice to text conversion failed';
     return new Response(
       JSON.stringify({ 
         success: false,
-        error: errorMessage 
+        error: "Unable to process request" 
       }),
       {
         status: 500,
