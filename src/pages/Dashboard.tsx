@@ -1,9 +1,3 @@
-declare global {
-  interface Window {
-    gtag?: (...args: any[]) => void;
-  }
-}
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -36,17 +30,6 @@ const Dashboard = () => {
       }
       setUser(user);
       fetchBooks(user.id);
-      
-      // Track Google Ads conversion for new sign-ups (fires once per user)
-      const conversionKey = `gtag_conversion_tracked_${user.id}`;
-      if (!localStorage.getItem(conversionKey) && typeof window.gtag === 'function') {
-        window.gtag('event', 'conversion', {
-          'send_to': 'AW-17857950137/YwPjCMeQk-obELnjqsNC',
-          'value': 1.0,
-          'currency': 'AUD'
-        });
-        localStorage.setItem(conversionKey, 'true');
-      }
     });
 
     // Listen for auth changes
