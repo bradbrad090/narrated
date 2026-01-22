@@ -16,7 +16,7 @@ const WhatWeDo = () => {
         <link rel="canonical" href="https://narrated.com/what-we-do" />
       </Helmet>
       
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-gradient-subtle">
         <Header />
         
         <main className="pt-16 sm:pt-20">
