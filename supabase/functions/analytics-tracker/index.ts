@@ -39,11 +39,14 @@ Deno.serve(async (req) => {
     });
 
     // Build milestone data with snake_case column names
+    // IMPORTANT: Only set milestone flags to true, never overwrite existing true values with false
     const milestoneData: Record<string, boolean> = {};
-    if (event.milestones?.signedUp !== undefined) milestoneData.signed_up = event.milestones.signedUp;
-    if (event.milestones?.createdBook !== undefined) milestoneData.created_book = event.milestones.createdBook;
-    if (event.milestones?.startedProfile !== undefined) milestoneData.started_profile = event.milestones.startedProfile;
-    if (event.milestones?.startedConversation !== undefined) milestoneData.started_conversation = event.milestones.startedConversation;
+    if (event.milestones?.signedUp === true) milestoneData.signed_up = true;
+    if (event.milestones?.createdBook === true) milestoneData.created_book = true;
+    if (event.milestones?.startedProfile === true) milestoneData.started_profile = true;
+    if (event.milestones?.startedConversation === true) milestoneData.started_conversation = true;
+
+    console.log('Processing milestones:', milestoneData);
 
     // Upsert session data
     const { error: sessionError } = await supabase

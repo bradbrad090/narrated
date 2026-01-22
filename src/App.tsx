@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AnalyticsProvider } from "@/components/AnalyticsProvider";
+import { useAuthTracking } from "@/hooks/useAuthTracking";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -26,6 +27,12 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Component that uses the auth tracking hook (must be inside AnalyticsProvider)
+function AuthTracker() {
+  useAuthTracking();
+  return null;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -33,6 +40,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AnalyticsProvider>
+          <AuthTracker />
           <Routes>
           {/* Public routes */}
           <Route path="/" element={<Index />} />
