@@ -687,6 +687,15 @@ const WriteBook = () => {
         console.log("Email sending failed (non-critical):", emailError);
       }
 
+      // Track Google Ads conversion for chapter submission
+      if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
+        (window as any).gtag('event', 'conversion', {
+          'send_to': 'AW-17857950137/YwPjCMeQk-obELnjqsNC',
+          'value': 1.0,
+          'currency': 'AUD',
+        });
+      }
+
       toast({
         title: "Chapter submitted successfully!",
         description: "Your chapter has been finalized and can no longer be modified.",
