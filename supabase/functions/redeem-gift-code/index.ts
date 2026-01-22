@@ -43,17 +43,28 @@ serve(async (req) => {
 
     const { code }: RedeemGiftCodeRequest = await req.json();
 
-    // Validate code format (should be like XXXX-XXXX-XXXX)
+    // Strict format validation: XXXX-XXXX-XXXX pattern (alphanumeric)
+    const GIFT_CODE_REGEX = /^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
+    
     if (!code || typeof code !== 'string') {
       return new Response(
-        JSON.stringify({ error: 'Invalid gift code format' }),
+        JSON.stringify({ error: 'Invalid or expired gift code' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const normalizedCode = code.trim().toUpperCase();
+    
+    // Validate code format strictly
+    if (!GIFT_CODE_REGEX.test(normalizedCode)) {
+      console.log('Gift code format validation failed for user:', user.id);
+      return new Response(
+        JSON.stringify({ error: 'Invalid or expired gift code' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
-    console.log('Attempting to redeem gift code:', normalizedCode, 'for user:', user.id);
+    console.log('Attempting to redeem gift code for user:', user.id);
 
     // Fetch the gift code with validation
     const { data: giftCode, error: fetchError } = await supabase
@@ -62,11 +73,12 @@ serve(async (req) => {
       .eq('code', normalizedCode)
       .single();
 
+    // Use generic error message to prevent enumeration
     if (fetchError || !giftCode) {
-      console.error('Gift code not found:', fetchError);
+      console.log('Gift code lookup failed for user:', user.id);
       return new Response(
-        JSON.stringify({ error: 'Invalid gift code' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Invalid or expired gift code' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -78,12 +90,11 @@ serve(async (req) => {
     }
 
     // Validate gift code status (skip for test codes)
+    // Use generic error messages to prevent enumeration attacks
     if (!isTestCode && giftCode.redeemed) {
+      console.log('Gift code already redeemed, user:', user.id);
       return new Response(
-        JSON.stringify({ 
-          error: 'Gift code already redeemed',
-          redeemedAt: giftCode.redeemed_at 
-        }),
+        JSON.stringify({ error: 'Invalid or expired gift code' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -92,22 +103,18 @@ serve(async (req) => {
     const now = new Date();
     const expiresAt = new Date(giftCode.expires_at);
     if (expiresAt < now) {
+      console.log('Gift code expired, user:', user.id);
       return new Response(
-        JSON.stringify({ 
-          error: 'Gift code has expired',
-          expiresAt: giftCode.expires_at 
-        }),
+        JSON.stringify({ error: 'Invalid or expired gift code' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     // Check payment status (skip for test codes)
     if (!isTestCode && giftCode.stripe_payment_status !== 'paid') {
+      console.log('Gift code payment not confirmed, user:', user.id);
       return new Response(
-        JSON.stringify({ 
-          error: 'Gift code payment not confirmed',
-          paymentStatus: giftCode.stripe_payment_status 
-        }),
+        JSON.stringify({ error: 'Invalid or expired gift code' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -242,9 +249,10 @@ serve(async (req) => {
     );
 
   } catch (error) {
+    // Log full error server-side only
     console.error('Error redeeming gift code:', error);
     return new Response(
-      JSON.stringify({ error: error.message || 'Internal server error' }),
+      JSON.stringify({ error: 'Unable to process gift code' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

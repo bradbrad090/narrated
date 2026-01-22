@@ -18,40 +18,16 @@ serve(async (req) => {
   }
 
   try {
-    // Debug all environment variables
-    console.log("=== COMPLETE ENV DEBUG ===");
-    const allEnv = Deno.env.toObject();
-    const envKeys = Object.keys(allEnv).sort();
-    console.log("Total env vars:", envKeys.length);
-    console.log("All env var names:", JSON.stringify(envKeys));
-    
-    // Check specifically for secrets that should exist
-    const expectedSecrets = [
-      'STRIPE_SECRET_KEY',
-      'SUPABASE_URL', 
-      'SUPABASE_ANON_KEY',
-      'SUPABASE_SERVICE_ROLE_KEY',
-      'OPENAI_API_KEY'
-    ];
-    
-    console.log("Checking expected secrets:");
-    expectedSecrets.forEach(secret => {
-      const value = Deno.env.get(secret);
-      console.log(`${secret}: ${value ? 'EXISTS' : 'MISSING'}`);
-    });
+    // Verify required configuration
+    console.log("Verifying payment configuration...");
 
-    // Get Stripe key with detailed logging
+    // Get Stripe key
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    console.log("STRIPE_SECRET_KEY final check:", {
-      exists: !!stripeKey,
-      type: typeof stripeKey,
-      length: stripeKey?.length || 0,
-      startsWithSk: stripeKey?.startsWith('sk_') || false
-    });
+    console.log("Stripe key configured:", !!stripeKey);
 
     if (!stripeKey) {
-      console.error("CRITICAL: STRIPE_SECRET_KEY not found in environment");
-      throw new Error("Stripe secret key not configured in Supabase secrets");
+      console.error("STRIPE_SECRET_KEY not found");
+      throw new Error("Payment configuration error");
     }
 
     // Get request data
@@ -176,8 +152,9 @@ serve(async (req) => {
 
   } catch (error) {
     console.error("Payment error:", error);
+    // Return generic error to client, keep details in server logs
     return new Response(JSON.stringify({ 
-      error: error instanceof Error ? error.message : "Payment failed" 
+      error: "Unable to process payment request" 
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
