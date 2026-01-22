@@ -374,12 +374,15 @@ Output format: Respond only with the autobiography chapter content. Do not inclu
     );
 
   } catch (error) {
+    // Log full error server-side only
     console.error('Error in generate-chapter function:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Chapter generation failed';
+    if (error instanceof Error && error.stack) {
+      console.error('Stack trace:', error.stack);
+    }
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: errorMessage 
+        error: 'Unable to generate chapter' 
       }),
       {
         status: 500,

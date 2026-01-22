@@ -263,9 +263,13 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Webhook handler error:', error.message, error.stack);
+    // Log full error details server-side only
+    console.error('Webhook handler error:', error instanceof Error ? error.message : 'Unknown error');
+    if (error instanceof Error && error.stack) {
+      console.error('Stack trace:', error.stack);
+    }
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: 'Webhook processing failed' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
