@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -44,26 +45,53 @@ serve(async (req) => {
   try {
     // Validate JWT
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
+    if (!authHeader?.startsWith('Bearer ')) {
       return new Response(JSON.stringify({ error: "Missing authorization header" }), { 
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
+    // Validate JWT token with Supabase
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !data?.user) {
+      console.warn('Invalid token attempt');
+      return new Response(JSON.stringify({ error: "Invalid authentication" }), { 
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    console.log('Authenticated user:', data.user.id);
+
     const { audio, systemPrompt } = await req.json();
     
     if (!audio) {
-      throw new Error('No audio data provided');
+      return new Response(JSON.stringify({ error: "No audio data provided" }), { 
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
     
     if (!OPENAI_API_KEY) {
-      throw new Error('OpenAI API key not configured');
+      console.error('OpenAI API key not configured');
+      return new Response(JSON.stringify({ error: "Service configuration error" }), { 
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
-    console.log('Processing audio for transcription...');
+    console.log('Processing audio for transcription, user:', data.user.id);
 
     // Step 1: Transcribe audio to text
     const binaryAudio = processBase64Chunks(audio);
@@ -82,7 +110,12 @@ serve(async (req) => {
     });
 
     if (!transcriptionResponse.ok) {
-      throw new Error(`OpenAI Transcription API error: ${await transcriptionResponse.text()}`);
+      const errorText = await transcriptionResponse.text();
+      console.error('OpenAI Transcription API error:', errorText);
+      return new Response(JSON.stringify({ error: "Unable to transcribe audio" }), { 
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     const transcriptionResult = await transcriptionResponse.json();
@@ -91,18 +124,7 @@ serve(async (req) => {
     console.log('Transcription completed, transforming to autobiography format...');
 
     // Step 2: Transform text to autobiography format
-    const chatResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o',
-        messages: [
-          {
-            role: 'system',
-            content: systemPrompt || `You are an AI specialized in transforming raw, transcribed spoken narratives into clean, readable autobiographical transcripts. Your sole task is to process voice-to-text input, which consists of unstructured, conversational speech about personal experiences or events. This input may be rambling, incomplete, repetitive, or non-linear, as it comes directly from spoken storytelling without clear structure.
+    const defaultSystemPrompt = `You are an AI specialized in transforming raw, transcribed spoken narratives into clean, readable autobiographical transcripts. Your sole task is to process voice-to-text input, which consists of unstructured, conversational speech about personal experiences or events. This input may be rambling, incomplete, repetitive, or non-linear, as it comes directly from spoken storytelling without clear structure.
 
 To create the output:
 
@@ -118,7 +140,20 @@ Keep it faithful: Do not add fabricated details, alter facts, or introduce exter
 
 Output length: Match the essence of the input without aiming for a specific word count; keep it concise and natural.
 
-Output format: Respond only with the cleaned autobiographical transcript. Do not include explanations, summaries, or additional commentary.`
+Output format: Respond only with the cleaned autobiographical transcript. Do not include explanations, summaries, or additional commentary.`;
+
+    const chatResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt || defaultSystemPrompt
           },
           {
             role: 'user',
@@ -131,7 +166,12 @@ Output format: Respond only with the cleaned autobiographical transcript. Do not
     });
 
     if (!chatResponse.ok) {
-      throw new Error(`OpenAI Chat API error: ${await chatResponse.text()}`);
+      const errorText = await chatResponse.text();
+      console.error('OpenAI Chat API error:', errorText);
+      return new Response(JSON.stringify({ error: "Unable to process text" }), { 
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     const chatResult = await chatResponse.json();
@@ -149,9 +189,8 @@ Output format: Respond only with the cleaned autobiographical transcript. Do not
 
   } catch (error) {
     console.error('Error in voice-to-autobiography function:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Voice to autobiography conversion failed';
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: "Unable to process request" }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
