@@ -27,7 +27,7 @@ export const SecurityHeaders = ({
       {/* Content Security Policy */}
       <meta 
         httpEquiv="Content-Security-Policy" 
-        content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://checkout.stripe.com https://www.googletagmanager.com https://googleads.g.doubleclick.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self' https://keadkwromhlyvoyxvcmi.supabase.co https://api.openai.com https://api.stripe.com https://www.google-analytics.com https://www.googletagmanager.com https://googleads.g.doubleclick.net https://www.google.com; frame-src https://js.stripe.com https://checkout.stripe.com https://td.doubleclick.net; object-src 'none'; base-uri 'self';" 
+        content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://checkout.stripe.com https://www.googletagmanager.com https://googleads.g.doubleclick.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self' https://keadkwromhlyvoyxvcmi.supabase.co https://api.openai.com https://api.stripe.com https://www.google-analytics.com https://www.googletagmanager.com https://googleads.g.doubleclick.net https://www.google.com https://www.googleadservices.com; frame-src https://js.stripe.com https://checkout.stripe.com https://td.doubleclick.net; object-src 'none'; base-uri 'self';" 
       />
       
       {/* SEO and indexing */}
