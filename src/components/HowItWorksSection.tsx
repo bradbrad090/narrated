@@ -1,10 +1,8 @@
 import { MessageCircle, PenTool, Truck } from "lucide-react";
 import conversationImage from "@/assets/conversation-family.jpg";
 import deliveryImage from "@/assets/family-book-delivery.jpg";
-
 const HowItWorksSection = () => {
-  return (
-    <section className="py-12 sm:py-24 bg-background">
+  return <section className="py-12 sm:py-24 bg-background">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="text-center mb-8 sm:mb-16">
           <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3 sm:mb-6">
@@ -67,9 +65,7 @@ const HowItWorksSection = () => {
               <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gradient-accent rounded-full flex items-center justify-center mx-auto shadow-glow group-hover:shadow-elegant transition-elegant">
                 <MessageCircle className="w-8 h-8 sm:w-12 sm:h-12 text-accent-foreground" />
               </div>
-              <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 w-6 h-6 sm:w-8 sm:h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-sm sm:text-base">
-                1
-              </div>
+              
             </div>
             <h3 className="text-lg sm:text-2xl font-semibold text-foreground mb-2 sm:mb-4">
               Share Your Story
@@ -79,11 +75,7 @@ const HowItWorksSection = () => {
               <span className="sm:hidden">Talk about your memories and experiences.</span>
             </p>
             <div className="rounded-lg overflow-hidden shadow-card hidden sm:block">
-              <img 
-                src={conversationImage} 
-                alt="Family sharing stories around dinner table" 
-                className="w-full h-48 object-cover"
-              />
+              <img src={conversationImage} alt="Family sharing stories around dinner table" className="w-full h-48 object-cover" />
             </div>
           </div>
           
@@ -93,9 +85,7 @@ const HowItWorksSection = () => {
               <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gradient-accent rounded-full flex items-center justify-center mx-auto shadow-glow group-hover:shadow-elegant transition-elegant">
                 <PenTool className="w-8 h-8 sm:w-12 sm:h-12 text-accent-foreground" />
               </div>
-              <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 w-6 h-6 sm:w-8 sm:h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-sm sm:text-base">
-                2
-              </div>
+              
             </div>
             <h3 className="text-lg sm:text-2xl font-semibold text-foreground mb-2 sm:mb-4">
               We Write and Edit your Story
@@ -123,9 +113,7 @@ const HowItWorksSection = () => {
               <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gradient-accent rounded-full flex items-center justify-center mx-auto shadow-glow group-hover:shadow-elegant transition-elegant">
                 <Truck className="w-8 h-8 sm:w-12 sm:h-12 text-accent-foreground" />
               </div>
-              <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 w-6 h-6 sm:w-8 sm:h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-sm sm:text-base">
-                3
-              </div>
+              
             </div>
             <h3 className="text-lg sm:text-2xl font-semibold text-foreground mb-2 sm:mb-4">
               Receive Your Book
@@ -135,18 +123,12 @@ const HowItWorksSection = () => {
               <span className="sm:hidden">Get your professionally printed hardcover book delivered.</span>
             </p>
             <div className="rounded-lg overflow-hidden shadow-card hidden sm:block">
-              <img 
-                src={deliveryImage} 
-                alt="Family enjoying their photo album together" 
-                className="w-full h-48 object-cover"
-              />
+              <img src={deliveryImage} alt="Family enjoying their photo album together" className="w-full h-48 object-cover" />
             </div>
           </div>
         </div>
         
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default HowItWorksSection;
