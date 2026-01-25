@@ -4,12 +4,9 @@ import { Mic, Sparkles, BookOpen, ArrowRight, Check } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useNavigate } from "react-router-dom";
-
 const WhatWeDo = () => {
   const navigate = useNavigate();
-
-  return (
-    <>
+  return <>
       <Helmet>
         <title>How It Works | Narrated</title>
         <meta name="description" content="Turn conversations into a professionally printed autobiography. Share your stories by voice or text, and we'll craft them into a beautiful book." />
@@ -29,11 +26,7 @@ const WhatWeDo = () => {
               <p className="text-base sm:text-lg text-muted-foreground mb-6 sm:mb-8 max-w-2xl mx-auto px-2">
                 Share your memories through natural conversation. Our AI transforms your words into a professionally written autobiography, delivered as a hardcover book.
               </p>
-              <Button 
-                size="lg"
-                onClick={() => navigate('/auth')}
-                className="px-6 sm:px-8 min-h-[48px] text-base"
-              >
+              <Button size="lg" onClick={() => navigate('/auth')} className="px-6 sm:px-8 min-h-[48px] text-base">
                 Start Your Free Chapter
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -87,10 +80,10 @@ const WhatWeDo = () => {
                   </div>
                   <div className="pb-6 sm:pb-8">
                     <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-foreground mb-2">
-                      2. AI Crafts Your Chapters
+                      2. We Craft Your Chapters
                     </h2>
                     <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4">
-                      Our AI transforms your conversations into polished, narrative chapters. Your authentic voice, professionally written.
+                                   Your conversations transform into polished, narrative chapters. Your authentic voice, professionally written.
                     </p>
                     <ul className="space-y-2">
                       <li className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
@@ -153,11 +146,7 @@ const WhatWeDo = () => {
               <p className="text-sm sm:text-base text-muted-foreground mb-6 sm:mb-8 px-2">
                 Start with a free chapter. No credit card required.
               </p>
-              <Button 
-                size="lg"
-                onClick={() => navigate('/auth')}
-                className="px-6 sm:px-8 min-h-[48px] text-base"
-              >
+              <Button size="lg" onClick={() => navigate('/auth')} className="px-6 sm:px-8 min-h-[48px] text-base">
                 Begin Your Story
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -167,8 +156,6 @@ const WhatWeDo = () => {
 
         <Footer />
       </div>
-    </>
-  );
+    </>;
 };
-
 export default WhatWeDo;
