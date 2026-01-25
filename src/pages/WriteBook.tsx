@@ -6,13 +6,13 @@ declare global {
 
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
+import { SecurityHeaders } from "@/components/SecurityHeaders";
 import {
   Book,
   LogOut,
@@ -836,14 +836,11 @@ const WriteBook = () => {
 
   return (
     <>
-      <Helmet>
-        <title>{book?.title ? `${book.title} - Write Your Book` : "Write Your Autobiography"} | Narrated</title>
-        <meta
-          name="description"
-          content="Write and edit your autobiography with AI assistance. Voice recording, chapter management, and intelligent content generation."
-        />
-        <meta name="robots" content="noindex, nofollow" />
-      </Helmet>
+      <SecurityHeaders
+        title={`${book?.title ? `${book.title} - Write Your Book` : "Write Your Autobiography"} | Narrated`}
+        description="Write and edit your autobiography with AI assistance. Voice recording, chapter management, and intelligent content generation."
+        noIndex
+      />
       <div className="min-h-screen bg-gradient-subtle">
         {/* Header - Fixed position on mobile for better accessibility */}
         <header
