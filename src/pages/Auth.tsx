@@ -1,3 +1,9 @@
+declare global {
+  interface Window {
+    gtag?: (...args: any[]) => void;
+  }
+}
+
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -42,6 +48,27 @@ const Auth = () => {
       setIsSignUp(true);
     }
   }, [location]);
+
+  // Google Ads conversion tracking for signup page visits
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const isSignupPage = urlParams.get('signup') === 'true';
+    
+    if (isSignupPage) {
+      const conversionKey = 'gtag_signup_page_tracked';
+      const alreadyTracked = sessionStorage.getItem(conversionKey);
+      
+      if (!alreadyTracked && typeof window.gtag === 'function') {
+        window.gtag('event', 'conversion', {
+          'send_to': 'AW-17857950137/YwPjCMeQk-obELnjqsNC',
+          'value': 1.0,
+          'currency': 'AUD'
+        });
+        sessionStorage.setItem(conversionKey, 'true');
+        console.log('Google Ads conversion fired on signup page');
+      }
+    }
+  }, [location.search]);
 
   useEffect(() => {
     // Don't redirect if user is on password reset page or if it's a recovery flow
