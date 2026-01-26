@@ -50,7 +50,7 @@ const HeroSection = () => {
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4 sm:px-0 max-w-md mx-auto">
             <Input type="email" placeholder="Enter your email" value={email} onChange={e => setEmail(e.target.value)} className="flex h-12 sm:h-14 w-full rounded-md border border-primary-foreground/30 bg-primary-foreground/10 backdrop-blur-sm px-4 py-3 text-base sm:text-lg text-primary-foreground placeholder:text-primary-foreground/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-transparent min-h-[44px]" />
             <Button variant="accent" size="lg" onClick={handleGetStarted} className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 font-semibold w-full sm:w-auto whitespace-nowrap min-h-[44px] touch-manipulation">
-              Get Started
+              Sign Up
             </Button>
           </div>
           
@@ -72,8 +72,8 @@ const HeroSection = () => {
       </div>
       
       {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <ChevronDown className="w-8 h-8 text-primary-foreground/70" />
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce cursor-pointer" onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}>
+        <ChevronDown className="w-12 h-12 text-primary-foreground/80" />
       </div>
       
       {/* Subtle glow effect */}
